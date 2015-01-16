@@ -1,2 +1,2 @@
-# Realtime-JS-SDK
+# Realtime-JavaScript-SDK
 LeanCloud Realtime Message JavaScript SDK

@@ -17,6 +17,13 @@ void function(win) {
     // 历史遗留，同时获取 av 命名空间
     win.av = win.av || lc;
 
+    // AMD 加载支持
+    // if (typeof define === 'function' && define.amd) {
+    //     define('lc', [], function() {
+    //         return lc;
+    //     });
+    // }
+
     // 配置项
     var config = {
         // 心跳时间（三分钟）
@@ -55,56 +62,58 @@ void function(win) {
 
     // 生成 conversation 对象，挂载所有 conversation 相关方法，每次调用实例化
     var newConvObject = function(cache) {
+
+        var addOrRemove = function(argument, callback, cmd) {
+            var me = this;
+            var members = [];
+            var options;
+            var fun;
+            var eventName;
+
+            // 传入 userId
+            if (typeof argument === 'string') {
+                members.push(argument);
+            }
+            // 传入多个 userId
+            else {
+                members = argument;
+            }
+            options = {
+                cid: me.id,
+                members: members,
+                serialId: tool.getId()
+            };     
+            switch(cmd) {
+                case 'add':
+                    eventName = 'conv-added';
+                    engine.convAdd(options); 
+                break;
+                case 'remove':
+                    eventName = 'conv-removed';
+                    engine.convRemove(options); 
+                break;
+            }
+            fun = function(data) {
+                if (data.i === options.serialId) {
+                    if (callback) {
+                        callback(data);
+                    }
+                    cache.ec.remove(eventName, fun);
+                }
+            };
+            cache.ec.on(eventName, fun);
+            return this;
+        };
+
         return {
             // cid 即 conversation id
             id: '',
-            _addOrRemove: function(argument, callback, cmd) {
-                var me = this;
-                var members = [];
-                var options;
-                var fun;
-                var eventName;
-
-                // 传入 userId
-                if (typeof argument === 'string') {
-                    members.push(argument);
-                }
-                // 传入多个 userId
-                else {
-                    members = argument;
-                }
-                options = {
-                    cid: me.id,
-                    members: members,
-                    serialId: tool.getId()
-                };     
-                switch(cmd) {
-                    case 'add':
-                        eventName = 'conv-added';
-                        engine.convAdd(options); 
-                    break;
-                    case 'remove':
-                        eventName = 'conv-removed';
-                        engine.convRemove(options); 
-                    break;
-                }
-                fun = function(data) {
-                    if (data.i === options.serialId) {
-                        if (callback) {
-                            callback(data);
-                        }
-                        cache.ec.remove(eventName, fun);
-                    }
-                };
-                cache.ec.on(eventName, fun);
-                return this;
-            },
             add: function(argument, callback) {
-                this._addOrRemove(argument, callback, 'add');
+                addOrRemove(argument, callback, 'add');
                 return this;
             },
             remove: function(argument, callback) {
-                this._addOrRemove(argument, callback, 'remove');
+                addOrRemove(argument, callback, 'remove');
                 return this;
             },
             // 自己加入
