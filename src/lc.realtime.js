@@ -17,6 +17,13 @@ void function(win) {
     // 历史遗留，同时获取 av 命名空间
     win.av = win.av || lc;
 
+    // AMD 加载支持
+    // if (typeof define === 'function' && define.amd) {
+    //     define('lc', [], function() {
+    //         return lc;
+    //     });
+    // }
+
     // 配置项
     var config = {
         // 心跳时间（三分钟）
@@ -55,56 +62,58 @@ void function(win) {
 
     // 生成 conversation 对象，挂载所有 conversation 相关方法，每次调用实例化
     var newConvObject = function(cache) {
+
+        var addOrRemove = function(argument, callback, cmd) {
+            var me = this;
+            var members = [];
+            var options;
+            var fun;
+            var eventName;
+
+            // 传入 userId
+            if (typeof argument === 'string') {
+                members.push(argument);
+            }
+            // 传入多个 userId
+            else {
+                members = argument;
+            }
+            options = {
+                cid: me.id,
+                members: members,
+                serialId: tool.getId()
+            };     
+            switch(cmd) {
+                case 'add':
+                    eventName = 'conv-added';
+                    engine.convAdd(options); 
+                break;
+                case 'remove':
+                    eventName = 'conv-removed';
+                    engine.convRemove(options); 
+                break;
+            }
+            fun = function(data) {
+                if (data.i === options.serialId) {
+                    if (callback) {
+                        callback(data);
+                    }
+                    cache.ec.remove(eventName, fun);
+                }
+            };
+            cache.ec.on(eventName, fun);
+            return this;
+        };
+
         return {
             // cid 即 conversation id
             id: '',
-            _addOrRemove: function(argument, callback, cmd) {
-                var me = this;
-                var members = [];
-                var options;
-                var fun;
-                var eventName;
-
-                // 传入 userId
-                if (typeof argument === 'string') {
-                    members.push(argument);
-                }
-                // 传入多个 userId
-                else {
-                    members = argument;
-                }
-                options = {
-                    cid: me.id,
-                    members: members,
-                    serialId: tool.getId()
-                };     
-                switch(cmd) {
-                    case 'add':
-                        eventName = 'conv-added';
-                        engine.convAdd(options); 
-                    break;
-                    case 'remove':
-                        eventName = 'conv-removed';
-                        engine.convRemove(options); 
-                    break;
-                }
-                fun = function(data) {
-                    if (data.i === options.serialId) {
-                        if (callback) {
-                            callback(data);
-                        }
-                        cache.ec.remove(eventName, fun);
-                    }
-                };
-                cache.ec.on(eventName, fun);
-                return this;
-            },
             add: function(argument, callback) {
-                this._addOrRemove(argument, callback, 'add');
+                addOrRemove(argument, callback, 'add');
                 return this;
             },
             remove: function(argument, callback) {
-                this._addOrRemove(argument, callback, 'remove');
+                addOrRemove(argument, callback, 'remove');
                 return this;
             },
             // 自己加入
@@ -211,6 +220,7 @@ void function(win) {
             cache.ws = ws;
 
             // TODO: 此处需要考虑 WebSocket 重用
+            // TODO: 需要考虑网络状况，是用户自己主动 close websocket 还是网络问题
             ws.addEventListener('open', wsOpen);
             ws.addEventListener('close', wsClose);
             ws.addEventListener('message', wsMessage);
@@ -256,7 +266,7 @@ void function(win) {
             if (secure) {
               url += '&secure=1';
             }
-            tool.ajaxGet({
+            tool.ajax({
                 url: url
             }, function(data) {
                 if (!data.avError) {
@@ -270,7 +280,19 @@ void function(win) {
             });
         };
 
+        engine.auth = function(callback) {
+            tool.ajax({
+                url: cache.options.auth,
+                method: 'post',
+                data: {
+                    self_id: cache.options.peerId
+                }
+            }, callback);
+        };
+
         // 打开 session
+        // TODO: session 的 error
+        // TODO: session 的对应，即使用参数 i
         engine.openSession = function(options) {
             wsSend({
                 cmd: 'session',
@@ -278,12 +300,13 @@ void function(win) {
                 appId: cache.options.appId,
                 peerId: cache.options.peerId,
                 ua: 'js/' + VERSION,
-                t: tool.now(),
                 // i: options.serialId
                 // n 签名参数随机字符串
-                // n: n,
+                n: cache.sessionAuth.nonce,
                 // s 签名参数签名
-                // s: s
+                s: cache.sessionAuth.signature,
+                // 服务器时间认证
+                t: cache.sessionAuth.timestamp
             });
         };
 
@@ -461,6 +484,7 @@ void function(win) {
             // });
 
             cache.ec.on('conv-error', function(data) {
+                tool.error(data.code + ':' + data.reason);
                 cache.ec.emit(eNameIndex.error, data);
             });
             // 查询对话的结果
@@ -550,7 +574,6 @@ void function(win) {
                 this.cache.ec.emit(eventName, data);
                 return this;
             },
-            // TODO: 名字改成 room 更短更好理解
             conv: function(argument, callback) {
                 var convObject = newConvObject(cache);
                 // 传入 convId
@@ -562,7 +585,7 @@ void function(win) {
                 else {
                     engine.startConv(argument, callback);
                     // 服务器端确认收到对话创建，并创建成功
-                    // ASK: 假如用户同时创建多个，如何确认该事件，就是当前这个 conv？
+                    // TODO: 假如用户同时创建多个
                     cache.ec.once('conv-started', function(data) {
                         convObject.id = data.cid;
                         cache.convIndex[convObject.id] = convObject;
@@ -591,17 +614,22 @@ void function(win) {
         else if (!options.clientId) {
             tool.error('Options must have clientId, clientId is a custom user id.');
         }
-        // else if (!options.auth) {
-        //     tool.error('Options must have server auth.');
-        // }
         else {
             // clientId 对应的就是 peerId
             options.peerId = options.clientId;
             var realtimeObj = newRealtimeObject();
             realtimeObj.cache.options = options;
             realtimeObj.cache.ec = tool.eventCenter();
-            // 启动 websocket，然后连接 session
-            realtimeObj.open(callback);
+            if (options.auth) {
+                engine.auth(function(data) {
+                    // 存储 session 的认证信息
+                    realtimeObj.cache.sessionAuth = data;
+                    realtimeObj.open(callback);
+                });
+            } else {
+                // 启动 websocket，然后连接 session
+                realtimeObj.open(callback);
+            }
             return realtimeObj;
         }
     };
@@ -639,10 +667,18 @@ void function(win) {
     };
 
     // Ajax get 请求
-    tool.ajaxGet = function(options, callback) {
+    tool.ajax = function(options, callback) {
         var url = options.url;
+        var method = options.method || 'get';
         var xhr = new XMLHttpRequest();
-        xhr.open('get', url);
+        xhr.open(method, url);
+        if (method === 'post') {
+            xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+            // xhr.setRequestHeader('Content-Type', 'application/json');
+            // xhr.setRequestHeader('Access-Control-Allow-Origin', '*');
+            // xhr.setRequestHeader('Access-Control-Allow-Headers', "Origin, X-Requested-With, Content-Type, Accept");
+            // xhr.setRequestHeader('Access-Control-Allow-Methods',"POST, GET, OPTIONS, DELETE, PUT, HEAD");
+        }
         xhr.onload = function() {
             if (xhr.status === 200) {
                 callback(JSON.parse(xhr.responseText));
@@ -657,7 +693,16 @@ void function(win) {
             // TODO: 派发一个 Error 事件
             cache.ec.emit('error', {type:'network'});
         };
-        xhr.send();
+        // 临时
+        var formData = '';
+        for (var k in options.data) {
+            if (!formData) {
+                formData += (k + '=' + options.data[k]);
+            } else {
+                formData += ('&' + k + '=' + options.data[k]);
+            }
+        }
+        xhr.send(formData);
     };
 
     // 获取当前时间的时间戳

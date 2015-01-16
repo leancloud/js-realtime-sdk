@@ -12,8 +12,10 @@ function createNew(clientId, callback) {
     var conv;
 
     rt = lc.realtime({
-        appId: '9p6hyhh60av3ukkni3i9z53q1l8yy3cijj6sie3cewft18vm',
-        clientId: clientId
+        // appId: '9p6hyhh60av3ukkni3i9z53q1l8yy3cijj6sie3cewft18vm',
+        appId: 'pyon3kvufmleg773ahop2i7zy0tz2rfjx5bh82n7h5jzuwjg',
+        clientId: clientId,
+        auth: 'http://signature-example.avosapps.com/sign'
     });
 
     rt.on('open', function() {
