@@ -220,6 +220,7 @@ void function(win) {
             cache.ws = ws;
 
             // TODO: 此处需要考虑 WebSocket 重用
+            // TODO: 需要考虑网络状况，是用户自己主动 close websocket 还是网络问题
             ws.addEventListener('open', wsOpen);
             ws.addEventListener('close', wsClose);
             ws.addEventListener('message', wsMessage);
@@ -265,7 +266,7 @@ void function(win) {
             if (secure) {
               url += '&secure=1';
             }
-            tool.ajaxGet({
+            tool.ajax({
                 url: url
             }, function(data) {
                 if (!data.avError) {
@@ -279,7 +280,19 @@ void function(win) {
             });
         };
 
+        engine.auth = function(callback) {
+            tool.ajax({
+                url: cache.options.auth,
+                method: 'post',
+                data: {
+                    self_id: cache.options.peerId
+                }
+            }, callback);
+        };
+
         // 打开 session
+        // TODO: session 的 error
+        // TODO: session 的对应，即使用参数 i
         engine.openSession = function(options) {
             wsSend({
                 cmd: 'session',
@@ -287,12 +300,13 @@ void function(win) {
                 appId: cache.options.appId,
                 peerId: cache.options.peerId,
                 ua: 'js/' + VERSION,
-                t: tool.now(),
                 // i: options.serialId
                 // n 签名参数随机字符串
-                // n: n,
+                n: cache.sessionAuth.nonce,
                 // s 签名参数签名
-                // s: s
+                s: cache.sessionAuth.signature,
+                // 服务器时间认证
+                t: cache.sessionAuth.timestamp
             });
         };
 
@@ -470,6 +484,7 @@ void function(win) {
             // });
 
             cache.ec.on('conv-error', function(data) {
+                tool.error(data.code + ':' + data.reason);
                 cache.ec.emit(eNameIndex.error, data);
             });
             // 查询对话的结果
@@ -559,7 +574,6 @@ void function(win) {
                 this.cache.ec.emit(eventName, data);
                 return this;
             },
-            // TODO: 名字改成 room 更短更好理解
             conv: function(argument, callback) {
                 var convObject = newConvObject(cache);
                 // 传入 convId
@@ -571,7 +585,7 @@ void function(win) {
                 else {
                     engine.startConv(argument, callback);
                     // 服务器端确认收到对话创建，并创建成功
-                    // ASK: 假如用户同时创建多个，如何确认该事件，就是当前这个 conv？
+                    // TODO: 假如用户同时创建多个
                     cache.ec.once('conv-started', function(data) {
                         convObject.id = data.cid;
                         cache.convIndex[convObject.id] = convObject;
@@ -600,17 +614,22 @@ void function(win) {
         else if (!options.clientId) {
             tool.error('Options must have clientId, clientId is a custom user id.');
         }
-        // else if (!options.auth) {
-        //     tool.error('Options must have server auth.');
-        // }
         else {
             // clientId 对应的就是 peerId
             options.peerId = options.clientId;
             var realtimeObj = newRealtimeObject();
             realtimeObj.cache.options = options;
             realtimeObj.cache.ec = tool.eventCenter();
-            // 启动 websocket，然后连接 session
-            realtimeObj.open(callback);
+            if (options.auth) {
+                engine.auth(function(data) {
+                    // 存储 session 的认证信息
+                    realtimeObj.cache.sessionAuth = data;
+                    realtimeObj.open(callback);
+                });
+            } else {
+                // 启动 websocket，然后连接 session
+                realtimeObj.open(callback);
+            }
             return realtimeObj;
         }
     };
@@ -648,10 +667,18 @@ void function(win) {
     };
 
     // Ajax get 请求
-    tool.ajaxGet = function(options, callback) {
+    tool.ajax = function(options, callback) {
         var url = options.url;
+        var method = options.method || 'get';
         var xhr = new XMLHttpRequest();
-        xhr.open('get', url);
+        xhr.open(method, url);
+        if (method === 'post') {
+            xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+            // xhr.setRequestHeader('Content-Type', 'application/json');
+            // xhr.setRequestHeader('Access-Control-Allow-Origin', '*');
+            // xhr.setRequestHeader('Access-Control-Allow-Headers', "Origin, X-Requested-With, Content-Type, Accept");
+            // xhr.setRequestHeader('Access-Control-Allow-Methods',"POST, GET, OPTIONS, DELETE, PUT, HEAD");
+        }
         xhr.onload = function() {
             if (xhr.status === 200) {
                 callback(JSON.parse(xhr.responseText));
@@ -666,7 +693,16 @@ void function(win) {
             // TODO: 派发一个 Error 事件
             cache.ec.emit('error', {type:'network'});
         };
-        xhr.send();
+        // 临时
+        var formData = '';
+        for (var k in options.data) {
+            if (!formData) {
+                formData += (k + '=' + options.data[k]);
+            } else {
+                formData += ('&' + k + '=' + options.data[k]);
+            }
+        }
+        xhr.send(formData);
     };
 
     // 获取当前时间的时间戳
