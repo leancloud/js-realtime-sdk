@@ -15,7 +15,7 @@ void function(win) {
     var lc = win.lc || {};
     win.lc = lc;
     // 历史遗留，同时获取 av 命名空间
-    win.av = win.av || lc;
+    // win.av = win.av || lc;
 
     // AMD 加载支持
     // if (typeof define === 'function' && define.amd) {
