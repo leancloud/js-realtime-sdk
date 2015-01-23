@@ -18,11 +18,11 @@ void function(win) {
     // win.av = win.av || lc;
 
     // AMD 加载支持
-    // if (typeof define === 'function' && define.amd) {
-    //     define('lc', [], function() {
-    //         return lc;
-    //     });
-    // }
+    if (typeof define === 'function' && define.amd) {
+        define('lc', [], function() {
+            return lc;
+        });
+    }
 
     // 配置项
     var config = {
@@ -646,7 +646,7 @@ void function(win) {
 
     // 获取一个唯一 id
     tool.getId = function() {
-        return 'lc' + (Date.now() + Math.floor(Math.random() * 100));
+        return 'lc' + (Date.now().toString(36) + Math.random().toString(36).substring(2, 3));
     };
 
     // Callback 返回的 data 中 avError 表示失败
@@ -714,33 +714,35 @@ void function(win) {
     tool.eventCenter = function() {
         var eventList = {};
         var eventOnceList = {};
-        return {
-            _on: function(eventName, fun, isOnce) {
-                if (!eventName) {
-                    tool.error('No event name.');
-                }
-                else if (!fun) {
-                    tool.error('No callback function.');
-                }
 
-                if (!isOnce) {
-                    if (!eventList[eventName]) {
-                        eventList[eventName] = [];
-                    }
-                    eventList[eventName].push(fun);
+        var _on = function(eventName, fun, isOnce) {
+            if (!eventName) {
+                tool.error('No event name.');
+            }
+            else if (!fun) {
+                tool.error('No callback function.');
+            }
+
+            if (!isOnce) {
+                if (!eventList[eventName]) {
+                    eventList[eventName] = [];
                 }
-                else {
-                    if (!eventOnceList[eventName]) {
-                        eventOnceList[eventName] = [];
-                    }
-                    eventOnceList[eventName].push(fun);
+                eventList[eventName].push(fun);
+            }
+            else {
+                if (!eventOnceList[eventName]) {
+                    eventOnceList[eventName] = [];
                 }
-            },
+                eventOnceList[eventName].push(fun);
+            }
+        };
+
+        return {
             on: function(eventName, fun) {
-                this._on(eventName, fun);
+                _on(eventName, fun);
             },
             once: function(eventName, fun) {
-                this._on(eventName, fun, true);
+                _on(eventName, fun, true);
             },
             emit: function(eventName, data) {
                 if (!eventName) {
