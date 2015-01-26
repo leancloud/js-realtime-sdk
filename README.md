@@ -1,11 +1,3 @@
-#Realtime-JavaScript-SDK
-LeanCloud Realtime Message JavaScript SDK
-
-##方法
-
-##事件
-您
-
 #LeanCloud 实时通信 JavaScript SDK 2.0
 
 
