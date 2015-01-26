@@ -182,6 +182,9 @@ void function(win) {
             tool.log('WebSocket opened.');
             engine.bindEvent();
             engine.openSession();
+
+            // 启动心跳
+            engine.heartbeats();
         };
 
         // WebSocket Close
@@ -225,9 +228,6 @@ void function(win) {
             ws.addEventListener('close', wsClose);
             ws.addEventListener('message', wsMessage);
             ws.addEventListener('error', wsError);
-
-            // 启动心跳
-            engine.heartbeats();
         };
 
         // 心跳程序
