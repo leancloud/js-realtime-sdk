@@ -15,14 +15,14 @@ void function(win) {
     var lc = win.lc || {};
     win.lc = lc;
     // 历史遗留，同时获取 av 命名空间
-    win.av = win.av || lc;
+    // win.av = win.av || lc;
 
     // AMD 加载支持
-    // if (typeof define === 'function' && define.amd) {
-    //     define('lc', [], function() {
-    //         return lc;
-    //     });
-    // }
+    if (typeof define === 'function' && define.amd) {
+        define('lc', [], function() {
+            return lc;
+        });
+    }
 
     // 配置项
     var config = {
@@ -39,7 +39,7 @@ void function(win) {
     // realtime 对象内，会被派发的全部事件名
     var eNameIndex = {
         // 新建一个 conversation 时派发
-        new: 'new',
+        create: 'create',
         // session 连接建立完毕
         open: 'open',
         // websocket 连接关闭
@@ -182,6 +182,9 @@ void function(win) {
             tool.log('WebSocket opened.');
             engine.bindEvent();
             engine.openSession();
+
+            // 启动心跳
+            engine.heartbeats();
         };
 
         // WebSocket Close
@@ -225,9 +228,6 @@ void function(win) {
             ws.addEventListener('close', wsClose);
             ws.addEventListener('message', wsMessage);
             ws.addEventListener('error', wsError);
-
-            // 启动心跳
-            engine.heartbeats();
         };
 
         // 心跳程序
@@ -331,7 +331,7 @@ void function(win) {
                 peerId: cache.options.peerId,
                 // attr json对象，对话的任意初始属性
                 attr: options.data || {},
-                t: tool.now(),
+                // t: tool.now(),
                 i: options.serialId
                 // n 签名参数随机字符串
                 // n: n,
@@ -348,7 +348,7 @@ void function(win) {
                 m: options.members,
                 appId: cache.options.appId,
                 peerId: cache.options.peerId,
-                t: tool.now(),
+                // t: tool.now(),
                 i: options.serialId
                 // n 签名参数随机字符串
                 // n: n,
@@ -365,7 +365,7 @@ void function(win) {
                 m: options.members,
                 appId: cache.options.appId,
                 peerId: cache.options.peerId,
-                t: tool.now(),
+                // t: tool.now(),
                 i: options.serialId
                 // n 签名参数随机字符串
                 // n: n,
@@ -412,7 +412,7 @@ void function(win) {
                 cmd: 'logs',
                 cid: options.cid,
                 // t 时间戳，从 t 开始向前查询
-                t: tool.now(),
+                // t: tool.now(),
                 // mid 消息 id，从消息 id 开始向前查询（和 t 共同使用，为防止某毫秒时刻有重复消息）
                 mid: options.mid,
                 limit: options.limit,
@@ -590,7 +590,7 @@ void function(win) {
                         convObject.id = data.cid;
                         cache.convIndex[convObject.id] = convObject;
                         callback(data);
-                        cache.ec.emit(eNameIndex.new, data);
+                        cache.ec.emit(eNameIndex.create, data);
                     });
                 }
                 return convObject;
@@ -646,7 +646,7 @@ void function(win) {
 
     // 获取一个唯一 id
     tool.getId = function() {
-        return 'lc' + (Date.now() + Math.floor(Math.random() * 100));
+        return 'lc' + (Date.now().toString(36) + Math.random().toString(36).substring(2, 3));
     };
 
     // Callback 返回的 data 中 avError 表示失败
@@ -714,33 +714,35 @@ void function(win) {
     tool.eventCenter = function() {
         var eventList = {};
         var eventOnceList = {};
-        return {
-            _on: function(eventName, fun, isOnce) {
-                if (!eventName) {
-                    tool.error('No event name.');
-                }
-                else if (!fun) {
-                    tool.error('No callback function.');
-                }
 
-                if (!isOnce) {
-                    if (!eventList[eventName]) {
-                        eventList[eventName] = [];
-                    }
-                    eventList[eventName].push(fun);
+        var _on = function(eventName, fun, isOnce) {
+            if (!eventName) {
+                tool.error('No event name.');
+            }
+            else if (!fun) {
+                tool.error('No callback function.');
+            }
+
+            if (!isOnce) {
+                if (!eventList[eventName]) {
+                    eventList[eventName] = [];
                 }
-                else {
-                    if (!eventOnceList[eventName]) {
-                        eventOnceList[eventName] = [];
-                    }
-                    eventOnceList[eventName].push(fun);
+                eventList[eventName].push(fun);
+            }
+            else {
+                if (!eventOnceList[eventName]) {
+                    eventOnceList[eventName] = [];
                 }
-            },
+                eventOnceList[eventName].push(fun);
+            }
+        };
+
+        return {
             on: function(eventName, fun) {
-                this._on(eventName, fun);
+                _on(eventName, fun);
             },
             once: function(eventName, fun) {
-                this._on(eventName, fun, true);
+                _on(eventName, fun, true);
             },
             emit: function(eventName, data) {
                 if (!eventName) {
