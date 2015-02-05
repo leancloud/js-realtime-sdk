@@ -45,7 +45,7 @@ LeanCloud 的缩写「lc」，新版 JavaScript SDK 都会基于此命名空间�
 例子：
 
 
-```
+```js
 var rtObject = lc.realtime({
    // appId 需要换成你自己的 appId
    appId: '9p6hyhh60av3ukkni3i9z53q1l8yy3cijj6sie3cewft18vm',
@@ -75,7 +75,7 @@ rtObject.on('open', function() {
 
 例子：
 
-```
+```js
 console.log(lc.realtime.version);   // 2.0.0
 ```
 
@@ -95,7 +95,7 @@ console.log(lc.realtime.version);   // 2.0.0
 
 例子：
 
-```
+```js
 var rtObject = lc.realtime({
    // appId 需要换成你自己的 appId
    appId: '9p6hyhh60av3ukkni3i9z53q1l8yy3cijj6sie3cewft18vm',
@@ -126,7 +126,7 @@ rtObject.on('open', function() {
 
 例子：
 
-```
+```js
 var rtObject = lc.realtime({
    // appId 需要换成你自己的 appId
    appId: '9p6hyhh60av3ukkni3i9z53q1l8yy3cijj6sie3cewft18vm',
@@ -159,7 +159,7 @@ rtObject.on('close', function() {
 
 {Object} 返回 RealtimeObject，其中有后续调用的方法，支持链式调用。
 
-```
+```js
 var rtObject = lc.realtime({
    // appId 需要换成你自己的 appId
    appId: '9p6hyhh60av3ukkni3i9z53q1l8yy3cijj6sie3cewft18vm',
@@ -196,7 +196,7 @@ rtObject.on('join', function(data) {
 
 {Object} 返回 RealtimeObject，其中有后续调用的方法，支持链式调用。
 
-```
+```js
 var rtObject = lc.realtime({
    // appId 需要换成你自己的 appId
    appId: '9p6hyhh60av3ukkni3i9z53q1l8yy3cijj6sie3cewft18vm',
@@ -233,6 +233,27 @@ rtObject.once('close', function() {
 
 {Object} 返回 RealtimeObject，其中有后续调用的方法，支持链式调用。
 
+```js
+var rtObject = lc.realtime({
+   // appId 需要换成你自己的 appId
+   appId: '9p6hyhh60av3ukkni3i9z53q1l8yy3cijj6sie3cewft18vm',
+   // clientId 是自定义的名字，当前客户端可以理解的名字
+   clientId: 'abc123'
+   // auth 是权限校验的服务器地址，具体请看文档
+   // auth: 'http://signature-example.avosapps.com/sign'
+});
+
+// 当事件被派发的时候会触发
+rtObject.on('wangxiao', function(data) {
+   // 会输出 test
+   console.log(data.aaa);
+});
+
+// 派发了一个自定义的事件，名字叫「wangxiao」。
+rtObject.emit('wangxiao', {
+    aaa: 'test'
+});
+```
 
 #### RealtimeObject.room(options, callback)
 
@@ -252,6 +273,32 @@ rtObject.once('close', function() {
 
 {Object} 返回 RoomObject，其中有后续调用的方法，支持链式调用。
 
+```js
+var rtObject = lc.realtime({
+   // appId 需要换成你自己的 appId
+   appId: '9p6hyhh60av3ukkni3i9z53q1l8yy3cijj6sie3cewft18vm',
+   // clientId 是自定义的名字，当前客户端可以理解的名字
+   clientId: 'abc123'
+   // auth 是权限校验的服务器地址，具体请看文档
+   // auth: 'http://signature-example.avosapps.com/sign'
+});
+
+var room = rt.room({
+    members: [
+        'wangxiao02'
+    ],
+    data: {
+        title: 'testTitle'
+    }
+}, function(result) {
+    console.log('Room created callback');
+});
+
+// 当新 Room 被创建时触发
+rtObject.on('create', function(data) {
+   console.log(data);
+});
+```
 
 #### RealtimeObject.room(roomId, callback)
 
@@ -269,6 +316,18 @@ rtObject.once('close', function() {
 
 {Object} 返回 RoomObject，其中有后续调用的方法，支持链式调用。
 
+```js
+var rtObject = lc.realtime({
+   // appId 需要换成你自己的 appId
+   appId: '9p6hyhh60av3ukkni3i9z53q1l8yy3cijj6sie3cewft18vm',
+   // clientId 是自定义的名字，当前客户端可以理解的名字
+   clientId: 'abc123'
+   // auth 是权限校验的服务器地址，具体请看文档
+   // auth: 'http://signature-example.avosapps.com/sign'
+});
+
+var room = rt.room('sasfalklkjdlfs123');
+```
 
 #### RoomObject.add(clientId, callback)
 
@@ -286,6 +345,34 @@ rtObject.once('close', function() {
 
 {Object} 返回 RoomObject，其中有后续调用的方法，支持链式调用。
 
+```js
+var rtObject = lc.realtime({
+   // appId 需要换成你自己的 appId
+   appId: '9p6hyhh60av3ukkni3i9z53q1l8yy3cijj6sie3cewft18vm',
+   // clientId 是自定义的名字，当前客户端可以理解的名字
+   clientId: 'abc123'
+   // auth 是权限校验的服务器地址，具体请看文档
+   // auth: 'http://signature-example.avosapps.com/sign'
+});
+
+var room = rt.room({
+    members: [
+        'wangxiao02'
+    ],
+    data: {
+        title: 'testTitle'
+    }
+});
+
+room.add('wangxiao03', function() {
+    console.log('Add success.');
+});
+
+// 当前 Room 有新的 client 加入时触发
+rtObject.on('join', function(data) {
+   console.log(data);
+});
+```
 
 #### RoomObject.add(clientIdList, callback)
 
@@ -303,6 +390,34 @@ rtObject.once('close', function() {
 
 {Object} 返回 RoomObject，其中有后续调用的方法，支持链式调用。
 
+```js
+var rtObject = lc.realtime({
+   // appId 需要换成你自己的 appId
+   appId: '9p6hyhh60av3ukkni3i9z53q1l8yy3cijj6sie3cewft18vm',
+   // clientId 是自定义的名字，当前客户端可以理解的名字
+   clientId: 'abc123'
+   // auth 是权限校验的服务器地址，具体请看文档
+   // auth: 'http://signature-example.avosapps.com/sign'
+});
+
+var room = rt.room({
+    members: [
+        'wangxiao02'
+    ],
+    data: {
+        title: 'testTitle'
+    }
+});
+
+room.add(['wangxiao03', 'wangxiao04'], function() {
+    console.log('Add success.');
+});
+
+// 当前 Room 有新的 client 加入时触发
+rtObject.on('join', function(data) {
+   console.log(data);
+});
+```
 
 #### RoomObject.remove(clientId, callback)
 
@@ -318,6 +433,34 @@ rtObject.once('close', function() {
 
 {Object} 返回 RoomObject，其中有后续调用的方法，支持链式调用。
 
+```js
+var rtObject = lc.realtime({
+   // appId 需要换成你自己的 appId
+   appId: '9p6hyhh60av3ukkni3i9z53q1l8yy3cijj6sie3cewft18vm',
+   // clientId 是自定义的名字，当前客户端可以理解的名字
+   clientId: 'abc123'
+   // auth 是权限校验的服务器地址，具体请看文档
+   // auth: 'http://signature-example.avosapps.com/sign'
+});
+
+var room = rt.room({
+    members: [
+        'wangxiao02'
+    ],
+    data: {
+        title: 'testTitle'
+    }
+});
+
+room.remove('wangxiao02', function() {
+    console.log('Remove success.');
+});
+
+// 当前 Room 有 client 立刻时触发
+rtObject.on('left', function(data) {
+   console.log(data);
+});
+```
 
 #### RoomObject.remove(clientIdList, callback)
 
@@ -335,6 +478,35 @@ rtObject.once('close', function() {
 
 {Object} 返回 RoomObject，其中有后续调用的方法，支持链式调用。
 
+```js
+var rtObject = lc.realtime({
+   // appId 需要换成你自己的 appId
+   appId: '9p6hyhh60av3ukkni3i9z53q1l8yy3cijj6sie3cewft18vm',
+   // clientId 是自定义的名字，当前客户端可以理解的名字
+   clientId: 'abc123'
+   // auth 是权限校验的服务器地址，具体请看文档
+   // auth: 'http://signature-example.avosapps.com/sign'
+});
+
+var room = rt.room({
+    members: [
+        'wangxiao02',
+        'wangxiao03'
+    ],
+    data: {
+        title: 'testTitle'
+    }
+});
+
+room.remove(['wangxiao02', 'wangxiao03'], function() {
+    console.log('Remove success.');
+});
+
+// 当前 Room 有 client 立刻时触发
+rtObject.on('left', function(data) {
+   console.log(data);
+});
+```
 
 #### RoomObject.join(callback)
 
@@ -350,6 +522,27 @@ rtObject.once('close', function() {
 
 {Object} 返回 RoomObject，其中有后续调用的方法，支持链式调用。
 
+```js
+var rtObject = lc.realtime({
+   // appId 需要换成你自己的 appId
+   appId: '9p6hyhh60av3ukkni3i9z53q1l8yy3cijj6sie3cewft18vm',
+   // clientId 是自定义的名字，当前客户端可以理解的名字
+   clientId: 'abc123'
+   // auth 是权限校验的服务器地址，具体请看文档
+   // auth: 'http://signature-example.avosapps.com/sign'
+});
+
+var room = rt.room('safjslakjlfkjla123');
+
+room.join(function() {
+    console.log('join');
+});
+
+// 当前 Room 有新的 client 加入时触发
+rtObject.on('join', function(data) {
+   console.log(data);
+});
+```
 
 #### RoomObject.leave(callback)
 
@@ -367,6 +560,33 @@ rtObject.once('close', function() {
 
 {Object} 返回 RoomObject，其中有后续调用的方法，支持链式调用。
 
+```js
+var rtObject = lc.realtime({
+   // appId 需要换成你自己的 appId
+   appId: '9p6hyhh60av3ukkni3i9z53q1l8yy3cijj6sie3cewft18vm',
+   // clientId 是自定义的名字，当前客户端可以理解的名字
+   clientId: 'abc123'
+   // auth 是权限校验的服务器地址，具体请看文档
+   // auth: 'http://signature-example.avosapps.com/sign'
+});
+
+var room = rt.room({
+    members: [
+        'wangxiao02',
+        'wangxiao03'
+    ],
+    data: {
+        title: 'testTitle'
+    }
+});
+
+room.leave();
+
+// 当前 Room 有 client 立刻时触发
+rtObject.on('left', function(data) {
+   console.log(data);
+});
+```
 
 #### RoomObject.send(dataObject, callback)
 
@@ -384,6 +604,37 @@ rtObject.once('close', function() {
 
 {Object} 返回 RoomObject，其中有后续调用的方法，支持链式调用。
 
+```js
+var rtObject = lc.realtime({
+   // appId 需要换成你自己的 appId
+   appId: '9p6hyhh60av3ukkni3i9z53q1l8yy3cijj6sie3cewft18vm',
+   // clientId 是自定义的名字，当前客户端可以理解的名字
+   clientId: 'abc123'
+   // auth 是权限校验的服务器地址，具体请看文档
+   // auth: 'http://signature-example.avosapps.com/sign'
+});
+
+var room = rt.room({
+    members: [
+        'wangxiao02',
+        'wangxiao03'
+    ],
+    data: {
+        title: 'testTitle'
+    }
+});
+
+room.send({
+    testMsg: 'abcde'
+}, function() {
+    console.log('server ack.');
+});
+
+// 当前用户所在的组，有消息时触发
+rtObject.on('message', function(data) {
+   console.log(data);
+});
+```
 
 ### 事件
 
