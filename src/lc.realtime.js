@@ -38,12 +38,12 @@ void function(win) {
 
     // realtime 对象内，会被派发的全部事件名
     var eNameIndex = {
-        // 新建一个 conversation 时派发
-        create: 'create',
         // session 连接建立完毕
         open: 'open',
         // websocket 连接关闭
         close: 'close',
+        // 新建一个 conversation 时派发
+        create: 'create',
         // conversation 新增加成员
         join: 'join',
         // conversation 成员离开
@@ -302,11 +302,11 @@ void function(win) {
                 ua: 'js/' + VERSION,
                 // i: options.serialId
                 // n 签名参数随机字符串
-                n: cache.sessionAuth.nonce,
+                n: cache.sessionAuth && cache.sessionAuth.nonce,
                 // s 签名参数签名
-                s: cache.sessionAuth.signature,
+                s: cache.sessionAuth && cache.sessionAuth.signature,
                 // 服务器时间认证
-                t: cache.sessionAuth.timestamp
+                t: cache.sessionAuth && cache.sessionAuth.timestamp
             });
         };
 
@@ -589,7 +589,9 @@ void function(win) {
                     cache.ec.once('conv-started', function(data) {
                         convObject.id = data.cid;
                         cache.convIndex[convObject.id] = convObject;
-                        callback(data);
+                        if (callback) {
+                            callback(data);
+                        }
                         cache.ec.emit(eNameIndex.create, data);
                     });
                 }
@@ -611,6 +613,7 @@ void function(win) {
             tool.error('Options must have appId.');
         }
         // 需要传入 peerId，对外叫做 clientId
+        // TODO: clientId 是否是必须，是否可以替用户生成？
         else if (!options.clientId) {
             tool.error('Options must have clientId, clientId is a custom user id.');
         }
