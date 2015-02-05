@@ -26,7 +26,7 @@ LeanCloud 的缩写「lc」，新版 JavaScript SDK 都会基于此命名空间�
 
 描述：
 
-创建实时通信对象的方法，会启动实时通信的连接。自动调用 open 方法，内部与服务器匹配，并建立 WebSocket 连接。内部会自动维持与服务器的链接稳定，控制心跳数据包的频率等，如果发生中断可以通过对应的事件来给用户界面上的变化提示。另外，此方法支持多实例，也就是说，你可以在一个页面中，创建多个 RealtimeObject 来实现聊天。
+* 创建实时通信对象的方法，会启动实时通信的连接。自动调用 open 方法，内部与服务器匹配，并建立 WebSocket 连接。内部会自动维持与服务器的链接稳定，控制心跳数据包的频率等，如果发生中断可以通过对应的事件来给用户界面上的变化提示。另外，此方法支持多实例，也就是说，你可以在一个页面中，创建多个 RealtimeObject 来实现聊天。
 
 参数：
 
@@ -40,7 +40,7 @@ LeanCloud 的缩写「lc」，新版 JavaScript SDK 都会基于此命名空间�
 
 返回：
 
-{Object} 返回 RealtimeObject，其中有后续调用的方法，支持链式调用。
+* {Object} 返回 RealtimeObject，其中有后续调用的方法，支持链式调用。
 
 例子：
 
@@ -67,11 +67,11 @@ rtObject.on('open', function() {
 
 描述：
 
-获取当前 SDK 的版本信息
+* 获取当前 SDK 的版本信息
 
 返回：
 
-{String} 返回当前版本
+* {String} 返回当前版本
 
 例子：
 
@@ -83,7 +83,7 @@ console.log(lc.realtime.version);   // 2.0.0
 
 描述：
 
-该方法一般情况下，您不需要调用，SDK 会自动启动与服务的连接。该方法可以启动实时通信的连接，与服务器匹配建立 websocket 连接；
+* 该方法一般情况下，您不需要调用，SDK 会自动启动与服务的连接。该方法可以启动实时通信的连接，与服务器匹配建立 websocket 连接；
 
 参数：
 
@@ -91,7 +91,7 @@ console.log(lc.realtime.version);   // 2.0.0
 
 返回：
 
-{Object} 返回 RealtimeObject，其中有后续调用的方法，支持链式调用。
+* {Object} 返回 RealtimeObject，其中有后续调用的方法，支持链式调用。
 
 例子：
 
@@ -118,11 +118,11 @@ rtObject.on('open', function() {
 
 描述：
 
-关闭实时通信的连接，并且内部会关闭 websocket 连接。该方法没有回调，因为调用会立刻关闭 WebSocket。
+* 关闭实时通信的连接，并且内部会关闭 websocket 连接。该方法没有回调，因为调用会立刻关闭 WebSocket。
 
 返回：
 
-{Object} 返回 RealtimeObject，其中有后续调用的方法，支持链式调用。
+* {Object} 返回 RealtimeObject，其中有后续调用的方法，支持链式调用。
 
 例子：
 
@@ -147,7 +147,7 @@ rtObject.on('close', function() {
 
 描述：
 
-监听 RealtimeObject 内部的事件，基于一个局部的事件中心，事件每次派发就会被触发一次；
+* 监听 RealtimeObject 内部的事件，基于一个局部的事件中心，事件每次派发就会被触发一次；
 
 参数：
 
@@ -157,7 +157,7 @@ rtObject.on('close', function() {
 
 返回：
 
-{Object} 返回 RealtimeObject，其中有后续调用的方法，支持链式调用。
+* {Object} 返回 RealtimeObject，其中有后续调用的方法，支持链式调用。
 
 ```js
 var rtObject = lc.realtime({
@@ -184,7 +184,7 @@ rtObject.on('join', function(data) {
 
 描述：
 
-监听 RealtimeObject 内部的事件，基于一个局部的事件中心，事件只会被触发一次；
+* 监听 RealtimeObject 内部的事件，基于一个局部的事件中心，事件只会被触发一次；
 
 参数：
 
@@ -194,7 +194,7 @@ rtObject.on('join', function(data) {
 
 返回：
 
-{Object} 返回 RealtimeObject，其中有后续调用的方法，支持链式调用。
+* {Object} 返回 RealtimeObject，其中有后续调用的方法，支持链式调用。
 
 ```js
 var rtObject = lc.realtime({
@@ -221,7 +221,7 @@ rtObject.once('close', function() {
 
 描述：
 
-派发一个事件到 RealtimeObject 中，局部的事件中心
+* 派发一个事件到 RealtimeObject 中，局部的事件中心
 
 参数：
 
@@ -231,7 +231,7 @@ rtObject.once('close', function() {
 
 返回：
 
-{Object} 返回 RealtimeObject，其中有后续调用的方法，支持链式调用。
+* {Object} 返回 RealtimeObject，其中有后续调用的方法，支持链式调用。
 
 ```js
 var rtObject = lc.realtime({
@@ -259,7 +259,7 @@ rtObject.emit('wangxiao', {
 
 描述：
 
-创建一个 Room（房间），实时通信的最小单元；
+* 创建一个 Room（房间），实时通信的最小单元；
 
 参数：
 
@@ -271,7 +271,7 @@ rtObject.emit('wangxiao', {
 
 返回：
 
-{Object} 返回 RoomObject，其中有后续调用的方法，支持链式调用。
+* {Object} 返回 RoomObject，其中有后续调用的方法，支持链式调用。
 
 ```js
 var rtObject = lc.realtime({
@@ -304,7 +304,7 @@ rtObject.on('create', function(data) {
 
 描述：
 
-匹配一个在服务器端已有的 room，并生成对应的 RoomObject，此时不派发任何事件；
+* 匹配一个在服务器端已有的 room，并生成对应的 RoomObject，此时不派发任何事件；
 
 参数：
 
@@ -314,7 +314,7 @@ rtObject.on('create', function(data) {
 
 返回：
 
-{Object} 返回 RoomObject，其中有后续调用的方法，支持链式调用。
+* {Object} 返回 RoomObject，其中有后续调用的方法，支持链式调用。
 
 ```js
 var rtObject = lc.realtime({
@@ -333,7 +333,7 @@ var room = rt.room('sasfalklkjdlfs123');
 
 描述：
 
-向当前 RoomObject 中添加一个用户
+* 向当前 RoomObject 中添加一个用户
 
 参数：
 
@@ -343,7 +343,7 @@ var room = rt.room('sasfalklkjdlfs123');
 
 返回：
 
-{Object} 返回 RoomObject，其中有后续调用的方法，支持链式调用。
+* {Object} 返回 RoomObject，其中有后续调用的方法，支持链式调用。
 
 ```js
 var rtObject = lc.realtime({
@@ -378,7 +378,7 @@ rtObject.on('join', function(data) {
 
 描述：
 
-向当前 RoomObject 中添加多个用户
+* 向当前 RoomObject 中添加多个用户
 
 参数：
 
@@ -388,7 +388,7 @@ rtObject.on('join', function(data) {
 
 返回：
 
-{Object} 返回 RoomObject，其中有后续调用的方法，支持链式调用。
+* {Object} 返回 RoomObject，其中有后续调用的方法，支持链式调用。
 
 ```js
 var rtObject = lc.realtime({
@@ -421,7 +421,7 @@ rtObject.on('join', function(data) {
 
 #### RoomObject.remove(clientId, callback)
 
-描述：从当前 RoomObject 中删除一个用户
+* 描述：从当前 RoomObject 中删除一个用户
 
 参数：
 
@@ -431,7 +431,7 @@ rtObject.on('join', function(data) {
 
 返回：
 
-{Object} 返回 RoomObject，其中有后续调用的方法，支持链式调用。
+* {Object} 返回 RoomObject，其中有后续调用的方法，支持链式调用。
 
 ```js
 var rtObject = lc.realtime({
@@ -466,7 +466,7 @@ rtObject.on('left', function(data) {
 
 描述：
 
-从当前 RoomObject 中删除多个用户
+* 从当前 RoomObject 中删除多个用户
 
 参数：
 
@@ -476,7 +476,7 @@ rtObject.on('left', function(data) {
 
 返回：
 
-{Object} 返回 RoomObject，其中有后续调用的方法，支持链式调用。
+* {Object} 返回 RoomObject，其中有后续调用的方法，支持链式调用。
 
 ```js
 var rtObject = lc.realtime({
@@ -512,7 +512,7 @@ rtObject.on('left', function(data) {
 
 描述：
 
-加入当前这个 Room
+* 加入当前这个 Room
 
 参数：
 
@@ -520,7 +520,7 @@ rtObject.on('left', function(data) {
 
 返回：
 
-{Object} 返回 RoomObject，其中有后续调用的方法，支持链式调用。
+* {Object} 返回 RoomObject，其中有后续调用的方法，支持链式调用。
 
 ```js
 var rtObject = lc.realtime({
@@ -548,7 +548,7 @@ rtObject.on('join', function(data) {
 
 描述：
 
-从当前 RoomObject 中离开
+* 从当前 RoomObject 中离开
 
 参数：
 
@@ -558,7 +558,7 @@ rtObject.on('join', function(data) {
 
 返回：
 
-{Object} 返回 RoomObject，其中有后续调用的方法，支持链式调用。
+* {Object} 返回 RoomObject，其中有后续调用的方法，支持链式调用。
 
 ```js
 var rtObject = lc.realtime({
@@ -592,7 +592,7 @@ rtObject.on('left', function(data) {
 
 描述：
 
-向当前这个 RoomObject 中发送消息
+* 向当前这个 RoomObject 中发送消息
 
 参数：
 
@@ -602,7 +602,7 @@ rtObject.on('left', function(data) {
 
 返回：
 
-{Object} 返回 RoomObject，其中有后续调用的方法，支持链式调用。
+* {Object} 返回 RoomObject，其中有后续调用的方法，支持链式调用。
 
 ```js
 var rtObject = lc.realtime({
