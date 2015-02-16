@@ -41,7 +41,7 @@ function createNew(clientId, callback) {
         console.log('close');
     });
 
-    rt.on('new', function(data) {
+    rt.on('create', function(data) {
         conv.join(function(data) {
             console.log('conversation joined callback');
         });
@@ -68,6 +68,8 @@ function createNew(clientId, callback) {
             console.log('conversation ack callback');
             console.log(data);
         });
+
+        conv.query();
     });
 
     rt.on('join', function(data) {

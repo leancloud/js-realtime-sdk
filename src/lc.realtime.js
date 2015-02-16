@@ -389,6 +389,7 @@ void function(win) {
         };
 
         engine.convQuery = function(options) {
+            options = options || {};
             wsSend({
                 cmd: 'conv',
                 op: 'query',
@@ -488,7 +489,7 @@ void function(win) {
                 cache.ec.emit(eNameIndex.error, data);
             });
             // 查询对话的结果
-            cache.ec.on('conv-result', function(data) {
+            cache.ec.on('conv-results', function(data) {
                 // cmd conv
                 // op result
                 // appId
