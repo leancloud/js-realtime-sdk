@@ -283,7 +283,7 @@ var rtObject = lc.realtime({
    // auth: 'http://signature-example.avosapps.com/sign'
 });
 
-var room = rt.room({
+var room = rtObject.room({
     members: [
         'wangxiao02'
     ],
@@ -326,7 +326,7 @@ var rtObject = lc.realtime({
    // auth: 'http://signature-example.avosapps.com/sign'
 });
 
-var room = rt.room('sasfalklkjdlfs123');
+var room = rtObject.room('sasfalklkjdlfs123');
 ```
 
 #### RoomObject.add(clientId, callback)
@@ -355,7 +355,7 @@ var rtObject = lc.realtime({
    // auth: 'http://signature-example.avosapps.com/sign'
 });
 
-var room = rt.room({
+var room = rtObject.room({
     members: [
         'wangxiao02'
     ],
@@ -400,7 +400,7 @@ var rtObject = lc.realtime({
    // auth: 'http://signature-example.avosapps.com/sign'
 });
 
-var room = rt.room({
+var room = rtObject.room({
     members: [
         'wangxiao02'
     ],
@@ -443,7 +443,7 @@ var rtObject = lc.realtime({
    // auth: 'http://signature-example.avosapps.com/sign'
 });
 
-var room = rt.room({
+var room = rtObject.room({
     members: [
         'wangxiao02'
     ],
@@ -488,7 +488,7 @@ var rtObject = lc.realtime({
    // auth: 'http://signature-example.avosapps.com/sign'
 });
 
-var room = rt.room({
+var room = rtObject.room({
     members: [
         'wangxiao02',
         'wangxiao03'
@@ -532,7 +532,7 @@ var rtObject = lc.realtime({
    // auth: 'http://signature-example.avosapps.com/sign'
 });
 
-var room = rt.room('safjslakjlfkjla123');
+var room = rtObject.room('safjslakjlfkjla123');
 
 room.join(function() {
     console.log('join');
@@ -570,7 +570,7 @@ var rtObject = lc.realtime({
    // auth: 'http://signature-example.avosapps.com/sign'
 });
 
-var room = rt.room({
+var room = rtObject.room({
     members: [
         'wangxiao02',
         'wangxiao03'
@@ -614,7 +614,7 @@ var rtObject = lc.realtime({
    // auth: 'http://signature-example.avosapps.com/sign'
 });
 
-var room = rt.room({
+var room = rtObject.room({
     members: [
         'wangxiao02',
         'wangxiao03'
