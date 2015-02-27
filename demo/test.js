@@ -69,7 +69,10 @@ function createNew(clientId, callback) {
             console.log(data);
         });
 
-        conv.query();
+        conv.query(function(data) {
+            console.log('conversation results');
+            console.log(data);
+        });
     });
 
     rt.on('join', function(data) {
@@ -89,11 +92,6 @@ function createNew(clientId, callback) {
 
     rt.on('log', function(data) {
         console.log('conversation logs');
-        console.log(data);
-    });
-
-    rt.on('result', function(data) {
-        console.log('conversation results');
         console.log(data);
     });
 }

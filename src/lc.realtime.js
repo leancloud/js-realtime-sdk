@@ -52,8 +52,6 @@ void function(win) {
         message: 'message',
         // conversation 历史记录
         log: 'log',
-        // conversation 查询结果
-        result: 'result',
         // conversation 更新
         update: 'update',
         // 各种错误
@@ -82,15 +80,15 @@ void function(win) {
                 cid: me.id,
                 members: members,
                 serialId: tool.getId()
-            };     
+            };
             switch(cmd) {
                 case 'add':
                     eventName = 'conv-added';
-                    engine.convAdd(options); 
+                    engine.convAdd(options);
                 break;
                 case 'remove':
                     eventName = 'conv-removed';
-                    engine.convRemove(options); 
+                    engine.convRemove(options);
                 break;
             }
             fun = function(data) {
@@ -133,7 +131,7 @@ void function(win) {
                     data: data,
                     serialId: tool.getId()
                 };
-                fun = function(data) {
+                var fun = function(data) {
                     if (data.i === options.serialId) {
                         if (callback) {
                             callback(data);
@@ -141,15 +139,35 @@ void function(win) {
                         cache.ec.remove('ack', fun);
                     }
                 };
-                engine.send(options, callback);
                 cache.ec.on('ack', fun);
+                engine.send(options, callback);
                 return this;
             },
             log: function(options, callback) {
                 engine.convLog(options);
                 return this;
             },
-            query: function(options, callback) {
+            query: function(argument, callback) {
+                var options = {};
+                switch(arguments.length) {
+                    // 如果只有一个参数，那么是 callback
+                    case 1:
+                        callback = argument;
+                    break;
+                    case 2:
+                        options = argument;
+                    break;
+                }
+                options.serialId = tool.getId();
+                var fun = function(data) {
+                    if (data.i === options.serialId) {
+                        if (callback) {
+                            callback(data);
+                        }
+                        cache.ec.remove('conv-results', fun);
+                    }
+                };
+                cache.ec.on('conv-results', fun);
                 engine.convQuery(options);
                 return this;
             },
@@ -402,8 +420,9 @@ void function(win) {
                 // limit 可选，数字，默认10
                 limit: options.limit || 10,
                 // skip 可选，数字，默认0
-                skip: options.skip || 0
+                skip: options.skip || 0,
                 // i serial-id
+                i: options.serialId
             });
         };
 
@@ -489,15 +508,15 @@ void function(win) {
                 cache.ec.emit(eNameIndex.error, data);
             });
             // 查询对话的结果
-            cache.ec.on('conv-results', function(data) {
+            // cache.ec.on('conv-results', function(data) {
                 // cmd conv
                 // op result
                 // appId
                 // peerId
                 // i serial-id
                 // results 数组，是查询结果
-                cache.ec.emit(eNameIndex.result, data);
-            });
+                // cache.ec.emit(eNameIndex.result, data);
+            // });
             cache.ec.on('conv-updated', function(data) {
                 cache.ec.emit(eNameIndex.update, data);
             });
@@ -648,7 +667,7 @@ void function(win) {
     // 空函数
     tool.noop = function() {};
 
-    // 获取一个唯一 id
+    // 获取一个唯一 id, 碰撞概率同一毫秒小于万分之一
     tool.getId = function() {
         return 'lc' + (Date.now().toString(36) + Math.random().toString(36).substring(2, 3));
     };
