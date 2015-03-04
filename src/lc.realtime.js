@@ -14,8 +14,6 @@ void function(win) {
     // 获取命名空间
     var lc = win.lc || {};
     win.lc = lc;
-    // 历史遗留，同时获取 av 命名空间
-    // win.av = win.av || lc;
 
     // AMD 加载支持
     if (typeof define === 'function' && define.amd) {
@@ -26,8 +24,8 @@ void function(win) {
 
     // 配置项
     var config = {
-        // 心跳时间（三分钟）
-        heartbeatsTime: 3 * 60 * 1000
+        // 心跳时间（一分钟）
+        heartbeatsTime: 60 * 1000
     };
 
     // 命名空间，挂载一些工具方法
@@ -40,6 +38,8 @@ void function(win) {
     var eNameIndex = {
         // session 连接建立完毕
         open: 'open',
+        // 断开重连
+        reuse: 'reuse',
         // websocket 连接关闭
         close: 'close',
         // 新建一个 conversation 时派发
@@ -220,7 +220,7 @@ void function(win) {
         };
 
         var wsError = function(data) {
-            tool.error(data);
+            new Error(data);
             // TODO: 增加更加详细的错误处理
         };
 
@@ -259,7 +259,7 @@ void function(win) {
                 engine.createSocket(server.server);
             }
             else {
-                tool.error('WebSocket connet failed.');
+                new Error('WebSocket connet failed.');
                 // TODO: 派发一个 Error 事件
             }
         };
@@ -498,7 +498,7 @@ void function(win) {
             // });
 
             cache.ec.on('conv-error', function(data) {
-                tool.error(data.code + ':' + data.reason);
+                new Error(data.code + ':' + data.reason);
                 cache.ec.emit(eNameIndex.error, data);
             });
             // 查询对话的结果
@@ -582,7 +582,7 @@ void function(win) {
                 this.cache.ec.emit(eventName, data);
                 return this;
             },
-            conv: function(argument, callback) {
+            room: function(argument, callback) {
                 var convObject = newConvObject(cache);
                 // 传入 convId
                 if (typeof argument === 'string') {
@@ -604,10 +604,6 @@ void function(win) {
                     });
                 }
                 return convObject;
-            },
-            // 暴露 room 就是 conversation 方法
-            room: function(argument, callback) {
-                return this.conv(argument, callback);
             },
             // 相关查询，包括用户列表查询，房间查询等
             query: function(argument, callback) {
@@ -640,15 +636,15 @@ void function(win) {
     // 主函数，启动通信并获得 realtimeObject
     lc.realtime = function(options, callback) {
         if (typeof options !== 'object') {
-            tool.error('lc.realtime need a argument at least.');
+            new Error('lc.realtime need a argument at least.');
         }
         else if (!options.appId) {
-            tool.error('Options must have appId.');
+            new Error('Options must have appId.');
         }
         // 需要传入 peerId，对外叫做 clientId
         // TODO: clientId 是否是必须，是否可以替用户生成？
         else if (!options.clientId) {
-            tool.error('Options must have clientId, clientId is a custom user id.');
+            new Error('Options must have clientId, clientId is a custom user id.');
         }
         else {
             // clientId 对应的就是 peerId
@@ -692,11 +688,6 @@ void function(win) {
         return obj;
     };
 
-    // 输出错误信息
-    tool.error = function(msg) {
-        throw new Error(msg);
-    };
-
     // 输出 log
     tool.log = function(msg) {
         console.log(msg);
@@ -725,7 +716,7 @@ void function(win) {
         };
         xhr.onerror = function() {
             callback(tool.fail());
-            tool.error('Network error.');
+            new Error('Network error.');
             // TODO: 派发一个 Error 事件
             cache.ec.emit('error', {type:'network'});
         };
@@ -753,36 +744,42 @@ void function(win) {
 
         var _on = function(eventName, fun, isOnce) {
             if (!eventName) {
-                tool.error('No event name.');
+                new Error('No event name.');
             }
             else if (!fun) {
-                tool.error('No callback function.');
+                new Error('No callback function.');
             }
-
-            if (!isOnce) {
-                if (!eventList[eventName]) {
-                    eventList[eventName] = [];
+            var list = eventName.split(/\s+/);
+            for (var i = 0, l = list.length; i < l; i ++) {
+                if (list[i]) {
+                    if (!isOnce) {
+                        if (!eventList[list[i]]) {
+                            eventList[list[i]] = [];
+                        }
+                        eventList[list[i]].push(fun);
+                    }
+                    else {
+                        if (!eventOnceList[list[i]]) {
+                            eventOnceList[list[i]] = [];
+                        }
+                        eventOnceList[list[i]].push(fun);
+                    }
                 }
-                eventList[eventName].push(fun);
-            }
-            else {
-                if (!eventOnceList[eventName]) {
-                    eventOnceList[eventName] = [];
-                }
-                eventOnceList[eventName].push(fun);
             }
         };
 
         return {
             on: function(eventName, fun) {
                 _on(eventName, fun);
+                return this;
             },
             once: function(eventName, fun) {
                 _on(eventName, fun, true);
+                return this;
             },
             emit: function(eventName, data) {
                 if (!eventName) {
-                    tool.error('No emit event name.');
+                    new Error('No emit event name.');
                 }
                 var i = 0;
                 var l = 0;
@@ -810,6 +807,7 @@ void function(win) {
                         eventOnceList[eventName][i].call(this, data);
                     }
                 }
+                return this;
             },
             remove: function(eventName, fun) {
                 if (eventList[eventName]) {
@@ -821,9 +819,9 @@ void function(win) {
                         }
                     }
                 }
+                return this;
             }
         };
     };
 
 } (window);
-
