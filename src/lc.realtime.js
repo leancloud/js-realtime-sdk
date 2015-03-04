@@ -147,30 +147,6 @@ void function(win) {
                 engine.convLog(options);
                 return this;
             },
-            query: function(argument, callback) {
-                var options = {};
-                switch(arguments.length) {
-                    // 如果只有一个参数，那么是 callback
-                    case 1:
-                        callback = argument;
-                    break;
-                    case 2:
-                        options = argument;
-                    break;
-                }
-                options.serialId = tool.getId();
-                var fun = function(data) {
-                    if (data.i === options.serialId) {
-                        if (callback) {
-                            callback(data);
-                        }
-                        cache.ec.remove('conv-results', fun);
-                    }
-                };
-                cache.ec.on('conv-results', fun);
-                engine.convQuery(options);
-                return this;
-            },
             update: function(options, callback) {
                 engine.convUpate(options);
                 return this;
@@ -620,6 +596,31 @@ void function(win) {
             // 暴露 room 就是 conversation 方法
             room: function(argument, callback) {
                 return this.conv(argument, callback);
+            },
+            // 相关查询，包括用户列表查询，房间查询等
+            query: function(argument, callback) {
+                var options = {};
+                switch(arguments.length) {
+                    // 如果只有一个参数，那么是 callback
+                    case 1:
+                        callback = argument;
+                    break;
+                    case 2:
+                        options = argument;
+                    break;
+                }
+                options.serialId = tool.getId();
+                var fun = function(data) {
+                    if (data.i === options.serialId) {
+                        if (callback) {
+                            callback(data);
+                        }
+                        cache.ec.remove('conv-results', fun);
+                    }
+                };
+                cache.ec.on('conv-results', fun);
+                engine.convQuery(options);
+                return this;
             }
         };
     };
