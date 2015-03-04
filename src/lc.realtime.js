@@ -166,6 +166,16 @@ void function(win) {
                 engine.convLog(options);
                 return this;
             },
+            receive: function(callback) {
+                var id = this.id;
+                cache.ec.on(eNameIndex.message, function(data) {
+                    // 是否是当前 room 的信息
+                    if (id === data.cid) {
+                        callback(data);
+                    }
+                });
+                return this;
+            },
             update: function(options, callback) {
                 engine.convUpate(options);
                 return this;

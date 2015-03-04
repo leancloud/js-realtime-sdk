@@ -78,6 +78,12 @@ rt.on('create', function(data) {
         console.log('conversation logs callback');
         console.log(data);
     });
+
+    // 当前房间接收到消息
+    room.receive(function(data) {
+        console.log('conversation receive callback');        
+        console.log(data);
+    });
 });
 
 // 监听所有用户加入的情况
