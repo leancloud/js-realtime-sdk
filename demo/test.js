@@ -72,6 +72,12 @@ rt.on('create', function(data) {
         console.log('conversation ack callback');
         console.log(data);
     });
+
+    // 查看历史消息
+    room.log(function(data) {
+        console.log('conversation logs callback');
+        console.log(data);
+    });
 });
 
 // 监听所有用户加入的情况

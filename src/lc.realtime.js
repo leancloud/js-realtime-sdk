@@ -50,8 +50,6 @@ void function(win) {
         left: 'left',
         // conversation 内发送的数据
         message: 'message',
-        // conversation 历史记录
-        log: 'log',
         // conversation 更新
         update: 'update',
         // 各种错误
@@ -143,7 +141,28 @@ void function(win) {
                 engine.send(options, callback);
                 return this;
             },
-            log: function(options, callback) {
+            log: function(argument, callback) {
+                var options = {};
+                switch(arguments.length) {
+                    // 如果只有一个参数，那么是 callback
+                    case 1:
+                        callback = argument;
+                    break;
+                    case 2:
+                        options = argument;
+                    break;
+                }
+                options.cid = options.cid || this.id;
+                options.serialId = options.serialId || tool.getId();
+                var fun = function(data) {
+                    if (data.i === options.serialId) {
+                        if (callback) {
+                            callback(data.logs);
+                        }
+                        cache.ec.remove('logs', fun);
+                    }
+                };
+                cache.ec.on('logs', fun);
                 engine.convLog(options);
                 return this;
             },
@@ -196,8 +215,6 @@ void function(win) {
                 if (data.op) {
                     eventName += '-' + data.op;
                 }
-                // tool.log('Emit event: ' + eventName);
-                // tool.log(data);
                 cache.ec.emit(eventName, data);
             }
         };
@@ -413,8 +430,9 @@ void function(win) {
                 mid: options.mid,
                 limit: options.limit,
                 appId: cache.options.appId,
-                peerId: cache.options.peerId
+                peerId: cache.options.peerId,
                 // i serial-id
+                i: options.serialId
             });
         };
 
@@ -522,12 +540,6 @@ void function(win) {
             });
             // 用户可以获取自己所在对话的历史记录
             cache.ec.on('logs', function(data) {
-                // cmd logs
-                // logs [] 数组，包含的消息内容包括 timestamp, data, from, msg-id 四个字段分别是 消息时间，内容，发件人
-                // i
-                // appId
-                // peerId
-                cache.ec.emit(eNameIndex.log, data);
             });
 
             // 清空 bindEvent，防止事件重复绑定
