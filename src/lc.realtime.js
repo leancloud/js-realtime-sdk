@@ -25,7 +25,7 @@ void function(win) {
     // 配置项
     var config = {
         // 心跳时间（一分钟）
-        heartbeatsTime: 60 * 1000
+        heartbeatsTime: 10 * 1000
     };
 
     // 命名空间，挂载一些工具方法
@@ -221,7 +221,11 @@ void function(win) {
             // 事件中心
             ec: undefined,
             // 所有已生成的 conversation 对象
-            convIndex: {}
+            convIndex: {},
+            // 是否是用户关闭，如果不是将会断开重连
+            closeFlag: false,
+            // reuse 事件的重试 timer
+            reuseTimer: undefined
         };
 
         // WebSocket Open
@@ -229,9 +233,10 @@ void function(win) {
             tool.log('WebSocket opened.');
             engine.bindEvent();
             engine.openSession();
-
             // 启动心跳
             engine.heartbeats();
+            // 启动守护进程
+            engine.guard();
         };
 
         // WebSocket Close
@@ -287,6 +292,15 @@ void function(win) {
             });
         };
 
+        // 守护进程，会派发 reuse 重连事件
+        engine.guard = function() {
+            cache.ec.on(eNameIndex.close + ' ' + 'session-closed', function() {
+                if (!cache.closeFlag) {
+                    cache.ec.emit(eNameIndex.reuse);
+                }
+            });
+        };
+
         engine.connect = function(options) {
             var server = options.server;
             if (server && tool.now() < server.expires) {
@@ -314,13 +328,13 @@ void function(win) {
             tool.ajax({
                 url: url
             }, function(data) {
-                if (!data.avError) {
+                if (data) {
                     data.expires = tool.now() + data.ttl * 1000;
                     cache.server = data;
                     callback(data);
                 }
                 else {
-                    callback(tool.fail());
+                    cache.ec.emit(eNameIndex.error);
                 }
             });
         };
@@ -493,10 +507,9 @@ void function(win) {
                 // 派发全局 open 事件，表示 realtime 已经启动
                 cache.ec.emit(eNameIndex.open, data);
             });
-            cache.ec.on('session-closed', function() {
-                // session 被关闭，则关闭当前 websocket 连接
-                cache.ws.close();
-            });
+            // cache.ec.on('session-closed', function() {
+                // session 被关闭，则关闭当前 websocket 连接                
+            // });
             cache.ec.on('session-error', function(data) {
                 cache.ec.emit(eNameIndex.error, data);
             });
@@ -592,25 +605,36 @@ void function(win) {
         return {
             cache: cache,
             open: function(callback) {
+                var me = this;
                 engine.getServer(cache.options, function(data) {
-                    if (!data.avError) {
+                    if (data) {
                         engine.connect({
                             server: cache.server
                         });
                     }
-                    // TODO 增加错误处理
                     else {
-                        callback(tool.fail());
+                        cache.ec.emit(eNameIndex.error);
                     }
                 });
                 if (callback) {
                     cache.ec.once('open', callback);
                 }
+                // 断开重连
+                cache.ec.once(eNameIndex.reuse + ' ' + eNameIndex.error, function() {
+                    if (cache.reuseTimer) {
+                        clearTimeout(cache.reuseTimer);
+                    }
+                    cache.reuseTimer = setTimeout(function() {
+                        me.open();
+                    }, 5000);
+                });
                 return this;
             },
             // 表示关闭当前的 session 连接和 WebSocket 连接，并且回收内存
             close: function() {
+                cache.closeFlag = true;
                 engine.closeSession();
+                cache.ws.close();
                 return this;
             },
             on: function(eventName, callback) {
@@ -689,11 +713,6 @@ void function(win) {
         else if (!options.appId) {
             new Error('Options must have appId.');
         }
-        // 需要传入 peerId，对外叫做 clientId
-        // TODO: clientId 是否是必须，是否可以替用户生成？
-        else if (!options.clientId) {
-            new Error('Options must have clientId, clientId is a custom user id.');
-        }
         else {
             // clientId 对应的就是 peerId
             options.peerId = options.clientId;
@@ -729,13 +748,6 @@ void function(win) {
         return 'lc' + (Date.now().toString(36) + Math.random().toString(36).substring(2, 3));
     };
 
-    // Callback 返回的 data 中 avError 表示失败
-    tool.fail = function(obj) {
-        obj = obj || {};
-        obj.avError = true;
-        return obj;
-    };
-
     // 输出 log
     tool.log = function(msg) {
         console.log(msg);
@@ -755,18 +767,11 @@ void function(win) {
             // xhr.setRequestHeader('Access-Control-Allow-Methods',"POST, GET, OPTIONS, DELETE, PUT, HEAD");
         }
         xhr.onload = function() {
-            if (xhr.status === 200) {
-                callback(JSON.parse(xhr.responseText));
-            }
-            else {
-                callback(tool.fail());
-            }
+            callback(JSON.parse(xhr.responseText));
         };
-        xhr.onerror = function() {
-            callback(tool.fail());
+        xhr.onerror = function(data) {
+            callback(null, data);
             new Error('Network error.');
-            // TODO: 派发一个 Error 事件
-            cache.ec.emit('error', {type:'network'});
         };
         // 临时
         var formData = '';

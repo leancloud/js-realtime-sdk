@@ -1,5 +1,6 @@
 var rt;
 var room;
+var firstFlag = true;
 
 // 创建聊天实例（支持单页多实例）
 rt = lc.realtime({
@@ -12,27 +13,31 @@ rt = lc.realtime({
 
 // 聊天连接成功
 rt.on('open', function() {
-    // 创建一个聊天室
-    room = rt.room({
-        // 人员的 id
-        members: [
-            'wangxiao02'
-        ],
-        // 默认的数据，可以放房间名字等
-        data: {
-            m: 123
-        }
-    }, function(result) {
-        if (!result.avError) {
-            console.log('conversation callback');
-        }
-    });
+    if (firstFlag) {
+        firstFlag = false;
+        
+        // 创建一个聊天室
+        room = rt.room({
+            // 人员的 id
+            members: [
+                'wangxiao02'
+            ],
+            // 默认的数据，可以放房间名字等
+            data: {
+                m: 123
+            }
+        }, function(result) {
+            if (!result.avError) {
+                console.log('conversation callback');
+            }
+        });
 
-    // 查询当前房间的相关信息
-    rt.query(function(data) {
-        console.log('conversation results');
-        console.log(data);
-    });
+        // 查询当前房间的相关信息
+        rt.query(function(data) {
+            console.log('conversation results');
+            console.log(data);
+        });
+    }
 });
 
 // 当聊天断开时触发
@@ -111,3 +116,7 @@ rt.on('message', function(data) {
     console.log(data);
 });
 
+// 接收断线或者网络状况不佳的事件
+rt.on('reuse', function() {
+    console.log('正在重新连接。。。');
+});
