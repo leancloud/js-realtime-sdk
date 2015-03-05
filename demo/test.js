@@ -85,6 +85,12 @@ rt.on('create', function(data) {
         console.log('conversation receive callback');        
         console.log(data);
     });
+
+    // 获取当前房间中的成员信息
+    room.list(function(data) {
+        console.log('conversation list callback');
+        console.log(data);
+    });
 });
 
 // 监听所有用户加入的情况

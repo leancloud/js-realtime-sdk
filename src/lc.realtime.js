@@ -104,7 +104,6 @@ void function(win) {
         return {
             // cid 即 conversation id
             id: '',
-            users: [],
             add: function(argument, callback) {
                 addOrRemove(argument, callback, 'add');
                 return this;
@@ -178,6 +177,27 @@ void function(win) {
                         callback(data);
                     }
                 });
+                return this;
+            },
+            list: function(callback) {
+                var options = {};
+                var id = this.id;
+                options.where = {
+                    m: cache.options.peerId,
+                    objectId: id
+                };
+                options.serialId = tool.getId();
+                var fun = function(data) {
+                    if (data.i === options.serialId) {
+                        if (callback) {
+                            // 因为是查询固定的 cid，所以结果只有一个。
+                            callback(data.results[0].m);
+                        }
+                        cache.ec.remove('conv-results', fun);
+                    }
+                };
+                cache.ec.on('conv-results', fun);
+                engine.convQuery(options);
                 return this;
             },
             update: function(options, callback) {
@@ -421,7 +441,11 @@ void function(win) {
                 appId: cache.options.appId,
                 peerId: cache.options.peerId,
                 // where 可选，对象，默认为包含自己的查询 {"m": peerId}
-                where: options.where || {m: cache.options.peerId},
+                where: options.where || {
+                    m: cache.options.peerId
+                    // conversation 的 id
+                    // objectId: options.cid
+                },
                 // sort 可选，字符串，默认为 -lm，最近对话反序
                 sort: options.sort || '-lm',
                 // limit 可选，数字，默认10
