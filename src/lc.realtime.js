@@ -104,6 +104,7 @@ void function(win) {
         return {
             // cid 即 conversation id
             id: '',
+            users: [],
             add: function(argument, callback) {
                 addOrRemove(argument, callback, 'add');
                 return this;
@@ -163,7 +164,10 @@ void function(win) {
                     }
                 };
                 cache.ec.on('logs', fun);
-                engine.convLog(options);
+                // 消息历史立刻取有可能取不到
+                setTimeout(function() {
+                    engine.convLog(options);
+                }, 500);
                 return this;
             },
             receive: function(callback) {
@@ -480,18 +484,22 @@ void function(win) {
 
             // 服务器端发给客户端，表示当前用户加入了某个对话。包括创建对话、或加入对话
             cache.ec.on('conv-joined', function(data) {
+                // 不是当前用户自己加入
                 if (data.peerId !== data.initBy) {
                     cache.ec.emit(eNameIndex.join, data);
                 }
             });
+
             // 服务器端发给客户端，表示当前用户离开了某个对话，不再能收到对话的消息
             cache.ec.on('conv-left', function(data) {
                 cache.ec.emit(eNameIndex.left, data);
             });
+
             // 服务器端发给客户端，表示当前对话有新人加入
             cache.ec.on('conv-members-joined', function(data) {
                 cache.ec.emit(eNameIndex.join, data);
             });
+
             // 服务器端发给客户端，表示当前对话有新人离开
             cache.ec.on('conv-members-left', function(data) {
                 cache.ec.emit(eNameIndex.left, data);
@@ -536,21 +544,22 @@ void function(win) {
                 // peerId
                 cache.ec.emit(eNameIndex.message, data);
             });
-            cache.ec.on('ack', function(data) {
+            // cache.ec.on('ack', function(data) {
                 // cmd ack
                 // uid 消息全局id
                 // i
                 // t 服务器时间戳，毫秒
                 // appId
                 // peerId
-            });
-            // 对要求回执的消息，服务器端会在对方客户端发送ack后发送回执
-            cache.ec.on('rcp', function() {
+            // });
 
-            });
+            // 对要求回执的消息，服务器端会在对方客户端发送ack后发送回执
+            // cache.ec.on('rcp', function() {
+            // });
+
             // 用户可以获取自己所在对话的历史记录
-            cache.ec.on('logs', function(data) {
-            });
+            // cache.ec.on('logs', function(data) {
+            // });
 
             // 清空 bindEvent，防止事件重复绑定
             engine.bindEvent = tool.noop;
@@ -601,17 +610,22 @@ void function(win) {
                 }
                 // 传入 options
                 else {
-                    engine.startConv(argument, callback);
+                    var options = argument;
+                    options.serialId = tool.getId();
+                    engine.startConv(options, callback);
                     // 服务器端确认收到对话创建，并创建成功
-                    // TODO: 假如用户同时创建多个
-                    cache.ec.once('conv-started', function(data) {
-                        convObject.id = data.cid;
-                        cache.convIndex[convObject.id] = convObject;
-                        if (callback) {
-                            callback(data);
+                    var fun = function(data) {
+                        if (data.i === options.serialId) {
+                            convObject.id = data.cid;
+                            cache.convIndex[convObject.id] = convObject;
+                            if (callback) {
+                                callback(data);
+                            }
+                            cache.ec.emit(eNameIndex.create, data);
+                            cache.ec.remove('conv-started', fun);
                         }
-                        cache.ec.emit(eNameIndex.create, data);
-                    });
+                    };
+                    cache.ec.on('conv-started', fun);
                 }
                 return convObject;
             },

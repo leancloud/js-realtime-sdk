@@ -71,12 +71,13 @@ rt.on('create', function(data) {
     }, function(data) {
         console.log('conversation ack callback');
         console.log(data);
-    });
 
-    // 查看历史消息
-    room.log(function(data) {
-        console.log('conversation logs callback');
-        console.log(data);
+        // 查看历史消息
+        room.log(function(data) {
+            console.log('conversation logs callback');
+            console.log(data);
+        });
+
     });
 
     // 当前房间接收到消息
@@ -104,7 +105,3 @@ rt.on('message', function(data) {
     console.log(data);
 });
 
-rt.on('log', function(data) {
-    console.log('conversation logs');
-    console.log(data);
-});
