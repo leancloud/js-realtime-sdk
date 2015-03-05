@@ -588,6 +588,45 @@ rtObject.on('left', function(data) {
 });
 ```
 
+#### RoomObject.list(callback)
+
+描述：
+
+* 获取当前 RoomObject 中的成员列表
+
+参数：
+
+* callback {Function} （必须）获取成员列表的回调函数；
+
+返回：
+
+* {Object} 返回 RoomObject，其中有后续调用的方法，支持链式调用。
+
+```js
+var rtObject = lc.realtime({
+   // appId 需要换成你自己的 appId
+   appId: '9p6hyhh60av3ukkni3i9z53q1l8yy3cijj6sie3cewft18vm',
+   // clientId 是自定义的名字，当前客户端可以理解的名字
+   clientId: 'abc123'
+   // auth 是权限校验的服务器地址，具体请看文档
+   // auth: 'http://signature-example.avosapps.com/sign'
+});
+
+var room = rtObject.room({
+    members: [
+        'wangxiao02',
+        'wangxiao03'
+    ],
+    data: {
+        title: 'testTitle'
+    }
+});
+
+room.list(function(data) {
+  console.log(data); // room 中成员 list
+});
+``` 
+
 #### RoomObject.send(dataObject, callback)
 
 描述：
@@ -636,6 +675,47 @@ rtObject.on('message', function(data) {
 });
 ```
 
+#### RoomObject.receive(callback)
+
+描述：
+
+* 接收到当前这个 RoomObject 中的消息
+
+参数：
+
+* callback {Function} （必须）收到当前 Room 中信息的处理函数
+
+返回：
+
+* {Object} 返回 RoomObject，其中有后续调用的方法，支持链式调用。
+
+```js
+var rtObject = lc.realtime({
+   // appId 需要换成你自己的 appId
+   appId: '9p6hyhh60av3ukkni3i9z53q1l8yy3cijj6sie3cewft18vm',
+   // clientId 是自定义的名字，当前客户端可以理解的名字
+   clientId: 'abc123'
+   // auth 是权限校验的服务器地址，具体请看文档
+   // auth: 'http://signature-example.avosapps.com/sign'
+});
+
+var room = rtObject.room({
+    members: [
+        'wangxiao02',
+        'wangxiao03'
+    ],
+    data: {
+        title: 'testTitle'
+    }
+});
+
+// 当前用户所在的组，有消息时触发
+room.receive(function(data) {
+   console.log(data); // 接收到的信息
+});
+```
+
+
 ### 事件
 
 SDK 会默认派发一些事件，这些事件仅会在 RealtimeObject 内部被派发（注意：RoomObject 内部默认不会派发任何事件），您可以通过监听这些事件来完成您的操作。以下是默认事件的说明：
@@ -675,3 +755,7 @@ SDK 会默认派发一些事件，这些事件仅会在 RealtimeObject 内部被
 描述：
 
 * 当收到消息时会被触发，收到的消息是当前客户端（clientId）存在的 Room 中的信息，所有这些数据都可以在服务器端看到。
+
+#### reuse
+
+* 发生连接错误，可能是网络原因，SDK 在自动尝试重连。可以监听这个状态，给用户「服务器已断开，正在重新连接。。。」之类的提示。
