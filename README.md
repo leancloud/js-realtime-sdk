@@ -596,7 +596,7 @@ rtObject.on('left', function(data) {
 
 参数：
 
-* callback {Function} （可选）创建成功后的回调函数；
+* callback {Function} （必须）获取成员列表的回调函数；
 
 返回：
 
@@ -674,6 +674,47 @@ rtObject.on('message', function(data) {
    console.log(data);
 });
 ```
+
+#### RoomObject.receive(callback)
+
+描述：
+
+* 接收到当前这个 RoomObject 中的消息
+
+参数：
+
+* callback {Function} （必须）收到当前 Room 中信息的处理函数
+
+返回：
+
+* {Object} 返回 RoomObject，其中有后续调用的方法，支持链式调用。
+
+```js
+var rtObject = lc.realtime({
+   // appId 需要换成你自己的 appId
+   appId: '9p6hyhh60av3ukkni3i9z53q1l8yy3cijj6sie3cewft18vm',
+   // clientId 是自定义的名字，当前客户端可以理解的名字
+   clientId: 'abc123'
+   // auth 是权限校验的服务器地址，具体请看文档
+   // auth: 'http://signature-example.avosapps.com/sign'
+});
+
+var room = rtObject.room({
+    members: [
+        'wangxiao02',
+        'wangxiao03'
+    ],
+    data: {
+        title: 'testTitle'
+    }
+});
+
+// 当前用户所在的组，有消息时触发
+room.receive(function(data) {
+   console.log(data); // 接收到的信息
+});
+```
+
 
 ### 事件
 
