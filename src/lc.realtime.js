@@ -14,8 +14,6 @@ void function(win) {
     // 获取命名空间
     var lc = win.lc || {};
     win.lc = lc;
-    // 历史遗留，同时获取 av 命名空间
-    // win.av = win.av || lc;
 
     // AMD 加载支持
     if (typeof define === 'function' && define.amd) {
@@ -26,8 +24,8 @@ void function(win) {
 
     // 配置项
     var config = {
-        // 心跳时间（三分钟）
-        heartbeatsTime: 3 * 60 * 1000
+        // 心跳时间（一分钟）
+        heartbeatsTime: 10 * 1000
     };
 
     // 命名空间，挂载一些工具方法
@@ -40,6 +38,8 @@ void function(win) {
     var eNameIndex = {
         // session 连接建立完毕
         open: 'open',
+        // 断开重连
+        reuse: 'reuse',
         // websocket 连接关闭
         close: 'close',
         // 新建一个 conversation 时派发
@@ -50,10 +50,6 @@ void function(win) {
         left: 'left',
         // conversation 内发送的数据
         message: 'message',
-        // conversation 历史记录
-        log: 'log',
-        // conversation 查询结果
-        result: 'result',
         // conversation 更新
         update: 'update',
         // 各种错误
@@ -82,15 +78,15 @@ void function(win) {
                 cid: me.id,
                 members: members,
                 serialId: tool.getId()
-            };     
+            };
             switch(cmd) {
                 case 'add':
                     eventName = 'conv-added';
-                    engine.convAdd(options); 
+                    engine.convAdd(options);
                 break;
                 case 'remove':
                     eventName = 'conv-removed';
-                    engine.convRemove(options); 
+                    engine.convRemove(options);
                 break;
             }
             fun = function(data) {
@@ -133,7 +129,7 @@ void function(win) {
                     data: data,
                     serialId: tool.getId()
                 };
-                fun = function(data) {
+                var fun = function(data) {
                     if (data.i === options.serialId) {
                         if (callback) {
                             callback(data);
@@ -141,15 +137,66 @@ void function(win) {
                         cache.ec.remove('ack', fun);
                     }
                 };
-                engine.send(options, callback);
                 cache.ec.on('ack', fun);
+                engine.send(options, callback);
                 return this;
             },
-            log: function(options, callback) {
-                engine.convLog(options);
+            log: function(argument, callback) {
+                var options = {};
+                switch(arguments.length) {
+                    // 如果只有一个参数，那么是 callback
+                    case 1:
+                        callback = argument;
+                    break;
+                    case 2:
+                        options = argument;
+                    break;
+                }
+                options.cid = options.cid || this.id;
+                options.serialId = options.serialId || tool.getId();
+                var fun = function(data) {
+                    if (data.i === options.serialId) {
+                        if (callback) {
+                            callback(data.logs);
+                        }
+                        cache.ec.remove('logs', fun);
+                    }
+                };
+                cache.ec.on('logs', fun);
+                // 消息历史立刻取有可能取不到
+                setTimeout(function() {
+                    engine.convLog(options);
+                }, 500);
                 return this;
             },
-            query: function(options, callback) {
+            receive: function(callback) {
+                var id = this.id;
+                cache.ec.on(eNameIndex.message, function(data) {
+                    // 是否是当前 room 的信息
+                    if (id === data.cid) {
+                        callback(data);
+                    }
+                });
+                return this;
+            },
+            list: function(callback) {
+                var options = {};
+                var id = this.id;
+                options.where = {
+                    m: cache.options.peerId,
+                    objectId: id
+                };
+                options.serialId = tool.getId();
+                var fun = function(data) {
+                    if (data.i === options.serialId) {
+                        if (callback) {
+                            // 因为是查询固定的 cid，所以结果只有一个。
+                            callback(data.results[0].m);
+                        }
+                        cache.ec.remove('conv-results', fun);
+                    }
+                };
+                cache.ec.on('conv-results', fun);
                 engine.convQuery(options);
                 return this;
             },
@@ -174,7 +221,11 @@ void function(win) {
             // 事件中心
             ec: undefined,
             // 所有已生成的 conversation 对象
-            convIndex: {}
+            convIndex: {},
+            // 是否是用户关闭，如果不是将会断开重连
+            closeFlag: false,
+            // reuse 事件的重试 timer
+            reuseTimer: undefined
         };
 
         // WebSocket Open
@@ -182,9 +233,10 @@ void function(win) {
             tool.log('WebSocket opened.');
             engine.bindEvent();
             engine.openSession();
-
             // 启动心跳
             engine.heartbeats();
+            // 启动守护进程
+            engine.guard();
         };
 
         // WebSocket Close
@@ -202,14 +254,12 @@ void function(win) {
                 if (data.op) {
                     eventName += '-' + data.op;
                 }
-                // tool.log('Emit event: ' + eventName);
-                // tool.log(data);
                 cache.ec.emit(eventName, data);
             }
         };
 
         var wsError = function(data) {
-            tool.error(data);
+            new Error(data);
             // TODO: 增加更加详细的错误处理
         };
 
@@ -242,13 +292,22 @@ void function(win) {
             });
         };
 
+        // 守护进程，会派发 reuse 重连事件
+        engine.guard = function() {
+            cache.ec.on(eNameIndex.close + ' ' + 'session-closed', function() {
+                if (!cache.closeFlag) {
+                    cache.ec.emit(eNameIndex.reuse);
+                }
+            });
+        };
+
         engine.connect = function(options) {
             var server = options.server;
             if (server && tool.now() < server.expires) {
                 engine.createSocket(server.server);
             }
             else {
-                tool.error('WebSocket connet failed.');
+                new Error('WebSocket connet failed.');
                 // TODO: 派发一个 Error 事件
             }
         };
@@ -269,13 +328,13 @@ void function(win) {
             tool.ajax({
                 url: url
             }, function(data) {
-                if (!data.avError) {
+                if (data) {
                     data.expires = tool.now() + data.ttl * 1000;
                     cache.server = data;
                     callback(data);
                 }
                 else {
-                    callback(tool.fail());
+                    cache.ec.emit(eNameIndex.error);
                 }
             });
         };
@@ -396,14 +455,19 @@ void function(win) {
                 appId: cache.options.appId,
                 peerId: cache.options.peerId,
                 // where 可选，对象，默认为包含自己的查询 {"m": peerId}
-                where: options.where || {m: cache.options.peerId},
+                where: options.where || {
+                    m: cache.options.peerId
+                    // conversation 的 id
+                    // objectId: options.cid
+                },
                 // sort 可选，字符串，默认为 -lm，最近对话反序
                 sort: options.sort || '-lm',
                 // limit 可选，数字，默认10
                 limit: options.limit || 10,
                 // skip 可选，数字，默认0
-                skip: options.skip || 0
+                skip: options.skip || 0,
                 // i serial-id
+                i: options.serialId
             });
         };
 
@@ -418,8 +482,9 @@ void function(win) {
                 mid: options.mid,
                 limit: options.limit,
                 appId: cache.options.appId,
-                peerId: cache.options.peerId
+                peerId: cache.options.peerId,
                 // i serial-id
+                i: options.serialId
             });
         };
 
@@ -442,10 +507,9 @@ void function(win) {
                 // 派发全局 open 事件，表示 realtime 已经启动
                 cache.ec.emit(eNameIndex.open, data);
             });
-            cache.ec.on('session-closed', function() {
-                // session 被关闭，则关闭当前 websocket 连接
-                cache.ws.close();
-            });
+            // cache.ec.on('session-closed', function() {
+                // session 被关闭，则关闭当前 websocket 连接                
+            // });
             cache.ec.on('session-error', function(data) {
                 cache.ec.emit(eNameIndex.error, data);
             });
@@ -457,18 +521,22 @@ void function(win) {
 
             // 服务器端发给客户端，表示当前用户加入了某个对话。包括创建对话、或加入对话
             cache.ec.on('conv-joined', function(data) {
+                // 不是当前用户自己加入
                 if (data.peerId !== data.initBy) {
                     cache.ec.emit(eNameIndex.join, data);
                 }
             });
+
             // 服务器端发给客户端，表示当前用户离开了某个对话，不再能收到对话的消息
             cache.ec.on('conv-left', function(data) {
                 cache.ec.emit(eNameIndex.left, data);
             });
+
             // 服务器端发给客户端，表示当前对话有新人加入
             cache.ec.on('conv-members-joined', function(data) {
                 cache.ec.emit(eNameIndex.join, data);
             });
+
             // 服务器端发给客户端，表示当前对话有新人离开
             cache.ec.on('conv-members-left', function(data) {
                 cache.ec.emit(eNameIndex.left, data);
@@ -485,19 +553,19 @@ void function(win) {
             // });
 
             cache.ec.on('conv-error', function(data) {
-                tool.error(data.code + ':' + data.reason);
+                new Error(data.code + ':' + data.reason);
                 cache.ec.emit(eNameIndex.error, data);
             });
             // 查询对话的结果
-            cache.ec.on('conv-results', function(data) {
+            // cache.ec.on('conv-results', function(data) {
                 // cmd conv
                 // op result
                 // appId
                 // peerId
                 // i serial-id
                 // results 数组，是查询结果
-                cache.ec.emit(eNameIndex.result, data);
-            });
+                // cache.ec.emit(eNameIndex.result, data);
+            // });
             cache.ec.on('conv-updated', function(data) {
                 cache.ec.emit(eNameIndex.update, data);
             });
@@ -513,27 +581,22 @@ void function(win) {
                 // peerId
                 cache.ec.emit(eNameIndex.message, data);
             });
-            cache.ec.on('ack', function(data) {
+            // cache.ec.on('ack', function(data) {
                 // cmd ack
                 // uid 消息全局id
                 // i
                 // t 服务器时间戳，毫秒
                 // appId
                 // peerId
-            });
-            // 对要求回执的消息，服务器端会在对方客户端发送ack后发送回执
-            cache.ec.on('rcp', function() {
+            // });
 
-            });
+            // 对要求回执的消息，服务器端会在对方客户端发送ack后发送回执
+            // cache.ec.on('rcp', function() {
+            // });
+
             // 用户可以获取自己所在对话的历史记录
-            cache.ec.on('logs', function(data) {
-                // cmd logs
-                // logs [] 数组，包含的消息内容包括 timestamp, data, from, msg-id 四个字段分别是 消息时间，内容，发件人
-                // i
-                // appId
-                // peerId
-                cache.ec.emit(eNameIndex.log, data);
-            });
+            // cache.ec.on('logs', function(data) {
+            // });
 
             // 清空 bindEvent，防止事件重复绑定
             engine.bindEvent = tool.noop;
@@ -542,25 +605,36 @@ void function(win) {
         return {
             cache: cache,
             open: function(callback) {
+                var me = this;
                 engine.getServer(cache.options, function(data) {
-                    if (!data.avError) {
+                    if (data) {
                         engine.connect({
                             server: cache.server
                         });
                     }
-                    // TODO 增加错误处理
                     else {
-                        callback(tool.fail());
+                        cache.ec.emit(eNameIndex.error);
                     }
                 });
                 if (callback) {
                     cache.ec.once('open', callback);
                 }
+                // 断开重连
+                cache.ec.once(eNameIndex.reuse + ' ' + eNameIndex.error, function() {
+                    if (cache.reuseTimer) {
+                        clearTimeout(cache.reuseTimer);
+                    }
+                    cache.reuseTimer = setTimeout(function() {
+                        me.open();
+                    }, 5000);
+                });
                 return this;
             },
             // 表示关闭当前的 session 连接和 WebSocket 连接，并且回收内存
             close: function() {
+                cache.closeFlag = true;
                 engine.closeSession();
+                cache.ws.close();
                 return this;
             },
             on: function(eventName, callback) {
@@ -575,7 +649,7 @@ void function(win) {
                 this.cache.ec.emit(eventName, data);
                 return this;
             },
-            conv: function(argument, callback) {
+            room: function(argument, callback) {
                 var convObject = newConvObject(cache);
                 // 传入 convId
                 if (typeof argument === 'string') {
@@ -584,23 +658,49 @@ void function(win) {
                 }
                 // 传入 options
                 else {
-                    engine.startConv(argument, callback);
+                    var options = argument;
+                    options.serialId = tool.getId();
+                    engine.startConv(options, callback);
                     // 服务器端确认收到对话创建，并创建成功
-                    // TODO: 假如用户同时创建多个
-                    cache.ec.once('conv-started', function(data) {
-                        convObject.id = data.cid;
-                        cache.convIndex[convObject.id] = convObject;
-                        if (callback) {
-                            callback(data);
+                    var fun = function(data) {
+                        if (data.i === options.serialId) {
+                            convObject.id = data.cid;
+                            cache.convIndex[convObject.id] = convObject;
+                            if (callback) {
+                                callback(data);
+                            }
+                            cache.ec.emit(eNameIndex.create, data);
+                            cache.ec.remove('conv-started', fun);
                         }
-                        cache.ec.emit(eNameIndex.create, data);
-                    });
+                    };
+                    cache.ec.on('conv-started', fun);
                 }
                 return convObject;
             },
-            // 暴露 room 就是 conversation 方法
-            room: function(argument, callback) {
-                return this.conv(argument, callback);
+            // 相关查询，包括用户列表查询，房间查询等
+            query: function(argument, callback) {
+                var options = {};
+                switch(arguments.length) {
+                    // 如果只有一个参数，那么是 callback
+                    case 1:
+                        callback = argument;
+                    break;
+                    case 2:
+                        options = argument;
+                    break;
+                }
+                options.serialId = tool.getId();
+                var fun = function(data) {
+                    if (data.i === options.serialId) {
+                        if (callback) {
+                            callback(data);
+                        }
+                        cache.ec.remove('conv-results', fun);
+                    }
+                };
+                cache.ec.on('conv-results', fun);
+                engine.convQuery(options);
+                return this;
             }
         };
     };
@@ -608,15 +708,10 @@ void function(win) {
     // 主函数，启动通信并获得 realtimeObject
     lc.realtime = function(options, callback) {
         if (typeof options !== 'object') {
-            tool.error('lc.realtime need a argument at least.');
+            new Error('lc.realtime need a argument at least.');
         }
         else if (!options.appId) {
-            tool.error('Options must have appId.');
-        }
-        // 需要传入 peerId，对外叫做 clientId
-        // TODO: clientId 是否是必须，是否可以替用户生成？
-        else if (!options.clientId) {
-            tool.error('Options must have clientId, clientId is a custom user id.');
+            new Error('Options must have appId.');
         }
         else {
             // clientId 对应的就是 peerId
@@ -648,21 +743,9 @@ void function(win) {
     // 空函数
     tool.noop = function() {};
 
-    // 获取一个唯一 id
+    // 获取一个唯一 id, 碰撞概率同一毫秒小于万分之一
     tool.getId = function() {
         return 'lc' + (Date.now().toString(36) + Math.random().toString(36).substring(2, 3));
-    };
-
-    // Callback 返回的 data 中 avError 表示失败
-    tool.fail = function(obj) {
-        obj = obj || {};
-        obj.avError = true;
-        return obj;
-    };
-
-    // 输出错误信息
-    tool.error = function(msg) {
-        throw new Error(msg);
     };
 
     // 输出 log
@@ -684,18 +767,11 @@ void function(win) {
             // xhr.setRequestHeader('Access-Control-Allow-Methods',"POST, GET, OPTIONS, DELETE, PUT, HEAD");
         }
         xhr.onload = function() {
-            if (xhr.status === 200) {
-                callback(JSON.parse(xhr.responseText));
-            }
-            else {
-                callback(tool.fail());
-            }
+            callback(JSON.parse(xhr.responseText));
         };
-        xhr.onerror = function() {
-            callback(tool.fail());
-            tool.error('Network error.');
-            // TODO: 派发一个 Error 事件
-            cache.ec.emit('error', {type:'network'});
+        xhr.onerror = function(data) {
+            callback(null, data);
+            new Error('Network error.');
         };
         // 临时
         var formData = '';
@@ -721,36 +797,42 @@ void function(win) {
 
         var _on = function(eventName, fun, isOnce) {
             if (!eventName) {
-                tool.error('No event name.');
+                new Error('No event name.');
             }
             else if (!fun) {
-                tool.error('No callback function.');
+                new Error('No callback function.');
             }
-
-            if (!isOnce) {
-                if (!eventList[eventName]) {
-                    eventList[eventName] = [];
+            var list = eventName.split(/\s+/);
+            for (var i = 0, l = list.length; i < l; i ++) {
+                if (list[i]) {
+                    if (!isOnce) {
+                        if (!eventList[list[i]]) {
+                            eventList[list[i]] = [];
+                        }
+                        eventList[list[i]].push(fun);
+                    }
+                    else {
+                        if (!eventOnceList[list[i]]) {
+                            eventOnceList[list[i]] = [];
+                        }
+                        eventOnceList[list[i]].push(fun);
+                    }
                 }
-                eventList[eventName].push(fun);
-            }
-            else {
-                if (!eventOnceList[eventName]) {
-                    eventOnceList[eventName] = [];
-                }
-                eventOnceList[eventName].push(fun);
             }
         };
 
         return {
             on: function(eventName, fun) {
                 _on(eventName, fun);
+                return this;
             },
             once: function(eventName, fun) {
                 _on(eventName, fun, true);
+                return this;
             },
             emit: function(eventName, data) {
                 if (!eventName) {
-                    tool.error('No emit event name.');
+                    new Error('No emit event name.');
                 }
                 var i = 0;
                 var l = 0;
@@ -778,6 +860,7 @@ void function(win) {
                         eventOnceList[eventName][i].call(this, data);
                     }
                 }
+                return this;
             },
             remove: function(eventName, fun) {
                 if (eventList[eventName]) {
@@ -789,9 +872,9 @@ void function(win) {
                         }
                     }
                 }
+                return this;
             }
         };
     };
 
 } (window);
-
