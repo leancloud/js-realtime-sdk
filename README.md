@@ -329,6 +329,39 @@ var rtObject = lc.realtime({
 var room = rtObject.room('sasfalklkjdlfs123');
 ```
 
+#### RealtimeObject.query(callback)
+
+描述：
+
+* 获取当前用户所在的 Room 信息
+
+参数：
+
+* callback {Function} （必须）创建成功后的回调函数，参数中可以获取到 Room 的列表；
+
+返回：
+
+* {Object} 返回 RoomObject，其中有后续调用的方法，支持链式调用。
+
+```js
+var rtObject = lc.realtime({
+   // appId 需要换成你自己的 appId
+   appId: '9p6hyhh60av3ukkni3i9z53q1l8yy3cijj6sie3cewft18vm',
+   // clientId 是自定义的名字，当前客户端可以理解的名字
+   clientId: 'abc123'
+   // auth 是权限校验的服务器地址，具体请看文档
+   // auth: 'http://signature-example.avosapps.com/sign'
+});
+
+// 当实时通信建立成功之后
+rtObject.on('open', function() {
+   // 查询当前用户所在的组
+   rtObject.query(function(data) {
+      console.log(data);  // list
+   });
+});
+```
+
 #### RoomObject.add(clientId, callback)
 
 描述：

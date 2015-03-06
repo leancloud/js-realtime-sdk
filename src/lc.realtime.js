@@ -25,7 +25,7 @@ void function(win) {
     // 配置项
     var config = {
         // 心跳时间（一分钟）
-        heartbeatsTime: 10 * 1000
+        heartbeatsTime: 60 * 1000
     };
 
     // 命名空间，挂载一些工具方法
@@ -259,8 +259,8 @@ void function(win) {
         };
 
         var wsError = function(data) {
+            cache.ec.emit(eNameIndex.error, data);
             new Error(data);
-            // TODO: 增加更加详细的错误处理
         };
 
         // WebSocket send message
@@ -271,9 +271,6 @@ void function(win) {
         engine.createSocket = function(server) {
             var ws = new WebSocket(server);
             cache.ws = ws;
-
-            // TODO: 此处需要考虑 WebSocket 重用
-            // TODO: 需要考虑网络状况，是用户自己主动 close websocket 还是网络问题
             ws.addEventListener('open', wsOpen);
             ws.addEventListener('close', wsClose);
             ws.addEventListener('message', wsMessage);
@@ -308,7 +305,6 @@ void function(win) {
             }
             else {
                 new Error('WebSocket connet failed.');
-                // TODO: 派发一个 Error 事件
             }
         };
 
@@ -350,8 +346,6 @@ void function(win) {
         };
 
         // 打开 session
-        // TODO: session 的 error
-        // TODO: session 的对应，即使用参数 i
         engine.openSession = function(options) {
             wsSend({
                 cmd: 'session',
@@ -360,6 +354,7 @@ void function(win) {
                 peerId: cache.options.peerId,
                 ua: 'js/' + VERSION,
                 // i: options.serialId
+                // TODO: session 的对应，即使用参数 i
                 // n 签名参数随机字符串
                 n: cache.sessionAuth && cache.sessionAuth.nonce,
                 // s 签名参数签名
@@ -553,8 +548,8 @@ void function(win) {
             // });
 
             cache.ec.on('conv-error', function(data) {
-                new Error(data.code + ':' + data.reason);
                 cache.ec.emit(eNameIndex.error, data);
+                new Error(data.code + ':' + data.reason);
             });
             // 查询对话的结果
             // cache.ec.on('conv-results', function(data) {
@@ -611,9 +606,6 @@ void function(win) {
                         engine.connect({
                             server: cache.server
                         });
-                    }
-                    else {
-                        cache.ec.emit(eNameIndex.error);
                     }
                 });
                 if (callback) {
