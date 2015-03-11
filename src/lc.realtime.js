@@ -260,7 +260,7 @@ void function(win) {
 
         var wsError = function(data) {
             cache.ec.emit(eNameIndex.error, data);
-            new Error(data);
+            throw(data);
         };
 
         // WebSocket send message
@@ -304,7 +304,7 @@ void function(win) {
                 engine.createSocket(server.server);
             }
             else {
-                new Error('WebSocket connet failed.');
+                throw('WebSocket connet failed.');
             }
         };
 
@@ -549,7 +549,7 @@ void function(win) {
 
             cache.ec.on('conv-error', function(data) {
                 cache.ec.emit(eNameIndex.error, data);
-                new Error(data.code + ':' + data.reason);
+                throw(data.code + ':' + data.reason);
             });
             // 查询对话的结果
             // cache.ec.on('conv-results', function(data) {
@@ -700,10 +700,10 @@ void function(win) {
     // 主函数，启动通信并获得 realtimeObject
     lc.realtime = function(options, callback) {
         if (typeof options !== 'object') {
-            new Error('lc.realtime need a argument at least.');
+            throw('lc.realtime need a argument at least.');
         }
         else if (!options.appId) {
-            new Error('Options must have appId.');
+            throw('Options must have appId.');
         }
         else {
             // clientId 对应的就是 peerId
@@ -758,12 +758,16 @@ void function(win) {
             // xhr.setRequestHeader('Access-Control-Allow-Headers', "Origin, X-Requested-With, Content-Type, Accept");
             // xhr.setRequestHeader('Access-Control-Allow-Methods',"POST, GET, OPTIONS, DELETE, PUT, HEAD");
         }
-        xhr.onload = function() {
-            callback(JSON.parse(xhr.responseText));
+        xhr.onload = function(data) {
+            if (xhr.status === 200) {
+                callback(JSON.parse(xhr.responseText));
+            } else {
+                callback(null, JSON.parse(xhr.responseText));
+            }
         };
         xhr.onerror = function(data) {
             callback(null, data);
-            new Error('Network error.');
+            throw('Network error.');
         };
         // 临时
         var formData = '';
@@ -789,10 +793,10 @@ void function(win) {
 
         var _on = function(eventName, fun, isOnce) {
             if (!eventName) {
-                new Error('No event name.');
+                throw('No event name.');
             }
             else if (!fun) {
-                new Error('No callback function.');
+                throw('No callback function.');
             }
             var list = eventName.split(/\s+/);
             for (var i = 0, l = list.length; i < l; i ++) {
@@ -824,7 +828,7 @@ void function(win) {
             },
             emit: function(eventName, data) {
                 if (!eventName) {
-                    new Error('No emit event name.');
+                    throw('No emit event name.');
                 }
                 var i = 0;
                 var l = 0;
