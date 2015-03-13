@@ -745,9 +745,13 @@ void function(win) {
     // 空函数
     tool.noop = function() {};
 
-    // 获取一个唯一 id, 碰撞概率同一毫秒小于万分之一
+    // 获取一个唯一 id，碰撞概率：基本不可能
     tool.getId = function() {
-        return 'AV' + (Date.now().toString(36) + Math.random().toString(36).substring(2, 3));
+        // 与时间相关的随机引子
+        var getIdItem = function() {
+            return Date.now().toString(36) + Math.random().toString(36).substring(2, 3);
+        };
+        return 'AV-' + getIdItem() + '-' + getIdItem() + '-' + getIdItem();
     };
 
     // 输出 log
