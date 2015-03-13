@@ -163,10 +163,9 @@ void function(win) {
                     }
                 };
                 cache.ec.on('logs', fun);
-                // 消息历史立刻取有可能取不到
-                setTimeout(function() {
-                    engine.convLog(options);
-                }, 500);
+                
+                // 注：立刻获取消息历史有可能取不到
+                engine.convLog(options);
                 return this;
             },
             receive: function(callback) {
@@ -608,7 +607,7 @@ void function(win) {
                 // peerId
                 cache.ec.emit(eNameIndex.message, data);
             });
-            
+
             // cache.ec.on('ack', function(data) {
                 // cmd ack
                 // uid 消息全局id

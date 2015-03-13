@@ -746,7 +746,6 @@ room.receive(function(data) {
 });
 ```
 
-
 ### 事件
 
 SDK 会默认派发一些事件，这些事件仅会在 RealtimeObject 内部被派发（注意：RoomObject 内部默认不会派发任何事件），你可以通过监听这些事件来完成你的操作。以下是默认事件的说明：
