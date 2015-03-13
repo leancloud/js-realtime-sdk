@@ -3,7 +3,7 @@ var room;
 var firstFlag = true;
 
 // 创建聊天实例（支持单页多实例）
-rt = lc.realtime({
+rt = AV.realtime({
     // 强将 appId 换为自己的 appId
     appId: '9p6hyhh60av3ukkni3i9z53q1l8yy3cijj6sie3cewft18vm',
     // appId: 'pyon3kvufmleg773ahop2i7zy0tz2rfjx5bh82n7h5jzuwjg',

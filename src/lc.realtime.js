@@ -12,13 +12,13 @@ void function(win) {
     var VERSION = '2.0.0';
 
     // 获取命名空间
-    var lc = win.lc || {};
-    win.lc = lc;
+    var AV = win.AV || {};
+    win.AV = AV;
 
     // AMD 加载支持
     if (typeof define === 'function' && define.amd) {
-        define('lc', [], function() {
-            return lc;
+        define('AV', [], function() {
+            return AV;
         });
     }
 
@@ -698,9 +698,9 @@ void function(win) {
     };
 
     // 主函数，启动通信并获得 realtimeObject
-    lc.realtime = function(options, callback) {
+    AV.realtime = function(options, callback) {
         if (typeof options !== 'object') {
-            throw('lc.realtime need a argument at least.');
+            throw('AV.realtime need a argument at least.');
         }
         else if (!options.appId) {
             throw('Options must have appId.');
@@ -726,18 +726,18 @@ void function(win) {
     };
 
     // 赋值版本号
-    lc.realtime.version = VERSION;
+    AV.realtime.version = VERSION;
 
     // 挂载私有方法
-    lc.realtime._tool = tool;
-    lc.realtime._engine = engine;
+    AV.realtime._tool = tool;
+    AV.realtime._engine = engine;
 
     // 空函数
     tool.noop = function() {};
 
     // 获取一个唯一 id, 碰撞概率同一毫秒小于万分之一
     tool.getId = function() {
-        return 'lc' + (Date.now().toString(36) + Math.random().toString(36).substring(2, 3));
+        return 'AV' + (Date.now().toString(36) + Math.random().toString(36).substring(2, 3));
     };
 
     // 输出 log
