@@ -205,8 +205,23 @@ void function(win) {
                 engine.convQuery(options);
                 return this;
             },
-            update: function(options, callback) {
-                engine.convUpate(options);
+            update: function(data, callback) {
+                var id = this.id;
+                var options = {
+                    cid: id,
+                    data: data,
+                    serialId: engine.getSerialId()
+                };
+                var fun = function(data) {
+                    if (data.i === options.serialId) {
+                        if (callback) {
+                            callback(data);
+                        }
+                        cache.ec.remove('conv-updated', fun);
+                    }
+                };
+                cache.ec.on('conv-updated', fun);
+                engine.convUpate(options);                
                 return this;
             }
         };
@@ -501,8 +516,8 @@ void function(win) {
                 peerId: cache.options.peerId,
                 cid: options.cid,
                 // attr 要修改的内容
-                attr: options.data
-                // i serial-id
+                attr: options.data,
+                i: options.serialId
             });
         };
 
@@ -566,6 +581,7 @@ void function(win) {
                 cache.ec.emit(eNameIndex.error, data);
                 throw(data.code + ':' + data.reason);
             });
+
             // 查询对话的结果
             // cache.ec.on('conv-results', function(data) {
                 // cmd conv
@@ -576,9 +592,10 @@ void function(win) {
                 // results 数组，是查询结果
                 // cache.ec.emit(eNameIndex.result, data);
             // });
-            cache.ec.on('conv-updated', function(data) {
-                cache.ec.emit(eNameIndex.update, data);
-            });
+            // cache.ec.on('conv-updated', function(data) {
+            //     cache.ec.emit(eNameIndex.update, data);
+            // });
+
             cache.ec.on('direct', function(data) {
                 // cmd direct
                 // cid 会话 id
@@ -591,6 +608,7 @@ void function(win) {
                 // peerId
                 cache.ec.emit(eNameIndex.message, data);
             });
+            
             // cache.ec.on('ack', function(data) {
                 // cmd ack
                 // uid 消息全局id
