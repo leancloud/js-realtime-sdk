@@ -328,14 +328,19 @@ void function(win) {
             }
             tool.ajax({
                 url: url
-            }, function(data) {
+            }, function(data, error) {
                 if (data) {
                     data.expires = tool.now() + data.ttl * 1000;
                     cache.server = data;
                     callback(data);
                 }
                 else {
-                    cache.ec.emit(eNameIndex.error);
+                    if (error.code === 403 || error.code === 404) {
+                        throw(error.error);
+                    }
+                    else {
+                        cache.ec.emit(eNameIndex.error);
+                    }
                 }
             });
         };
@@ -722,10 +727,14 @@ void function(win) {
             realtimeObj.cache.options = options;
             realtimeObj.cache.ec = tool.eventCenter();
             if (options.auth) {
-                engine.auth(function(data) {
-                    // 存储 session 的认证信息
-                    realtimeObj.cache.sessionAuth = data;
-                    realtimeObj.open(callback);
+                engine.auth(function(data, error) {
+                    if (data) {
+                        // 存储 session 的认证信息
+                        realtimeObj.cache.sessionAuth = data;
+                        realtimeObj.open(callback);
+                    } else {
+                        throw(error);
+                    }
                 });
             } else {
                 // 启动 websocket，然后连接 session
