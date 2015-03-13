@@ -7,7 +7,7 @@ rt = AV.realtime({
     // 强将 appId 换为自己的 appId
     appId: '9p6hyhh60av3ukkni3i9z53q1l8yy3cijj6sie3cewft18vm',
     // appId: 'pyon3kvufmleg773ahop2i7zy0tz2rfjx5bh82n7h5jzuwjg',
-    clientId: 'wangxiao111'
+    clientId: 'LeanCloud111'
     // auth: 'http://signature-example.avosapps.com/sign'
 });
 
@@ -20,7 +20,7 @@ rt.on('open', function() {
         room = rt.room({
             // 人员的 id
             members: [
-                'wangxiao02'
+                'LeanCloud02'
             ],
             // 默认的数据，可以放房间名字等
             data: {
@@ -53,14 +53,14 @@ rt.on('create', function(data) {
     });
     // 向这个房间添加新的用户
     room.add([
-        'wangxiao03', 'wangxiao04'
+        'LeanCloud03', 'LeanCloud04'
     ], function(data) {
         console.log('conversation added callback');
         console.log(data);
     });
 
     // 从这个房间中删除用户
-    room.remove('wangxiao03', function(data) {
+    room.remove('LeanCloud03', function(data) {
         console.log('conversation removed callback');
         console.log(data);
     });
