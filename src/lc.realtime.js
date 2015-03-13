@@ -77,7 +77,7 @@ void function(win) {
             options = {
                 cid: me.id,
                 members: members,
-                serialId: tool.getSerialId()
+                serialId: engine.getSerialId()
             };
             switch(cmd) {
                 case 'add':
@@ -127,7 +127,7 @@ void function(win) {
                 var options = {
                     cid: me.id,
                     data: data,
-                    serialId: tool.getSerialId()
+                    serialId: engine.getSerialId()
                 };
                 var fun = function(data) {
                     if (data.i === options.serialId) {
@@ -153,7 +153,7 @@ void function(win) {
                     break;
                 }
                 options.cid = options.cid || this.id;
-                options.serialId = options.serialId || tool.getSerialId();
+                options.serialId = options.serialId || engine.getSerialId();
                 var fun = function(data) {
                     if (data.i === options.serialId) {
                         if (callback) {
@@ -186,7 +186,7 @@ void function(win) {
                     m: cache.options.peerId,
                     objectId: id
                 };
-                options.serialId = tool.getSerialId();
+                options.serialId = engine.getSerialId();
                 var fun = function(data) {
                     if (data.i === options.serialId) {
                         if (callback) {
@@ -666,7 +666,7 @@ void function(win) {
                 // 传入 options
                 else {
                     var options = argument;
-                    options.serialId = tool.getSerialId();
+                    options.serialId = engine.getSerialId();
                     engine.startConv(options, callback);
                     // 服务器端确认收到对话创建，并创建成功
                     var fun = function(data) {
@@ -696,7 +696,7 @@ void function(win) {
                         options = argument;
                     break;
                 }
-                options.serialId = tool.getSerialId();
+                options.serialId = engine.getSerialId();
                 var fun = function(data) {
                     if (data.i === options.serialId) {
                         if (callback) {
