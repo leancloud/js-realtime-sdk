@@ -190,8 +190,13 @@ void function(win) {
                 var fun = function(data) {
                     if (data.i === options.serialId) {
                         if (callback) {
-                            // 因为是查询固定的 cid，所以结果只有一个。
-                            callback(data.results[0].m);
+                            if (data.results.length) {
+                                // 因为是查询固定的 cid，所以结果只有一个。
+                                callback(data.results[0].m);
+                            } 
+                            else {
+                                callback([]);
+                            }
                         }
                         cache.ec.remove('conv-results', fun);
                     }
@@ -207,7 +212,7 @@ void function(win) {
         };
     };
 
-    // 创建一个新的 realtime 对象，挂载所有 realtime 中的方法
+    // 创建一个新的 realtime 对象，挂载所有 realtime 中的方法，每次调用实例化一个实例，支持单页多实例。
     var newRealtimeObject = function() {
 
         // 缓存一些已经实例化的变量
