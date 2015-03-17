@@ -3,11 +3,11 @@ var room;
 var firstFlag = true;
 
 // 创建聊天实例（支持单页多实例）
-rt = lc.realtime({
+rt = AV.realtime({
     // 强将 appId 换为自己的 appId
     appId: '9p6hyhh60av3ukkni3i9z53q1l8yy3cijj6sie3cewft18vm',
     // appId: 'pyon3kvufmleg773ahop2i7zy0tz2rfjx5bh82n7h5jzuwjg',
-    clientId: 'wangxiao111'
+    clientId: 'LeanCloud111'
     // auth: 'http://signature-example.avosapps.com/sign'
 });
 
@@ -20,7 +20,7 @@ rt.on('open', function() {
         room = rt.room({
             // 人员的 id
             members: [
-                'wangxiao02'
+                'LeanCloud02'
             ],
             // 默认的数据，可以放房间名字等
             data: {
@@ -53,14 +53,14 @@ rt.on('create', function(data) {
     });
     // 向这个房间添加新的用户
     room.add([
-        'wangxiao03', 'wangxiao04'
+        'LeanCloud03', 'LeanCloud04'
     ], function(data) {
         console.log('conversation added callback');
         console.log(data);
     });
 
     // 从这个房间中删除用户
-    room.remove('wangxiao03', function(data) {
+    room.remove('LeanCloud03', function(data) {
         console.log('conversation removed callback');
         console.log(data);
     });
@@ -95,6 +95,32 @@ rt.on('create', function(data) {
     room.list(function(data) {
         console.log('conversation list callback');
         console.log(data);
+    });
+
+    // 发送多媒体消息
+    room.send({
+        text: '图片测试',
+        // 自定义的属性
+        attr: {
+            a:123
+        },
+        url: 'https://leancloud.cn/images/static/press/Logo%20-%20Blue%20Padding.png',
+        metaData: {
+            name:'logo', 
+            format:'png',
+            height: 123,
+            width: 123,
+            size: 888
+        }
+    }, 'image', function(data) {
+        console.log('图片数据发送成功！');
+        console.log(data);
+    });
+
+    // 取得当前 Room 中的人数
+    room.count(function(num) {
+        console.log('取得当前的用户数量');
+        console.log(num);
     });
 });
 
