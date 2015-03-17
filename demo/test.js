@@ -96,6 +96,23 @@ rt.on('create', function(data) {
         console.log('conversation list callback');
         console.log(data);
     });
+
+    // 发送多媒体消息
+    room.send({
+        text: '图片测试',
+        attr: {a:123},
+        url: 'https://leancloud.cn/images/static/press/Logo%20-%20Blue%20Padding.png',
+        metaData: {
+            name:'logo', 
+            format:'png',
+            height: 123,
+            width: 123,
+            size: 888
+        }
+    }, 'image', function(data) {
+        console.log('图片数据发送成功！');
+        console.log(data);
+    });
 });
 
 // 监听所有用户加入的情况

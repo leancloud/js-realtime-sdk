@@ -122,13 +122,29 @@ void function(win) {
                 this.remove(cache.options.peerId, callback);
                 return this;
             },
-            send: function(data, callback) {
+            send: function(data, argument1, argument2) {
+                var type;
+                var callback;
                 var me = this;
+                switch(arguments.length) {
+                    case 2:
+                        callback = argument1;
+                    break;
+                    case 3:
+                        type = argument1;
+                        callback = argument2;
+                    break;
+                }
                 var options = {
                     cid: me.id,
-                    data: data,
                     serialId: engine.getSerialId()
                 };
+                // 如果 type 存在，则发送多媒体格式
+                if (type) {
+                    options.data = engine.createMediaMsg(type, data);
+                } else {
+                    options.data = data;
+                }
                 var fun = function(data) {
                     if (data.i === options.serialId) {
                         if (callback) {
