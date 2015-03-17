@@ -520,6 +520,117 @@ void function(win) {
             });
         };
 
+        // 生成多媒体特定格式的数据
+        engine.createMediaMsg = function(type, data) {
+            var obj;
+            if (type !== 'text' && !data.metaData) {
+                throw('Media Data must have metaData attribute.');
+            }
+            switch(type) {
+                case 'text':
+                    obj = {
+                        _lctype: -1,
+                        _lctext: data.text,
+                        // _lcattrs 是用来存储用户自定义的一些键值对
+                        _lcattrs: data.attr
+                    };
+                break;
+                case 'image':
+                    obj = {
+                        _lctype: -2,
+                        _lctext: data.text,
+                        // _lcattrs 是用来存储用户自定义的一些键值对
+                        _lcattrs: data.attr,
+                        _lcfile: {
+                            url: data.url,
+                            objId: data.objectId,
+                            metaData: {
+                                name: data.metaData.name,
+                                // 格式
+                                format: data.metaData.format,
+                                //单位：像素
+                                height: data.metaData.height,
+                                //单位：像素
+                                width: data.metaData.width,
+                                //单位：b
+                                size: data.metaData.size
+                            }
+                        }
+                    };
+                break;
+                case 'audio':
+                    obj = {
+                        _lctype: -3,
+                        _lctext: data.text,
+                        // _lcattrs 是用来存储用户自定义的一些键值对
+                        _lcattrs: data.attr,
+                        _lcfile: {
+                            url: data.url,
+                            objId: data.objectId,
+                            metaData: {
+                                name: data.metaData.name,
+                                // 媒体格式
+                                format: data.metaData.format,
+                                //单位：秒
+                                duration: data.metaData.duration,
+                                //单位：b
+                                size: data.metaData.size
+                            }
+                        }
+                    };
+                break;
+                case 'video':
+                    obj = {
+                        _lctype: -4,
+                        _lctext: data.text,
+                        // _lcattrs 是用来存储用户自定义的一些键值对
+                        _lcattrs: data.attr,
+                        _lcfile: {
+                            url: data.url,
+                            objId: data.objectId,
+                            metaData: {
+                                name: data.metaData.name,
+                                // 媒体格式
+                                format: data.metaData.format,
+                                // 单位：秒
+                                duration: data.metaData.duration,
+                                //单位：b
+                                size: data.metaData.size
+                            }
+                        }
+                    };
+                break;
+                case 'location':
+                    obj = {
+                        _lctype: -5,
+                        _lctext: data.text,
+                        // _lcattrs 是用来存储用户自定义的一些键值对
+                        _lcattrs: data.attr,
+                        _lcloc: {
+                            // 经度
+                            longitude: data.metaData.longitude,
+                            // 维度
+                            latitude: data.metaData.latitude
+                        }
+                    };
+                break;
+                case 'file':
+                    obj = {
+                        _lctype: -6,
+                        _lctext: data.text,
+                        // _lcattrs 是用来存储用户自定义的一些键值对
+                        _lcattrs: data.attr,
+                        _lcfile: {
+                            name: data.metaData.name,
+                            // 单位：b
+                            size: data.metaData.size
+                        }
+                    };
+                break;
+            }
+            return obj;
+        };
+
         // 取自增的 number 类型
         engine.getSerialId = function() {
             return tool.now() + 1;
