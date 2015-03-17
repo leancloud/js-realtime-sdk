@@ -94,7 +94,7 @@ void function(win) {
                     if (callback) {
                         callback(data);
                     }
-                    cache.ec.remove(eventName, fun);
+                    cache.ec.off(eventName, fun);
                 }
             };
             cache.ec.on(eventName, fun);
@@ -150,7 +150,7 @@ void function(win) {
                         if (callback) {
                             callback(data);
                         }
-                        cache.ec.remove('ack', fun);
+                        cache.ec.off('ack', fun);
                     }
                 };
                 cache.ec.on('ack', fun);
@@ -175,7 +175,7 @@ void function(win) {
                         if (callback) {
                             callback(data.logs);
                         }
-                        cache.ec.remove('logs', fun);
+                        cache.ec.off('logs', fun);
                     }
                 };
                 cache.ec.on('logs', fun);
@@ -213,7 +213,7 @@ void function(win) {
                                 callback([]);
                             }
                         }
-                        cache.ec.remove('conv-results', fun);
+                        cache.ec.off('conv-results', fun);
                     }
                 };
                 cache.ec.on('conv-results', fun);
@@ -232,7 +232,7 @@ void function(win) {
                         if (callback) {
                             callback(data);
                         }
-                        cache.ec.remove('conv-updated', fun);
+                        cache.ec.off('conv-updated', fun);
                     }
                 };
                 cache.ec.on('conv-updated', fun);
@@ -866,7 +866,7 @@ void function(win) {
                                 callback(data);
                             }
                             cache.ec.emit(eNameIndex.create, data);
-                            cache.ec.remove('conv-started', fun);
+                            cache.ec.off('conv-started', fun);
                         }
                     };
                     cache.ec.on('conv-started', fun);
@@ -891,7 +891,7 @@ void function(win) {
                         if (callback) {
                             callback(data);
                         }
-                        cache.ec.remove('conv-results', fun);
+                        cache.ec.off('conv-results', fun);
                     }
                 };
                 cache.ec.on('conv-results', fun);
@@ -1070,7 +1070,7 @@ void function(win) {
                 }
                 return this;
             },
-            remove: function(eventName, fun) {
+            off: function(eventName, fun) {
                 if (eventList[eventName]) {
                     var i = 0;
                     var l = eventList[eventName].length;
