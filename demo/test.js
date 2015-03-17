@@ -116,6 +116,12 @@ rt.on('create', function(data) {
         console.log('图片数据发送成功！');
         console.log(data);
     });
+
+    // 取得当前 Room 中的人数
+    room.count(function(num) {
+        console.log('取得当前的用户数量');
+        console.log(num);
+    });
 });
 
 // 监听所有用户加入的情况

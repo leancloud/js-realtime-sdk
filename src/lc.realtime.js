@@ -220,6 +220,24 @@ void function(win) {
                 engine.convQuery(options);
                 return this;
             },
+            count: function(callback) {
+                var id = this.id;
+                var options = {
+                    cid: id,
+                    serialId: engine.getSerialId()
+                };
+                var fun = function(data) {
+                    if (data.i === options.serialId) {
+                        if (callback) {
+                            callback(data.count);
+                        }
+                        cache.ec.off('conv-result', fun);
+                    }
+                };
+                cache.ec.on('conv-result', fun);                
+                engine.convCount(options);
+                return this;
+            },
             update: function(data, callback) {
                 var id = this.id;
                 var options = {
@@ -548,6 +566,17 @@ void function(win) {
             });
         };
 
+        engine.convCount = function(options) {
+            wsSend({
+                cmd: 'conv',
+                op: 'count',
+                appId: cache.options.appId,
+                peerId: cache.options.peerId,
+                i: options.serialId,
+                cid: options.cid
+            });
+        };
+
         // 取出多媒体类型的格式
         engine.getMediaMsg = function(msg) {
             // 检查是否是多媒体类型
@@ -719,8 +748,7 @@ void function(win) {
 
             // 服务器端确认收到 conversation 创建，并创建成功
             // 在创建时已经做绑定，所以注释掉
-            // cache.ec.on('conv-started', function(data) {
-            // });
+            // cache.ec.on('conv-started', function(data) {});
 
             // 服务器端发给客户端，表示当前用户加入了某个对话。包括创建对话、或加入对话
             cache.ec.on('conv-joined', function(data) {
@@ -747,13 +775,11 @@ void function(win) {
 
             // 服务器端回复。表示 add 操作完成
             // 因为 added 之后也会触发 members-joined，所以注释掉
-            // cache.ec.on('conv-added', function(data) {
-            // });
+            // cache.ec.on('conv-added', function(data) {});
 
             // 服务器端确认删除成功
             // 因为 removed 之后也会触发 members-removed，所以注释掉
-            // cache.ec.on('conv-removed', function() {
-            // });
+            // cache.ec.on('conv-removed', function() {});
 
             cache.ec.on('conv-error', function(data) {
                 cache.ec.emit(eNameIndex.error, data);
@@ -761,18 +787,9 @@ void function(win) {
             });
 
             // 查询对话的结果
-            // cache.ec.on('conv-results', function(data) {
-                // cmd conv
-                // op result
-                // appId
-                // peerId
-                // i serial-id
-                // results 数组，是查询结果
-                // cache.ec.emit(eNameIndex.result, data);
-            // });
-            // cache.ec.on('conv-updated', function(data) {
-            //     cache.ec.emit(eNameIndex.update, data);
-            // });
+            // cache.ec.on('conv-results', function(data) {});
+
+            // cache.ec.on('conv-updated', function(data) {});
 
             cache.ec.on('direct', function(data) {
                 // cmd direct
@@ -795,22 +812,13 @@ void function(win) {
                 cache.ec.emit(eNameIndex.message, data);
             });
 
-            // cache.ec.on('ack', function(data) {
-                // cmd ack
-                // uid 消息全局id
-                // i
-                // t 服务器时间戳，毫秒
-                // appId
-                // peerId
-            // });
+            // cache.ec.on('ack', function(data) {});
 
             // 对要求回执的消息，服务器端会在对方客户端发送ack后发送回执
-            // cache.ec.on('rcp', function() {
-            // });
+            // cache.ec.on('rcp', function() {});
 
             // 用户可以获取自己所在对话的历史记录
-            // cache.ec.on('logs', function(data) {
-            // });
+            // cache.ec.on('logs', function(data) {});
 
             // 清空 bindEvent，防止事件重复绑定
             engine.bindEvent = tool.noop;
