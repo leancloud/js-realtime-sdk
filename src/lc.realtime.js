@@ -538,6 +538,16 @@ void function(win) {
             });
         };
 
+        engine.convAck = function(options) {
+            wsSend({
+                cmd: 'ack',
+                cid: options.cid,
+                appId: cache.options.appId,
+                peerId: cache.options.peerId,
+                mid: options.mid
+            });
+        };
+
         // 取出多媒体类型的格式
         engine.getMediaMsg = function(msg) {
             // 检查是否是多媒体类型
@@ -777,6 +787,11 @@ void function(win) {
 
                 // 增加多媒体消息的数据格式化
                 data.msg = engine.getMediaMsg(data.msg);
+                // 收到消息，立刻告知服务器
+                engine.convAck({
+                    cid: data.cid,
+                    mid: data.id
+                });
                 cache.ec.emit(eNameIndex.message, data);
             });
 
