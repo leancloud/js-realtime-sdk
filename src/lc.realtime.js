@@ -232,7 +232,7 @@ void function(win) {
         var wsOpen = function() {
             tool.log('WebSocket opened.');
             engine.bindEvent();
-            engine.openSession();
+            engine.openSession({serialId: tool.getId()});
             // 启动心跳
             engine.heartbeats();
             // 启动守护进程
@@ -322,7 +322,8 @@ void function(win) {
               url += '&secure=1';
             }
             tool.ajax({
-                url: url
+                url: url,
+                form: true
             }, function(data) {
                 if (data) {
                     data.expires = tool.now() + data.ttl * 1000;
@@ -335,33 +336,32 @@ void function(win) {
             });
         };
 
-        engine.auth = function(callback) {
-            tool.ajax({
-                url: cache.options.auth,
-                method: 'post',
-                data: {
-                    self_id: cache.options.peerId
-                }
-            }, callback);
-        };
-
         // 打开 session
         engine.openSession = function(options) {
-            wsSend({
+            var cmd = {
                 cmd: 'session',
                 op: 'open',
                 appId: cache.options.appId,
                 peerId: cache.options.peerId,
                 ua: 'js/' + VERSION,
-                // i: options.serialId
-                // TODO: session 的对应，即使用参数 i
-                // n 签名参数随机字符串
-                n: cache.sessionAuth && cache.sessionAuth.nonce,
-                // s 签名参数签名
-                s: cache.sessionAuth && cache.sessionAuth.signature,
-                // 服务器时间认证
-                t: cache.sessionAuth && cache.sessionAuth.timestamp
-            });
+                i: options.serialId
+            };
+            if (cache.authFun) {
+                cache.authFun({
+                    clientId: cache.options.peerId
+                }, function(authResult){
+                    if (authResult && authResult.signature) {
+                        cmd.n = authResult.nonce;
+                        cmd.t = authResult.timestamp;
+                        cmd.s = authResult.signature;
+                        wsSend(cmd);
+                    } else {
+                        throw('Session open denied by application: ' + authResult);
+                    }
+                });
+            } else {
+                wsSend(cmd);
+            }
         };
 
         engine.closeSession = function() {
@@ -376,7 +376,7 @@ void function(win) {
         };
 
         engine.startConv = function(options) {
-            wsSend({
+            var cmd = {
                 cmd: 'conv',
                 op: 'start',
                 // m [] 初始的对话用户id列表，服务器默认会把自己加入
@@ -385,47 +385,87 @@ void function(win) {
                 peerId: cache.options.peerId,
                 // attr json对象，对话的任意初始属性
                 attr: options.data || {},
-                // t: tool.now(),
                 i: options.serialId
-                // n 签名参数随机字符串
-                // n: n,
-                // s 签名参数签名
-                // s: s
-            });
+            };
+            if (cache.authFun) {
+                cache.authFun({
+                    clientId: cache.options.peerId,
+                    members: options.members
+                }, function(authResult){
+                    if (authResult && authResult.signature) {
+                        cmd.n = authResult.nonce;
+                        cmd.t = authResult.timestamp;
+                        cmd.s = authResult.signature;
+                        wsSend(cmd);
+                    } else {
+                        throw('Conversation creation denied by application: ' + authResult);
+                    }
+                });
+            } else {
+                wsSend(cmd);
+            }
         };
 
         engine.convAdd = function(options) {
-            wsSend({
+            var cmd = {
                 cmd: 'conv',
                 op: 'add',
                 cid: options.cid,
                 m: options.members,
                 appId: cache.options.appId,
                 peerId: cache.options.peerId,
-                // t: tool.now(),
                 i: options.serialId
-                // n 签名参数随机字符串
-                // n: n,
-                // s 签名参数签名
-                // s: s
-            });
+            };
+            if (cache.authFun) {
+                cache.authFun({
+                    clientId: cache.options.peerId,
+                    members: options.members,
+                    convId: options.cid,
+                    action: 'invite'
+                }, function(authResult){
+                    if (authResult && authResult.signature) {
+                        cmd.n = authResult.nonce;
+                        cmd.t = authResult.timestamp;
+                        cmd.s = authResult.signature;
+                        wsSend(cmd);
+                    } else {
+                        throw('Adding members to conversation denied by application: ' + authResult);
+                    }
+                });
+            } else {
+                wsSend(cmd);
+            }
         };
 
         engine.convRemove = function(options) {
-            wsSend({
+            var cmd = {
                 cmd: 'conv',
                 op: 'remove',
                 cid: options.cid,
                 m: options.members,
                 appId: cache.options.appId,
                 peerId: cache.options.peerId,
-                // t: tool.now(),
                 i: options.serialId
-                // n 签名参数随机字符串
-                // n: n,
-                // s 签名参数签名
-                // s: s
-            });
+            };
+            if (cache.authFun && (options.members.length > 1 || options.members[0] != cache.options.peerId)) {
+                cache.authFun({
+                    clientId: cache.options.peerId,
+                    members: options.members,
+                    convId: options.cid,
+                    action: 'kick'
+                }, function(authResult){
+                    if (authResult && authResult.signature) {
+                        cmd.n = authResult.nonce;
+                        cmd.t = authResult.timestamp;
+                        cmd.s = authResult.signature;
+                        wsSend(cmd);
+                    } else {
+                        throw('Removing members from conversation denied by application: ' + authResult);
+                    }
+                });
+            } else {
+                wsSend(cmd);
+            }
         };
 
         engine.send = function(options) {
@@ -503,7 +543,7 @@ void function(win) {
                 cache.ec.emit(eNameIndex.open, data);
             });
             // cache.ec.on('session-closed', function() {
-                // session 被关闭，则关闭当前 websocket 连接                
+                // session 被关闭，则关闭当前 websocket 连接
             // });
             cache.ec.on('session-error', function(data) {
                 cache.ec.emit(eNameIndex.error, data);
@@ -711,16 +751,9 @@ void function(win) {
             var realtimeObj = newRealtimeObject();
             realtimeObj.cache.options = options;
             realtimeObj.cache.ec = tool.eventCenter();
-            if (options.auth) {
-                engine.auth(function(data) {
-                    // 存储 session 的认证信息
-                    realtimeObj.cache.sessionAuth = data;
-                    realtimeObj.open(callback);
-                });
-            } else {
-                // 启动 websocket，然后连接 session
-                realtimeObj.open(callback);
-            }
+            realtimeObj.cache.authFun = options.auth;
+
+            realtimeObj.open(callback);
             return realtimeObj;
         }
     };
@@ -752,11 +785,14 @@ void function(win) {
         var xhr = new XMLHttpRequest();
         xhr.open(method, url);
         if (method === 'post') {
-            xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
-            // xhr.setRequestHeader('Content-Type', 'application/json');
-            // xhr.setRequestHeader('Access-Control-Allow-Origin', '*');
-            // xhr.setRequestHeader('Access-Control-Allow-Headers', "Origin, X-Requested-With, Content-Type, Accept");
-            // xhr.setRequestHeader('Access-Control-Allow-Methods',"POST, GET, OPTIONS, DELETE, PUT, HEAD");
+            if (options.form) {
+                xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+            } else {
+                xhr.setRequestHeader('Content-Type', 'application/json');
+                xhr.setRequestHeader('Access-Control-Allow-Origin', '*');
+                xhr.setRequestHeader('Access-Control-Allow-Headers', "Origin, X-Requested-With, Content-Type, Accept");
+                xhr.setRequestHeader('Access-Control-Allow-Methods',"POST, GET, OPTIONS, DELETE, PUT, HEAD");
+            }
         }
         xhr.onload = function() {
             callback(JSON.parse(xhr.responseText));
@@ -765,15 +801,20 @@ void function(win) {
             callback(null, data);
             new Error('Network error.');
         };
-        // 临时
-        var formData = '';
-        for (var k in options.data) {
-            if (!formData) {
-                formData += (k + '=' + options.data[k]);
-            } else {
-                formData += ('&' + k + '=' + options.data[k]);
+
+        if (options.form) {
+            var formData = '';
+            for (var k in options.data) {
+                if (!formData) {
+                    formData += (k + '=' + options.data[k]);
+                } else {
+                    formData += ('&' + k + '=' + options.data[k]);
+                }
             }
+        } else {
+            var formData = JSON.stringify(options.data);
         }
+
         xhr.send(formData);
     };
 
