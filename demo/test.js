@@ -100,7 +100,10 @@ rt.on('create', function(data) {
     // 发送多媒体消息
     room.send({
         text: '图片测试',
-        attr: {a:123},
+        // 自定义的属性
+        attr: {
+            a:123
+        },
         url: 'https://leancloud.cn/images/static/press/Logo%20-%20Blue%20Padding.png',
         metaData: {
             name:'logo', 

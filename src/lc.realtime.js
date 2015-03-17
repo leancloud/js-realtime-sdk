@@ -260,7 +260,9 @@ void function(win) {
             // 是否是用户关闭，如果不是将会断开重连
             closeFlag: false,
             // reuse 事件的重试 timer
-            reuseTimer: undefined
+            reuseTimer: undefined,
+            // 当前的 serialId
+            serialId: 2015
         };
 
         // WebSocket Open
@@ -685,7 +687,11 @@ void function(win) {
 
         // 取自增的 number 类型
         engine.getSerialId = function() {
-            return tool.now() + 1;
+            cache.serialId ++;
+            if (cache.serialId > 999999) {
+                cache.serialId = 2015;
+            }
+            return cache.serialId;
         };
 
         // 绑定所有服务返回事件
