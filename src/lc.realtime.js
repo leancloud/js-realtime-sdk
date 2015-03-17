@@ -141,7 +141,7 @@ void function(win) {
                 };
                 // 如果 type 存在，则发送多媒体格式
                 if (type) {
-                    options.data = engine.createMediaMsg(type, data);
+                    options.data = engine.setMediaMsg(type, data);
                 } else {
                     options.data = data;
                 }
@@ -536,8 +536,44 @@ void function(win) {
             });
         };
 
+        // 取出多媒体类型的格式
+        engine.getMediaMsg = function(msg) {
+            // 检查是否是多媒体类型
+            if (!msg.hasOwnProperty('_lctype')) {
+                return msg;
+            }
+            var obj = {
+                text: msg._lctext,
+                attr: msg._lcattrs,
+                url: msg._lcfile.url,
+                metaData: msg._lcfile.metaData
+            };
+            // 多媒体类型
+            switch(msg._lctype) {
+                case -1:
+                    obj.type = 'text';
+                break;
+                case -2:
+                    obj.type = 'image';
+                break;
+                case -3:
+                    obj.type = 'audio';
+                break;
+                case -4:
+                    obj.type = 'video';
+                break;
+                case -5:
+                    obj.type = 'location';
+                break;
+                case -6:
+                    obj.type = 'file';
+                break;
+            }
+            return obj;
+        };
+
         // 生成多媒体特定格式的数据
-        engine.createMediaMsg = function(type, data) {
+        engine.setMediaMsg = function(type, data) {
             var obj;
             if (type !== 'text' && !data.metaData) {
                 throw('Media Data must have metaData attribute.');
@@ -732,6 +768,9 @@ void function(win) {
                 // transient 是否是暂态消息，如果为 true 客户端不需要回复 ack
                 // appId
                 // peerId
+
+                // 增加多媒体消息的数据格式化
+                data.msg = engine.getMediaMsg(data.msg);
                 cache.ec.emit(eNameIndex.message, data);
             });
 
