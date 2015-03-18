@@ -102,7 +102,15 @@ rt.on('create', function(data) {
         room.log(function(data) {
             console.log('查看当前房间最近的聊天记录：', data);
         });
+    });
 
+    // 向这个房间中发送消息
+    room.send({
+        msg: '当前用户正在输入。。。'
+    }, {
+        transient: true
+    }, function(data) {
+        console.log('暂态消息的回调不会被运行');
     });
 
     // 当前房间接收到消息
@@ -130,7 +138,9 @@ rt.on('create', function(data) {
             width: 123,
             size: 888
         }
-    }, 'image', function(data) {
+    }, {
+       type: 'image'
+    }, function(data) {
         console.log('图片数据发送成功！');
     });
 

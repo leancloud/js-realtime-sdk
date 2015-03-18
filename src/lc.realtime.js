@@ -123,37 +123,42 @@ void function(win) {
                 return this;
             },
             send: function(data, argument1, argument2) {
-                var type;
                 var callback;
+                var options = {};
                 var me = this;
                 switch(arguments.length) {
+                    // 只有两个参数时，第二个是回调函数
                     case 2:
                         callback = argument1;
                     break;
+                    // 三个参数时，第二个参数是配置项，第三个参数是回调
                     case 3:
-                        type = argument1;
+                        options = argument1;
                         callback = argument2;
                     break;
                 }
-                var options = {
-                    cid: me.id,
-                    serialId: engine.getSerialId()
-                };
+                options.cid = me.id;
+                options.serialId = engine.getSerialId();
+
                 // 如果 type 存在，则发送多媒体格式
-                if (type) {
-                    options.data = engine.setMediaMsg(type, data);
+                if (options.type) {
+                    options.data = engine.setMediaMsg(options.type, data);
                 } else {
                     options.data = data;
                 }
-                var fun = function(data) {
-                    if (data.i === options.serialId) {
-                        if (callback) {
-                            callback(data);
+
+                // 如果是暂态消息，则不需回调，服务器也不会返回回调
+                if (!options.transient) {
+                    var fun = function(data) {
+                        if (data.i === options.serialId) {
+                            if (callback) {
+                                callback(data);
+                            }
+                            cache.ec.off('ack', fun);
                         }
-                        cache.ec.off('ack', fun);
-                    }
-                };
-                cache.ec.on('ack', fun);
+                    };
+                    cache.ec.on('ack', fun);
+                }
                 engine.send(options, callback);
                 return this;
             },
@@ -535,10 +540,11 @@ void function(win) {
                 appId: cache.options.appId,
                 peerId: cache.options.peerId,
                 msg: options.data,
-                i: options.serialId
+                i: options.serialId,
                 // r 是否需要回执需要则1，否则不传
                 // r: 1,
                 // transient 是否暂态消息（暂态消息不返回 ack，不保留离线消息，不触发离 线推送），否则不传
+                transient: options.transient || false
             });
         };
 
