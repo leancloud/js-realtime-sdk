@@ -583,7 +583,7 @@ void function(win) {
             });
         };
 
-        engine.convUpate = function(options) {
+        engine.convUpdate = function(options) {
             wsSend({
                 cmd: 'conv',
                 op: 'update',
@@ -998,7 +998,7 @@ void function(win) {
 
     // 获取一个唯一 id，碰撞概率：基本不可能
     tool.getId = function() {
-        // 与时间相关的随机引子
+        // 与时间相关的随机因子
         var getIdItem = function() {
             return Date.now().toString(36) + Math.random().toString(36).substring(2, 3);
         };
