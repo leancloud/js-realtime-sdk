@@ -2,32 +2,14 @@ var rt;
 var room;
 var firstFlag = true;
 
-function auth_fn(options, callback) {
-    // 将以上签名必要参数及当前应用状态信息发送到应用服务器端做权限判
-    // 端。关于签名的详细说明请查看文档：
-    // https://github.com/leancloud/docs/blob/master/md/realtime_v2.md#%E4%BA%91%E4%BB%A3%E7%A0%81%E7%AD%BE%E5%90%8D%E8%8C%83%E4%BE%8B
-    // 签名成功执行 callback({signature: '', nonce: '', timestamp: 123})
-    // 签名被拒绝执行 callback() 即可
-    // 云代码签名范例：https://github.com/leancloud/realtime-messaging-signature-cloudcode
-    lc.realtime._tool.ajax({
-        url: 'http://localhost:3000/sign2',
-        data: {
-            client_id: options.clientId,
-            conv_id: options.convId,
-            members: options.members,
-            action: options.action
-        },
-        method: 'post'
-    }, callback);
-}
-
 // 创建聊天实例（支持单页多实例）
 rt = AV.realtime({
     // 强将 appId 换为自己的 appId
     appId: '9p6hyhh60av3ukkni3i9z53q1l8yy3cijj6sie3cewft18vm',
     // appId: 'pyon3kvufmleg773ahop2i7zy0tz2rfjx5bh82n7h5jzuwjg',
-    clientId: 'LeanCloud111',
-    auth: auth_fn
+    clientId: 'LeanCloud111'
+    // 是否开启服务器端认证
+    // auth: authFun
 });
 
 // 当前 SDK 版本
@@ -169,3 +151,22 @@ rt.on('message', function(data) {
 rt.on('reuse', function() {
     console.log('正在重新连接。。。');
 });
+
+function authFun(options, callback) {
+    // 将以上签名必要参数及当前应用状态信息发送到应用服务器端做权限判
+    // 端。关于签名的详细说明请查看文档：
+    // https://github.com/leancloud/docs/blob/master/md/realtime_v2.md#%E4%BA%91%E4%BB%A3%E7%A0%81%E7%AD%BE%E5%90%8D%E8%8C%83%E4%BE%8B
+    // 签名成功执行 callback({signature: '', nonce: '', timestamp: 123})
+    // 签名被拒绝执行 callback() 即可
+    // 云代码签名范例：https://github.com/leancloud/realtime-messaging-signature-cloudcode
+    AV.realtime._tool.ajax({
+        url: 'http://localhost:3000/sign2',
+        data: {
+            client_id: options.clientId,
+            conv_id: options.convId,
+            members: options.members,
+            action: options.action
+        },
+        method: 'post'
+    }, callback);
+}

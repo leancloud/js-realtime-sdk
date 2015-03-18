@@ -292,7 +292,9 @@ void function(win) {
         var wsOpen = function() {
             tool.log('WebSocket opened.');
             engine.bindEvent();
-            engine.openSession({serialId: tool.getId()});
+            engine.openSession({
+                serialId: engine.getSerialId()
+            });
             // 启动心跳
             engine.heartbeats();
             // 启动守护进程
@@ -1044,8 +1046,8 @@ void function(win) {
             throw('Network error.');
         };
 
+        var formData = '';
         if (options.form) {
-            var formData = '';
             for (var k in options.data) {
                 if (!formData) {
                     formData += (k + '=' + options.data[k]);
@@ -1054,9 +1056,8 @@ void function(win) {
                 }
             }
         } else {
-            var formData = JSON.stringify(options.data);
+            formData = JSON.stringify(options.data);
         }
-
         xhr.send(formData);
     };
 
