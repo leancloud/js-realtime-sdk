@@ -292,8 +292,6 @@ void function(win) {
             options: undefined,
             // WebSocket 实例
             ws: undefined,
-            // 心跳的计时器
-            heartbeatsTimer: undefined,
             // 事件中心
             ec: undefined,
             // 所有已生成的 conversation 对象
@@ -302,6 +300,8 @@ void function(win) {
             closeFlag: false,
             // reuse 事件的重试 timer
             reuseTimer: undefined,
+            // resuse 状态，如果为 true 表示内部已经在重试中
+            resuseFlag: false,
             // 当前的 serialId
             serialId: 2015
         };
@@ -359,23 +359,51 @@ void function(win) {
 
         // 心跳程序
         engine.heartbeats = function() {
+            var timer;
             cache.ws.addEventListener('message', function() {
-                if (cache.heartbeatsTimer) {
-                    clearTimeout(cache.heartbeatsTimer);
+                if (timer) {
+                    clearTimeout(timer);
                 }
-                cache.heartbeatsTimer = setTimeout(function() {
+                heartbeatsTimer = setTimeout(function() {
                     wsSend({});
                 }, config.heartbeatsTime);
             });
+
+            // 防止多次实例化
+            engine.heartbeats = tool.noop;
         };
 
         // 守护进程，会派发 reuse 重连事件
         engine.guard = function() {
+            
+            // 超时是三分钟
+            var timeLength = 3 * 60 * 1000;
+            var timer;
+
+            // 结合心跳事件，如果长时间没有收到服务器的心跳，也要触发重连机制
+            cache.ws.addEventListener('message', function() {
+                if (timer) {
+                    clearTimeout(timer);
+                }
+                timer = setTimeout(function() {
+                    if (!cache.closeFlag && !cache.resuseFlag) {
+                        cache.resuseFlag = true;
+                        // 超时则派发重试事件
+                        cache.ec.emit(eNameIndex.reuse);
+                    }
+                }, timeLength);
+            });
+
+            // 监测断开事件
             cache.ec.on(eNameIndex.close + ' ' + 'session-closed', function() {
-                if (!cache.closeFlag) {
+                if (!cache.closeFlag && !cache.resuseFlag) {
+                    cache.resuseFlag = true;
                     cache.ec.emit(eNameIndex.reuse);
                 }
             });
+
+            // 防止多次实例化
+            engine.guard = tool.noop;
         };
 
         engine.connect = function(options) {
@@ -802,6 +830,8 @@ void function(win) {
         // 绑定所有服务返回事件
         engine.bindEvent = function() {
             cache.ec.on('session-opened', function(data) {
+                // 标记重试状态为 false，表示没有在重试
+                cache.resuseFlag = false;
                 // 派发全局 open 事件，表示 realtime 已经启动
                 cache.ec.emit(eNameIndex.open, data);
             });
@@ -895,10 +925,10 @@ void function(win) {
                     }
                 });
                 if (callback) {
-                    cache.ec.once('open', callback);
+                    cache.ec.once(eNameIndex.open, callback);
                 }
                 // 断开重连
-                cache.ec.once(eNameIndex.reuse + ' ' + eNameIndex.error, function() {
+                cache.ec.once(eNameIndex.reuse, function() {
                     if (cache.reuseTimer) {
                         clearTimeout(cache.reuseTimer);
                     }
