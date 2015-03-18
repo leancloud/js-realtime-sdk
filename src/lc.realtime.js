@@ -50,6 +50,8 @@ void function(win) {
         left: 'left',
         // conversation 内发送的数据
         message: 'message',
+        // conversation 消息回执
+        receipt: 'receipt',
         // conversation 更新
         update: 'update',
         // 各种错误
@@ -123,37 +125,47 @@ void function(win) {
                 return this;
             },
             send: function(data, argument1, argument2) {
-                var type;
                 var callback;
+                var options = {};
                 var me = this;
                 switch(arguments.length) {
+                    // 只有两个参数时，第二个是回调函数
                     case 2:
                         callback = argument1;
                     break;
+                    // 三个参数时，第二个参数是配置项，第三个参数是回调
                     case 3:
-                        type = argument1;
+                        options = argument1;
                         callback = argument2;
                     break;
                 }
-                var options = {
-                    cid: me.id,
-                    serialId: engine.getSerialId()
-                };
+                options.cid = me.id;
+                options.serialId = engine.getSerialId();
+
                 // 如果 type 存在，则发送多媒体格式
-                if (type) {
-                    options.data = engine.setMediaMsg(type, data);
+                if (options.type) {
+                    options.data = engine.setMediaMsg(options.type, data);
                 } else {
                     options.data = data;
                 }
-                var fun = function(data) {
-                    if (data.i === options.serialId) {
-                        if (callback) {
-                            callback(data);
+
+                // 是否需要消息回执
+                if (options.receipt) {
+                    options.receipt = 1;
+                }
+
+                // 如果是暂态消息，则不需回调，服务器也不会返回回调
+                if (!options.transient) {
+                    var fun = function(data) {
+                        if (data.i === options.serialId) {
+                            if (callback) {
+                                callback(data);
+                            }
+                            cache.ec.off('ack', fun);
                         }
-                        cache.ec.off('ack', fun);
-                    }
-                };
-                cache.ec.on('ack', fun);
+                    };
+                    cache.ec.on('ack', fun);
+                }
                 engine.send(options, callback);
                 return this;
             },
@@ -194,6 +206,17 @@ void function(win) {
                 });
                 return this;
             },
+            // 获取信息回执（待服务器端 cid 返回上线再开放，暂时不开放）
+            // receipt: function(callback) {
+            //     var id = this.id;
+            //     cache.ec.on(eNameIndex.receipt, function(data) {
+            //         // 是否是当前 room 的信息
+            //         if (id === data.cid) {
+            //             callback(data);
+            //         }
+            //     });
+            //     return this;
+            // },
             list: function(callback) {
                 var options = {};
                 var id = this.id;
@@ -269,8 +292,6 @@ void function(win) {
             options: undefined,
             // WebSocket 实例
             ws: undefined,
-            // 心跳的计时器
-            heartbeatsTimer: undefined,
             // 事件中心
             ec: undefined,
             // 所有已生成的 conversation 对象
@@ -279,6 +300,8 @@ void function(win) {
             closeFlag: false,
             // reuse 事件的重试 timer
             reuseTimer: undefined,
+            // resuse 状态，如果为 true 表示内部已经在重试中
+            resuseFlag: false,
             // 当前的 serialId
             serialId: 2015
         };
@@ -287,7 +310,9 @@ void function(win) {
         var wsOpen = function() {
             tool.log('WebSocket opened.');
             engine.bindEvent();
-            engine.openSession({serialId: tool.getId()});
+            engine.openSession({
+                serialId: engine.getSerialId()
+            });
             // 启动心跳
             engine.heartbeats();
             // 启动守护进程
@@ -334,23 +359,51 @@ void function(win) {
 
         // 心跳程序
         engine.heartbeats = function() {
+            var timer;
             cache.ws.addEventListener('message', function() {
-                if (cache.heartbeatsTimer) {
-                    clearTimeout(cache.heartbeatsTimer);
+                if (timer) {
+                    clearTimeout(timer);
                 }
-                cache.heartbeatsTimer = setTimeout(function() {
+                heartbeatsTimer = setTimeout(function() {
                     wsSend({});
                 }, config.heartbeatsTime);
             });
+
+            // 防止多次实例化
+            engine.heartbeats = tool.noop;
         };
 
         // 守护进程，会派发 reuse 重连事件
         engine.guard = function() {
+            
+            // 超时是三分钟
+            var timeLength = 3 * 60 * 1000;
+            var timer;
+
+            // 结合心跳事件，如果长时间没有收到服务器的心跳，也要触发重连机制
+            cache.ws.addEventListener('message', function() {
+                if (timer) {
+                    clearTimeout(timer);
+                }
+                timer = setTimeout(function() {
+                    if (!cache.closeFlag && !cache.resuseFlag) {
+                        cache.resuseFlag = true;
+                        // 超时则派发重试事件
+                        cache.ec.emit(eNameIndex.reuse);
+                    }
+                }, timeLength);
+            });
+
+            // 监测断开事件
             cache.ec.on(eNameIndex.close + ' ' + 'session-closed', function() {
-                if (!cache.closeFlag) {
+                if (!cache.closeFlag && !cache.resuseFlag) {
+                    cache.resuseFlag = true;
                     cache.ec.emit(eNameIndex.reuse);
                 }
             });
+
+            // 防止多次实例化
+            engine.guard = tool.noop;
         };
 
         engine.connect = function(options) {
@@ -535,10 +588,11 @@ void function(win) {
                 appId: cache.options.appId,
                 peerId: cache.options.peerId,
                 msg: options.data,
-                i: options.serialId
+                i: options.serialId,
                 // r 是否需要回执需要则1，否则不传
-                // r: 1,
+                r: options.receipt || false,
                 // transient 是否暂态消息（暂态消息不返回 ack，不保留离线消息，不触发离 线推送），否则不传
+                transient: options.transient || false
             });
         };
 
@@ -583,7 +637,7 @@ void function(win) {
             });
         };
 
-        engine.convUpate = function(options) {
+        engine.convUpdate = function(options) {
             wsSend({
                 cmd: 'conv',
                 op: 'update',
@@ -776,6 +830,8 @@ void function(win) {
         // 绑定所有服务返回事件
         engine.bindEvent = function() {
             cache.ec.on('session-opened', function(data) {
+                // 标记重试状态为 false，表示没有在重试
+                cache.resuseFlag = false;
                 // 派发全局 open 事件，表示 realtime 已经启动
                 cache.ec.emit(eNameIndex.open, data);
             });
@@ -832,15 +888,6 @@ void function(win) {
             // cache.ec.on('conv-updated', function(data) {});
 
             cache.ec.on('direct', function(data) {
-                // cmd direct
-                // cid 会话 id
-                // fromPeerId 发自用户id
-                // msg
-                // id 消息id，即之前ack中的uid
-                // timestamp 时间戳，毫秒
-                // transient 是否是暂态消息，如果为 true 客户端不需要回复 ack
-                // appId
-                // peerId
 
                 // 增加多媒体消息的数据格式化
                 data.msg = engine.getMediaMsg(data.msg);
@@ -852,10 +899,12 @@ void function(win) {
                 cache.ec.emit(eNameIndex.message, data);
             });
 
-            // cache.ec.on('ack', function(data) {});
-
             // 对要求回执的消息，服务器端会在对方客户端发送ack后发送回执
-            // cache.ec.on('rcp', function() {});
+            cache.ec.on('rcp', function(data) {
+                cache.ec.emit(eNameIndex.receipt, data);
+            });
+
+            // cache.ec.on('ack', function(data) {});
 
             // 用户可以获取自己所在对话的历史记录
             // cache.ec.on('logs', function(data) {});
@@ -876,10 +925,10 @@ void function(win) {
                     }
                 });
                 if (callback) {
-                    cache.ec.once('open', callback);
+                    cache.ec.once(eNameIndex.open, callback);
                 }
                 // 断开重连
-                cache.ec.once(eNameIndex.reuse + ' ' + eNameIndex.error, function() {
+                cache.ec.once(eNameIndex.reuse, function() {
                     if (cache.reuseTimer) {
                         clearTimeout(cache.reuseTimer);
                     }
@@ -998,7 +1047,7 @@ void function(win) {
 
     // 获取一个唯一 id，碰撞概率：基本不可能
     tool.getId = function() {
-        // 与时间相关的随机引子
+        // 与时间相关的随机因子
         var getIdItem = function() {
             return Date.now().toString(36) + Math.random().toString(36).substring(2, 3);
         };
@@ -1038,8 +1087,8 @@ void function(win) {
             throw('Network error.');
         };
 
+        var formData = '';
         if (options.form) {
-            var formData = '';
             for (var k in options.data) {
                 if (!formData) {
                     formData += (k + '=' + options.data[k]);
@@ -1048,9 +1097,8 @@ void function(win) {
                 }
             }
         } else {
-            var formData = JSON.stringify(options.data);
+            formData = JSON.stringify(options.data);
         }
-
         xhr.send(formData);
     };
 
