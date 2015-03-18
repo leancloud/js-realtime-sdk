@@ -86,13 +86,24 @@ rt.on('create', function(data) {
         });
     });
 
-    // 向这个房间中发送消息
+    // 向这个房间中发送暂态消息
     room.send({
         msg: '当前用户正在输入。。。'
     }, {
+        // 暂态消息，不需要回调
         transient: true
     }, function(data) {
         console.log('暂态消息的回调不会被运行');
+    });
+
+    // 向这个房间中发送消息，并且消息是否对方收到要有回执
+    room.send({
+        abc: 123
+    }, {
+        // 获取阅读回执
+        receipt: true
+    }, function(data) {
+        console.log('信息发送成功，该信息会获取阅读回执');
     });
 
     // 当前房间接收到消息
@@ -145,6 +156,11 @@ rt.on('left', function(data) {
 // 监听所有房间中发送的消息
 rt.on('message', function(data) {
     console.log('某个当前用户在的 Room 接收到消息：', data);
+});
+
+// 接收断线或者网络状况不佳的事件（断网可测试）
+rt.on('receipt', function(data) {
+    console.log('接收到消息阅读的回执：', data);
 });
 
 // 接收断线或者网络状况不佳的事件（断网可测试）

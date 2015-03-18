@@ -50,6 +50,8 @@ void function(win) {
         left: 'left',
         // conversation 内发送的数据
         message: 'message',
+        // conversation 消息回执
+        receipt: 'receipt',
         // conversation 更新
         update: 'update',
         // 各种错误
@@ -147,6 +149,11 @@ void function(win) {
                     options.data = data;
                 }
 
+                // 是否需要消息回执
+                if (options.receipt) {
+                    options.receipt = 1;
+                }
+
                 // 如果是暂态消息，则不需回调，服务器也不会返回回调
                 if (!options.transient) {
                     var fun = function(data) {
@@ -199,6 +206,17 @@ void function(win) {
                 });
                 return this;
             },
+            // 获取信息回执（待服务器端 cid 返回上线再开放，暂时不开放）
+            // receipt: function(callback) {
+            //     var id = this.id;
+            //     cache.ec.on(eNameIndex.receipt, function(data) {
+            //         // 是否是当前 room 的信息
+            //         if (id === data.cid) {
+            //             callback(data);
+            //         }
+            //     });
+            //     return this;
+            // },
             list: function(callback) {
                 var options = {};
                 var id = this.id;
@@ -544,7 +562,7 @@ void function(win) {
                 msg: options.data,
                 i: options.serialId,
                 // r 是否需要回执需要则1，否则不传
-                // r: 1,
+                r: options.receipt || false,
                 // transient 是否暂态消息（暂态消息不返回 ack，不保留离线消息，不触发离 线推送），否则不传
                 transient: options.transient || false
             });
@@ -840,15 +858,6 @@ void function(win) {
             // cache.ec.on('conv-updated', function(data) {});
 
             cache.ec.on('direct', function(data) {
-                // cmd direct
-                // cid 会话 id
-                // fromPeerId 发自用户id
-                // msg
-                // id 消息id，即之前ack中的uid
-                // timestamp 时间戳，毫秒
-                // transient 是否是暂态消息，如果为 true 客户端不需要回复 ack
-                // appId
-                // peerId
 
                 // 增加多媒体消息的数据格式化
                 data.msg = engine.getMediaMsg(data.msg);
@@ -860,10 +869,12 @@ void function(win) {
                 cache.ec.emit(eNameIndex.message, data);
             });
 
-            // cache.ec.on('ack', function(data) {});
-
             // 对要求回执的消息，服务器端会在对方客户端发送ack后发送回执
-            // cache.ec.on('rcp', function() {});
+            cache.ec.on('rcp', function(data) {
+                cache.ec.emit(eNameIndex.receipt, data);
+            });
+
+            // cache.ec.on('ack', function(data) {});
 
             // 用户可以获取自己所在对话的历史记录
             // cache.ec.on('logs', function(data) {});
