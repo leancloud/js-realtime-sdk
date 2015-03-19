@@ -497,7 +497,9 @@ void function(win) {
                 peerId: cache.options.peerId,
                 // attr json对象，对话的任意初始属性
                 attr: options.data || {},
-                i: options.serialId
+                i: options.serialId,
+                // 是否是开放聊天室，无人数限制
+                transient: options.transient || false
             };
             if (cache.authFun) {
                 cache.authFun({
