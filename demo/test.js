@@ -29,19 +29,19 @@ rt.on('open', function() {
             members: [
                 'LeanCloud02'
             ],
-            // 默认的数据，可以放房间名字等
+            // 默认的数据，可以放 Conversation 名字等
             data: {
                 m: 123
             }
         }, function(data) {
             if (data) {
-                console.log('conv 创建成功!', data);
+                console.log('Conversation 创建成功!', data);
             }
         });
 
-        // 查询当前房间的相关信息
+        // 查询当前 Conversation 的相关信息
         rt.query(function(data) {
-            console.log('查询房间所有相关信息：', data);
+            console.log('查询 Conversation 所有相关信息：', data);
         });
     }
 });
@@ -51,30 +51,30 @@ rt.on('close', function() {
     console.log('实时通信服务被断开！');
 });
 
-// 当房间被创建时触发，当然您可以使用回调函数来处理，不一定要监听这个事件
+// 当 Conversation 被创建时触发，当然您可以使用回调函数来处理，不一定要监听这个事件
 rt.on('create', function(data) {
-    // 当前用户加入这个房间
+    // 当前用户加入这个 Conversation 
     conv.join(function(data) {
-        console.log('当前用户成功加入 conv');
+        console.log('当前用户成功加入 Conversation');
     });
-    // 向这个房间添加新的用户
+    // 向这个 Conversation 添加新的用户
     conv.add([
         'LeanCloud03', 'LeanCloud04'
     ], function(data) {
         console.log('成功添加用户：', data);
     });
 
-    // 从这个房间中删除用户
+    // 从这个 Conversation 中删除用户
     conv.remove('LeanCloud03', function(data) {
         console.log('成功删除用户：', data);
     });
 
-    // 当前用户离开这个房间
+    // 当前用户离开这个 Conversation 
     conv.leave(function(data) {
-        console.log('当前用户成功离开 conv');
+        console.log('当前用户成功离开 Conversation');
     });
 
-    // 向这个房间中发送消息
+    // 向这个 Conversation 中发送消息
     conv.send({
         abc: 123
     }, function(data) {
@@ -82,11 +82,11 @@ rt.on('create', function(data) {
 
         // 查看历史消息
         conv.log(function(data) {
-            console.log('查看当前房间最近的聊天记录：', data);
+            console.log('查看当前 Conversation 最近的聊天记录：', data);
         });
     });
 
-    // 向这个房间中发送暂态消息
+    // 向这个 Conversation 中发送暂态消息
     conv.send({
         msg: '当前用户正在输入。。。'
     }, {
@@ -96,7 +96,7 @@ rt.on('create', function(data) {
         console.log('暂态消息的回调不会被运行');
     });
 
-    // 向这个房间中发送消息，并且消息是否对方收到要有回执
+    // 向这个 Conversation 中发送消息，并且消息是否对方收到要有回执
     conv.send({
         abc: 123
     }, {
@@ -106,14 +106,14 @@ rt.on('create', function(data) {
         console.log('信息发送成功，该信息会获取阅读回执');
     });
 
-    // 当前房间接收到消息
+    // 当前 Conversation 接收到消息
     conv.receive(function(data) {
-        console.log('当前房间收到消息：', data);
+        console.log('当前 Conversation 收到消息：', data);
     });
 
-    // 获取当前房间中的成员信息
+    // 获取当前 Conversation 中的成员信息
     conv.list(function(data) {
-        console.log('列出当前房间的成员列表：', data);
+        console.log('列出当前 Conversation 的成员列表：', data);
     });
 
     // 发送多媒体消息
@@ -145,17 +145,17 @@ rt.on('create', function(data) {
 
 // 监听所有用户加入的情况
 rt.on('join', function(data) {
-    console.log('有用户加入某个当前用户在的 conv：', data);
+    console.log('有用户加入某个当前用户在的 Conversation：', data);
 });
 
 // 监听所有用户离开的情况
 rt.on('left', function(data) {
-    console.log('有用户离开某个当前用户在的 conv：', data);
+    console.log('有用户离开某个当前用户在的 Conversation：', data);
 });
 
-// 监听所有房间中发送的消息
+// 监听所有 Conversation 中发送的消息
 rt.on('message', function(data) {
-    console.log('某个当前用户在的 conv 接收到消息：', data);
+    console.log('某个当前用户在的 Conversation 接收到消息：', data);
 });
 
 // 接收断线或者网络状况不佳的事件（断网可测试）
