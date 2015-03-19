@@ -481,8 +481,7 @@ void function(win) {
             wsSend({
                 cmd: 'session',
                 op: 'close',
-                peerId: cache.options.peerId,
-                i: options.serialId
+                peerId: cache.options.peerId
                 // ASK: 这块用不用 appId
                 // appId: cache.options.appId
             });

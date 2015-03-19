@@ -168,6 +168,11 @@ rt.on('reuse', function() {
     console.log('正在重新连接。。。');
 });
 
+// 当然你可以关闭这一切
+// setTimeout(function() {
+//     rt.close();
+// }, 10000);
+
 function authFun(options, callback) {
     // 将以上签名必要参数及当前应用状态信息发送到应用服务器端做权限判
     // 端。关于签名的详细说明请查看文档：
