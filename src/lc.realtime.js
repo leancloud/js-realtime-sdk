@@ -375,7 +375,7 @@ void function(win) {
 
         // 守护进程，会派发 reuse 重连事件
         engine.guard = function() {
-            
+
             // 超时是三分钟
             var timeLength = 3 * 60 * 1000;
             var timer;
@@ -481,8 +481,7 @@ void function(win) {
             wsSend({
                 cmd: 'session',
                 op: 'close',
-                peerId: cache.options.peerId,
-                i: options.serialId
+                peerId: cache.options.peerId
                 // ASK: 这块用不用 appId
                 // appId: cache.options.appId
             });
@@ -498,7 +497,9 @@ void function(win) {
                 peerId: cache.options.peerId,
                 // attr json对象，对话的任意初始属性
                 attr: options.data || {},
-                i: options.serialId
+                i: options.serialId,
+                // 是否是开放聊天室，无人数限制
+                transient: options.transient || false
             };
             if (cache.authFun) {
                 cache.authFun({
@@ -985,6 +986,10 @@ void function(win) {
                 }
                 return convObject;
             },
+            // conv 就是 room 的别名
+            conv: function(argument, callback) {
+                return this.room(argument, callback);
+            },
             // 相关查询，包括用户列表查询，房间查询等
             query: function(argument, callback) {
                 var options = {};
@@ -1009,7 +1014,7 @@ void function(win) {
                 cache.ec.on('conv-results', fun);
                 engine.convQuery(options);
                 return this;
-            }
+            },
         };
     };
 
