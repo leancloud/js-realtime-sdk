@@ -1,5 +1,5 @@
 var rt;
-var room;
+var conv;
 var firstFlag = true;
 
 // 创建聊天实例（支持单页多实例）
@@ -24,7 +24,7 @@ rt.on('open', function() {
         firstFlag = false;
 
         // 创建一个聊天室
-        room = rt.room({
+        conv = rt.conv({
             // 人员的 id
             members: [
                 'LeanCloud02'
@@ -35,7 +35,7 @@ rt.on('open', function() {
             }
         }, function(data) {
             if (data) {
-                console.log('Room 创建成功!', data);
+                console.log('conv 创建成功!', data);
             }
         });
 
@@ -54,40 +54,40 @@ rt.on('close', function() {
 // 当房间被创建时触发，当然您可以使用回调函数来处理，不一定要监听这个事件
 rt.on('create', function(data) {
     // 当前用户加入这个房间
-    room.join(function(data) {
-        console.log('当前用户成功加入 Room');
+    conv.join(function(data) {
+        console.log('当前用户成功加入 conv');
     });
     // 向这个房间添加新的用户
-    room.add([
+    conv.add([
         'LeanCloud03', 'LeanCloud04'
     ], function(data) {
         console.log('成功添加用户：', data);
     });
 
     // 从这个房间中删除用户
-    room.remove('LeanCloud03', function(data) {
+    conv.remove('LeanCloud03', function(data) {
         console.log('成功删除用户：', data);
     });
 
     // 当前用户离开这个房间
-    room.leave(function(data) {
-        console.log('当前用户成功离开 Room');
+    conv.leave(function(data) {
+        console.log('当前用户成功离开 conv');
     });
 
     // 向这个房间中发送消息
-    room.send({
+    conv.send({
         abc: 123
     }, function(data) {
         console.log('发送的消息服务端已收收到：', data);
 
         // 查看历史消息
-        room.log(function(data) {
+        conv.log(function(data) {
             console.log('查看当前房间最近的聊天记录：', data);
         });
     });
 
     // 向这个房间中发送暂态消息
-    room.send({
+    conv.send({
         msg: '当前用户正在输入。。。'
     }, {
         // 暂态消息，不需要回调
@@ -97,7 +97,7 @@ rt.on('create', function(data) {
     });
 
     // 向这个房间中发送消息，并且消息是否对方收到要有回执
-    room.send({
+    conv.send({
         abc: 123
     }, {
         // 获取阅读回执
@@ -107,17 +107,17 @@ rt.on('create', function(data) {
     });
 
     // 当前房间接收到消息
-    room.receive(function(data) {
+    conv.receive(function(data) {
         console.log('当前房间收到消息：', data);
     });
 
     // 获取当前房间中的成员信息
-    room.list(function(data) {
+    conv.list(function(data) {
         console.log('列出当前房间的成员列表：', data);
     });
 
     // 发送多媒体消息
-    room.send({
+    conv.send({
         text: '图片测试',
         // 自定义的属性
         attr: {
@@ -137,25 +137,25 @@ rt.on('create', function(data) {
         console.log('图片数据发送成功！');
     });
 
-    // 取得当前 Room 中的人数
-    room.count(function(num) {
+    // 取得当前 conv 中的人数
+    conv.count(function(num) {
         console.log('取得当前的用户数量：' + num);
     });
 });
 
 // 监听所有用户加入的情况
 rt.on('join', function(data) {
-    console.log('有用户加入某个当前用户在的 Room：', data);
+    console.log('有用户加入某个当前用户在的 conv：', data);
 });
 
 // 监听所有用户离开的情况
 rt.on('left', function(data) {
-    console.log('有用户离开某个当前用户在的 Room：', data);
+    console.log('有用户离开某个当前用户在的 conv：', data);
 });
 
 // 监听所有房间中发送的消息
 rt.on('message', function(data) {
-    console.log('某个当前用户在的 Room 接收到消息：', data);
+    console.log('某个当前用户在的 conv 接收到消息：', data);
 });
 
 // 接收断线或者网络状况不佳的事件（断网可测试）

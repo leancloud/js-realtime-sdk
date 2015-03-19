@@ -375,7 +375,7 @@ void function(win) {
 
         // 守护进程，会派发 reuse 重连事件
         engine.guard = function() {
-            
+
             // 超时是三分钟
             var timeLength = 3 * 60 * 1000;
             var timer;
@@ -984,6 +984,10 @@ void function(win) {
                 }
                 return convObject;
             },
+            // conv 就是 room 的别名
+            conv: function(argument, callback) {
+                return this.room(argument, callback);
+            },
             // 相关查询，包括用户列表查询，房间查询等
             query: function(argument, callback) {
                 var options = {};
@@ -1008,7 +1012,7 @@ void function(win) {
                 cache.ec.on('conv-results', fun);
                 engine.convQuery(options);
                 return this;
-            }
+            },
         };
     };
 
