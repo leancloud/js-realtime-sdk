@@ -1,0 +1,23 @@
+{
+  "name": "leancloud-realtime.js",
+  "version": "2.0.0",
+  "homepage": "http://leancloud.cn",
+  "authors": [
+    "WangXiao <xwang@leancloud.rocks>"
+  ],
+  "description": "LeanCloud JavaScript Realtime SDK",
+  "main": "src/AV.realtime.js",
+  "ignore": [
+    "demo",
+    "README.md"
+  ],
+  "moduleType": [
+    "amd",
+    "globals"
+  ],
+  "keywords": [
+    "LeanCloud",
+    "Realtime"
+  ],
+  "license": "MIT"
+}
