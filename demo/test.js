@@ -111,6 +111,11 @@ rt.on('create', function(data) {
         console.log('当前 Conversation 收到消息：', data);
     });
 
+    // 当前 Conversation 接收到消息
+    conv.receipt(function(data) {
+        console.log('当前 Conversation 收到消息回执：', data);
+    });
+
     // 获取当前 Conversation 中的成员信息
     conv.list(function(data) {
         console.log('列出当前 Conversation 的成员列表：', data);
