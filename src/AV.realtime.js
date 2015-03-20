@@ -206,17 +206,17 @@ void function(win) {
                 });
                 return this;
             },
-            // 获取信息回执（待服务器端 cid 返回上线再开放，暂时不开放）
-            // receipt: function(callback) {
-            //     var id = this.id;
-            //     cache.ec.on(eNameIndex.receipt, function(data) {
-            //         // 是否是当前 room 的信息
-            //         if (id === data.cid) {
-            //             callback(data);
-            //         }
-            //     });
-            //     return this;
-            // },
+            // 获取信息回执
+            receipt: function(callback) {
+                var id = this.id;
+                cache.ec.on(eNameIndex.receipt, function(data) {
+                    // 是否是当前 room 的信息
+                    if (id === data.cid) {
+                        callback(data);
+                    }
+                });
+                return this;
+            },
             list: function(callback) {
                 var options = {};
                 var id = this.id;
