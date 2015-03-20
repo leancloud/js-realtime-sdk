@@ -345,7 +345,9 @@ void function(win) {
 
         // WebSocket send message
         var wsSend = function(data) {
-            cache.ws.send(JSON.stringify(data));
+            if (!cache.closeFlag) {
+                cache.ws.send(JSON.stringify(data));
+            }
         };
 
         engine.createSocket = function(server) {
@@ -918,6 +920,7 @@ void function(win) {
             cache: cache,
             open: function(callback) {
                 var me = this;
+                cache.closeFlag = false;
                 engine.getServer(cache.options, function(data) {
                     if (data) {
                         engine.connect({
