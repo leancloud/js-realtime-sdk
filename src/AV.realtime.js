@@ -366,7 +366,7 @@ void function(win) {
                 if (timer) {
                     clearTimeout(timer);
                 }
-                heartbeatsTimer = setTimeout(function() {
+                timer = setTimeout(function() {
                     wsSend({});
                 }, config.heartbeatsTime);
             });
