@@ -958,6 +958,10 @@ void function(win) {
                 this.cache.ec.emit(eventName, data);
                 return this;
             },
+            off: function(eventName, callback) {
+                this.cache.ec.off(eventName, callback);
+                return this;
+            },
             room: function(argument, callback) {
                 var convObject = newConvObject(cache);
                 // 传入 convId

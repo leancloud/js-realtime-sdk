@@ -173,6 +173,22 @@ rt.on('reuse', function() {
 //     rt.close();
 // }, 10000);
 
+
+var eventFun = function(data) {
+    console.log('接收到自定义事件', data);
+};
+
+// 监听自定义事件
+rt.on('LeanCloud123', eventFun);
+
+// 取消绑定自定义事件
+rt.off('LeanCloud123', eventFun);
+
+// 派发自定义事件
+rt.emit('LeanCloud123', {
+    test: 123
+});
+
 function authFun(options, callback) {
     // 将以上签名必要参数及当前应用状态信息发送到应用服务器端做权限判
     // 端。关于签名的详细说明请查看文档：
