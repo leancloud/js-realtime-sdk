@@ -1133,19 +1133,36 @@ void function(win) {
                 throw('No callback function.');
             }
             var list = eventName.split(/\s+/);
+            var tempList;
+            if (!isOnce) {
+                tempList = eventList;
+            } 
+            else {
+                tempList = eventOnceList;
+            }
             for (var i = 0, l = list.length; i < l; i ++) {
                 if (list[i]) {
-                    if (!isOnce) {
-                        if (!eventList[list[i]]) {
-                            eventList[list[i]] = [];
-                        }
-                        eventList[list[i]].push(fun);
+                    if (!tempList[list[i]]) {
+                        tempList[list[i]] = [];
                     }
-                    else {
-                        if (!eventOnceList[list[i]]) {
-                            eventOnceList[list[i]] = [];
-                        }
-                        eventOnceList[list[i]].push(fun);
+                    tempList[list[i]].push(fun);
+                }
+            }
+        };
+        
+        var _off = function(eventName, fun, isOnce) {
+            var tempList;
+            if (!isOnce) {
+                tempList = eventList;
+            } else {
+                tempList = eventOnceList;
+            }
+            if (tempList[eventName]) {
+                var i = 0;
+                var l = tempList[eventName].length;
+                for (; i < l; i ++) {
+                    if (tempList[eventName][i] === fun) {
+                        tempList[eventName].splice(i, 1);
                     }
                 }
             }
@@ -1188,22 +1205,13 @@ void function(win) {
                             l = eventOnceList[eventName].length;
                         }
                         eventOnceList[eventName][i].call(this, data);
+                        _off(eventName, eventOnceList[eventName][i], true);
                     }
-                    // 清理 eventOnceList
-                    delete eventOnceList[eventName];
                 }
                 return this;
             },
             off: function(eventName, fun) {
-                if (eventList[eventName]) {
-                    var i = 0;
-                    var l = eventList[eventName].length;
-                    for (; i < l; i ++) {
-                        if (eventList[eventName][i] === fun) {
-                            eventList[eventName].splice(i, 1);
-                        }
-                    }
-                }
+                _off(eventName, fun);
                 return this;
             }
         };
