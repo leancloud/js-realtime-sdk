@@ -296,6 +296,8 @@ void function(win) {
             ec: undefined,
             // 所有已生成的 conversation 对象
             convIndex: {},
+            // 是否已经 open 完毕，主要在 close 方法中检测
+            openFlag: false,
             // 是否是用户关闭，如果不是将会断开重连
             closeFlag: false,
             // reuse 事件的重试 timer
@@ -835,6 +837,7 @@ void function(win) {
             cache.ec.on('session-opened', function(data) {
                 // 标记重试状态为 false，表示没有在重试
                 cache.resuseFlag = false;
+                cache.openFlag = true;
                 // 派发全局 open 事件，表示 realtime 已经启动
                 cache.ec.emit(eNameIndex.open, data);
             });
@@ -944,6 +947,9 @@ void function(win) {
             },
             // 表示关闭当前的 session 连接和 WebSocket 连接，并且回收内存
             close: function() {
+                if (!cache.openFlag) {
+                    throw('Use close() must after open() has successed.');
+                }
                 cache.closeFlag = true;
                 engine.closeSession();
                 cache.ws.close();
