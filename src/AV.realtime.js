@@ -1088,7 +1088,7 @@ void function(win) {
             }
         }
         xhr.onload = function(data) {
-            if (xhr.status === 200) {
+            if (String(xhr.status).indexOf(2) === 0) {
                 callback(JSON.parse(xhr.responseText));
             } else {
                 callback(null, JSON.parse(xhr.responseText));
