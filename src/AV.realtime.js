@@ -1169,7 +1169,7 @@ void function(win) {
                     i = 0;
                     l = eventList[eventName].length;
                     for (; i < l; i ++) {
-                        // 有可能执行过程中，删除了某个事件对应的方法
+                        // 有可能执行过程中，通过 off 删除了某个事件对应的方法
                         if (l > eventList[eventName].length) {
                             i --;
                             l = eventList[eventName].length;
@@ -1181,13 +1181,15 @@ void function(win) {
                     i = 0;
                     l = eventOnceList[eventName].length;
                     for (; i < l; i ++) {
-                        // 有可能执行过程中，删除了某个事件对应的方法
+                        // 有可能执行过程中，通过 off 删除了某个事件对应的方法
                         if (l > eventOnceList[eventName].length) {
                             i --;
                             l = eventOnceList[eventName].length;
                         }
                         eventOnceList[eventName][i].call(this, data);
                     }
+                    // 清理 eventOnceList
+                    delete eventOnceList[eventName];
                 }
                 return this;
             },
