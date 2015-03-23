@@ -1169,6 +1169,8 @@ void function(win) {
                 for (; i < l; i ++) {
                     if (tempList[eventName][i] === fun) {
                         tempList[eventName].splice(i, 1);
+                        // 每次只清除掉一个
+                        return;
                     }
                 }
             }
