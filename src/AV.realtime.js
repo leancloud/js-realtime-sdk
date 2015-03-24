@@ -331,6 +331,7 @@ void function(win) {
         // WebSocket Message
         var wsMessage = function(msg) {
             var data = JSON.parse(msg.data);
+            // 对服务端返回的数据进行逻辑包装
             if (data.cmd) {
                 var eventName = data.cmd;
                 if (data.op) {
@@ -625,6 +626,18 @@ void function(win) {
             });
         };
 
+        // 查询 session 在线情况
+        engine.querySession = function(options) {
+            wsSend({
+                cmd: 'session',
+                op: 'query',
+                appId: cache.options.appId,
+                peerId: cache.options.peerId,
+                i: options.serialId,
+                sessionPeerIds: options.peerIdList
+            });
+        };
+
         // 查询 conversation 的聊天记录
         engine.convLog = function(options) {
             wsSend({
@@ -844,6 +857,10 @@ void function(win) {
             // cache.ec.on('session-closed', function() {
                 // session 被关闭，则关闭当前 websocket 连接
             // });
+            
+            // 查询 session 在线情况
+            // cache.ec.on('session-query-result', function() {});
+            
             cache.ec.on('session-error', function(data) {
                 cache.ec.emit(eNameIndex.error, data);
             });
@@ -1028,6 +1045,34 @@ void function(win) {
                 engine.convQuery(options);
                 return this;
             },
+            // 判断用户是否在线
+            ping: function(argument, callback) {
+                if (!callback) {
+                    throw('Ping must have callback.');
+                }
+                var peerIdList = [];
+                // 传入一个 id
+                if (typeof(argument) === 'string') {
+                    peerIdList.push(argument);
+                }
+                // 传入的是数组
+                else {
+                    peerIdList = argument;
+                }
+                var options = {
+                    serialId: engine.getSerialId(),
+                    peerIdList: peerIdList
+                };
+                var fun = function(data) {
+                    if (data.i === options.serialId) {
+                        callback(data.onlineSessionPeerIds);
+                        cache.ec.off('session-query-result', fun);
+                    }
+                };
+                cache.ec.on('session-query-result', fun);
+                engine.querySession(options);
+                return this;
+            }
         };
     };
 

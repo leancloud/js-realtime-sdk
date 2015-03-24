@@ -43,6 +43,14 @@ rt.on('open', function() {
         rt.query(function(data) {
             console.log('查询 Conversation 所有相关信息：', data);
         });
+
+        // 查询对应 clientId 的用户是否处于在线状态
+        rt.ping([
+            'LeanCloud111',
+            'LeanCloud02'
+        ], function(data) {
+            console.log('查询用户在线状态：', data);
+        });
     }
 });
 
@@ -177,7 +185,6 @@ rt.on('reuse', function() {
 // setTimeout(function() {
 //     rt.close();
 // }, 10000);
-
 
 var eventFun = function(data) {
     console.log('接收到自定义事件', data);
