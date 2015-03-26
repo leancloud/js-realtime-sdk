@@ -1213,13 +1213,29 @@ void function(win) {
                 var l = tempList[eventName].length;
                 for (; i < l; i ++) {
                     if (tempList[eventName][i] === fun) {
-                        tempList[eventName].splice(i, 1);
-                        // 每次只清除掉一个
+                        tempList[eventName][i] = null;
+                        // 每次只清除一个相同事件绑定
                         return;
                     }
                 }
             }
         };
+
+        function cleanNull(list) {
+            var tempList = [];
+            var i = 0;
+            var l = list.length;
+            if (l) {
+                for (; i < l; i ++) {
+                    if (list[i]) {
+                        tempList.push(list[i]);
+                    }
+                }
+                return tempList;
+            } else {
+                return null;
+            }
+        }
 
         return {
             on: function(eventName, fun) {
@@ -1240,26 +1256,22 @@ void function(win) {
                     i = 0;
                     l = eventList[eventName].length;
                     for (; i < l; i ++) {
-                        // 有可能执行过程中，通过 off 删除了某个事件对应的方法
-                        if (l > eventList[eventName].length) {
-                            i --;
-                            l = eventList[eventName].length;
+                        if (eventList[eventName][i]) {
+                            eventList[eventName][i].call(this, data);
                         }
-                        eventList[eventName][i].call(this, data);
                     }
+                    cleanNull(eventList[eventName]);
                 }
                 if (eventOnceList[eventName]) {
                     i = 0;
                     l = eventOnceList[eventName].length;
                     for (; i < l; i ++) {
-                        // 有可能执行过程中，通过 off 删除了某个事件对应的方法
-                        if (l > eventOnceList[eventName].length) {
-                            i --;
-                            l = eventOnceList[eventName].length;
+                        if (eventOnceList[eventName][i]) {
+                            eventOnceList[eventName][i].call(this, data);
+                            _off(eventName, eventOnceList[eventName][i], true);
                         }
-                        eventOnceList[eventName][i].call(this, data);
-                        _off(eventName, eventOnceList[eventName][i], true);
                     }
+                    cleanNull(eventOnceList[eventName]);
                 }
                 return this;
             },

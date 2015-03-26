@@ -171,7 +171,7 @@ rt.on('message', function(data) {
     console.log('某个当前用户在的 Conversation 接收到消息：', data);
 });
 
-// 接收断线或者网络状况不佳的事件（断网可测试）
+// 监听短信回执事件
 rt.on('receipt', function(data) {
     console.log('接收到消息阅读的回执：', data);
 });
