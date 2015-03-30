@@ -65,6 +65,7 @@ input {
     border: 1px solid #888;
     height: 400px;
     width: 800px;
+    text-align: left;
 }
 
 .print-wall p {
