@@ -1,6 +1,6 @@
 /**
  * @author wangxiao
- * @date 2014-12-31
+ * @date 2015-03-30
  *
  * 每位工程师都有保持代码优雅的义务
  * Each engineer has a duty to keep the code elegant
@@ -9,7 +9,7 @@
 void function(win) {
 
     // 当前版本
-    var VERSION = '2.0.0';
+    var VERSION = '2.0.1';
 
     // 获取命名空间
     var AV = win.AV || {};
@@ -206,17 +206,17 @@ void function(win) {
                 });
                 return this;
             },
-            // 获取信息回执（待服务器端 cid 返回上线再开放，暂时不开放）
-            // receipt: function(callback) {
-            //     var id = this.id;
-            //     cache.ec.on(eNameIndex.receipt, function(data) {
-            //         // 是否是当前 room 的信息
-            //         if (id === data.cid) {
-            //             callback(data);
-            //         }
-            //     });
-            //     return this;
-            // },
+            // 获取信息回执
+            receipt: function(callback) {
+                var id = this.id;
+                cache.ec.on(eNameIndex.receipt, function(data) {
+                    // 是否是当前 room 的信息
+                    if (id === data.cid) {
+                        callback(data);
+                    }
+                });
+                return this;
+            },
             list: function(callback) {
                 var options = {};
                 var id = this.id;
@@ -296,6 +296,8 @@ void function(win) {
             ec: undefined,
             // 所有已生成的 conversation 对象
             convIndex: {},
+            // 是否已经 open 完毕，主要在 close 方法中检测
+            openFlag: false,
             // 是否是用户关闭，如果不是将会断开重连
             closeFlag: false,
             // reuse 事件的重试 timer
@@ -329,6 +331,7 @@ void function(win) {
         // WebSocket Message
         var wsMessage = function(msg) {
             var data = JSON.parse(msg.data);
+            // 对服务端返回的数据进行逻辑包装
             if (data.cmd) {
                 var eventName = data.cmd;
                 if (data.op) {
@@ -345,7 +348,9 @@ void function(win) {
 
         // WebSocket send message
         var wsSend = function(data) {
-            cache.ws.send(JSON.stringify(data));
+            if (!cache.closeFlag) {
+                cache.ws.send(JSON.stringify(data));
+            }
         };
 
         engine.createSocket = function(server) {
@@ -364,7 +369,7 @@ void function(win) {
                 if (timer) {
                     clearTimeout(timer);
                 }
-                heartbeatsTimer = setTimeout(function() {
+                timer = setTimeout(function() {
                     wsSend({});
                 }, config.heartbeatsTime);
             });
@@ -621,6 +626,18 @@ void function(win) {
             });
         };
 
+        // 查询 session 在线情况
+        engine.querySession = function(options) {
+            wsSend({
+                cmd: 'session',
+                op: 'query',
+                appId: cache.options.appId,
+                peerId: cache.options.peerId,
+                i: options.serialId,
+                sessionPeerIds: options.peerIdList
+            });
+        };
+
         // 查询 conversation 的聊天记录
         engine.convLog = function(options) {
             wsSend({
@@ -833,12 +850,17 @@ void function(win) {
             cache.ec.on('session-opened', function(data) {
                 // 标记重试状态为 false，表示没有在重试
                 cache.resuseFlag = false;
+                cache.openFlag = true;
                 // 派发全局 open 事件，表示 realtime 已经启动
                 cache.ec.emit(eNameIndex.open, data);
             });
             // cache.ec.on('session-closed', function() {
                 // session 被关闭，则关闭当前 websocket 连接
             // });
+            
+            // 查询 session 在线情况
+            // cache.ec.on('session-query-result', function() {});
+            
             cache.ec.on('session-error', function(data) {
                 cache.ec.emit(eNameIndex.error, data);
             });
@@ -918,6 +940,7 @@ void function(win) {
             cache: cache,
             open: function(callback) {
                 var me = this;
+                cache.closeFlag = false;
                 engine.getServer(cache.options, function(data) {
                     if (data) {
                         engine.connect({
@@ -941,6 +964,9 @@ void function(win) {
             },
             // 表示关闭当前的 session 连接和 WebSocket 连接，并且回收内存
             close: function() {
+                if (!cache.openFlag) {
+                    throw('Use close() must after open() has successed.');
+                }
                 cache.closeFlag = true;
                 engine.closeSession();
                 cache.ws.close();
@@ -956,6 +982,10 @@ void function(win) {
             },
             emit: function(eventName, data) {
                 this.cache.ec.emit(eventName, data);
+                return this;
+            },
+            off: function(eventName, callback) {
+                this.cache.ec.off(eventName, callback);
                 return this;
             },
             room: function(argument, callback) {
@@ -1015,6 +1045,34 @@ void function(win) {
                 engine.convQuery(options);
                 return this;
             },
+            // 判断用户是否在线
+            ping: function(argument, callback) {
+                if (!callback) {
+                    throw('Ping must have callback.');
+                }
+                var peerIdList = [];
+                // 传入一个 id
+                if (typeof(argument) === 'string') {
+                    peerIdList.push(argument);
+                }
+                // 传入的是数组
+                else {
+                    peerIdList = argument;
+                }
+                var options = {
+                    serialId: engine.getSerialId(),
+                    peerIdList: peerIdList
+                };
+                var fun = function(data) {
+                    if (data.i === options.serialId) {
+                        callback(data.onlineSessionPeerIds);
+                        cache.ec.off('session-query-result', fun);
+                    }
+                };
+                cache.ec.on('session-query-result', fun);
+                engine.querySession(options);
+                return this;
+            }
         };
     };
 
@@ -1081,7 +1139,8 @@ void function(win) {
             }
         }
         xhr.onload = function(data) {
-            if (xhr.status === 200) {
+            // 检测认为 2xx 的返回都是成功
+            if (xhr.status >= 200 && xhr.status < 300) {
                 callback(JSON.parse(xhr.responseText));
             } else {
                 callback(null, JSON.parse(xhr.responseText));
@@ -1125,23 +1184,58 @@ void function(win) {
                 throw('No callback function.');
             }
             var list = eventName.split(/\s+/);
+            var tempList;
+            if (!isOnce) {
+                tempList = eventList;
+            } 
+            else {
+                tempList = eventOnceList;
+            }
             for (var i = 0, l = list.length; i < l; i ++) {
                 if (list[i]) {
-                    if (!isOnce) {
-                        if (!eventList[list[i]]) {
-                            eventList[list[i]] = [];
-                        }
-                        eventList[list[i]].push(fun);
+                    if (!tempList[list[i]]) {
+                        tempList[list[i]] = [];
                     }
-                    else {
-                        if (!eventOnceList[list[i]]) {
-                            eventOnceList[list[i]] = [];
-                        }
-                        eventOnceList[list[i]].push(fun);
+                    tempList[list[i]].push(fun);
+                }
+            }
+        };
+        
+        var _off = function(eventName, fun, isOnce) {
+            var tempList;
+            if (!isOnce) {
+                tempList = eventList;
+            } else {
+                tempList = eventOnceList;
+            }
+            if (tempList[eventName]) {
+                var i = 0;
+                var l = tempList[eventName].length;
+                for (; i < l; i ++) {
+                    if (tempList[eventName][i] === fun) {
+                        tempList[eventName][i] = null;
+                        // 每次只清除一个相同事件绑定
+                        return;
                     }
                 }
             }
         };
+
+        function cleanNull(list) {
+            var tempList = [];
+            var i = 0;
+            var l = list.length;
+            if (l) {
+                for (; i < l; i ++) {
+                    if (list[i]) {
+                        tempList.push(list[i]);
+                    }
+                }
+                return tempList;
+            } else {
+                return null;
+            }
+        }
 
         return {
             on: function(eventName, fun) {
@@ -1162,38 +1256,27 @@ void function(win) {
                     i = 0;
                     l = eventList[eventName].length;
                     for (; i < l; i ++) {
-                        // 有可能执行过程中，删除了某个事件对应的方法
-                        if (l > eventList[eventName].length) {
-                            i --;
-                            l = eventList[eventName].length;
+                        if (eventList[eventName][i]) {
+                            eventList[eventName][i].call(this, data);
                         }
-                        eventList[eventName][i].call(this, data);
                     }
+                    eventList[eventName] = cleanNull(eventList[eventName]);
                 }
                 if (eventOnceList[eventName]) {
                     i = 0;
                     l = eventOnceList[eventName].length;
                     for (; i < l; i ++) {
-                        // 有可能执行过程中，删除了某个事件对应的方法
-                        if (l > eventOnceList[eventName].length) {
-                            i --;
-                            l = eventOnceList[eventName].length;
+                        if (eventOnceList[eventName][i]) {
+                            eventOnceList[eventName][i].call(this, data);
+                            _off(eventName, eventOnceList[eventName][i], true);
                         }
-                        eventOnceList[eventName][i].call(this, data);
                     }
+                    eventOnceList[eventName] = cleanNull(eventOnceList[eventName]);
                 }
                 return this;
             },
             off: function(eventName, fun) {
-                if (eventList[eventName]) {
-                    var i = 0;
-                    var l = eventList[eventName].length;
-                    for (; i < l; i ++) {
-                        if (eventList[eventName][i] === fun) {
-                            eventList[eventName].splice(i, 1);
-                        }
-                    }
-                }
+                _off(eventName, fun);
                 return this;
             }
         };

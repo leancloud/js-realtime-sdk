@@ -43,6 +43,14 @@ rt.on('open', function() {
         rt.query(function(data) {
             console.log('查询 Conversation 所有相关信息：', data);
         });
+
+        // 查询对应 clientId 的用户是否处于在线状态
+        rt.ping([
+            'LeanCloud111',
+            'LeanCloud02'
+        ], function(data) {
+            console.log('查询用户在线状态：', data);
+        });
     }
 });
 
@@ -111,6 +119,11 @@ rt.on('create', function(data) {
         console.log('当前 Conversation 收到消息：', data);
     });
 
+    // 当前 Conversation 接收到消息
+    conv.receipt(function(data) {
+        console.log('当前 Conversation 收到消息回执：', data);
+    });
+
     // 获取当前 Conversation 中的成员信息
     conv.list(function(data) {
         console.log('列出当前 Conversation 的成员列表：', data);
@@ -158,7 +171,7 @@ rt.on('message', function(data) {
     console.log('某个当前用户在的 Conversation 接收到消息：', data);
 });
 
-// 接收断线或者网络状况不佳的事件（断网可测试）
+// 监听短信回执事件
 rt.on('receipt', function(data) {
     console.log('接收到消息阅读的回执：', data);
 });
@@ -172,6 +185,21 @@ rt.on('reuse', function() {
 // setTimeout(function() {
 //     rt.close();
 // }, 10000);
+
+var eventFun = function(data) {
+    console.log('接收到自定义事件', data);
+};
+
+// 监听自定义事件
+rt.on('LeanCloud123', eventFun);
+
+// 取消绑定自定义事件
+rt.off('LeanCloud123', eventFun);
+
+// 派发自定义事件
+rt.emit('LeanCloud123', {
+    test: 123
+});
 
 function authFun(options, callback) {
     // 将以上签名必要参数及当前应用状态信息发送到应用服务器端做权限判
