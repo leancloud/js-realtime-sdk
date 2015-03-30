@@ -35,6 +35,10 @@ input {
     opacity: 1;
 }
 
+.strong {
+    color: #f00;
+}
+
 .item {
     margin: 10px 0px;
 }
