@@ -61,8 +61,7 @@ void function(win) {
     // 生成 conversation 对象，挂载所有 conversation 相关方法，每次调用实例化
     var newConvObject = function(cache) {
 
-        var addOrRemove = function(argument, callback, cmd) {
-            var me = this;
+        var addOrRemove = function(cid, argument, callback, cmd) {
             var members = [];
             var options;
             var fun;
@@ -77,7 +76,7 @@ void function(win) {
                 members = argument;
             }
             options = {
-                cid: me.id,
+                cid: cid,
                 members: members,
                 serialId: engine.getSerialId()
             };
@@ -107,11 +106,11 @@ void function(win) {
             // cid 即 conversation id
             id: '',
             add: function(argument, callback) {
-                addOrRemove(argument, callback, 'add');
+                addOrRemove(this.id, argument, callback, 'add');
                 return this;
             },
             remove: function(argument, callback) {
-                addOrRemove(argument, callback, 'remove');
+                addOrRemove(this.id, argument, callback, 'remove');
                 return this;
             },
             // 自己加入
@@ -349,7 +348,12 @@ void function(win) {
         // WebSocket send message
         var wsSend = function(data) {
             if (!cache.closeFlag) {
-                cache.ws.send(JSON.stringify(data));
+                if (!cache.ws) {
+                    throw('The realtimeObject must opened first. Please listening to the "open" event.');
+                }
+                else {
+                    cache.ws.send(JSON.stringify(data));
+                }
             }
         };
 
@@ -994,6 +998,9 @@ void function(win) {
                 if (typeof argument === 'string') {
                     convObject.id = argument;
                     cache.convIndex[convObject.id] = convObject;
+                    if (callback) {
+                        callback();
+                    }
                 }
                 // 传入 options
                 else {
