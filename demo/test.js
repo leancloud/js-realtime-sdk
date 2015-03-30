@@ -1,11 +1,12 @@
-var rt;
-var conv;
 // 请将 AppId 改为你自己的 AppId
 var appId = '9p6hyhh60av3ukkni3i9z53q1l8yy3cijj6sie3cewft18vm';
-var firstFlag = true;
+// 每个客户端自定义的 id
+var clientId = 'LeanCloud111';
 
-// 已有 converstion
-var conv2;
+var rt;
+var conv;
+var convOld;
+var firstFlag = true;
 
 // Demo 中聊天相关的主逻辑
 function main() {
@@ -14,7 +15,7 @@ function main() {
     rt = AV.realtime({
         appId: appId,
         // appId: 'pyon3kvufmleg773ahop2i7zy0tz2rfjx5bh82n7h5jzuwjg',
-        clientId: 'LeanCloud111'
+        clientId: clientId
         // 是否开启服务器端认证
         // auth: authFun
     });
@@ -165,11 +166,11 @@ function main() {
         });
 
         // 这是一个已有的对话，通过房间 id 生成它的对话实例
-        conv2 = rt.conv('55150e62e4b0d4d151ef12cf', function() {
+        convOld = rt.conv('55150e62e4b0d4d151ef12cf', function() {
             console.log('已经获取已有房间的实例');
         });
 
-        conv2.add([
+        convOld.add([
             'LeanCloud05', 'LeanCloud06'
         ], function(data) {
             console.log('已有的房间成功添加新的用户：', data);
@@ -261,6 +262,7 @@ function showLog(msg, data) {
 var openBtn = document.getElementById('open-btn');
 var sendBtn = document.getElementById('send-btn');
 var changeIdBtn = document.getElementById('change-id-btn');
+var changeNameBtn = document.getElementById('change-name-btn');
 
 openBtn.addEventListener('click', function() {
     var val = document.getElementById('input-appId').value;
@@ -275,6 +277,19 @@ sendBtn.addEventListener('click', sendMsg);
 changeIdBtn.addEventListener('click', function() {
     var id = document.getElementById('input-cid').value;
     createNewRoom(id);
+    alert('修改 Room id 成功！');
+});
+
+changeNameBtn.addEventListener('click', function() {
+    clientId = document.getElementById('input-name').value;
+    rt.close();
+    rt = AV.realtime({
+        appId: appId,
+        clientId: clientId
+    }, function() {
+        var id = document.getElementById('input-cid').value;
+        createNewRoom(id);
+    });
 });
 
 function bindReceive() {
@@ -285,6 +300,7 @@ function bindReceive() {
         localStorage.setItem(itemName, id);
     }
     document.getElementById('input-cid').value = id;
+    document.getElementById('input-name').value = clientId;
     window.addEventListener('close', function() {
         localStorage.removeItem(itemName);
     });
@@ -292,12 +308,14 @@ function bindReceive() {
 }
 
 function createNewRoom(id) {
-    conv2 = rt.conv(id);
+    convOld = rt.conv(id);
     showLog('房间的 id:  ' + id);
-    conv2.list(function(data) {
-        showLog('列出当前 Conversation 的成员列表：', data);
+    convOld.join(function() {
+        convOld.list(function(data) {
+            showLog('当前 Conversation 的成员列表：', data);
+        });
     });
-    conv2.receive(function(data) {
+    convOld.receive(function(data) {
         console.log(data);
         var text = '';
         if (data.msg.test) {
@@ -305,7 +323,7 @@ function createNewRoom(id) {
         } else {
             text = JSON.stringify(data.msg);
         }
-        showLog('朋友：', text);
+        showLog(data.fromPeerId + '：', text);
     });
 }
 
@@ -314,13 +332,15 @@ function sendMsg() {
         alert('请先连接服务器！');
         return;
     }
-    var dom = document.getElementById('input-send');
-    var val = dom.value;
-    conv2.send({
+    var input = document.getElementById('input-send');
+    var val = input.value;
+    convOld.send({
         test: val
     }, function(data) {
-        dom.value = '';
-        showLog('自己：', val);
+        input.value = '';
+        showLog('自己（' + clientId + ')： ' , val);
+        var dom = document.getElementById('print-wall');
+        dom.scrollTop = dom.scrollHeight;
     });
 }
 
