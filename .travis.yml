@@ -1,3 +1,4 @@
+sudo: false
 script: "echo 1"
 after_success: |
         cp src/AV.realtime.js demo/ && \
