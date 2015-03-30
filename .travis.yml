@@ -1,0 +1,6 @@
+script: "echo 1"
+after_success: |
+        cp src/AV.realtime.js demo/ && \
+        sudo pip install ghp-import && \
+        ghp-import -n demo && \
+        git push -qf https://${TOKEN}@github.com/${TRAVIS_REPO_SLUG}.git gh-pages
