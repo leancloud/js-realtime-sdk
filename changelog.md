@@ -4,3 +4,4 @@
 * 修正调用 close() 方法的 bug
 * ajax 返回 2xx 都应该认为正确
 * 心跳链接中的 bug，close 之后无法停止
+* 修正已有的 conversation 获取实例失败的 bug
