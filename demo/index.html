@@ -10,7 +10,23 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <h1>Demo 在 console 中查看，请将 AppId 换成自己的 AppId 即可。</h1>
+    <h1>欢迎使用 LeanCloud 实时通信 SDK</h1>
+    <div class="item">
+        <p>请填入自己的 AppId，可以打开两个浏览器 tab 来模拟两个人的通信（AppId 要一致）</p>
+    </div>
+    <div class="item">
+        <label>请填入 AppId:</label>
+        <input id="input-appId" type="text">
+        <div id="open-btn" class="btn">连接服务器</div>
+    </div>
+    <div class="item">
+        <div id="print-wall" class="print-wall"></div>
+    </div>
+    <div class="item">
+        <label>输入信息：</label>
+        <input id="input-send" type="text">
+        <div id="send-btn" class="btn">发送</div>
+    </div>
 <script src="../src/AV.realtime.js"></script>
 <script src="test.js"></script>
 </body>
