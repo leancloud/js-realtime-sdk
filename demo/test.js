@@ -1,5 +1,8 @@
 var rt;
 var conv;
+
+// 已有房间
+var conv2;
 var firstFlag = true;
 
 // 创建聊天实例（支持单页多实例）
@@ -154,6 +157,17 @@ rt.on('create', function(data) {
     conv.count(function(num) {
         console.log('取得当前的用户数量：' + num);
     });
+
+    // 这是一个已有的对话，通过房间 id 生成它的对话实例
+    conv2 = rt.conv('55150e62e4b0d4d151ef12cf', function() {
+        console.log('已经获取已有房间的实例');
+    });
+
+    conv2.add([
+        'LeanCloud05', 'LeanCloud06'
+    ], function(data) {
+        console.log('已有的房间成功添加新的用户：', data);
+    });    
 });
 
 // 监听所有用户加入的情况
