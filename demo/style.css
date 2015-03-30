@@ -16,6 +16,8 @@ h1 {
 input {
     padding: 2px 3px;
     width: 320px;
+    border: 1px solid #ccc;
+    margin: 5px;
 }
 
 .btn {
@@ -48,9 +50,10 @@ input {
 }
 
 .change-cid {
-    margin: 50px auto;
+    margin: 20px auto;
     border: 1px solid #ae0000;
-    width: 512px;
+    max-width: 512px;
+    width: 88%;
     padding: 10px;
 }
 
@@ -63,8 +66,9 @@ input {
     margin: 20px auto;
     padding: 20px;
     border: 1px solid #888;
-    height: 400px;
-    width: 800px;
+    height: 320px;
+    max-width: 800px;
+    width: 84%;
     text-align: left;
 }
 
