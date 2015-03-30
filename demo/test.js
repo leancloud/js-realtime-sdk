@@ -323,7 +323,7 @@ function createNewRoom(id) {
         } else {
             text = JSON.stringify(data.msg);
         }
-        showLog(data.fromPeerId + '：', text);
+        showLog('朋友（' + data.fromPeerId + '）：', text);
     });
 }
 
