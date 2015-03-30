@@ -260,6 +260,7 @@ function showLog(msg, data) {
 
 var openBtn = document.getElementById('open-btn');
 var sendBtn = document.getElementById('send-btn');
+var changeIdBtn = document.getElementById('change-id-btn');
 
 openBtn.addEventListener('click', function() {
     var val = document.getElementById('input-appId').value;
@@ -282,6 +283,11 @@ sendBtn.addEventListener('click', function() {
     });
 });
 
+changeIdBtn.addEventListener('click', function() {
+    var id = document.getElementById('input-cid').value;
+    createNewRoom(id);
+});
+
 function bindReceive() {
     var itemName = 'LeanCloud-realtime-sdk-demo-room-id';
     var id = localStorage.getItem(itemName);
@@ -289,6 +295,14 @@ function bindReceive() {
         id = conv.id;
         localStorage.setItem(itemName, id);
     }
+    document.getElementById('input-cid').value = id;
+    window.addEventListener('close', function() {
+        localStorage.removeItem(itemName);
+    });
+    createNewRoom(id);
+}
+
+function createNewRoom(id) {
     conv2 = rt.conv(id);
     showLog('房间的 id:' + id);
     conv2.list(function(data) {
@@ -303,8 +317,5 @@ function bindReceive() {
             text = JSON.stringify(data.msg);
         }
         showLog('收到新消息：' + text);
-    });
-    window.addEventListener('close', function() {
-        localStorage.removeItem(itemName);
     });
 }
