@@ -248,13 +248,13 @@ function authFun(options, callback) {
 function showLog(msg, data) {
     if (data) {
         console.log(msg, data);
-        msg += JSON.stringify(data);
+        msg = msg + '<span class="strong">' + JSON.stringify(data) + '</span>';
     } else {
         console.log(msg);
     }
     var div = document.getElementById('print-wall');
     var p = document.createElement('p');
-    p.innerText = msg;
+    p.innerHTML = msg;
     div.appendChild(p);
 }
 
@@ -270,18 +270,7 @@ openBtn.addEventListener('click', function() {
     main();
 });
 
-sendBtn.addEventListener('click', function() {
-    if (firstFlag) {
-        alert('请先连接服务器！');
-        return;
-    }
-    var val = document.getElementById('input-send').value;
-    conv2.send({
-        test: val
-    }, function(data) {
-        showLog('发送的消息服务端已收收到，查看另一个客户端，可能已经收到这条消息。');
-    });
-});
+sendBtn.addEventListener('click', sendMsg);
 
 changeIdBtn.addEventListener('click', function() {
     var id = document.getElementById('input-cid').value;
@@ -304,7 +293,7 @@ function bindReceive() {
 
 function createNewRoom(id) {
     conv2 = rt.conv(id);
-    showLog('房间的 id:' + id);
+    showLog('房间的 id:  ' + id);
     conv2.list(function(data) {
         showLog('列出当前 Conversation 的成员列表：', data);
     });
@@ -316,6 +305,27 @@ function createNewRoom(id) {
         } else {
             text = JSON.stringify(data.msg);
         }
-        showLog('收到新消息：' + text);
+        showLog('朋友：', text);
     });
 }
+
+function sendMsg() {
+    if (firstFlag) {
+        alert('请先连接服务器！');
+        return;
+    }
+    var dom = document.getElementById('input-send');
+    var val = dom.value;
+    conv2.send({
+        test: val
+    }, function(data) {
+        dom.value = '';
+        showLog('自己：', val);
+    });
+}
+
+document.body.addEventListener('keydown', function(e) {
+    if (e.keyCode === 13) {
+        sendMsg();
+    }
+});
