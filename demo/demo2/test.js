@@ -102,7 +102,7 @@ function sendMsg() {
 function showLog(msg, data) {
     if (data) {
         console.log(msg, data);
-        msg = msg + '<span class="strong">' + JSON.stringify(data) + '</span>';
+        msg = msg + '<span class="strong">' + encodeHTML(JSON.stringify(data)) + '</span>';
     } else {
         console.log(msg);
     }
@@ -110,4 +110,14 @@ function showLog(msg, data) {
     var p = document.createElement('p');
     p.innerHTML = msg;
     div.appendChild(p);
+}
+
+function encodeHTML(source) {
+    return String(source)
+        .replace(/&/g,'&amp;')
+        .replace(/</g,'&lt;')
+        .replace(/>/g,'&gt;')
+        .replace(/\\/g,'&#92;')
+        .replace(/"/g,'&quot;')
+        .replace(/'/g,'&#39;');
 }
