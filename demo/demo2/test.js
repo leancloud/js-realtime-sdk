@@ -68,6 +68,11 @@ function main() {
         });
 
     });
+
+    // 监听服务情况
+    rt.on('resue', function() {
+        showLog('服务器正在重连，请耐心等待。。。');
+    });
 }
 
 function sendMsg() {
