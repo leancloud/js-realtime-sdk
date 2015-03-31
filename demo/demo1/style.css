@@ -1,0 +1,26 @@
+* {
+    margin: 0px;
+    padding: 0px;
+}
+
+body {
+    padding-top: 25%;
+    text-align: center;
+    font-size: 13px;
+}
+
+h1 {
+    font-size: 22px;
+}
+
+a {
+    color: #00f;
+}
+
+.item {
+    margin: 10px 0px;
+}
+
+.item p {
+    margin: 5px;
+}
