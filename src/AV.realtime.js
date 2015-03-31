@@ -597,7 +597,7 @@ void function(win) {
                 cid: options.cid,
                 appId: cache.options.appId,
                 peerId: cache.options.peerId,
-                msg: options.data,
+                msg: JSON.stringify(options.data),
                 i: options.serialId,
                 // r 是否需要回执需要则1，否则不传
                 r: options.receipt || false,
@@ -917,7 +917,7 @@ void function(win) {
             cache.ec.on('direct', function(data) {
 
                 // 增加多媒体消息的数据格式化
-                data.msg = engine.getMediaMsg(data.msg);
+                data.msg = engine.getMediaMsg(JSON.parse(data.msg));
                 // 收到消息，立刻告知服务器
                 engine.convAck({
                     cid: data.cid,
