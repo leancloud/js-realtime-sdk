@@ -1,5 +1,5 @@
 script: "echo 1"
 after_success: |
         sudo pip install ghp-import && \
-        ghp-import -n demo && \
+        ghp-import -n . && \
         git push -qf https://${TOKEN}@github.com/${TRAVIS_REPO_SLUG}.git gh-pages
