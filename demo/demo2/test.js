@@ -24,6 +24,8 @@ openBtn.addEventListener('click', function() {
     }
 });
 
+sendBtn.addEventListener('click', sendMsg);
+
 document.body.addEventListener('keydown', function(e) {
     if (e.keyCode === 13) {
         sendMsg();
