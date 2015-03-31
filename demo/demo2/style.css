@@ -20,6 +20,10 @@ input {
     margin: 5px;
 }
 
+a {
+    color: #00f;
+}
+
 .btn {
     height: 22px;
     line-height: 22px;
