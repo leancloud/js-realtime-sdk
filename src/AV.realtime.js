@@ -597,7 +597,7 @@ void function(win) {
                 cid: options.cid,
                 appId: cache.options.appId,
                 peerId: cache.options.peerId,
-                msg: JSON.stringify(options.data),
+                msg: typeof(options.data) === 'string'? options.data : JSON.stringify(options.data),
                 i: options.serialId,
                 // r 是否需要回执需要则1，否则不传
                 r: options.receipt || false,
