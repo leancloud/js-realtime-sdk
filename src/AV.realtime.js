@@ -329,7 +329,7 @@ void function(win) {
 
         // WebSocket Message
         var wsMessage = function(msg) {
-            var data = JSON.parse(msg.data);
+            var data = msg.data;
             // 对服务端返回的数据进行逻辑包装
             if (data.cmd) {
                 var eventName = data.cmd;
@@ -597,7 +597,7 @@ void function(win) {
                 cid: options.cid,
                 appId: cache.options.appId,
                 peerId: cache.options.peerId,
-                msg: typeof(options.data) === 'string'? options.data : JSON.stringify(options.data),
+                msg: options.data,
                 i: options.serialId,
                 // r 是否需要回执需要则1，否则不传
                 r: options.receipt || false,
@@ -695,10 +695,12 @@ void function(win) {
 
         // 取出多媒体类型的格式
         engine.getMediaMsg = function(msg) {
+            
             // 检查是否是多媒体类型
             if (!msg.hasOwnProperty('_lctype')) {
                 return msg;
             }
+
             var obj = {
                 text: msg._lctext,
                 attr: msg._lcattrs
@@ -730,6 +732,7 @@ void function(win) {
                     obj.type = 'file';
                 break;
             }
+            obj = JSON.parse(obj);
             return obj;
         };
 
@@ -841,6 +844,7 @@ void function(win) {
                     };
                 break;
             }
+            obj = JSON.stringify(obj);
             return obj;
         };
 
@@ -921,7 +925,8 @@ void function(win) {
             cache.ec.on('direct', function(data) {
 
                 // 增加多媒体消息的数据格式化
-                data.msg = engine.getMediaMsg(JSON.parse(data.msg));
+                data.msg = engine.getMediaMsg(data.msg);
+                
                 // 收到消息，立刻告知服务器
                 engine.convAck({
                     cid: data.cid,
