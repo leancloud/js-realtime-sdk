@@ -701,10 +701,14 @@ void function(win) {
             }
             var obj = {
                 text: msg._lctext,
-                attr: msg._lcattrs,
-                url: msg._lcfile.url,
-                metaData: msg._lcfile.metaData
+                attr: msg._lcattrs
             };
+            if (msg._lcfile && msg._lcfile.url) {
+                obj.url = msg._lcfile.url;
+            }
+            if (msg._lcfile && msg._lcfile.metaData) {
+                obj.metaData = msg._lcfile.metaData;
+            }
             // 多媒体类型
             switch(msg._lctype) {
                 case -1:
