@@ -696,12 +696,13 @@ void function(win) {
 
         // 取出多媒体类型的格式
         engine.getMediaMsg = function(msg) {
-            
+
             // 检查是否是多媒体类型
-            if (!msg.hasOwnProperty('_lctype')) {
+            if (!tool.isJSONString(msg) || msg.indexOf('_lctype') < 0) {
                 return msg;
             }
 
+            msg = JSON.parse(msg);
             var obj = {
                 text: msg._lctext,
                 attr: msg._lcattrs
@@ -733,7 +734,6 @@ void function(win) {
                     obj.type = 'file';
                 break;
             }
-            obj = JSON.parse(obj);
             return obj;
         };
 
@@ -1132,6 +1132,11 @@ void function(win) {
             return Date.now().toString(36) + Math.random().toString(36).substring(2, 3);
         };
         return 'AV-' + getIdItem() + '-' + getIdItem() + '-' + getIdItem();
+    };
+
+    // 检查是否是 JSON 格式的字符串
+    tool.isJSONString = function(obj) {
+        return /^\{.*\}$/.test(obj);
     };
 
     // 输出 log
