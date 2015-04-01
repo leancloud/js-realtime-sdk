@@ -329,7 +329,8 @@ void function(win) {
 
         // WebSocket Message
         var wsMessage = function(msg) {
-            var data = msg.data;
+            var data = JSON.parse(msg.data);
+            
             // 对服务端返回的数据进行逻辑包装
             if (data.cmd) {
                 var eventName = data.cmd;
