@@ -697,12 +697,18 @@ void function(win) {
         // 取出多媒体类型的格式
         engine.getMediaMsg = function(msg) {
 
+            // 检查是否是 JSON 类型
+            if (!tool.isJSONString(msg)) {
+                return msg;
+            }
+            
+            msg = JSON.parse(msg);
+
             // 检查是否是多媒体类型
-            if (!tool.isJSONString(msg) || msg.indexOf('_lctype') < 0) {
+            if (!msg.hasOwnProperty('_lctype')) {
                 return msg;
             }
 
-            msg = JSON.parse(msg);
             var obj = {
                 text: msg._lctext,
                 attr: msg._lcattrs
