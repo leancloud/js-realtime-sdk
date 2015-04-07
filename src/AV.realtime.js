@@ -1016,7 +1016,7 @@ void function(win) {
                     convObject.id = argument;
                     cache.convIndex[convObject.id] = convObject;
                     if (callback) {
-                        callback();
+                        callback(convObject);
                     }
                 }
                 // 传入 options
@@ -1030,7 +1030,7 @@ void function(win) {
                             convObject.id = data.cid;
                             cache.convIndex[convObject.id] = convObject;
                             if (callback) {
-                                callback(data);
+                                callback(convObject);
                             }
                             cache.ec.emit(eNameIndex.create, data);
                             cache.ec.off('conv-started', fun);
