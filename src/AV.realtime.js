@@ -330,6 +330,7 @@ void function(win) {
         // WebSocket Message
         var wsMessage = function(msg) {
             var data = JSON.parse(msg.data);
+            
             // 对服务端返回的数据进行逻辑包装
             if (data.cmd) {
                 var eventName = data.cmd;
@@ -695,16 +696,30 @@ void function(win) {
 
         // 取出多媒体类型的格式
         engine.getMediaMsg = function(msg) {
-            // 检查是否是多媒体类型
-            if (!msg.hasOwnProperty('_lctype')) {
+
+            // 检查是否是 JSON 类型
+            if (!tool.isJSONString(msg)) {
                 return msg;
             }
+            
+            var msgString = msg;
+            msg = JSON.parse(msg);
+
+            // 检查是否是多媒体类型
+            if (!msg.hasOwnProperty('_lctype')) {
+                return msgString;
+            }
+
             var obj = {
                 text: msg._lctext,
-                attr: msg._lcattrs,
-                url: msg._lcfile.url,
-                metaData: msg._lcfile.metaData
+                attr: msg._lcattrs
             };
+            if (msg._lcfile && msg._lcfile.url) {
+                obj.url = msg._lcfile.url;
+            }
+            if (msg._lcfile && msg._lcfile.metaData) {
+                obj.metaData = msg._lcfile.metaData;
+            }
             // 多媒体类型
             switch(msg._lctype) {
                 case -1:
@@ -837,6 +852,7 @@ void function(win) {
                     };
                 break;
             }
+            obj = JSON.stringify(obj);
             return obj;
         };
 
@@ -918,6 +934,7 @@ void function(win) {
 
                 // 增加多媒体消息的数据格式化
                 data.msg = engine.getMediaMsg(data.msg);
+                
                 // 收到消息，立刻告知服务器
                 engine.convAck({
                     cid: data.cid,
@@ -1122,6 +1139,11 @@ void function(win) {
             return Date.now().toString(36) + Math.random().toString(36).substring(2, 3);
         };
         return 'AV-' + getIdItem() + '-' + getIdItem() + '-' + getIdItem();
+    };
+
+    // 检查是否是 JSON 格式的字符串
+    tool.isJSONString = function(obj) {
+        return /^\{.*\}$/.test(obj);
     };
 
     // 输出 log

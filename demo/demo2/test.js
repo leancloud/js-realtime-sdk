@@ -18,10 +18,8 @@ openBtn.addEventListener('click', function() {
     var val = document.getElementById('input-name').value;
     if (val) {
         clientId = val;
-        main();
-    } else {
-        alert('请先填入昵称！');
     }
+    main();
 });
 
 sendBtn.addEventListener('click', sendMsg);
@@ -59,8 +57,8 @@ function main() {
         room.receive(function(data) {
             console.log(data);
             var text = '';
-            if (data.msg.test) {
-                text = data.msg.test;
+            if (data.msg.type) {
+                text = data.msg.text;
             } else {
                 text = JSON.stringify(data.msg);
             }
@@ -85,9 +83,11 @@ function sendMsg() {
     var input = document.getElementById('input-send');
     var val = input.value;
     
-    // 向这个房间发送消息
+    // 向这个房间发送消息，这段代码是兼容多终端格式的，包括 iOS、Android、Window Phone
     room.send({
-        test: val
+        text: val
+    }, {
+        type: 'text'
     }, function(data) {
 
         // 发送成功之后的回调
@@ -96,6 +96,27 @@ function sendMsg() {
         var dom = document.getElementById('print-wall');
         dom.scrollTop = dom.scrollHeight;
     });
+
+    // 发送多媒体消息，如果想测试图片发送，可以打开注释    
+    // room.send({
+    //     text: '图片测试',
+    //     // 自定义的属性
+    //     attr: {
+    //         a:123
+    //     },
+    //     url: 'https://leancloud.cn/images/static/press/Logo%20-%20Blue%20Padding.png',
+    //     metaData: {
+    //         name:'logo',
+    //         format:'png',
+    //         height: 123,
+    //         width: 123,
+    //         size: 888
+    //     }
+    // }, {
+    //    type: 'image'
+    // }, function(data) {
+    //     console.log('图片数据发送成功！');
+    // });
 }
 
 // demo 中输出代码
