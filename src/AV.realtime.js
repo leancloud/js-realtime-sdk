@@ -702,11 +702,12 @@ void function(win) {
                 return msg;
             }
             
+            var msgString = msg;
             msg = JSON.parse(msg);
 
             // 检查是否是多媒体类型
             if (!msg.hasOwnProperty('_lctype')) {
-                return msg;
+                return msgString;
             }
 
             var obj = {
