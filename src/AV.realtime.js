@@ -694,11 +694,16 @@ void function(win) {
             });
         };
 
-        // 取出多媒体类型的格式
+        // 取出多媒体类型的格式（内置 HTML 转义逻辑）
         engine.getMediaMsg = function(msg) {
 
-            // 检查是否是 JSON 类型
+            // 检查是否是 JSON 格式的一个 String 类型
             if (!tool.isJSONString(msg)) {
+
+                // 是否对消息中的 HTML 进行转义
+                if (cache.options.encodeHTML) {
+                    msg = tool.encodeHTML(msg);
+                }
                 return msg;
             }
             
@@ -711,15 +716,20 @@ void function(win) {
             }
 
             var obj = {
-                text: msg._lctext,
                 attr: msg._lcattrs
             };
+
+            // 是否对消息中的 HTML 进行转义，对媒体格式仅对 text 转义
+            if (cache.options.encodeHTML) {
+                obj.text = tool.encodeHTML(msg._lctext);
+            }
             if (msg._lcfile && msg._lcfile.url) {
                 obj.url = msg._lcfile.url;
             }
             if (msg._lcfile && msg._lcfile.metaData) {
                 obj.metaData = msg._lcfile.metaData;
             }
+            
             // 多媒体类型
             switch(msg._lctype) {
                 case -1:
@@ -941,10 +951,6 @@ void function(win) {
                     mid: data.id
                 });
 
-                // 是否对消息中的 HTML 进行转义
-                if (cache.options.encodeHTML) {
-                    data.msg = tool.encodeHTML(data.msg);
-                }
                 cache.ec.emit(eNameIndex.message, data);
             });
 
@@ -1216,13 +1222,28 @@ void function(win) {
 
     // HTML 转义
     tool.encodeHTML = function(source) {
-        return String(source)
-        .replace(/&/g,'&amp;')
-        .replace(/</g,'&lt;')
-        .replace(/>/g,'&gt;')
-        .replace(/\\/g,'&#92;')
-        .replace(/"/g,'&quot;')
-        .replace(/'/g,'&#39;');
+        var encodeHTML = function(str) {
+            return String(str)
+            .replace(/&/g,'&amp;')
+            .replace(/</g,'&lt;')
+            .replace(/>/g,'&gt;');
+            // 考虑到其中有可能是 JSON，所以不做 HTML 强过滤，仅对标签过滤
+            // .replace(/\\/g,'&#92;')
+            // .replace(/"/g,'&quot;')
+            // .replace(/'/g,'&#39;');
+        };
+
+        // 对象类型
+        if (typeof(source) === 'object') {
+            for (var key in source) {
+                source[key] = tool.encodeHTML(source[key]);
+            }
+            return source;
+        }
+        // 字符串
+        else {
+            return encodeHTML(source);
+        }
     };
 
     // 小型的私有事件中心
