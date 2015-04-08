@@ -35,7 +35,9 @@ function main() {
     // 创建实时通信实例
     rt = AV.realtime({
         appId: appId,
-        clientId: clientId
+        clientId: clientId,
+        // 是否 HTML 转义，防止 XSS
+        encodeHTML: true
     });
 
     // 监听连接成功事件

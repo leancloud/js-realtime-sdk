@@ -940,6 +940,11 @@ void function(win) {
                     cid: data.cid,
                     mid: data.id
                 });
+
+                // 是否对消息中的 HTML 进行转义
+                if (cache.options.encodeHTML) {
+                    data.msg = tool.encodeHTML(data.msg);
+                }
                 cache.ec.emit(eNameIndex.message, data);
             });
 
@@ -1109,8 +1114,17 @@ void function(win) {
             throw('Options must have appId.');
         }
         else {
-            // clientId 对应的就是 peerId，如果不传入服务器会自动生成，客户端没有持久化该数据。
-            options.peerId = options.clientId;
+            options = {
+                // LeanCloud 中唯一的服务 id
+                appId: options.appId,
+                // clientId 对应的就是 peerId，如果不传入服务器会自动生成，客户端没有持久化该数据。
+                peerId: options.clientId,
+                // 是否开启 HTML 转义，防止 XSS 攻击，默认关闭
+                encodeHTML: options.encodeHTML || false,
+                // 是否开启服务器端认证，传入认证函数
+                auth: options.auth
+            };
+            
             var realtimeObj = newRealtimeObject();
             realtimeObj.cache.options = options;
             realtimeObj.cache.ec = tool.eventCenter();
@@ -1198,6 +1212,17 @@ void function(win) {
     // 获取当前时间的时间戳
     tool.now = function() {
         return Date.now();
+    };
+
+    // HTML 转义
+    tool.encodeHTML = function(source) {
+        return String(source)
+        .replace(/&/g,'&amp;')
+        .replace(/</g,'&lt;')
+        .replace(/>/g,'&gt;')
+        .replace(/\\/g,'&#92;')
+        .replace(/"/g,'&quot;')
+        .replace(/'/g,'&#39;');
     };
 
     // 小型的私有事件中心
