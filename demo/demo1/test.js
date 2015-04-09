@@ -40,9 +40,11 @@ rt.on('open', function() {
             members: [
                 'LeanCloud02'
             ],
+            // 创建暂态的聊天室
+            // transient: true,
             // 默认的数据，可以放 Conversation 名字等
             data: {
-                m: 123
+                test: 123
             }
         }, function(data) {
             if (data) {
