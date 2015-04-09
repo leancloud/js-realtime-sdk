@@ -16,7 +16,9 @@ var firstFlag = true;
 // 创建聊天实例（支持单页多实例）
 rt = AV.realtime({
     appId: appId,
-    clientId: clientId
+    clientId: clientId,
+    // 是否开启 HTML 转义，防止 XSS
+    encodeHTML: true
     // 是否开启服务器端认证
     // auth: authFun
 });
@@ -38,9 +40,11 @@ rt.on('open', function() {
             members: [
                 'LeanCloud02'
             ],
+            // 创建暂态的聊天室
+            // transient: true,
             // 默认的数据，可以放 Conversation 名字等
             data: {
-                m: 123
+                test: 123
             }
         }, function(data) {
             if (data) {

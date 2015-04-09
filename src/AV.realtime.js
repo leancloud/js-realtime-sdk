@@ -694,11 +694,16 @@ void function(win) {
             });
         };
 
-        // 取出多媒体类型的格式
+        // 取出多媒体类型的格式（内置 HTML 转义逻辑）
         engine.getMediaMsg = function(msg) {
 
-            // 检查是否是 JSON 类型
+            // 检查是否是 JSON 格式的一个 String 类型
             if (!tool.isJSONString(msg)) {
+
+                // 是否对消息中的 HTML 进行转义
+                if (cache.options.encodeHTML) {
+                    msg = tool.encodeHTML(msg);
+                }
                 return msg;
             }
             
@@ -711,15 +716,20 @@ void function(win) {
             }
 
             var obj = {
-                text: msg._lctext,
                 attr: msg._lcattrs
             };
+
+            // 是否对消息中的 HTML 进行转义，对媒体格式仅对 text 转义
+            if (cache.options.encodeHTML) {
+                obj.text = tool.encodeHTML(msg._lctext);
+            }
             if (msg._lcfile && msg._lcfile.url) {
                 obj.url = msg._lcfile.url;
             }
             if (msg._lcfile && msg._lcfile.metaData) {
                 obj.metaData = msg._lcfile.metaData;
             }
+            
             // 多媒体类型
             switch(msg._lctype) {
                 case -1:
@@ -940,6 +950,7 @@ void function(win) {
                     cid: data.cid,
                     mid: data.id
                 });
+
                 cache.ec.emit(eNameIndex.message, data);
             });
 
@@ -1016,7 +1027,7 @@ void function(win) {
                     convObject.id = argument;
                     cache.convIndex[convObject.id] = convObject;
                     if (callback) {
-                        callback();
+                        callback(convObject);
                     }
                 }
                 // 传入 options
@@ -1030,7 +1041,7 @@ void function(win) {
                             convObject.id = data.cid;
                             cache.convIndex[convObject.id] = convObject;
                             if (callback) {
-                                callback(data);
+                                callback(convObject);
                             }
                             cache.ec.emit(eNameIndex.create, data);
                             cache.ec.off('conv-started', fun);
@@ -1109,8 +1120,17 @@ void function(win) {
             throw('Options must have appId.');
         }
         else {
-            // clientId 对应的就是 peerId，如果不传入服务器会自动生成，客户端没有持久化该数据。
-            options.peerId = options.clientId;
+            options = {
+                // LeanCloud 中唯一的服务 id
+                appId: options.appId,
+                // clientId 对应的就是 peerId，如果不传入服务器会自动生成，客户端没有持久化该数据。
+                peerId: options.clientId,
+                // 是否开启 HTML 转义，防止 XSS 攻击，默认关闭
+                encodeHTML: options.encodeHTML || false,
+                // 是否开启服务器端认证，传入认证函数
+                auth: options.auth
+            };
+            
             var realtimeObj = newRealtimeObject();
             realtimeObj.cache.options = options;
             realtimeObj.cache.ec = tool.eventCenter();
@@ -1198,6 +1218,37 @@ void function(win) {
     // 获取当前时间的时间戳
     tool.now = function() {
         return Date.now();
+    };
+
+    // HTML 转义
+    tool.encodeHTML = function(source) {
+        var encodeHTML = function(str) {
+            if (typeof(str) === 'string') {
+                return str.replace(/&/g,'&amp;')
+                        .replace(/</g,'&lt;')
+                        .replace(/>/g,'&gt;');
+                        // 考虑到其中有可能是 JSON，所以不做 HTML 强过滤，仅对标签过滤
+                        // .replace(/\\/g,'&#92;')
+                        // .replace(/"/g,'&quot;')
+                        // .replace(/'/g,'&#39;');
+            } 
+            // 数字
+            else {
+                return str;
+            }
+        };
+
+        // 对象类型
+        if (typeof(source) === 'object') {
+            for (var key in source) {
+                source[key] = tool.encodeHTML(source[key]);
+            }
+            return source;
+        }
+        // 非对象类型
+        else {
+            return encodeHTML(source);
+        }
     };
 
     // 小型的私有事件中心
