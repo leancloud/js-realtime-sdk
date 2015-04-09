@@ -276,7 +276,7 @@ void function(win) {
                     }
                 };
                 cache.ec.on('conv-updated', fun);
-                engine.convUpate(options);
+                engine.convUpdate(options);
                 return this;
             }
         };
