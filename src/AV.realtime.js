@@ -1223,14 +1223,19 @@ void function(win) {
     // HTML 转义
     tool.encodeHTML = function(source) {
         var encodeHTML = function(str) {
-            return String(str)
-            .replace(/&/g,'&amp;')
-            .replace(/</g,'&lt;')
-            .replace(/>/g,'&gt;');
-            // 考虑到其中有可能是 JSON，所以不做 HTML 强过滤，仅对标签过滤
-            // .replace(/\\/g,'&#92;')
-            // .replace(/"/g,'&quot;')
-            // .replace(/'/g,'&#39;');
+            if (typeof(str) === 'string') {
+                return str.replace(/&/g,'&amp;')
+                        .replace(/</g,'&lt;')
+                        .replace(/>/g,'&gt;');
+                        // 考虑到其中有可能是 JSON，所以不做 HTML 强过滤，仅对标签过滤
+                        // .replace(/\\/g,'&#92;')
+                        // .replace(/"/g,'&quot;')
+                        // .replace(/'/g,'&#39;');
+            } 
+            // 数字
+            else {
+                return str;
+            }
         };
 
         // 对象类型
@@ -1240,7 +1245,7 @@ void function(win) {
             }
             return source;
         }
-        // 字符串
+        // 非对象类型
         else {
             return encodeHTML(source);
         }
