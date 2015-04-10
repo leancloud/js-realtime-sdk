@@ -1,6 +1,6 @@
 {
   "name": "leancloud-realtime.js",
-  "version": "2.0.1",
+  "version": "2.0.2",
   "homepage": "http://github.com/leancloud/js-realtime-sdk/",
   "authors": [
     "WangXiao <xwang@leancloud.rocks>"
