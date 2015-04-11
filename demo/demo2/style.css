@@ -82,4 +82,5 @@ a {
 
 .print-wall p {
     margin: 10px 0px;
+    word-wrap: break-word;
 }
