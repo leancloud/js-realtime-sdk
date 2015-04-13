@@ -310,7 +310,6 @@ void function(win) {
 
         // WebSocket Open
         var wsOpen = function() {
-            tool.log('WebSocket opened.');
             engine.bindEvent();
             engine.openSession({
                 serialId: engine.getSerialId()
@@ -323,7 +322,6 @@ void function(win) {
 
         // WebSocket Close
         var wsClose = function() {
-            tool.log('WebSocket closed.');
             // 派发全局 close 事件，表示 realtime 已经关闭
             cache.ec.emit(eNameIndex.close);
         };
@@ -1169,17 +1167,10 @@ void function(win) {
         return /^\{.*\}$/.test(obj);
     };
 
-    // 输出 log
-    tool.log = function(msg) {
-        console.log(msg);
-    };
-
     // Ajax get 请求
     tool.ajax = function(options, callback) {
         var url = options.url;
         var method = options.method || 'get';
-        var jsonp = options.jsonp || false;
-        var jsonpFun = '';
         var xhr;
 
         // 浏览器兼容，IE8+
@@ -1189,13 +1180,6 @@ void function(win) {
             xhr = new XMLHttpRequest();
         }
 
-        if (jsonp) {
-            jsonpFun = tool.getId();
-            
-            // 服务器返回 cb 参数中的函数名即可
-            url = url + '&cb=' + jsonpFun;
-            window[jsonpFun] = callback;
-        }
         xhr.open(method, url);
         
         if (method === 'post') {
@@ -1211,13 +1195,7 @@ void function(win) {
 
         xhr.onload = function(data) {
             if ((xhr.status >= 200 && xhr.status < 300) || (window.XDomainRequest && !xhr.status)) {
-                // 判断是否是 jsonp 返回的回调函数
-                if (jsonp && xhr.getResponseHeader('Content-Type') === 'text/javascript') {
-                    window.eval(xhr.responseText);
-                    window[jsonpFun] = null;
-                } else {
-                    callback(JSON.parse(xhr.responseText));
-                }
+                callback(JSON.parse(xhr.responseText));
             } else {
                 callback(null, JSON.parse(xhr.responseText));
             }
