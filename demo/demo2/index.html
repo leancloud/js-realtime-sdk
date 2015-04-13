@@ -30,7 +30,18 @@
         <input id="input-send" class="input-send" type="text">
         <div id="send-btn" class="btn">发送</div>
     </div>
+
+    <!-- 引入插件，兼容低版本浏览器 -->
+    <script type="text/javascript" src="../../plugin/web-socket-js/swfobject.js"></script>
+    <script type="text/javascript" src="../../plugin/web-socket-js/web_socket.js"></script>
+    <script type="text/javascript">
+    // Let the library know where WebSocketMain.swf is:
+    WEB_SOCKET_SWF_LOCATION = "../../plugin/web-socket-js/WebSocketMain.swf";
+    </script>
+
+    <!-- 引入 LeanCloud 实时通信 SDK -->
     <script src="../../src/AV.realtime.js"></script>
+    <!-- Demo 逻辑文件 -->
     <script src="test.js"></script>
 </body>
 </html>
