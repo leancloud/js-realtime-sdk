@@ -430,10 +430,10 @@ void function(win) {
         engine.getServer = function(options, callback) {
             var appId = options.appId;
             // 是否获取 wss 的安全链接
-            var secure = options.secure || true;
+            var secure = options.secure;
             var url = '';
             var protocol = 'http://';
-            if (win && win.location.protocol === 'https:') {
+            if (win && win.location.protocol === 'https:' && secure) {
                 protocol = 'https://';
             }
             url = protocol + 'router-g0-push.avoscloud.com/v1/route?appId=' + appId ;
@@ -1129,7 +1129,9 @@ void function(win) {
                 // 是否开启 HTML 转义，防止 XSS 攻击，默认关闭
                 encodeHTML: options.encodeHTML || false,
                 // 是否开启服务器端认证，传入认证函数
-                auth: options.auth
+                auth: options.auth,
+                // 是否要关掉安全连接，在需要兼容 flash 的时候需要关掉，默认开启。
+                secure: typeof(options.secure) === 'undefined'? true : options.secure
             };
             
             var realtimeObj = newRealtimeObject();
@@ -1153,13 +1155,13 @@ void function(win) {
     // 空函数
     tool.noop = function() {};
 
-    // 获取一个唯一 id，碰撞概率：基本不可能
+    // 获取一个唯一 id
     tool.getId = function() {
         // 与时间相关的随机因子
         var getIdItem = function() {
-            return Date.now().toString(36) + Math.random().toString(36).substring(2, 3);
+            return new Date().getTime().toString(36) + Math.random().toString(36).substring(2, 3);
         };
-        return 'AV-' + getIdItem() + '-' + getIdItem() + '-' + getIdItem();
+        return 'AV' + getIdItem();
     };
 
     // 检查是否是 JSON 格式的字符串
@@ -1176,8 +1178,26 @@ void function(win) {
     tool.ajax = function(options, callback) {
         var url = options.url;
         var method = options.method || 'get';
-        var xhr = new XMLHttpRequest();
+        var jsonp = options.jsonp || false;
+        var jsonpFun = '';
+        var xhr;
+
+        // 浏览器兼容，IE8+
+        if (window.XDomainRequest) {
+            xhr = new XDomainRequest();
+        } else {
+            xhr = new XMLHttpRequest();
+        }
+
+        if (jsonp) {
+            jsonpFun = tool.getId();
+            
+            // 服务器返回 cb 参数中的函数名即可
+            url = url + '&cb=' + jsonpFun;
+            window[jsonpFun] = callback;
+        }
         xhr.open(method, url);
+        
         if (method === 'post') {
             if (options.form) {
                 xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
@@ -1188,14 +1208,21 @@ void function(win) {
                 xhr.setRequestHeader('Access-Control-Allow-Methods',"POST, GET, OPTIONS, DELETE, PUT, HEAD");
             }
         }
+
         xhr.onload = function(data) {
-            // 检测认为 2xx 的返回都是成功
-            if (xhr.status >= 200 && xhr.status < 300) {
-                callback(JSON.parse(xhr.responseText));
+            if ((xhr.status >= 200 && xhr.status < 300) || (window.XDomainRequest && !xhr.status)) {
+                // 判断是否是 jsonp 返回的回调函数
+                if (jsonp && xhr.getResponseHeader('Content-Type') === 'text/javascript') {
+                    window.eval(xhr.responseText);
+                    window[jsonpFun] = null;
+                } else {
+                    callback(JSON.parse(xhr.responseText));
+                }
             } else {
                 callback(null, JSON.parse(xhr.responseText));
             }
         };
+
         xhr.onerror = function(data) {
             callback(null, data);
             throw('Network error.');
@@ -1218,7 +1245,7 @@ void function(win) {
 
     // 获取当前时间的时间戳
     tool.now = function() {
-        return Date.now();
+        return new Date().getTime();
     };
 
     // HTML 转义
