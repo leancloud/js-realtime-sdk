@@ -310,7 +310,6 @@ void function(win) {
 
         // WebSocket Open
         var wsOpen = function() {
-            tool.log('WebSocket opened.');
             engine.bindEvent();
             engine.openSession({
                 serialId: engine.getSerialId()
@@ -323,7 +322,6 @@ void function(win) {
 
         // WebSocket Close
         var wsClose = function() {
-            tool.log('WebSocket closed.');
             // 派发全局 close 事件，表示 realtime 已经关闭
             cache.ec.emit(eNameIndex.close);
         };
@@ -331,7 +329,7 @@ void function(win) {
         // WebSocket Message
         var wsMessage = function(msg) {
             var data = JSON.parse(msg.data);
-            
+
             // 对服务端返回的数据进行逻辑包装
             if (data.cmd) {
                 var eventName = data.cmd;
@@ -430,10 +428,10 @@ void function(win) {
         engine.getServer = function(options, callback) {
             var appId = options.appId;
             // 是否获取 wss 的安全链接
-            var secure = options.secure || true;
+            var secure = options.secure;
             var url = '';
             var protocol = 'http://';
-            if (win && win.location.protocol === 'https:') {
+            if (win && win.location.protocol === 'https:' && secure) {
                 protocol = 'https://';
             }
             url = protocol + 'router-g0-push.avoscloud.com/v1/route?appId=' + appId ;
@@ -707,7 +705,7 @@ void function(win) {
                 }
                 return msg;
             }
-            
+
             var msgString = msg;
             msg = JSON.parse(msg);
 
@@ -730,7 +728,7 @@ void function(win) {
             if (msg._lcfile && msg._lcfile.metaData) {
                 obj.metaData = msg._lcfile.metaData;
             }
-            
+
             // 多媒体类型
             switch(msg._lctype) {
                 case -1:
@@ -888,10 +886,10 @@ void function(win) {
             // cache.ec.on('session-closed', function() {
                 // session 被关闭，则关闭当前 websocket 连接
             // });
-            
+
             // 查询 session 在线情况
             // cache.ec.on('session-query-result', function() {});
-            
+
             cache.ec.on('session-error', function(data) {
                 cache.ec.emit(eNameIndex.error, data);
             });
@@ -945,7 +943,7 @@ void function(win) {
 
                 // 增加多媒体消息的数据格式化
                 data.msg = engine.getMediaMsg(data.msg);
-                
+
                 // 收到消息，立刻告知服务器
                 engine.convAck({
                     cid: data.cid,
@@ -1120,6 +1118,9 @@ void function(win) {
         else if (!options.appId) {
             throw('Options must have appId.');
         }
+        else if (!win.WebSocket) {
+            alert('Bowser must support WebSocket, please read LeanCloud doc and use plugin.');
+        }
         else {
             options = {
                 // LeanCloud 中唯一的服务 id
@@ -1129,9 +1130,11 @@ void function(win) {
                 // 是否开启 HTML 转义，防止 XSS 攻击，默认关闭
                 encodeHTML: options.encodeHTML || false,
                 // 是否开启服务器端认证，传入认证函数
-                auth: options.auth
+                auth: options.auth,
+                // 通过判断插件库中的对象是否存在来检测是否需要关掉安全链接，在需要兼容 flash 的时候需要关掉，默认开启。
+                secure: win.WebSocket.loadFlashPolicyFile ? false : true
             };
-            
+
             var realtimeObj = newRealtimeObject();
             realtimeObj.cache.options = options;
             realtimeObj.cache.ec = tool.eventCenter();
@@ -1153,13 +1156,13 @@ void function(win) {
     // 空函数
     tool.noop = function() {};
 
-    // 获取一个唯一 id，碰撞概率：基本不可能
+    // 获取一个唯一 id
     tool.getId = function() {
         // 与时间相关的随机因子
         var getIdItem = function() {
-            return Date.now().toString(36) + Math.random().toString(36).substring(2, 3);
+            return new Date().getTime().toString(36) + Math.random().toString(36).substring(2, 3);
         };
-        return 'AV-' + getIdItem() + '-' + getIdItem() + '-' + getIdItem();
+        return 'AV' + getIdItem();
     };
 
     // 检查是否是 JSON 格式的字符串
@@ -1167,17 +1170,21 @@ void function(win) {
         return /^\{.*\}$/.test(obj);
     };
 
-    // 输出 log
-    tool.log = function(msg) {
-        console.log(msg);
-    };
-
     // Ajax get 请求
     tool.ajax = function(options, callback) {
         var url = options.url;
         var method = options.method || 'get';
-        var xhr = new XMLHttpRequest();
+        var xhr;
+
+        // 浏览器兼容，IE8+
+        if (window.XDomainRequest) {
+            xhr = new XDomainRequest();
+        } else {
+            xhr = new XMLHttpRequest();
+        }
+
         xhr.open(method, url);
+
         if (method === 'post') {
             if (options.form) {
                 xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
@@ -1188,14 +1195,15 @@ void function(win) {
                 xhr.setRequestHeader('Access-Control-Allow-Methods',"POST, GET, OPTIONS, DELETE, PUT, HEAD");
             }
         }
+
         xhr.onload = function(data) {
-            // 检测认为 2xx 的返回都是成功
-            if (xhr.status >= 200 && xhr.status < 300) {
+            if ((xhr.status >= 200 && xhr.status < 300) || (window.XDomainRequest && !xhr.status)) {
                 callback(JSON.parse(xhr.responseText));
             } else {
                 callback(null, JSON.parse(xhr.responseText));
             }
         };
+
         xhr.onerror = function(data) {
             callback(null, data);
             throw('Network error.');
@@ -1218,7 +1226,7 @@ void function(win) {
 
     // 获取当前时间的时间戳
     tool.now = function() {
-        return Date.now();
+        return new Date().getTime();
     };
 
     // HTML 转义
@@ -1232,7 +1240,7 @@ void function(win) {
                         // .replace(/\\/g,'&#92;')
                         // .replace(/"/g,'&quot;')
                         // .replace(/'/g,'&#39;');
-            } 
+            }
             // 数字
             else {
                 return str;
@@ -1268,7 +1276,7 @@ void function(win) {
             var tempList;
             if (!isOnce) {
                 tempList = eventList;
-            } 
+            }
             else {
                 tempList = eventOnceList;
             }
@@ -1281,7 +1289,7 @@ void function(win) {
                 }
             }
         };
-        
+
         var _off = function(eventName, fun, isOnce) {
             var tempList;
             if (!isOnce) {

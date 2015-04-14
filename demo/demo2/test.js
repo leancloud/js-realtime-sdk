@@ -14,7 +14,7 @@ var firstFlag = true;
 var openBtn = document.getElementById('open-btn');
 var sendBtn = document.getElementById('send-btn');
 
-openBtn.addEventListener('click', function() {
+bindEvent(openBtn, 'click', function() {
     var val = document.getElementById('input-name').value;
     if (val) {
         clientId = val;
@@ -22,9 +22,9 @@ openBtn.addEventListener('click', function() {
     main();
 });
 
-sendBtn.addEventListener('click', sendMsg);
+bindEvent(sendBtn, 'click', sendMsg);
 
-document.body.addEventListener('keydown', function(e) {
+bindEvent(document.body, 'keydown', function(e) {
     if (e.keyCode === 13) {
         sendMsg();
     }
@@ -57,7 +57,7 @@ function main() {
 
         // 房间接受消息
         room.receive(function(data) {
-            console.log(data);
+            // console.log(data);
             var text = '';
             if (data.msg.type) {
                 text = data.msg.text;
@@ -124,10 +124,10 @@ function sendMsg() {
 // demo 中输出代码
 function showLog(msg, data) {
     if (data) {
-        console.log(msg, data);
+        // console.log(msg, data);
         msg = msg + '<span class="strong">' + encodeHTML(JSON.stringify(data)) + '</span>';
     } else {
-        console.log(msg);
+        // console.log(msg);
     }
     var div = document.getElementById('print-wall');
     var p = document.createElement('p');
@@ -143,4 +143,12 @@ function encodeHTML(source) {
         .replace(/\\/g,'&#92;')
         .replace(/"/g,'&quot;')
         .replace(/'/g,'&#39;');
+}
+
+function bindEvent(dom, eventName, fun) {
+    if (window.addEventListener) {
+        dom.addEventListener(eventName, fun);
+    } else {
+        dom.attachEvent('on' + eventName, fun);
+    }
 }

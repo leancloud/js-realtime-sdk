@@ -9,7 +9,9 @@
   "main": "src/AV.realtime.js",
   "ignore": [
     "demo",
-    "README.md"
+    "README.md",
+    ".travis.yml",
+    "changelog.md"
   ],
   "moduleType": [
     "amd",
