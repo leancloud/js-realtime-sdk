@@ -329,7 +329,7 @@ void function(win) {
         // WebSocket Message
         var wsMessage = function(msg) {
             var data = JSON.parse(msg.data);
-            
+
             // 对服务端返回的数据进行逻辑包装
             if (data.cmd) {
                 var eventName = data.cmd;
@@ -705,7 +705,7 @@ void function(win) {
                 }
                 return msg;
             }
-            
+
             var msgString = msg;
             msg = JSON.parse(msg);
 
@@ -728,7 +728,7 @@ void function(win) {
             if (msg._lcfile && msg._lcfile.metaData) {
                 obj.metaData = msg._lcfile.metaData;
             }
-            
+
             // 多媒体类型
             switch(msg._lctype) {
                 case -1:
@@ -886,10 +886,10 @@ void function(win) {
             // cache.ec.on('session-closed', function() {
                 // session 被关闭，则关闭当前 websocket 连接
             // });
-            
+
             // 查询 session 在线情况
             // cache.ec.on('session-query-result', function() {});
-            
+
             cache.ec.on('session-error', function(data) {
                 cache.ec.emit(eNameIndex.error, data);
             });
@@ -943,7 +943,7 @@ void function(win) {
 
                 // 增加多媒体消息的数据格式化
                 data.msg = engine.getMediaMsg(data.msg);
-                
+
                 // 收到消息，立刻告知服务器
                 engine.convAck({
                     cid: data.cid,
@@ -1128,10 +1128,10 @@ void function(win) {
                 encodeHTML: options.encodeHTML || false,
                 // 是否开启服务器端认证，传入认证函数
                 auth: options.auth,
-                // 通过判断插件需要加载的 falsh 路径判断是否要关掉安全连接，在需要兼容 flash 的时候需要关掉，默认开启。
-                secure: win.WEB_SOCKET_SWF_LOCATION ? false : true
+                // 通过判断是否是 IE 低版本来选择性兼容，在需要兼容 flash 的时候需要关掉，默认开启。
+                secure: (win.WEB_SOCKET_SWF_LOCATION && win.XDomainRequest) ? false : true
             };
-            
+
             var realtimeObj = newRealtimeObject();
             realtimeObj.cache.options = options;
             realtimeObj.cache.ec = tool.eventCenter();
@@ -1181,7 +1181,7 @@ void function(win) {
         }
 
         xhr.open(method, url);
-        
+
         if (method === 'post') {
             if (options.form) {
                 xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
@@ -1237,7 +1237,7 @@ void function(win) {
                         // .replace(/\\/g,'&#92;')
                         // .replace(/"/g,'&quot;')
                         // .replace(/'/g,'&#39;');
-            } 
+            }
             // 数字
             else {
                 return str;
@@ -1273,7 +1273,7 @@ void function(win) {
             var tempList;
             if (!isOnce) {
                 tempList = eventList;
-            } 
+            }
             else {
                 tempList = eventOnceList;
             }
@@ -1286,7 +1286,7 @@ void function(win) {
                 }
             }
         };
-        
+
         var _off = function(eventName, fun, isOnce) {
             var tempList;
             if (!isOnce) {
