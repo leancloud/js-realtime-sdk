@@ -1118,6 +1118,9 @@ void function(win) {
         else if (!options.appId) {
             throw('Options must have appId.');
         }
+        else if (!win.WebSocket) {
+            alert('Bowser must support WebSocket, please read LeanCloud doc and use plugin.');
+        }
         else {
             options = {
                 // LeanCloud 中唯一的服务 id
@@ -1128,8 +1131,8 @@ void function(win) {
                 encodeHTML: options.encodeHTML || false,
                 // 是否开启服务器端认证，传入认证函数
                 auth: options.auth,
-                // 通过判断是否是 IE 低版本来选择性兼容，在需要兼容 flash 的时候需要关掉，默认开启。
-                secure: (win.WEB_SOCKET_SWF_LOCATION && win.XDomainRequest) ? false : true
+                // 通过判断插件库中的对象是否存在来检测是否需要关掉安全链接，在需要兼容 flash 的时候需要关掉，默认开启。
+                secure: win.WebSocket.loadFlashPolicyFile ? false : true
             };
 
             var realtimeObj = newRealtimeObject();
