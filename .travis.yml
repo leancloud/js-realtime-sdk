@@ -3,6 +3,7 @@ after_success: |
         mkdir target && \
         cp -r demo target/ && \
         cp -r src target/ && \
+        cp -r plugin target/ && \
         sudo pip install ghp-import && \
         ghp-import -n target && \
         git push -qf https://${TOKEN}@github.com/${TRAVIS_REPO_SLUG}.git gh-pages
