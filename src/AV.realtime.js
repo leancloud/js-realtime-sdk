@@ -1128,8 +1128,8 @@ void function(win) {
                 encodeHTML: options.encodeHTML || false,
                 // 是否开启服务器端认证，传入认证函数
                 auth: options.auth,
-                // 是否要关掉安全连接，在需要兼容 flash 的时候需要关掉，默认开启。
-                secure: typeof(options.secure) === 'undefined'? true : options.secure
+                // 通过判断插件需要加载的 falsh 路径判断是否要关掉安全连接，在需要兼容 flash 的时候需要关掉，默认开启。
+                secure: win.WEB_SOCKET_SWF_LOCATION ? false : true
             };
             
             var realtimeObj = newRealtimeObject();

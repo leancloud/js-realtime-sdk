@@ -37,9 +37,7 @@ function main() {
         appId: appId,
         clientId: clientId,
         // 是否 HTML 转义，防止 XSS
-        encodeHTML: true,
-        // 是否要关掉安全协议（引入 flash 来兼容来版本浏览器）
-        secure: false
+        encodeHTML: true
     });
 
     // 监听连接成功事件
