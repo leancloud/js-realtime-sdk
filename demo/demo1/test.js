@@ -7,7 +7,7 @@ var appId = '9p6hyhh60av3ukkni3i9z53q1l8yy3cijj6sie3cewft18vm';
 var clientId = 'LeanCloud111';
 
 // 如果想加入一个已有房间，可以传入 roomId
-var roomId = '55150e62e4b0d4d151ef12cf';
+var roomId = '551a2847e4b04d688d73dc54';
 var rt;
 var conv;
 var convOld;
@@ -169,14 +169,20 @@ rt.on('create', function(data) {
     });
 
     // 这是一个已有的对话，通过房间 id 生成它的对话实例
-    convOld = rt.conv(roomId, function() {
-        console.log('已经获取已有房间的实例');
-    });
-
-    convOld.add([
-        'LeanCloud05', 'LeanCloud06'
-    ], function(data) {
-        console.log('已有的房间成功添加新的用户：', data);
+    rt.conv(roomId, function(obj) {
+        
+        // 判断这个 conv 是否在服务器端存在
+        if (obj) {
+            console.log('已经获取已有房间的实例');
+            convOld = obj;
+            convOld.add([
+                'LeanCloud05', 'LeanCloud06'
+            ], function(data) {
+                console.log('已有的房间成功添加新的用户：', data);
+            });
+        } else {
+            console.log('你想获取的房间不存在');
+        }
     });
 });
 
