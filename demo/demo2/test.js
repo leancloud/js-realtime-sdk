@@ -1,9 +1,11 @@
 // 请将 AppId 改为你自己的 AppId，否则无法本地测试
 var appId = '9p6hyhh60av3ukkni3i9z53q1l8yy3cijj6sie3cewft18vm';
 
+// 请换成你自己的一个房间的 conversation id
+var roomId = '551a2847e4b04d688d73dc54';
+
 // 每个客户端自定义的 id
 var clientId = 'LeanCloud';
-var roomId = '551a2847e4b04d688d73dc54';
 
 var rt;
 var room;
@@ -54,27 +56,32 @@ function main() {
         showLog('服务器连接成功！');
 
         // 获得已有房间的实例
-        room = rt.room(roomId);        
+        rt.room(roomId, function(object) {
 
-        // 当前用户加入这个房间
-        room.join(function() {
-            room.list(function(data) {
-                showLog('当前 Conversation 的成员列表：', data);
-            });
-        });
+            // 判断服务器端是否存在这个 room，如果存在
+            if (object) {
+                room = object;
 
-        // 房间接受消息
-        room.receive(function(data) {
-            // console.log(data);
-            var text = '';
-            if (data.msg.type) {
-                text = data.msg.text;
-            } else {
-                text = JSON.stringify(data.msg);
+                // 当前用户加入这个房间
+                room.join(function() {
+                    room.list(function(data) {
+                        showLog('当前 Conversation 的成员列表：', data);
+                    });
+                });
+
+                // 房间接受消息
+                room.receive(function(data) {
+                    // console.log(data);
+                    var text = '';
+                    if (data.msg.type) {
+                        text = data.msg.text;
+                    } else {
+                        text = JSON.stringify(data.msg);
+                    }
+                    showLog(data.fromPeerId + '： ', text);
+                });
             }
-            showLog(data.fromPeerId + '： ', text);
         });
-
     });
 
     // 监听服务情况
@@ -91,7 +98,7 @@ function sendMsg() {
         return;
     }
     var val = inputSend.value;
-    
+
     // 向这个房间发送消息，这段代码是兼容多终端格式的，包括 iOS、Android、Window Phone
     room.send({
         text: val
@@ -105,7 +112,7 @@ function sendMsg() {
         printWall.scrollTop = printWall.scrollHeight;
     });
 
-    // 发送多媒体消息，如果想测试图片发送，可以打开注释    
+    // 发送多媒体消息，如果想测试图片发送，可以打开注释
     // room.send({
     //     text: '图片测试',
     //     // 自定义的属性
