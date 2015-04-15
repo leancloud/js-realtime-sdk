@@ -13,24 +13,32 @@ var firstFlag = true;
 
 var openBtn = document.getElementById('open-btn');
 var sendBtn = document.getElementById('send-btn');
+var inputName = document.getElementById('input-name');
+var inputSend = document.getElementById('input-send');
+var printWall = document.getElementById('print-wall');
 
-bindEvent(openBtn, 'click', function() {
-    var val = document.getElementById('input-name').value;
-    if (val) {
-        clientId = val;
-    }
-    main();
-});
-
+bindEvent(openBtn, 'click', main);
 bindEvent(sendBtn, 'click', sendMsg);
 
 bindEvent(document.body, 'keydown', function(e) {
     if (e.keyCode === 13) {
-        sendMsg();
+        if (firstFlag) {
+            main();
+        } else {
+            sendMsg();
+        }
     }
 });
 
 function main() {
+    showLog('正在链接服务器，请等待。。。');
+    var val = inputName.value;
+    if (val) {
+        clientId = val;
+    }
+    if (!firstFlag) {
+        rt.close();
+    }
 
     // 创建实时通信实例
     rt = AV.realtime({
@@ -82,8 +90,7 @@ function sendMsg() {
         alert('请先连接服务器！');
         return;
     }
-    var input = document.getElementById('input-send');
-    var val = input.value;
+    var val = inputSend.value;
     
     // 向这个房间发送消息，这段代码是兼容多终端格式的，包括 iOS、Android、Window Phone
     room.send({
@@ -93,10 +100,9 @@ function sendMsg() {
     }, function(data) {
 
         // 发送成功之后的回调
-        input.value = '';
+        inputSend.value = '';
         showLog('自己： ' , val);
-        var dom = document.getElementById('print-wall');
-        dom.scrollTop = dom.scrollHeight;
+        printWall.scrollTop = printWall.scrollHeight;
     });
 
     // 发送多媒体消息，如果想测试图片发送，可以打开注释    
@@ -129,10 +135,9 @@ function showLog(msg, data) {
     } else {
         // console.log(msg);
     }
-    var div = document.getElementById('print-wall');
     var p = document.createElement('p');
     p.innerHTML = msg;
-    div.appendChild(p);
+    printWall.appendChild(p);
 }
 
 function encodeHTML(source) {
