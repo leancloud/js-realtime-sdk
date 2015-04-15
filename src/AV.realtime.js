@@ -1043,7 +1043,7 @@ void function(win) {
                     };
 
                     engine.startConv(options, callback);
-                    
+
                     // 服务器端确认收到对话创建，并创建成功
                     var fun = function(data) {
                         if (data.i === options.serialId) {
@@ -1133,6 +1133,10 @@ void function(win) {
             alert('Bowser must support WebSocket, please read LeanCloud doc and use plugin.');
         }
         else {
+
+            // 通过判断插件库中的对象是否存在来检测是否需要关掉安全链接，在需要兼容 flash 的时候需要关掉，默认开启。
+            var secure = win.WebSocket.loadFlashPolicyFile ? false : true;
+
             options = {
                 // LeanCloud 中唯一的服务 id
                 appId: options.appId,
@@ -1142,8 +1146,8 @@ void function(win) {
                 encodeHTML: options.encodeHTML || false,
                 // 是否开启服务器端认证，传入认证函数
                 auth: options.auth,
-                // 通过判断插件库中的对象是否存在来检测是否需要关掉安全链接，在需要兼容 flash 的时候需要关掉，默认开启。
-                secure: win.WebSocket.loadFlashPolicyFile ? false : true
+                // 是否关闭 WebSocket 的安全链接，即由 wss 协议转为 ws 协议，关闭 SSL 保护。默认开启。
+                secure: typeof(options.secure) === 'undefined' ? secure : options.secure
             };
 
             var realtimeObj = newRealtimeObject();
