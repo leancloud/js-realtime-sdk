@@ -1037,6 +1037,8 @@ void function(win) {
                         // 如果服务器端有这个 id
                         if (data.length) {
                             convObject.id = argument;
+                            // 获取初始化时的属性
+                            convObject.data = data[0].data;
                         }
 
                         if (callback) {
@@ -1058,7 +1060,9 @@ void function(win) {
                         // 人员的 id list
                         members: options.members,
                         // 默认的数据，可以放 Conversation 名字等
-                        data: options.data,
+                        data: {
+                            data: options.data
+                        },
                         serialId: engine.getSerialId()
                     };
 
