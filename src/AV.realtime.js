@@ -1025,11 +1025,31 @@ void function(win) {
                 var convObject = newConvObject(cache);
                 // 传入 convId
                 if (typeof argument === 'string') {
-                    convObject.id = argument;
                     // cache.convIndex[convObject.id] = convObject;
-                    if (callback) {
-                        callback(convObject);
-                    }
+
+                    // 去服务器端判断下当前 room id 是否存在
+                    this.query({
+                        where: {
+                            objectId: argument
+                        }
+                    }, function(data) {
+                        
+                        // 如果服务器端有这个 id
+                        if (data.length) {
+                            convObject.id = argument;
+                        }
+
+                        if (callback) {
+                            // 如果服务器端存在就直接返回 roomObject
+                            if (data.length) {
+                                callback(convObject);
+                            }
+                            // 如果服务器端不存在这个 room id
+                            else {
+                                callback(null);
+                            }
+                        }
+                    });
                 }
                 // 传入 options
                 else {
