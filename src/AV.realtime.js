@@ -106,6 +106,8 @@ void function(win) {
         return {
             // cid 即 conversation id
             id: '',
+            // 创建 Conversation 时的默认属性
+            data: {},
             add: function(argument, callback) {
                 addOrRemove(this.id, argument, callback, 'add');
                 return this;
@@ -294,8 +296,8 @@ void function(win) {
             ws: undefined,
             // 事件中心
             ec: undefined,
-            // 所有已生成的 conversation 对象
-            convIndex: {},
+            // 所有已生成的 conversation 对象（缓存也并没有使用，暂时去掉）
+            // convIndex: {},
             // 是否已经 open 完毕，主要在 close 方法中检测
             openFlag: false,
             // 是否是用户关闭，如果不是将会断开重连
@@ -1024,7 +1026,7 @@ void function(win) {
                 // 传入 convId
                 if (typeof argument === 'string') {
                     convObject.id = argument;
-                    cache.convIndex[convObject.id] = convObject;
+                    // cache.convIndex[convObject.id] = convObject;
                     if (callback) {
                         callback(convObject);
                     }
@@ -1032,13 +1034,22 @@ void function(win) {
                 // 传入 options
                 else {
                     var options = argument;
-                    options.serialId = engine.getSerialId();
+                    options = {
+                        // 人员的 id list
+                        members: options.members,
+                        // 默认的数据，可以放 Conversation 名字等
+                        data: options.data,
+                        serialId: engine.getSerialId()
+                    };
+
                     engine.startConv(options, callback);
+                    
                     // 服务器端确认收到对话创建，并创建成功
                     var fun = function(data) {
                         if (data.i === options.serialId) {
                             convObject.id = data.cid;
-                            cache.convIndex[convObject.id] = convObject;
+                            convObject.data = options.data;
+                            // cache.convIndex[convObject.id] = convObject;
                             if (callback) {
                                 callback(convObject);
                             }
@@ -1070,7 +1081,7 @@ void function(win) {
                 var fun = function(data) {
                     if (data.i === options.serialId) {
                         if (callback) {
-                            callback(data);
+                            callback(data.results);
                         }
                         cache.ec.off('conv-results', fun);
                     }
