@@ -76,7 +76,7 @@ function main() {
                     if (data.msg.type) {
                         text = data.msg.text;
                     } else {
-                        text = JSON.stringify(data.msg);
+                        text = data.msg;
                     }
                     showLog(data.fromPeerId + '： ', text);
                 });
