@@ -1037,6 +1037,8 @@ void function(win) {
                         // 如果服务器端有这个 id
                         if (data.length) {
                             convObject.id = argument;
+                            // 获取初始化时的属性
+                            convObject.data = data[0];
                         }
 
                         if (callback) {

@@ -7,7 +7,7 @@ var appId = '9p6hyhh60av3ukkni3i9z53q1l8yy3cijj6sie3cewft18vm';
 var clientId = 'LeanCloud111';
 
 // 如果想加入一个已有房间，可以传入 roomId
-var roomId = '551a2847e4b04d688d73dc54';
+var roomId;
 var rt;
 var conv;
 var convOld;
@@ -74,10 +74,12 @@ rt.on('close', function() {
 
 // 当 Conversation 被创建时触发，当然您可以使用回调函数来处理，不一定要监听这个事件
 rt.on('create', function(data) {
+    
     // 当前用户加入这个 Conversation 
     conv.join(function(data) {
         console.log('当前用户成功加入 Conversation');
     });
+
     // 向这个 Conversation 添加新的用户
     conv.add([
         'LeanCloud03', 'LeanCloud04'
@@ -168,6 +170,10 @@ rt.on('create', function(data) {
         console.log('取得当前的用户数量：' + num);
     });
 
+    if (!roomId) {
+        roomId = conv.id;
+    }
+
     // 这是一个已有的对话，通过房间 id 生成它的对话实例
     rt.conv(roomId, function(obj) {
         
@@ -180,6 +186,7 @@ rt.on('create', function(data) {
             ], function(data) {
                 console.log('已有的房间成功添加新的用户：', data);
             });
+            console.log('获取房间的初始化数据', convOld.data);
         } else {
             console.log('你想获取的房间不存在');
         }
