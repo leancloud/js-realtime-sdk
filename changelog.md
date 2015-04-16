@@ -1,3 +1,9 @@
+# 2.0.3
+* 提供兼容 IE8+ 低版本浏览器的插件方式
+* 修改获取已有 conversation id 没有判断在服务器端是否存在
+* 提供获取 conversation 初始化属性的方式
+* 开放 secure 选项，用户可以手动关闭 SSL 协议
+
 # 2.0.2
 * 修复与 iOS 及 Android 端 SDK 通信的 bug
 * 创建 conversation 成功后，回调中可以直接取到 convObject
