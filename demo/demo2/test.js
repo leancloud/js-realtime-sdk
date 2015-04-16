@@ -151,10 +151,10 @@ function encodeHTML(source) {
     return String(source)
         .replace(/&/g,'&amp;')
         .replace(/</g,'&lt;')
-        .replace(/>/g,'&gt;')
-        .replace(/\\/g,'&#92;')
-        .replace(/"/g,'&quot;')
-        .replace(/'/g,'&#39;');
+        .replace(/>/g,'&gt;');
+        // .replace(/\\/g,'&#92;')
+        // .replace(/"/g,'&quot;')
+        // .replace(/'/g,'&#39;');
 }
 
 function bindEvent(dom, eventName, fun) {
