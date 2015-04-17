@@ -717,6 +717,7 @@ void function(win) {
             }
 
             var obj = {
+                text: msg._lctext,
                 attr: msg._lcattrs
             };
 
@@ -724,6 +725,7 @@ void function(win) {
             if (cache.options.encodeHTML) {
                 obj.text = tool.encodeHTML(msg._lctext);
             }
+
             if (msg._lcfile && msg._lcfile.url) {
                 obj.url = msg._lcfile.url;
             }
