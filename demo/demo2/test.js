@@ -83,7 +83,7 @@ function main() {
     });
 
     // 监听服务情况
-    rt.on('resue', function() {
+    rt.on('reuse', function() {
         showLog('服务器正在重连，请耐心等待。。。');
     });
 }
