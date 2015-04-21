@@ -1248,7 +1248,7 @@ void function(win) {
         };
 
         xhr.onerror = function(data) {
-            callback(null, data);
+            callback(null, data || {});
             throw('Network error.');
         };
 
