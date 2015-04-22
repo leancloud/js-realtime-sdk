@@ -70,16 +70,25 @@ function main() {
             if (object) {
                 room = object;
 
-                // 当前用户加入这个房间
-                room.join(function() {
+                // 获取成员列表
+                room.list(function(data) {
+                    showLog('当前 Conversation 的成员列表：', data);
+                    var l = data.length;
 
-                    // 获取成员列表
-                    room.list(function(data) {
-                        showLog('当前 Conversation 的成员列表：', data);
+                    // 如果超过 500 人，就踢掉一个。
+                    if (l > 499) {
+                        conv.remove(data[30], function(data) {
+                            showLog('人数过多，踢掉:', data[30]);
+                        });
+                    }
 
-                        // 获取聊天历史
-                        getLog();
+                    // 当前用户加入这个房间
+                    room.join(function() {
+                        showLog('已经加入，可以开始聊天。');
                     });
+
+                    // 获取聊天历史
+                    getLog();
                 });
 
                 // 房间接受消息
@@ -152,7 +161,7 @@ function sendMsg() {
 
 // 拉取历史
 bindEvent(printWall, 'scroll', function(e) {
-    if (printWall.scrollTop < 10) {
+    if (printWall.scrollTop < 20) {
         getLog();
     }
 });
