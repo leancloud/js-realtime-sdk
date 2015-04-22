@@ -187,6 +187,10 @@ void function(win) {
                 var fun = function(data) {
                     if (data.i === options.serialId) {
                         if (callback) {
+                            // 对查出的类型进行过滤，兼容多端通信
+                            for (var i = 0, l = data.logs.length; i < l; i ++) {
+                                data.logs[i].data = engine.getMediaMsg(data.logs[i].data);
+                            }
                             callback(data.logs);
                         }
                         cache.ec.off('logs', fun);
@@ -650,10 +654,10 @@ void function(win) {
                 cmd: 'logs',
                 cid: options.cid,
                 // t 时间戳，从 t 开始向前查询
-                // t: tool.now(),
+                t: options.t || undefined,
                 // mid 消息 id，从消息 id 开始向前查询（和 t 共同使用，为防止某毫秒时刻有重复消息）
-                mid: options.mid,
-                limit: options.limit,
+                mid: options.mid || undefined,
+                limit: options.limit || 20,
                 appId: cache.options.appId,
                 peerId: cache.options.peerId,
                 // i serial-id
@@ -1244,7 +1248,7 @@ void function(win) {
         };
 
         xhr.onerror = function(data) {
-            callback(null, data);
+            callback(null, data || {});
             throw('Network error.');
         };
 
