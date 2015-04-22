@@ -133,7 +133,7 @@ function sendMsg() {
 
         // 发送成功之后的回调
         inputSend.value = '';
-        showLog('自己： ' , val);
+        showLog('（' + formatTime(data.t) + '）  自己： ', val);
         printWall.scrollTop = printWall.scrollHeight;
     });
 
@@ -171,7 +171,7 @@ function showMsg(data, isBefore) {
     if (data.fromPeerId === clientId) {
         from = '自己';
     }
-    showLog(from + '： ', text, isBefore);
+    showLog('（' + formatTime(data.timestamp) + '）  ' + from + '： ', text, isBefore);
 }
 
 // 拉取历史
@@ -202,7 +202,9 @@ function getLog(callback) {
         for (var i = l - 1; i >= 0; i --) {
             showMsg(data[i], true);
         }
-        printWall.scrollTop = printWall.scrollHeight - height;
+        if (l) {
+            printWall.scrollTop = printWall.scrollHeight - height;
+        }
         if (callback) {
             callback();   
         }
@@ -232,6 +234,16 @@ function encodeHTML(source) {
         // .replace(/\\/g,'&#92;')
         // .replace(/"/g,'&quot;')
         // .replace(/'/g,'&#39;');
+}
+
+function formatTime(time) {
+    var date = new Date(time);
+    var month = date.getMonth() + 1 < 10 ? '0' + (date.getMonth() + 1) : date.getMonth() + 1;
+    var currentDate = date.getDate() < 10 ? '0' + date.getDate() : date.getDate();
+    var hh = date.getHours() < 10 ? '0' + date.getHours() : date.getHours();
+    var mm = date.getMinutes() < 10 ? '0' + date.getMinutes() : date.getMinutes();
+    var ss = date.getSeconds() < 10 ? '0' + date.getSeconds() : date.getSeconds();
+    return date.getFullYear() + '-' + month + '-' + currentDate+' '+ hh + ':' + mm + ':' + ss;
 }
 
 function bindEvent(dom, eventName, fun) {
