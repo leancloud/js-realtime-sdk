@@ -1,7 +1,7 @@
 // 请将 AppId 改为你自己的 AppId，否则无法本地测试
 var appId = '9p6hyhh60av3ukkni3i9z53q1l8yy3cijj6sie3cewft18vm';
 
-// 请换成你自己的一个房间的 conversation id
+// 请换成你自己的一个房间的 conversation id（这是服务器端生成的）
 var roomId = '551a2847e4b04d688d73dc54';
 
 // 每个客户端自定义的 id
@@ -82,13 +82,15 @@ function main() {
                         });
                     }
 
-                    // 当前用户加入这个房间
-                    room.join(function() {
-                        showLog('已经加入，可以开始聊天。');
-                    });
-
                     // 获取聊天历史
-                    getLog();
+                    getLog(function() {
+                        
+                        // 当前用户加入这个房间
+                        room.join(function() {
+                            showLog('已经加入，可以开始聊天。');
+                            printWall.scrollTop = printWall.scrollHeight;
+                        });
+                    });
                 });
 
                 // 房间接受消息
@@ -97,14 +99,12 @@ function main() {
                         // 存储下最早的一个消息时间戳
                         msgTime = data.timestamp;
                     }
-                    var text = '';
-                    if (data.msg.type) {
-                        text = data.msg.text;
-                    } else {
-                        text = data.msg;
-                    }
-                    showLog(data.fromPeerId + '： ', text);
+                    showMsg(data);
                 });
+            }
+            // 如果服务器端不存在这个 conversation
+            else {
+                showLog('服务器不存在这个 conversation，你需要创建一个。');
             }
         });
     });
@@ -159,6 +159,21 @@ function sendMsg() {
     // });
 }
 
+// 显示接收到的信息
+function showMsg(data, isBefore) {
+    var text = '';
+    var from = data.fromPeerId;
+    if (data.msg.type) {
+        text = data.msg.text;
+    } else {
+        text = data.msg;
+    }
+    if (data.fromPeerId === clientId) {
+        from = '自己';
+    }
+    showLog(from + '： ', text, isBefore);
+}
+
 // 拉取历史
 bindEvent(printWall, 'scroll', function(e) {
     if (printWall.scrollTop < 20) {
@@ -167,7 +182,7 @@ bindEvent(printWall, 'scroll', function(e) {
 });
 
 // 获取消息历史
-function getLog() {
+function getLog(callback) {
     var height = printWall.scrollHeight;
     if (logFlag) {
         return;
@@ -185,19 +200,12 @@ function getLog() {
             msgTime = data[0].timestamp;
         }
         for (var i = l - 1; i >= 0; i --) {
-            var from = data[i].from;
-            var text = '';
-            if (data[i].data.type) {
-                text = data[i].data.text;
-            } else {
-                text = data[i].data;
-            }
-            if (data[i].from === clientId) {
-                from = '自己';
-            }
-            showLog(from + '： ', text, true);
+            showMsg(data[i], true);
         }
         printWall.scrollTop = printWall.scrollHeight - height;
+        if (callback) {
+            callback();   
+        }
     });
 }
 

@@ -190,6 +190,9 @@ void function(win) {
                             // 对查出的类型进行过滤，兼容多端通信
                             for (var i = 0, l = data.logs.length; i < l; i ++) {
                                 data.logs[i].data = engine.getMediaMsg(data.logs[i].data);
+                                // 增加字段，兼容接收消息的字段
+                                data.logs[i].fromPeerId = data.logs[i].from;
+                                data.logs[i].msg = data.logs[i].data;
                             }
                             callback(data.logs);
                         }
