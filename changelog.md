@@ -1,3 +1,7 @@
+# 2.0.5
+* 修正获取 conversation 历史消息的 bug，并且支持多端通信协议
+* 修正 tool.ajax 有时不会返回错误信息的 bug
+
 # 2.0.4
 * 修正关闭 encodeHTML 时多媒体格式没有对 text 赋值
 
