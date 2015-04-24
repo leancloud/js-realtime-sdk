@@ -148,7 +148,12 @@ void function(win) {
                 if (options.type) {
                     options.data = engine.setMediaMsg(options.type, data);
                 } else {
-                    options.data = JSON.stringify(data);
+                    if (typeof data === 'string') {
+                        options.data = data;
+                    } else {
+                        // 协议中只接收 string 类型
+                        options.data = JSON.stringify(data);
+                    }
                 }
 
                 // 是否需要消息回执
