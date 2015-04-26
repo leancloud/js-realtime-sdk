@@ -123,6 +123,11 @@ function sendMsg() {
         return;
     }
     var val = inputSend.value;
+    
+    // 不让发送空字符
+    if (!String(val).replace(/^\s+/, '').replace(/\s+$/, '')) {
+        alert('请输入点文字！');
+    }
 
     // 向这个房间发送消息，这段代码是兼容多终端格式的，包括 iOS、Android、Window Phone
     room.send({
@@ -171,7 +176,9 @@ function showMsg(data, isBefore) {
     if (data.fromPeerId === clientId) {
         from = '自己';
     }
-    showLog('（' + formatTime(data.timestamp) + '）  ' + from + '： ', text, isBefore);
+    if (String(text).replace(/^\s+/, '').replace(/\s+$/, '')) {
+        showLog('（' + formatTime(data.timestamp) + '）  ' + from + '： ', text, isBefore);
+    }
 }
 
 // 拉取历史
