@@ -13,4 +13,3 @@
 ```
 bower register leancloud-realtime git@github.com:leancloud/js-realtime-sdk.git
 ```
-* 修改 changelog.md

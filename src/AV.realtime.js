@@ -148,7 +148,12 @@ void function(win) {
                 if (options.type) {
                     options.data = engine.setMediaMsg(options.type, data);
                 } else {
-                    options.data = data;
+                    if (typeof data === 'string') {
+                        options.data = data;
+                    } else {
+                        // 协议中只接收 string 类型
+                        options.data = JSON.stringify(data);
+                    }
                 }
 
                 // 是否需要消息回执
@@ -715,12 +720,11 @@ void function(win) {
                 return msg;
             }
 
-            var msgString = msg;
             msg = JSON.parse(msg);
 
             // 检查是否是多媒体类型
             if (!msg.hasOwnProperty('_lctype')) {
-                return msgString;
+                return msg;
             }
 
             var obj = {
