@@ -448,7 +448,7 @@ void function(win) {
             if (win && win.location.protocol === 'https:' && secure) {
                 protocol = 'https://';
             }
-            url = protocol + 'router-g0-push.avoscloud.com/v1/route?appId=' + appId ;
+            url = protocol + 'router-g0-push.avoscloud.com/v1/route?r='+(new Date()).getTime()+'&appId=' + appId ;
             if (secure) {
               url += '&secure=1';
             }
