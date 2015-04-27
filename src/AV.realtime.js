@@ -1259,6 +1259,10 @@ void function(win) {
             throw('Network error.');
         };
 
+        xhr.onprogress = function(){}
+        xhr.ontimeout = function(){}
+        xhr.timeout=0;
+
         var formData = '';
         if (options.form) {
             for (var k in options.data) {
@@ -1271,7 +1275,10 @@ void function(win) {
         } else {
             formData = JSON.stringify(options.data);
         }
-        xhr.send(formData);
+        setTimeout(function(){
+            xhr.send(formData);
+        }, 300);
+        
     };
 
     // 获取当前时间的时间戳
