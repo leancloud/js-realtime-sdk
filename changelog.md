@@ -1,3 +1,7 @@
+# 2.0.6
+* 支持自定义的 JSON，并兼容其他端 SDK
+* close 事件中可以获取 websocket 关闭的 event 对象
+
 # 2.0.5
 * 修正获取 conversation 历史消息的 bug，并且支持多端通信协议
 * 修正 tool.ajax 有时不会返回错误信息的 bug
