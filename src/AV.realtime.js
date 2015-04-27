@@ -335,9 +335,9 @@ void function(win) {
         };
 
         // WebSocket Close
-        var wsClose = function() {
+        var wsClose = function(event) {
             // 派发全局 close 事件，表示 realtime 已经关闭
-            cache.ec.emit(eNameIndex.close);
+            cache.ec.emit(eNameIndex.close, event);
         };
 
         // WebSocket Message
