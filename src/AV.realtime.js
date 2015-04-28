@@ -448,7 +448,7 @@ void function(win) {
             if (win && win.location.protocol === 'https:' && secure) {
                 protocol = 'https://';
             }
-            url = protocol + 'router-g0-push.avoscloud.com/v1/route?_=' + tool.now() + '&appId=' + appId ;
+            url = protocol + 'router-g0-push.avoscloud.com/v1/route?_t=' + tool.now() + '&appId=' + appId ;
             if (secure) {
               url += '&secure=1';
             }
@@ -1259,6 +1259,7 @@ void function(win) {
             throw('Network error.');
         };
 
+        // IE9 中需要设置所有的 xhr 事件回调，不然可能会无法执行后续操作
         xhr.onprogress = function(){}
         xhr.ontimeout = function(){}
         xhr.timeout = 0;
