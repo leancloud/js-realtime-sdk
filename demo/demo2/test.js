@@ -106,6 +106,26 @@ function main() {
             // 如果服务器端不存在这个 conversation
             else {
                 showLog('服务器不存在这个 conversation，你需要创建一个。');
+
+                // 创建一个新 room
+                rt.room({
+                    // 默认成员的 clientId
+                    members: [
+                        // 当前用户
+                        clientId
+                    ],
+                    // 创建暂态的聊天室（暂态聊天室支持无限人员聊天，但是不支持存储历史）
+                    // transient: true,
+                    // 默认的数据，可以放 Conversation 名字等
+                    data: {
+                        title: 'demo2'
+                    }
+                }, function(obj) {
+
+                    // 创建成功，后续你可以将 room id 存储起来
+                    room = obj;
+                    showLog('创建一个新 Room 成功，id 是：', room.id);
+                });
             }
         });
     });
@@ -124,7 +144,7 @@ function sendMsg() {
         return;
     }
     var val = inputSend.value;
-    
+
     // 不让发送空字符
     if (!String(val).replace(/^\s+/, '').replace(/\s+$/, '')) {
         alert('请输入点文字！');
@@ -214,7 +234,7 @@ function getLog(callback) {
             printWall.scrollTop = printWall.scrollHeight - height;
         }
         if (callback) {
-            callback();   
+            callback();
         }
     });
 }
