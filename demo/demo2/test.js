@@ -77,7 +77,7 @@ function main() {
 
                     // 如果超过 500 人，就踢掉一个。
                     if (l > 499) {
-                        conv.remove(data[30], function(data) {
+                        room.remove(data[30], function(data) {
                             showLog('人数过多，踢掉:', data[30]);
                         });
                     }
