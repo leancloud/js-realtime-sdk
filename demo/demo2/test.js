@@ -70,27 +70,28 @@ function main() {
             if (object) {
                 room = object;
 
-                // 获取成员列表
-                room.list(function(data) {
-                    showLog('当前 Conversation 的成员列表：', data);
-                    var l = data.length;
+                // 当前用户加入这个房间
+                room.join(function() {
 
-                    // 如果超过 500 人，就踢掉一个。
-                    if (l > 499) {
-                        room.remove(data[30], function(data) {
-                            showLog('人数过多，踢掉:', data[30]);
-                        });
-                    }
+                    // 获取成员列表
+                    room.list(function(data) {
+                        showLog('当前 Conversation 的成员列表：', data);
+                        var l = data.length;
 
-                    // 获取聊天历史
-                    getLog(function() {
-                        
-                        // 当前用户加入这个房间
-                        room.join(function() {
-                            showLog('已经加入，可以开始聊天。');
+                        // 如果超过 500 人，就踢掉一个。
+                        if (l > 490) {
+                            room.remove(data[30], function() {
+                                showLog('人数过多，踢掉： ', data[30]);
+                            });
+                        }
+
+                        // 获取聊天历史
+                        getLog(function() {
                             printWall.scrollTop = printWall.scrollHeight;
+                            showLog('已经加入，可以开始聊天。');
                         });
                     });
+
                 });
 
                 // 房间接受消息
