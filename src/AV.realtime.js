@@ -1074,6 +1074,7 @@ void function(win) {
                         members: options.members,
                         // 默认的数据，可以放 Conversation 名字等
                         data: options.data,
+                        transient: options.transient,
                         serialId: engine.getSerialId()
                     };
 
