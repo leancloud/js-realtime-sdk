@@ -356,7 +356,7 @@ void function(win) {
 
         var wsError = function(data) {
             cache.ec.emit(eNameIndex.error, data);
-            throw(data);
+            console.error(data);
         };
 
         // WebSocket send message
@@ -435,7 +435,7 @@ void function(win) {
                 engine.createSocket(server.server);
             }
             else {
-                throw('WebSocket connet failed.');
+                console.error('WebSocket connet failed.');
             }
         };
 
@@ -946,7 +946,7 @@ void function(win) {
 
             cache.ec.on('conv-error', function(data) {
                 cache.ec.emit(eNameIndex.error, data);
-                throw(data.code + ':' + data.reason);
+                console.error(data.code + ':' + data.reason);
             });
 
             // 查询对话的结果
@@ -1257,7 +1257,7 @@ void function(win) {
 
         xhr.onerror = function(data) {
             callback(null, data || {});
-            throw('Network error.');
+            console.error('Network error.');
         };
 
         var formData = '';
