@@ -1,6 +1,6 @@
 /**
  * @author wangxiao
- * @date 2015-04-27
+ * @date 2015-05-15
  * @homepage http://github.com/leancloud/js-realtime-sdk/
  *
  * 每位工程师都有保持代码优雅的义务
@@ -10,7 +10,7 @@
 void function(win) {
 
     // 当前版本
-    var VERSION = '2.0.6';
+    var VERSION = '2.0.7';
 
     // 获取命名空间
     var AV = win.AV || {};
