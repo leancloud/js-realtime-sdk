@@ -76,8 +76,8 @@ function main() {
                     room.list(function(data) {
                         showLog('当前 Conversation 的成员列表：', data);
 
-                        // 获取在线的 client
-                        rt.ping(data, function(list) {
+                        // 获取在线的 client（Ping 方法每次只能获取 20 个用户在线信息）
+                        rt.ping(data.slice(0, 20), function(list) {
                             showLog('当前在线的成员列表：', list);
                         });
 
