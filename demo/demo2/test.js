@@ -57,7 +57,6 @@ function main() {
         appId: appId,
         clientId: clientId
     });
-
     // 监听连接成功事件
     rt.on('open', function() {
         firstFlag = false;
@@ -76,6 +75,12 @@ function main() {
                     // 获取成员列表
                     room.list(function(data) {
                         showLog('当前 Conversation 的成员列表：', data);
+
+                        // 获取在线的 client（Ping 方法每次只能获取 20 个用户在线信息）
+                        rt.ping(data.slice(0, 20), function(list) {
+                            showLog('当前在线的成员列表：', list);
+                        });
+
                         var l = data.length;
 
                         // 如果超过 500 人，就踢掉一个。
@@ -133,6 +138,11 @@ function main() {
     // 监听服务情况
     rt.on('reuse', function() {
         showLog('服务器正在重连，请耐心等待。。。');
+    });
+
+    // 监听错误
+    rt.on('error', function() {
+        showLog('连接遇到错误。。。');
     });
 }
 
