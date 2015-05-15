@@ -1011,7 +1011,7 @@ void function(win) {
             // 表示关闭当前的 session 连接和 WebSocket 连接，并且回收内存
             close: function() {
                 if (!cache.openFlag) {
-                    throw('Use close() must after open() has successed.');
+                    throw('Must call after open() has successed.');
                 }
                 cache.closeFlag = true;
                 engine.closeSession();
@@ -1035,6 +1035,9 @@ void function(win) {
                 return this;
             },
             room: function(argument, callback) {
+                if (!cache.openFlag) {
+                    throw('Must call after open() has successed.');
+                }
                 var convObject = newConvObject(cache);
                 // 传入 convId
                 if (typeof argument === 'string') {
@@ -1103,6 +1106,9 @@ void function(win) {
             },
             // 相关查询，包括用户列表查询，房间查询等
             query: function(argument, callback) {
+                if (!cache.openFlag) {
+                    throw('Must call after open() has successed.');
+                }
                 var options = {};
                 switch(arguments.length) {
                     // 如果只有一个参数，那么是 callback
@@ -1128,6 +1134,9 @@ void function(win) {
             },
             // 判断用户是否在线
             ping: function(argument, callback) {
+                if (!cache.openFlag) {
+                    throw('Must call after open() has successed.');
+                }
                 if (!callback) {
                     throw('Ping must have callback.');
                 }
