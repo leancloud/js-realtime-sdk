@@ -134,6 +134,11 @@ function main() {
     rt.on('reuse', function() {
         showLog('服务器正在重连，请耐心等待。。。');
     });
+
+    // 监听错误
+    rt.on('error', function() {
+        showLog('连接遇到错误。。。');
+    });
 }
 
 function sendMsg() {
