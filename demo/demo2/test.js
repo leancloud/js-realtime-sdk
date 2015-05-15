@@ -76,6 +76,12 @@ function main() {
                     // 获取成员列表
                     room.list(function(data) {
                         showLog('当前 Conversation 的成员列表：', data);
+
+                        // 获取在线的 client
+                        rt.ping(data, function(list) {
+                            showLog('当前在线的成员列表：', list);
+                        });
+
                         var l = data.length;
 
                         // 如果超过 500 人，就踢掉一个。
