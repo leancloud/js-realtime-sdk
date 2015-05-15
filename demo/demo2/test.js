@@ -57,7 +57,6 @@ function main() {
         appId: appId,
         clientId: clientId
     });
-
     // 监听连接成功事件
     rt.on('open', function() {
         firstFlag = false;
