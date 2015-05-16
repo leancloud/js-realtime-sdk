@@ -1071,13 +1071,14 @@ void function(win) {
                 }
                 // 传入 options
                 else {
-                    var options = argument;
+                    // 有可能没有传入任何参数
+                    var options = argument || {};
                     options = {
                         // 人员的 id list
-                        members: options.members,
+                        members: options.members || [cache.options.clientId],
                         // 默认的数据，可以放 Conversation 名字等
-                        data: options.data,
-                        transient: options.transient,
+                        data: options.data || {},
+                        transient: options.transient || false,
                         serialId: engine.getSerialId()
                     };
 
