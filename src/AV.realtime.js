@@ -1071,11 +1071,18 @@ void function(win) {
                 }
                 // 传入 options
                 else {
-                    // 有可能没有传入任何参数
-                    var options = argument || {};
+
+                    var options;
+                    if (typeof argument === 'function') {
+                        callback = argument;
+                    } else {
+                        // 有可能没有传入任何参数
+                        options = argument || {};
+                    }
+
                     options = {
                         // 人员的 id list
-                        members: options.members || [cache.options.clientId],
+                        members: options.members || [],
                         // 默认的数据，可以放 Conversation 名字等
                         data: options.data || {},
                         transient: options.transient || false,
