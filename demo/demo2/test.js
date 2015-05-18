@@ -55,8 +55,14 @@ function main() {
     // 创建实时通信实例
     rt = AV.realtime({
         appId: appId,
-        clientId: clientId
+        clientId: clientId,
+
+        // 请注意，这里关闭 secure 完全是为了 Demo 兼容范围更大些
+        // 具体请参考实时通信文档中的「其他兼容问题」部分
+        // 如果真正使用在生产环境，建议不要关闭 secure，具体阅读文档
+        secure: false
     });
+
     // 监听连接成功事件
     rt.on('open', function() {
         firstFlag = false;
