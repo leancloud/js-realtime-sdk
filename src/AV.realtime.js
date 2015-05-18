@@ -519,7 +519,9 @@ void function(win) {
                 appId: cache.options.appId,
                 peerId: cache.options.peerId,
                 // attr json对象，对话的任意初始属性
-                attr: options.data || {},
+                attr: {
+                    attr: options.attr || {}
+                },
                 i: options.serialId,
                 // 是否是开放聊天室，无人数限制
                 transient: options.transient || false
@@ -1049,12 +1051,12 @@ void function(win) {
                             objectId: argument
                         }
                     }, function(data) {
-                        
+
                         // 如果服务器端有这个 id
                         if (data.length) {
                             convObject.id = argument;
                             // 获取初始化时的属性
-                            convObject.data = data[0];
+                            convObject.attr = data[0].attr;
                         }
 
                         if (callback) {
@@ -1091,7 +1093,7 @@ void function(win) {
                         // 人员的 id list
                         members: options.members || [],
                         // 默认的数据，可以放 Conversation 名字等
-                        data: options.data || {},
+                        attr: options.attr || {},
                         transient: options.transient || false,
                         serialId: engine.getSerialId()
                     };
@@ -1102,7 +1104,7 @@ void function(win) {
                     var fun = function(data) {
                         if (data.i === options.serialId) {
                             convObject.id = data.cid;
-                            convObject.data = options.data;
+                            convObject.attr = options.attr;
                             // cache.convIndex[convObject.id] = convObject;
                             if (callback) {
                                 callback(convObject);
