@@ -1071,13 +1071,20 @@ void function(win) {
                 }
                 // 传入 options
                 else {
+                    // 如果没有传入参数，则给一个错误提示
+                    if (!argument) {
+                        throw('Createing room must have a callback function.');
+                    }
 
                     var options;
+
+                    // 只传入 callback
                     if (typeof argument === 'function') {
                         callback = argument;
-                    } else {
-                        // 有可能没有传入任何参数
-                        options = argument || {};
+                    } 
+                    // 传入参数
+                    else {
+                        options = argument;
                     }
 
                     options = {
