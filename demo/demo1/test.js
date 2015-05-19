@@ -36,6 +36,7 @@ rt.on('open', function() {
 
         // 创建一个聊天室
         conv = rt.conv({
+            name: 'LeanCloud-Room',
             // 人员的 id
             members: [
                 'LeanCloud02'
@@ -186,6 +187,7 @@ rt.on('create', function(data) {
             ], function(data) {
                 console.log('已有的房间成功添加新的用户：', data);
             });
+            console.log('房间名字： ', convOld.name);
             console.log('获取房间的初始化数据', convOld.attr);
         } else {
             console.log('你想获取的房间不存在');
