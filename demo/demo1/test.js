@@ -36,14 +36,19 @@ rt.on('open', function() {
 
         // 创建一个聊天室
         conv = rt.conv({
-            name: 'LeanCloud-Room',
+
             // 人员的 id
             members: [
                 'LeanCloud02'
             ],
+
+            // Conversation 的名字
+            name: 'LeanCloud-Room',
+
             // 创建暂态的聊天室
             // transient: true,
-            // 默认的数据，可以放 Conversation 名字等
+
+            // 默认的数据，可以放 Conversation 一些属性
             attr: {
                 test: 123
             }
