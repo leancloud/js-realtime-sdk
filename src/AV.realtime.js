@@ -10,7 +10,7 @@
 void function(win) {
 
     // 当前版本
-    var VERSION = '2.0.7';
+    var VERSION = '2.1.0';
 
     // 获取命名空间
     var AV = win.AV || {};

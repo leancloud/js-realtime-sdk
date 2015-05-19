@@ -1,3 +1,10 @@
+# 2.1.0
+* 创建 Room 更简单，支持只传入 CallBack，参数变为可选
+* 修改初始化 Room 属性为 attr（原来是 data 字段）
+* 初始化属性在服务端 Conversation 表中结构修改，与之前版本不兼容，存储在 attr 字段内
+* 增加创建 Room 的名称，提供一个默认字段 name
+* 防止同一个 realtime 实例可能产生两个 websocket 实例
+
 # 2.0.7
 * 修正创建暂态聊天室失败的问题
 * 兼容 IE9

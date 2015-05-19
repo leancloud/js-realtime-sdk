@@ -7,6 +7,7 @@
 * 修改代码中版本号及修改日期
 * 修改 bower.json 中的版本号
 * 修改 changelog.md
+* 提交代码合并到 master
 * Github 生成 release 包
 * 发布到 bower
 
