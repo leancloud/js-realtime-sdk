@@ -60,6 +60,7 @@ function main() {
         // 请注意，这里关闭 secure 完全是为了 Demo 兼容范围更大些
         // 具体请参考实时通信文档中的「其他兼容问题」部分
         // 如果真正使用在生产环境，建议不要关闭 secure，具体阅读文档
+        // secure 设置为 true 是开启
         secure: false
     });
 
@@ -120,6 +121,9 @@ function main() {
 
                 // 创建一个新 room
                 rt.room({
+                    // Room 的默认名字
+                    name: 'LeanCloud-Room',
+
                     // 默认成员的 clientId
                     members: [
                         // 当前用户
@@ -128,8 +132,8 @@ function main() {
                     // 创建暂态的聊天室（暂态聊天室支持无限人员聊天，但是不支持存储历史）
                     // transient: true,
                     // 默认的数据，可以放 Conversation 名字等
-                    data: {
-                        title: 'demo2'
+                    attr: {
+                        test: 'demo2'
                     }
                 }, function(obj) {
 
