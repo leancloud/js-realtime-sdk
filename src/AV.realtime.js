@@ -1071,13 +1071,28 @@ void function(win) {
                 }
                 // 传入 options
                 else {
-                    var options = argument;
+                    // 如果没有传入参数，则给一个错误提示
+                    if (!argument) {
+                        throw('Createing room must have a callback function.');
+                    }
+
+                    var options;
+
+                    // 只传入 callback
+                    if (typeof argument === 'function') {
+                        callback = argument;
+                    } 
+                    // 传入参数
+                    else {
+                        options = argument;
+                    }
+
                     options = {
                         // 人员的 id list
-                        members: options.members,
+                        members: options.members || [],
                         // 默认的数据，可以放 Conversation 名字等
-                        data: options.data,
-                        transient: options.transient,
+                        data: options.data || {},
+                        transient: options.transient || false,
                         serialId: engine.getSerialId()
                     };
 
