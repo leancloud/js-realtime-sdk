@@ -107,7 +107,7 @@ void function(win) {
             // cid 即 conversation id
             id: '',
             // 创建 Conversation 时的默认属性
-            data: {},
+            attr: {},
             add: function(argument, callback) {
                 addOrRemove(this.id, argument, callback, 'add');
                 return this;
@@ -519,7 +519,10 @@ void function(win) {
                 appId: cache.options.appId,
                 peerId: cache.options.peerId,
                 // attr json对象，对话的任意初始属性
-                attr: options.data || {},
+                attr: {
+                    name: options.name || '',
+                    attr: options.attr || {}
+                },
                 i: options.serialId,
                 // 是否是开放聊天室，无人数限制
                 transient: options.transient || false
@@ -1049,12 +1052,13 @@ void function(win) {
                             objectId: argument
                         }
                     }, function(data) {
-                        
+
                         // 如果服务器端有这个 id
                         if (data.length) {
                             convObject.id = argument;
+                            convObject.name = data[0].name;
                             // 获取初始化时的属性
-                            convObject.data = data[0];
+                            convObject.attr = data[0].attr;
                         }
 
                         if (callback) {
@@ -1088,10 +1092,12 @@ void function(win) {
                     }
 
                     options = {
+                        // Room 的名字
+                        name: options.name || '',
                         // 人员的 id list
                         members: options.members || [],
                         // 默认的数据，可以放 Conversation 名字等
-                        data: options.data || {},
+                        attr: options.attr || {},
                         transient: options.transient || false,
                         serialId: engine.getSerialId()
                     };
@@ -1102,7 +1108,8 @@ void function(win) {
                     var fun = function(data) {
                         if (data.i === options.serialId) {
                             convObject.id = data.cid;
-                            convObject.data = options.data;
+                            convObject.name = options.name;
+                            convObject.attr = options.attr;
                             // cache.convIndex[convObject.id] = convObject;
                             if (callback) {
                                 callback(convObject);
@@ -1285,8 +1292,8 @@ void function(win) {
         };
 
         // IE9 中需要设置所有的 xhr 事件回调，不然可能会无法执行后续操作
-        xhr.onprogress = function(){}
-        xhr.ontimeout = function(){}
+        xhr.onprogress = function(){};
+        xhr.ontimeout = function(){};
         xhr.timeout = 0;
 
         var formData = '';
@@ -1301,9 +1308,9 @@ void function(win) {
         } else {
             formData = JSON.stringify(options.data);
         }
-        
+
         xhr.send(formData);
-        
+
     };
 
     // 获取当前时间的时间戳
