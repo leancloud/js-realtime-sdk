@@ -1,6 +1,6 @@
 /**
  * @author wangxiao
- * @date 2015-05-15
+ * @date 2015-05-19
  * @homepage http://github.com/leancloud/js-realtime-sdk/
  *
  * 每位工程师都有保持代码优雅的义务
@@ -372,6 +372,9 @@ void function(win) {
         };
 
         engine.createSocket = function(server) {
+            if (cache.ws) {
+                cache.ws.close();
+            }
             var ws = new WebSocket(server);
             cache.ws = ws;
             ws.addEventListener('open', wsOpen);
