@@ -139,7 +139,12 @@ function main() {
 
                     // 创建成功，后续你可以将 room id 存储起来
                     room = obj;
-                    showLog('创建一个新 Room 成功，id 是：', room.id);
+                    roomId = room.id;
+                    showLog('创建一个新 Room 成功，id 是：', roomId);
+
+                    // 关闭原连接，重新开启新连接
+                    rt.close();
+                    main();
                 });
             }
         });

@@ -1,6 +1,6 @@
 /**
  * @author wangxiao
- * @date 2015-05-19
+ * @date 2015-05-25
  * @homepage http://github.com/leancloud/js-realtime-sdk/
  *
  * 每位工程师都有保持代码优雅的义务
@@ -434,10 +434,12 @@ void function(win) {
 
         engine.connect = function(options) {
             var server = options.server;
-            if (server && tool.now() < server.expires) {
+            // 判断获取出缓存的时间是否是比较新的
+            if (server && tool.now() <= server.expires) {
                 engine.createSocket(server.server);
             }
             else {
+                cache.ec.emit(eNameIndex.error);
                 throw('WebSocket connet failed.');
             }
         };
@@ -451,7 +453,16 @@ void function(win) {
             if (win && win.location.protocol === 'https:' && secure) {
                 protocol = 'https://';
             }
-            url = protocol + 'router-g0-push.avoscloud.com/v1/route?_t=' + tool.now() + '&appId=' + appId ;
+            var node = '';
+            switch (options.country) {
+                case 'cn':
+                    node = 'g0';
+                break;
+                case 'us':
+                    node = 'a0';
+                break;
+            }
+            url = protocol + 'router-' + node + '-push.avoscloud.com/v1/route?_t=' + tool.now() + '&appId=' + appId ;
             if (secure) {
               url += '&secure=1';
             }
@@ -1217,7 +1228,9 @@ void function(win) {
                 // 是否开启服务器端认证，传入认证函数
                 auth: options.auth,
                 // 是否关闭 WebSocket 的安全链接，即由 wss 协议转为 ws 协议，关闭 SSL 保护。默认开启。
-                secure: typeof(options.secure) === 'undefined' ? secure : options.secure
+                secure: typeof(options.secure) === 'undefined' ? secure : options.secure,
+                // 服务器地区选项，默认为中国大陆
+                country: options.country || 'cn'
             };
 
             var realtimeObj = newRealtimeObject();
