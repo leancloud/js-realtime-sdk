@@ -454,7 +454,7 @@ void function(win) {
                 protocol = 'https://';
             }
             var node = '';
-            switch (options.country) {
+            switch (options.region) {
                 case 'cn':
                     node = 'g0';
                 break;
@@ -1230,7 +1230,7 @@ void function(win) {
                 // 是否关闭 WebSocket 的安全链接，即由 wss 协议转为 ws 协议，关闭 SSL 保护。默认开启。
                 secure: typeof(options.secure) === 'undefined' ? secure : options.secure,
                 // 服务器地区选项，默认为中国大陆
-                country: options.country || 'cn'
+                region: options.region || 'cn'
             };
 
             var realtimeObj = newRealtimeObject();
