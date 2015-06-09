@@ -1257,15 +1257,6 @@ void function(win) {
     // 空函数
     tool.noop = function() {};
 
-    // 获取一个唯一 id
-    tool.getId = function() {
-        // 与时间相关的随机因子
-        var getIdItem = function() {
-            return new Date().getTime().toString(36) + Math.random().toString(36).substring(2, 3);
-        };
-        return 'AV' + getIdItem();
-    };
-
     // 检查是否是 JSON 格式的字符串
     tool.isJSONString = function(obj) {
         return /^\{.*\}$/.test(obj);
