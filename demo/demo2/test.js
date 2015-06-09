@@ -223,7 +223,7 @@ function showMsg(data, isBefore) {
         from = '自己';
     }
     if (String(text).replace(/^\s+/, '').replace(/\s+$/, '')) {
-        showLog('（' + formatTime(data.timestamp) + '）  ' + from + '： ', text, isBefore);
+        showLog('（' + formatTime(data.timestamp) + '）  ' + encodeHTML(from) + '： ', text, isBefore);
     }
 }
 
