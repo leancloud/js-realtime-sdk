@@ -1,5 +1,6 @@
 script: "echo 1"
 after_success: |
+        [ $TRAVIS_BRANCH == 'master' ] && \
         mkdir target && \
         cp -r demo target/ && \
         cp -r src target/ && \
