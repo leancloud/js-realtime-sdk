@@ -462,8 +462,7 @@ void function(win) {
                     node = 'a0';
                 break;
                 default:
-                    throw('There is no this region.');
-                break;
+                throw('There is no this region.');
             }
             url = protocol + 'router-' + node + '-push.avoscloud.com/v1/route?_t=' + tool.now() + '&appId=' + appId ;
             if (secure) {
@@ -1006,6 +1005,7 @@ void function(win) {
             cache: cache,
             open: function(callback) {
                 var me = this;
+                var cache = this.cache;
                 cache.closeFlag = false;
                 engine.getServer(cache.options, function(data) {
                     if (data) {
@@ -1030,6 +1030,7 @@ void function(win) {
             },
             // 表示关闭当前的 session 连接和 WebSocket 连接，并且回收内存
             close: function() {
+                var cache = this.cache;
                 if (!cache.openFlag) {
                     throw('Must call after open() has successed.');
                 }
@@ -1055,6 +1056,7 @@ void function(win) {
                 return this;
             },
             room: function(argument, callback) {
+                var cache = this.cache;
                 if (!cache.openFlag) {
                     throw('Must call after open() has successed.');
                 }
@@ -1145,6 +1147,7 @@ void function(win) {
             },
             // 相关查询，包括用户列表查询，房间查询等
             query: function(argument, callback) {
+                var cache = this.cache;
                 if (!cache.openFlag) {
                     throw('Must call after open() has successed.');
                 }
@@ -1173,6 +1176,7 @@ void function(win) {
             },
             // 判断用户是否在线
             ping: function(argument, callback) {
+                var cache = this.cache;
                 if (!cache.openFlag) {
                     throw('Must call after open() has successed.');
                 }
