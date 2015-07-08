@@ -79,16 +79,16 @@ void function(win) {
             options = {
                 cid: cid,
                 members: members,
-                serialId: engine.getSerialId()
+                serialId: engine.getSerialId(cache)
             };
             switch(cmd) {
                 case 'add':
                     eventName = 'conv-added';
-                    engine.convAdd(options);
+                    engine.convAdd(cache, options);
                 break;
                 case 'remove':
                     eventName = 'conv-removed';
-                    engine.convRemove(options);
+                    engine.convRemove(cache, options);
                 break;
             }
             fun = function(data) {
@@ -142,11 +142,11 @@ void function(win) {
                     break;
                 }
                 options.cid = me.id;
-                options.serialId = engine.getSerialId();
+                options.serialId = engine.getSerialId(cache);
 
                 // 如果 type 存在，则发送多媒体格式
                 if (options.type) {
-                    options.data = engine.setMediaMsg(options.type, data);
+                    options.data = engine.setMediaMsg(cache, options.type, data);
                 } else {
                     if (typeof data === 'string') {
                         options.data = data;
@@ -173,7 +173,7 @@ void function(win) {
                     };
                     cache.ec.on('ack', fun);
                 }
-                engine.send(options, callback);
+                engine.send(cache, options, callback);
                 return this;
             },
             log: function(argument, callback) {
@@ -188,13 +188,13 @@ void function(win) {
                     break;
                 }
                 options.cid = options.cid || this.id;
-                options.serialId = options.serialId || engine.getSerialId();
+                options.serialId = options.serialId || engine.getSerialId(cache);
                 var fun = function(data) {
                     if (data.i === options.serialId) {
                         if (callback) {
                             // 对查出的类型进行过滤，兼容多端通信
                             for (var i = 0, l = data.logs.length; i < l; i ++) {
-                                data.logs[i].data = engine.getMediaMsg(data.logs[i].data);
+                                data.logs[i].data = engine.getMediaMsg(cache, data.logs[i].data);
                                 // 增加字段，兼容接收消息的字段
                                 data.logs[i].fromPeerId = data.logs[i].from;
                                 data.logs[i].msg = data.logs[i].data;
@@ -207,7 +207,7 @@ void function(win) {
                 cache.ec.on('logs', fun);
 
                 // 注：立刻获取消息历史有可能取不到
-                engine.convLog(options);
+                engine.convLog(cache, options);
                 return this;
             },
             receive: function(callback) {
@@ -238,7 +238,7 @@ void function(win) {
                     m: cache.options.peerId,
                     objectId: id
                 };
-                options.serialId = engine.getSerialId();
+                options.serialId = engine.getSerialId(cache);
                 var fun = function(data) {
                     if (data.i === options.serialId) {
                         if (callback) {
@@ -254,14 +254,14 @@ void function(win) {
                     }
                 };
                 cache.ec.on('conv-results', fun);
-                engine.convQuery(options);
+                engine.convQuery(cache, options);
                 return this;
             },
             count: function(callback) {
                 var id = this.id;
                 var options = {
                     cid: id,
-                    serialId: engine.getSerialId()
+                    serialId: engine.getSerialId(cache)
                 };
                 var fun = function(data) {
                     if (data.i === options.serialId) {
@@ -272,7 +272,7 @@ void function(win) {
                     }
                 };
                 cache.ec.on('conv-result', fun);
-                engine.convCount(options);
+                engine.convCount(cache, options);
                 return this;
             },
             update: function(data, callback) {
@@ -280,7 +280,7 @@ void function(win) {
                 var options = {
                     cid: id,
                     data: data,
-                    serialId: engine.getSerialId()
+                    serialId: engine.getSerialId(cache)
                 };
                 var fun = function(data) {
                     if (data.i === options.serialId) {
@@ -291,7 +291,7 @@ void function(win) {
                     }
                 };
                 cache.ec.on('conv-updated', fun);
-                engine.convUpdate(options);
+                engine.convUpdate(cache, options);
                 return this;
             }
         };
@@ -322,694 +322,15 @@ void function(win) {
             serialId: 2015
         };
 
-        // WebSocket Open
-        var wsOpen = function() {
-            engine.bindEvent();
-            engine.openSession({
-                serialId: engine.getSerialId()
-            });
-            // 启动心跳
-            engine.heartbeats();
-            // 启动守护进程
-            engine.guard();
-        };
-
-        // WebSocket Close
-        var wsClose = function(event) {
-            // 派发全局 close 事件，表示 realtime 已经关闭
-            cache.ec.emit(eNameIndex.close, event);
-        };
-
-        // WebSocket Message
-        var wsMessage = function(msg) {
-            var data = JSON.parse(msg.data);
-
-            // 对服务端返回的数据进行逻辑包装
-            if (data.cmd) {
-                var eventName = data.cmd;
-                if (data.op) {
-                    eventName += '-' + data.op;
-                }
-                cache.ec.emit(eventName, data);
-            }
-        };
-
-        var wsError = function(data) {
-            cache.ec.emit(eNameIndex.error, data);
-            throw(data);
-        };
-
-        // WebSocket send message
-        var wsSend = function(data) {
-            if (!cache.closeFlag) {
-                if (!cache.ws) {
-                    throw('The realtimeObject must opened first. Please listening to the "open" event.');
-                }
-                else {
-                    cache.ws.send(JSON.stringify(data));
-                }
-            }
-        };
-
-        engine.createSocket = function(server) {
-            if (cache.ws) {
-                cache.ws.close();
-            }
-            var ws = new WebSocket(server);
-            cache.ws = ws;
-            ws.addEventListener('open', wsOpen);
-            ws.addEventListener('close', wsClose);
-            ws.addEventListener('message', wsMessage);
-            ws.addEventListener('error', wsError);
-        };
-
-        // 心跳程序
-        engine.heartbeats = function() {
-            var timer;
-            cache.ws.addEventListener('message', function() {
-                if (timer) {
-                    clearTimeout(timer);
-                }
-                timer = setTimeout(function() {
-                    wsSend({});
-                }, config.heartbeatsTime);
-            });
-
-            // 防止多次实例化
-            engine.heartbeats = tool.noop;
-        };
-
-        // 守护进程，会派发 reuse 重连事件
-        engine.guard = function() {
-
-            // 超时是三分钟
-            var timeLength = 3 * 60 * 1000;
-            var timer;
-
-            // 结合心跳事件，如果长时间没有收到服务器的心跳，也要触发重连机制
-            cache.ws.addEventListener('message', function() {
-                if (timer) {
-                    clearTimeout(timer);
-                }
-                timer = setTimeout(function() {
-                    if (!cache.closeFlag && !cache.resuseFlag) {
-                        cache.resuseFlag = true;
-                        // 超时则派发重试事件
-                        cache.ec.emit(eNameIndex.reuse);
-                    }
-                }, timeLength);
-            });
-
-            // 监测断开事件
-            cache.ec.on(eNameIndex.close + ' ' + 'session-closed', function() {
-                if (!cache.closeFlag && !cache.resuseFlag) {
-                    cache.resuseFlag = true;
-                    cache.ec.emit(eNameIndex.reuse);
-                }
-            });
-
-            // 防止多次实例化
-            engine.guard = tool.noop;
-        };
-
-        engine.connect = function(options) {
-            var server = options.server;
-            // 判断获取出缓存的时间是否是比较新的
-            if (server && tool.now() <= server.expires) {
-                engine.createSocket(server.server);
-            }
-            else {
-                cache.ec.emit(eNameIndex.error);
-                throw('WebSocket connet failed.');
-            }
-        };
-
-        engine.getServer = function(options, callback) {
-            var appId = options.appId;
-            // 是否获取 wss 的安全链接
-            var secure = options.secure;
-            var url = '';
-            var protocol = 'http://';
-            if (win && win.location.protocol === 'https:' && secure) {
-                protocol = 'https://';
-            }
-            var node = '';
-            switch (options.region) {
-                case 'cn':
-                    node = 'g0';
-                break;
-                case 'us':
-                    node = 'a0';
-                break;
-                default:
-                throw('There is no this region.');
-            }
-            url = protocol + 'router-' + node + '-push.avoscloud.com/v1/route?_t=' + tool.now() + '&appId=' + appId ;
-            if (secure) {
-              url += '&secure=1';
-            }
-            tool.ajax({
-                url: url,
-                form: true
-            }, function(data, error) {
-                if (data) {
-                    data.expires = tool.now() + data.ttl * 1000;
-                    cache.server = data;
-                    callback(data);
-                }
-                else {
-                    if (error.code === 403 || error.code === 404) {
-                        throw(error.error);
-                    }
-                    else {
-                        cache.ec.emit(eNameIndex.error);
-                    }
-                }
-            });
-        };
-
-        // 打开 session
-        engine.openSession = function(options) {
-            var cmd = {
-                cmd: 'session',
-                op: 'open',
-                appId: cache.options.appId,
-                peerId: cache.options.peerId,
-                ua: 'js/' + VERSION,
-                i: options.serialId
-            };
-            if (cache.authFun) {
-                cache.authFun({
-                    clientId: cache.options.peerId
-                }, function(authResult){
-                    if (authResult && authResult.signature) {
-                        cmd.n = authResult.nonce;
-                        cmd.t = authResult.timestamp;
-                        cmd.s = authResult.signature;
-                        wsSend(cmd);
-                    } else {
-                        throw('Session open denied by application: ' + authResult);
-                    }
-                });
-            } else {
-                wsSend(cmd);
-            }
-        };
-
-        engine.closeSession = function() {
-            wsSend({
-                cmd: 'session',
-                op: 'close',
-                peerId: cache.options.peerId
-                // ASK: 这块用不用 appId
-                // appId: cache.options.appId
-            });
-        };
-
-        engine.startConv = function(options) {
-            var cmd = {
-                cmd: 'conv',
-                op: 'start',
-                // m [] 初始的对话用户id列表，服务器默认会把自己加入
-                m: options.members,
-                appId: cache.options.appId,
-                peerId: cache.options.peerId,
-                // attr json对象，对话的任意初始属性
-                attr: {
-                    name: options.name || '',
-                    attr: options.attr || {}
-                },
-                i: options.serialId,
-                // 是否是开放聊天室，无人数限制
-                transient: options.transient || false
-            };
-            if (cache.authFun) {
-                cache.authFun({
-                    clientId: cache.options.peerId,
-                    members: options.members
-                }, function(authResult){
-                    if (authResult && authResult.signature) {
-                        cmd.n = authResult.nonce;
-                        cmd.t = authResult.timestamp;
-                        cmd.s = authResult.signature;
-                        wsSend(cmd);
-                    } else {
-                        throw('Conversation creation denied by application: ' + authResult);
-                    }
-                });
-            } else {
-                wsSend(cmd);
-            }
-        };
-
-        engine.convAdd = function(options) {
-            var cmd = {
-                cmd: 'conv',
-                op: 'add',
-                cid: options.cid,
-                m: options.members,
-                appId: cache.options.appId,
-                peerId: cache.options.peerId,
-                i: options.serialId
-            };
-            if (cache.authFun) {
-                cache.authFun({
-                    clientId: cache.options.peerId,
-                    members: options.members,
-                    convId: options.cid,
-                    action: 'invite'
-                }, function(authResult){
-                    if (authResult && authResult.signature) {
-                        cmd.n = authResult.nonce;
-                        cmd.t = authResult.timestamp;
-                        cmd.s = authResult.signature;
-                        wsSend(cmd);
-                    } else {
-                        throw('Adding members to conversation denied by application: ' + authResult);
-                    }
-                });
-            } else {
-                wsSend(cmd);
-            }
-        };
-
-        engine.convRemove = function(options) {
-            var cmd = {
-                cmd: 'conv',
-                op: 'remove',
-                cid: options.cid,
-                m: options.members,
-                appId: cache.options.appId,
-                peerId: cache.options.peerId,
-                i: options.serialId
-            };
-            if (cache.authFun && (options.members.length > 1 || options.members[0] != cache.options.peerId)) {
-                cache.authFun({
-                    clientId: cache.options.peerId,
-                    members: options.members,
-                    convId: options.cid,
-                    action: 'kick'
-                }, function(authResult){
-                    if (authResult && authResult.signature) {
-                        cmd.n = authResult.nonce;
-                        cmd.t = authResult.timestamp;
-                        cmd.s = authResult.signature;
-                        wsSend(cmd);
-                    } else {
-                        throw('Removing members from conversation denied by application: ' + authResult);
-                    }
-                });
-            } else {
-                wsSend(cmd);
-            }
-        };
-
-        engine.send = function(options) {
-            wsSend({
-                cmd: 'direct',
-                cid: options.cid,
-                appId: cache.options.appId,
-                peerId: cache.options.peerId,
-                msg: options.data,
-                i: options.serialId,
-                // r 是否需要回执需要则1，否则不传
-                r: options.receipt || false,
-                // transient 是否暂态消息（暂态消息不返回 ack，不保留离线消息，不触发离 线推送），否则不传
-                transient: options.transient || false
-            });
-        };
-
-        engine.convQuery = function(options) {
-            options = options || {};
-            wsSend({
-                cmd: 'conv',
-                op: 'query',
-                appId: cache.options.appId,
-                peerId: cache.options.peerId,
-                // where 可选，对象，默认为包含自己的查询 {"m": peerId}
-                where: options.where || {
-                    m: cache.options.peerId
-                    // conversation 的 id
-                    // objectId: options.cid
-                },
-                // sort 可选，字符串，默认为 -lm，最近对话反序
-                sort: options.sort || '-lm',
-                // limit 可选，数字，默认10
-                limit: options.limit || 10,
-                // skip 可选，数字，默认0
-                skip: options.skip || 0,
-                // i serial-id
-                i: options.serialId
-            });
-        };
-
-        // 查询 session 在线情况
-        engine.querySession = function(options) {
-            wsSend({
-                cmd: 'session',
-                op: 'query',
-                appId: cache.options.appId,
-                peerId: cache.options.peerId,
-                i: options.serialId,
-                sessionPeerIds: options.peerIdList
-            });
-        };
-
-        // 查询 conversation 的聊天记录
-        engine.convLog = function(options) {
-            wsSend({
-                cmd: 'logs',
-                cid: options.cid,
-                // t 时间戳，从 t 开始向前查询
-                t: options.t || undefined,
-                // mid 消息 id，从消息 id 开始向前查询（和 t 共同使用，为防止某毫秒时刻有重复消息）
-                mid: options.mid || undefined,
-                limit: options.limit || 20,
-                appId: cache.options.appId,
-                peerId: cache.options.peerId,
-                // i serial-id
-                i: options.serialId
-            });
-        };
-
-        engine.convUpdate = function(options) {
-            wsSend({
-                cmd: 'conv',
-                op: 'update',
-                appId: cache.options.appId,
-                peerId: cache.options.peerId,
-                cid: options.cid,
-                // attr 要修改的内容
-                attr: options.data,
-                i: options.serialId
-            });
-        };
-
-        engine.convAck = function(options) {
-            wsSend({
-                cmd: 'ack',
-                cid: options.cid,
-                appId: cache.options.appId,
-                peerId: cache.options.peerId,
-                mid: options.mid
-            });
-        };
-
-        engine.convCount = function(options) {
-            wsSend({
-                cmd: 'conv',
-                op: 'count',
-                appId: cache.options.appId,
-                peerId: cache.options.peerId,
-                i: options.serialId,
-                cid: options.cid
-            });
-        };
-
-        // 取出多媒体类型的格式（内置 HTML 转义逻辑）
-        engine.getMediaMsg = function(msg) {
-
-            // 检查是否是 JSON 格式的一个 String 类型
-            if (!tool.isJSONString(msg)) {
-
-                // 是否对消息中的 HTML 进行转义
-                if (cache.options.encodeHTML) {
-                    msg = tool.encodeHTML(msg);
-                }
-                return msg;
-            }
-
-            msg = JSON.parse(msg);
-
-            // 检查是否是多媒体类型
-            if (!msg.hasOwnProperty('_lctype')) {
-                return msg;
-            }
-
-            var obj = {
-                text: msg._lctext,
-                attr: msg._lcattrs
-            };
-
-            // 是否对消息中的 HTML 进行转义，对媒体格式仅对 text 转义
-            if (cache.options.encodeHTML) {
-                obj.text = tool.encodeHTML(msg._lctext);
-            }
-
-            if (msg._lcfile && msg._lcfile.url) {
-                obj.url = msg._lcfile.url;
-            }
-            if (msg._lcfile && msg._lcfile.metaData) {
-                obj.metaData = msg._lcfile.metaData;
-            }
-
-            // 多媒体类型
-            switch(msg._lctype) {
-                case -1:
-                    obj.type = 'text';
-                break;
-                case -2:
-                    obj.type = 'image';
-                break;
-                case -3:
-                    obj.type = 'audio';
-                break;
-                case -4:
-                    obj.type = 'video';
-                break;
-                case -5:
-                    obj.type = 'location';
-                break;
-                case -6:
-                    obj.type = 'file';
-                break;
-            }
-            return obj;
-        };
-
-        // 生成多媒体特定格式的数据
-        engine.setMediaMsg = function(type, data) {
-            var obj;
-            if (type !== 'text' && !data.metaData) {
-                throw('Media Data must have metaData attribute.');
-            }
-            switch(type) {
-                case 'text':
-                    obj = {
-                        _lctype: -1,
-                        _lctext: data.text,
-                        // _lcattrs 是用来存储用户自定义的一些键值对
-                        _lcattrs: data.attr
-                    };
-                break;
-                case 'image':
-                    obj = {
-                        _lctype: -2,
-                        _lctext: data.text,
-                        // _lcattrs 是用来存储用户自定义的一些键值对
-                        _lcattrs: data.attr,
-                        _lcfile: {
-                            url: data.url,
-                            objId: data.objectId,
-                            metaData: {
-                                name: data.metaData.name,
-                                // 格式
-                                format: data.metaData.format,
-                                //单位：像素
-                                height: data.metaData.height,
-                                //单位：像素
-                                width: data.metaData.width,
-                                //单位：b
-                                size: data.metaData.size
-                            }
-                        }
-                    };
-                break;
-                case 'audio':
-                    obj = {
-                        _lctype: -3,
-                        _lctext: data.text,
-                        // _lcattrs 是用来存储用户自定义的一些键值对
-                        _lcattrs: data.attr,
-                        _lcfile: {
-                            url: data.url,
-                            objId: data.objectId,
-                            metaData: {
-                                name: data.metaData.name,
-                                // 媒体格式
-                                format: data.metaData.format,
-                                //单位：秒
-                                duration: data.metaData.duration,
-                                //单位：b
-                                size: data.metaData.size
-                            }
-                        }
-                    };
-                break;
-                case 'video':
-                    obj = {
-                        _lctype: -4,
-                        _lctext: data.text,
-                        // _lcattrs 是用来存储用户自定义的一些键值对
-                        _lcattrs: data.attr,
-                        _lcfile: {
-                            url: data.url,
-                            objId: data.objectId,
-                            metaData: {
-                                name: data.metaData.name,
-                                // 媒体格式
-                                format: data.metaData.format,
-                                // 单位：秒
-                                duration: data.metaData.duration,
-                                //单位：b
-                                size: data.metaData.size
-                            }
-                        }
-                    };
-                break;
-                case 'location':
-                    obj = {
-                        _lctype: -5,
-                        _lctext: data.text,
-                        // _lcattrs 是用来存储用户自定义的一些键值对
-                        _lcattrs: data.attr,
-                        _lcloc: {
-                            // 经度
-                            longitude: data.metaData.longitude,
-                            // 维度
-                            latitude: data.metaData.latitude
-                        }
-                    };
-                break;
-                case 'file':
-                    obj = {
-                        _lctype: -6,
-                        _lctext: data.text,
-                        // _lcattrs 是用来存储用户自定义的一些键值对
-                        _lcattrs: data.attr,
-                        _lcfile: {
-                            name: data.metaData.name,
-                            // 单位：b
-                            size: data.metaData.size
-                        }
-                    };
-                break;
-            }
-            obj = JSON.stringify(obj);
-            return obj;
-        };
-
-        // 取自增的 number 类型
-        engine.getSerialId = function() {
-            cache.serialId ++;
-            if (cache.serialId > 999999) {
-                cache.serialId = 2015;
-            }
-            return cache.serialId;
-        };
-
-        // 绑定所有服务返回事件
-        engine.bindEvent = function() {
-            cache.ec.on('session-opened', function(data) {
-                // 标记重试状态为 false，表示没有在重试
-                cache.resuseFlag = false;
-                cache.openFlag = true;
-                // 派发全局 open 事件，表示 realtime 已经启动
-                cache.ec.emit(eNameIndex.open, data);
-            });
-            // cache.ec.on('session-closed', function() {
-                // session 被关闭，则关闭当前 websocket 连接
-            // });
-
-            // 查询 session 在线情况
-            // cache.ec.on('session-query-result', function() {});
-
-            cache.ec.on('session-error', function(data) {
-                cache.ec.emit(eNameIndex.error, data);
-            });
-
-            // 服务器端确认收到 conversation 创建，并创建成功
-            // 在创建时已经做绑定，所以注释掉
-            // cache.ec.on('conv-started', function(data) {});
-
-            // 服务器端发给客户端，表示当前用户加入了某个对话。包括创建对话、或加入对话
-            cache.ec.on('conv-joined', function(data) {
-                // 不是当前用户自己加入
-                if (data.peerId !== data.initBy) {
-                    cache.ec.emit(eNameIndex.join, data);
-                }
-            });
-
-            // 服务器端发给客户端，表示当前用户离开了某个对话，不再能收到对话的消息
-            cache.ec.on('conv-left', function(data) {
-                cache.ec.emit(eNameIndex.left, data);
-            });
-
-            // 服务器端发给客户端，表示当前对话有新人加入
-            cache.ec.on('conv-members-joined', function(data) {
-                cache.ec.emit(eNameIndex.join, data);
-            });
-
-            // 服务器端发给客户端，表示当前对话有新人离开
-            cache.ec.on('conv-members-left', function(data) {
-                cache.ec.emit(eNameIndex.left, data);
-            });
-
-            // 服务器端回复。表示 add 操作完成
-            // 因为 added 之后也会触发 members-joined，所以注释掉
-            // cache.ec.on('conv-added', function(data) {});
-
-            // 服务器端确认删除成功
-            // 因为 removed 之后也会触发 members-removed，所以注释掉
-            // cache.ec.on('conv-removed', function() {});
-
-            cache.ec.on('conv-error', function(data) {
-                cache.ec.emit(eNameIndex.error, data);
-                throw(data.code + ':' + data.reason);
-            });
-
-            // 查询对话的结果
-            // cache.ec.on('conv-results', function(data) {});
-
-            // cache.ec.on('conv-updated', function(data) {});
-
-            cache.ec.on('direct', function(data) {
-
-                // 增加多媒体消息的数据格式化
-                data.msg = engine.getMediaMsg(data.msg);
-
-                // 收到消息，立刻告知服务器
-                engine.convAck({
-                    cid: data.cid,
-                    mid: data.id
-                });
-
-                cache.ec.emit(eNameIndex.message, data);
-            });
-
-            // 对要求回执的消息，服务器端会在对方客户端发送ack后发送回执
-            cache.ec.on('rcp', function(data) {
-                cache.ec.emit(eNameIndex.receipt, data);
-            });
-
-            // cache.ec.on('ack', function(data) {});
-
-            // 用户可以获取自己所在对话的历史记录
-            // cache.ec.on('logs', function(data) {});
-
-            // 清空 bindEvent，防止事件重复绑定
-            engine.bindEvent = tool.noop;
-        };
-
         return {
             cache: cache,
             open: function(callback) {
                 var me = this;
                 var cache = this.cache;
                 cache.closeFlag = false;
-                engine.getServer(cache.options, function(data) {
+                engine.getServer(cache, cache.options, function(data) {
                     if (data) {
-                        engine.connect({
+                        engine.connect(cache, {
                             server: cache.server
                         });
                     }
@@ -1035,7 +356,7 @@ void function(win) {
                     throw('Must call after open() has successed.');
                 }
                 cache.closeFlag = true;
-                engine.closeSession();
+                engine.closeSession(cache);
                 cache.ws.close();
                 return this;
             },
@@ -1118,10 +439,10 @@ void function(win) {
                         // 默认的数据，可以放 Conversation 名字等
                         attr: options.attr || {},
                         transient: options.transient || false,
-                        serialId: engine.getSerialId()
+                        serialId: engine.getSerialId(cache)
                     };
 
-                    engine.startConv(options, callback);
+                    engine.startConv(cache, options, callback);
 
                     // 服务器端确认收到对话创建，并创建成功
                     var fun = function(data) {
@@ -1161,7 +482,7 @@ void function(win) {
                         options = argument;
                     break;
                 }
-                options.serialId = engine.getSerialId();
+                options.serialId = engine.getSerialId(cache);
                 var fun = function(data) {
                     if (data.i === options.serialId) {
                         if (callback) {
@@ -1171,7 +492,7 @@ void function(win) {
                     }
                 };
                 cache.ec.on('conv-results', fun);
-                engine.convQuery(options);
+                engine.convQuery(cache, options);
                 return this;
             },
             // 判断用户是否在线
@@ -1193,7 +514,7 @@ void function(win) {
                     peerIdList = argument;
                 }
                 var options = {
-                    serialId: engine.getSerialId(),
+                    serialId: engine.getSerialId(cache),
                     peerIdList: peerIdList
                 };
                 var fun = function(data) {
@@ -1203,7 +524,7 @@ void function(win) {
                     }
                 };
                 cache.ec.on('session-query-result', fun);
-                engine.querySession(options);
+                engine.querySession(cache, options);
                 return this;
             }
         };
@@ -1244,7 +565,6 @@ void function(win) {
             realtimeObj.cache.options = options;
             realtimeObj.cache.ec = tool.eventCenter();
             realtimeObj.cache.authFun = options.auth;
-
             realtimeObj.open(callback);
 
             return realtimeObj;
@@ -1257,6 +577,693 @@ void function(win) {
     // 挂载私有方法
     AV.realtime._tool = tool;
     AV.realtime._engine = engine;
+
+    // WebSocket Open
+    engine.wsOpen = function(cache) {
+        engine.bindEvent(cache);
+        engine.openSession(cache, {
+            serialId: engine.getSerialId(cache)
+        });
+        // 启动心跳
+        engine.heartbeats(cache);
+        // 启动守护进程
+        engine.guard(cache);
+    };
+
+    // WebSocket Close
+    engine.wsClose = function(cache, event) {
+        // 派发全局 close 事件，表示 realtime 已经关闭
+        cache.ec.emit(eNameIndex.close, event);
+    };
+
+    // WebSocket Message
+    engine.wsMessage = function(cache, msg) {
+        var data = JSON.parse(msg.data);
+
+        // 对服务端返回的数据进行逻辑包装
+        if (data.cmd) {
+            var eventName = data.cmd;
+            if (data.op) {
+                eventName += '-' + data.op;
+            }
+            cache.ec.emit(eventName, data);
+        }
+    };
+
+    engine.wsError = function(cache, data) {
+        cache.ec.emit(eNameIndex.error, data);
+        throw(data);
+    };
+
+    // WebSocket send message
+    engine.wsSend = function(cache, data) {
+        if (!cache.closeFlag) {
+            if (!cache.ws) {
+                throw('The realtimeObject must opened first. Please listening to the "open" event.');
+            }
+            else {
+                cache.ws.send(JSON.stringify(data));
+            }
+        }
+    };
+
+    engine.createSocket = function(cache, server) {
+        if (cache.ws) {
+            cache.ws.close();
+        }
+        var ws = new WebSocket(server);
+        cache.ws = ws;
+        ws.addEventListener('open', function() {
+            engine.wsOpen(cache);
+        });
+        ws.addEventListener('close', function(event) {
+            engine.wsClose(cache, event);
+        });
+        ws.addEventListener('message', function(msg) {
+            engine.wsMessage(cache, msg);
+        });
+        ws.addEventListener('error', function(data) {
+            engine.wsError(cache, data);
+        });
+    };
+
+    // 心跳程序
+    engine.heartbeats = function(cache) {
+        var timer;
+        cache.ws.addEventListener('message', function() {
+            if (timer) {
+                clearTimeout(timer);
+            }
+            timer = setTimeout(function() {
+                engine.wsSend(cache, {});
+            }, config.heartbeatsTime);
+        });
+
+        // 防止多次实例化
+        engine.heartbeats = tool.noop;
+    };
+
+    // 守护进程，会派发 reuse 重连事件
+    engine.guard = function(cache) {
+
+        // 超时是三分钟
+        var timeLength = 3 * 60 * 1000;
+        var timer;
+
+        // 结合心跳事件，如果长时间没有收到服务器的心跳，也要触发重连机制
+        cache.ws.addEventListener('message', function() {
+            if (timer) {
+                clearTimeout(timer);
+            }
+            timer = setTimeout(function() {
+                if (!cache.closeFlag && !cache.resuseFlag) {
+                    cache.resuseFlag = true;
+                    // 超时则派发重试事件
+                    cache.ec.emit(eNameIndex.reuse);
+                }
+            }, timeLength);
+        });
+
+        // 监测断开事件
+        cache.ec.on(eNameIndex.close + ' ' + 'session-closed', function() {
+            if (!cache.closeFlag && !cache.resuseFlag) {
+                cache.resuseFlag = true;
+                cache.ec.emit(eNameIndex.reuse);
+            }
+        });
+
+        // 防止多次实例化
+        engine.guard = tool.noop;
+    };
+
+    engine.connect = function(cache, options) {
+        var server = options.server;
+        // 判断获取出缓存的时间是否是比较新的
+        if (server && tool.now() <= server.expires) {
+            engine.createSocket(cache, server.server);
+        }
+        else {
+            cache.ec.emit(eNameIndex.error);
+            throw('WebSocket connet failed.');
+        }
+    };
+
+    engine.getServer = function(cache, options, callback) {
+        var appId = options.appId;
+        // 是否获取 wss 的安全链接
+        var secure = options.secure;
+        var url = '';
+        var protocol = 'http://';
+        if (win && win.location.protocol === 'https:' && secure) {
+            protocol = 'https://';
+        }
+        var node = '';
+        switch (options.region) {
+            case 'cn':
+                node = 'g0';
+            break;
+            case 'us':
+                node = 'a0';
+            break;
+            default:
+            throw('There is no this region.');
+        }
+        url = protocol + 'router-' + node + '-push.avoscloud.com/v1/route?_t=' + tool.now() + '&appId=' + appId ;
+        if (secure) {
+          url += '&secure=1';
+        }
+        tool.ajax({
+            url: url,
+            form: true
+        }, function(data, error) {
+            if (data) {
+                data.expires = tool.now() + data.ttl * 1000;
+                cache.server = data;
+                callback(data);
+            }
+            else {
+                if (error.code === 403 || error.code === 404) {
+                    throw(error.error);
+                }
+                else {
+                    cache.ec.emit(eNameIndex.error);
+                }
+            }
+        });
+    };
+
+    // 打开 session
+    engine.openSession = function(cache, options) {
+        var cmd = {
+            cmd: 'session',
+            op: 'open',
+            appId: cache.options.appId,
+            peerId: cache.options.peerId,
+            ua: 'js/' + VERSION,
+            i: options.serialId
+        };
+        if (cache.authFun) {
+            cache.authFun({
+                clientId: cache.options.peerId
+            }, function(authResult){
+                if (authResult && authResult.signature) {
+                    cmd.n = authResult.nonce;
+                    cmd.t = authResult.timestamp;
+                    cmd.s = authResult.signature;
+                    engine.wsSend(cache, cache.cmd);
+                } else {
+                    throw('Session open denied by application: ' + authResult);
+                }
+            });
+        } else {
+            engine.wsSend(cache, cmd);
+        }
+    };
+
+    engine.closeSession = function(cache) {
+        engine.wsSend(cache, cache,{
+            cmd: 'session',
+            op: 'close',
+            peerId: cache.options.peerId
+            // ASK: 这块用不用 appId
+            // appId: cache.options.appId
+        });
+    };
+
+    engine.startConv = function(cache, options) {
+        var cmd = {
+            cmd: 'conv',
+            op: 'start',
+            // m [] 初始的对话用户id列表，服务器默认会把自己加入
+            m: options.members,
+            appId: cache.options.appId,
+            peerId: cache.options.peerId,
+            // attr json对象，对话的任意初始属性
+            attr: {
+                name: options.name || '',
+                attr: options.attr || {}
+            },
+            i: options.serialId,
+            // 是否是开放聊天室，无人数限制
+            transient: options.transient || false
+        };
+        if (cache.authFun) {
+            cache.authFun({
+                clientId: cache.options.peerId,
+                members: options.members
+            }, function(authResult){
+                if (authResult && authResult.signature) {
+                    cmd.n = authResult.nonce;
+                    cmd.t = authResult.timestamp;
+                    cmd.s = authResult.signature;
+                    engine.wsSend(cache, cmd);
+                } else {
+                    throw('Conversation creation denied by application: ' + authResult);
+                }
+            });
+        } else {
+            engine.wsSend(cache, cmd);
+        }
+    };
+
+    engine.convAdd = function(cache, options) {
+        var cmd = {
+            cmd: 'conv',
+            op: 'add',
+            cid: options.cid,
+            m: options.members,
+            appId: cache.options.appId,
+            peerId: cache.options.peerId,
+            i: options.serialId
+        };
+        if (cache.authFun) {
+            cache.authFun({
+                clientId: cache.options.peerId,
+                members: options.members,
+                convId: options.cid,
+                action: 'invite'
+            }, function(authResult){
+                if (authResult && authResult.signature) {
+                    cmd.n = authResult.nonce;
+                    cmd.t = authResult.timestamp;
+                    cmd.s = authResult.signature;
+                    engine.wsSend(cache, cmd);
+                } else {
+                    throw('Adding members to conversation denied by application: ' + authResult);
+                }
+            });
+        } else {
+            engine.wsSend(cache, cmd);
+        }
+    };
+
+    engine.convRemove = function(cache, options) {
+        var cmd = {
+            cmd: 'conv',
+            op: 'remove',
+            cid: options.cid,
+            m: options.members,
+            appId: cache.options.appId,
+            peerId: cache.options.peerId,
+            i: options.serialId
+        };
+        if (cache.authFun && (options.members.length > 1 || options.members[0] != cache.options.peerId)) {
+            cache.authFun({
+                clientId: cache.options.peerId,
+                members: options.members,
+                convId: options.cid,
+                action: 'kick'
+            }, function(authResult){
+                if (authResult && authResult.signature) {
+                    cmd.n = authResult.nonce;
+                    cmd.t = authResult.timestamp;
+                    cmd.s = authResult.signature;
+                    engine.wsSend(cache, cmd);
+                } else {
+                    throw('Removing members from conversation denied by application: ' + authResult);
+                }
+            });
+        } else {
+            engine.wsSend(cache, cmd);
+        }
+    };
+
+    engine.send = function(cache, options) {
+        engine.wsSend(cache, {
+            cmd: 'direct',
+            cid: options.cid,
+            appId: cache.options.appId,
+            peerId: cache.options.peerId,
+            msg: options.data,
+            i: options.serialId,
+            // r 是否需要回执需要则1，否则不传
+            r: options.receipt || false,
+            // transient 是否暂态消息（暂态消息不返回 ack，不保留离线消息，不触发离 线推送），否则不传
+            transient: options.transient || false
+        });
+    };
+
+    engine.convQuery = function(cache, options) {
+        options = options || {};
+        engine.wsSend(cache, {
+            cmd: 'conv',
+            op: 'query',
+            appId: cache.options.appId,
+            peerId: cache.options.peerId,
+            // where 可选，对象，默认为包含自己的查询 {"m": peerId}
+            where: options.where || {
+                m: cache.options.peerId
+                // conversation 的 id
+                // objectId: options.cid
+            },
+            // sort 可选，字符串，默认为 -lm，最近对话反序
+            sort: options.sort || '-lm',
+            // limit 可选，数字，默认10
+            limit: options.limit || 10,
+            // skip 可选，数字，默认0
+            skip: options.skip || 0,
+            // i serial-id
+            i: options.serialId
+        });
+    };
+
+    // 查询 session 在线情况
+    engine.querySession = function(cache, options) {
+        engine.wsSend(cache, {
+            cmd: 'session',
+            op: 'query',
+            appId: cache.options.appId,
+            peerId: cache.options.peerId,
+            i: options.serialId,
+            sessionPeerIds: options.peerIdList
+        });
+    };
+
+    // 查询 conversation 的聊天记录
+    engine.convLog = function(cache, options) {
+        engine.wsSend(cache, {
+            cmd: 'logs',
+            cid: options.cid,
+            // t 时间戳，从 t 开始向前查询
+            t: options.t || undefined,
+            // mid 消息 id，从消息 id 开始向前查询（和 t 共同使用，为防止某毫秒时刻有重复消息）
+            mid: options.mid || undefined,
+            limit: options.limit || 20,
+            appId: cache.options.appId,
+            peerId: cache.options.peerId,
+            // i serial-id
+            i: options.serialId
+        });
+    };
+
+    engine.convUpdate = function(cache, options) {
+        engine.wsSend(cache, {
+            cmd: 'conv',
+            op: 'update',
+            appId: cache.options.appId,
+            peerId: cache.options.peerId,
+            cid: options.cid,
+            // attr 要修改的内容
+            attr: options.data,
+            i: options.serialId
+        });
+    };
+
+    engine.convAck = function(cache, options) {
+        engine.wsSend(cache, {
+            cmd: 'ack',
+            cid: options.cid,
+            appId: cache.options.appId,
+            peerId: cache.options.peerId,
+            mid: options.mid
+        });
+    };
+
+    engine.convCount = function(cache, options) {
+        engine.wsSend(cache, {
+            cmd: 'conv',
+            op: 'count',
+            appId: cache.options.appId,
+            peerId: cache.options.peerId,
+            i: options.serialId,
+            cid: options.cid
+        });
+    };
+
+    // 取出多媒体类型的格式（内置 HTML 转义逻辑）
+    engine.getMediaMsg = function(cache, msg) {
+
+        // 检查是否是 JSON 格式的一个 String 类型
+        if (!tool.isJSONString(msg)) {
+
+            // 是否对消息中的 HTML 进行转义
+            if (cache.options.encodeHTML) {
+                msg = tool.encodeHTML(msg);
+            }
+            return msg;
+        }
+
+        msg = JSON.parse(msg);
+
+        // 检查是否是多媒体类型
+        if (!msg.hasOwnProperty('_lctype')) {
+            return msg;
+        }
+
+        var obj = {
+            text: msg._lctext,
+            attr: msg._lcattrs
+        };
+
+        // 是否对消息中的 HTML 进行转义，对媒体格式仅对 text 转义
+        if (cache.options.encodeHTML) {
+            obj.text = tool.encodeHTML(msg._lctext);
+        }
+
+        if (msg._lcfile && msg._lcfile.url) {
+            obj.url = msg._lcfile.url;
+        }
+        if (msg._lcfile && msg._lcfile.metaData) {
+            obj.metaData = msg._lcfile.metaData;
+        }
+
+        // 多媒体类型
+        switch(msg._lctype) {
+            case -1:
+                obj.type = 'text';
+            break;
+            case -2:
+                obj.type = 'image';
+            break;
+            case -3:
+                obj.type = 'audio';
+            break;
+            case -4:
+                obj.type = 'video';
+            break;
+            case -5:
+                obj.type = 'location';
+            break;
+            case -6:
+                obj.type = 'file';
+            break;
+        }
+        return obj;
+    };
+
+    // 生成多媒体特定格式的数据
+    engine.setMediaMsg = function(cache, type, data) {
+        var obj;
+        if (type !== 'text' && !data.metaData) {
+            throw('Media Data must have metaData attribute.');
+        }
+        switch(type) {
+            case 'text':
+                obj = {
+                    _lctype: -1,
+                    _lctext: data.text,
+                    // _lcattrs 是用来存储用户自定义的一些键值对
+                    _lcattrs: data.attr
+                };
+            break;
+            case 'image':
+                obj = {
+                    _lctype: -2,
+                    _lctext: data.text,
+                    // _lcattrs 是用来存储用户自定义的一些键值对
+                    _lcattrs: data.attr,
+                    _lcfile: {
+                        url: data.url,
+                        objId: data.objectId,
+                        metaData: {
+                            name: data.metaData.name,
+                            // 格式
+                            format: data.metaData.format,
+                            //单位：像素
+                            height: data.metaData.height,
+                            //单位：像素
+                            width: data.metaData.width,
+                            //单位：b
+                            size: data.metaData.size
+                        }
+                    }
+                };
+            break;
+            case 'audio':
+                obj = {
+                    _lctype: -3,
+                    _lctext: data.text,
+                    // _lcattrs 是用来存储用户自定义的一些键值对
+                    _lcattrs: data.attr,
+                    _lcfile: {
+                        url: data.url,
+                        objId: data.objectId,
+                        metaData: {
+                            name: data.metaData.name,
+                            // 媒体格式
+                            format: data.metaData.format,
+                            //单位：秒
+                            duration: data.metaData.duration,
+                            //单位：b
+                            size: data.metaData.size
+                        }
+                    }
+                };
+            break;
+            case 'video':
+                obj = {
+                    _lctype: -4,
+                    _lctext: data.text,
+                    // _lcattrs 是用来存储用户自定义的一些键值对
+                    _lcattrs: data.attr,
+                    _lcfile: {
+                        url: data.url,
+                        objId: data.objectId,
+                        metaData: {
+                            name: data.metaData.name,
+                            // 媒体格式
+                            format: data.metaData.format,
+                            // 单位：秒
+                            duration: data.metaData.duration,
+                            //单位：b
+                            size: data.metaData.size
+                        }
+                    }
+                };
+            break;
+            case 'location':
+                obj = {
+                    _lctype: -5,
+                    _lctext: data.text,
+                    // _lcattrs 是用来存储用户自定义的一些键值对
+                    _lcattrs: data.attr,
+                    _lcloc: {
+                        // 经度
+                        longitude: data.metaData.longitude,
+                        // 维度
+                        latitude: data.metaData.latitude
+                    }
+                };
+            break;
+            case 'file':
+                obj = {
+                    _lctype: -6,
+                    _lctext: data.text,
+                    // _lcattrs 是用来存储用户自定义的一些键值对
+                    _lcattrs: data.attr,
+                    _lcfile: {
+                        name: data.metaData.name,
+                        // 单位：b
+                        size: data.metaData.size
+                    }
+                };
+            break;
+        }
+        obj = JSON.stringify(obj);
+        return obj;
+    };
+
+    // 取自增的 number 类型
+    engine.getSerialId = function(cache) {
+        cache.serialId ++;
+        if (cache.serialId > 999999) {
+            cache.serialId = 2015;
+        }
+        return cache.serialId;
+    };
+
+    // 绑定所有服务返回事件
+    engine.bindEvent = function(cache) {
+        cache.ec.on('session-opened', function(data) {
+            // 标记重试状态为 false，表示没有在重试
+            cache.resuseFlag = false;
+            cache.openFlag = true;
+            // 派发全局 open 事件，表示 realtime 已经启动
+            cache.ec.emit(eNameIndex.open, data);
+        });
+        // cache.ec.on('session-closed', function() {
+            // session 被关闭，则关闭当前 websocket 连接
+        // });
+
+        // 查询 session 在线情况
+        // cache.ec.on('session-query-result', function() {});
+
+        cache.ec.on('session-error', function(data) {
+            cache.ec.emit(eNameIndex.error, data);
+        });
+
+        // 服务器端确认收到 conversation 创建，并创建成功
+        // 在创建时已经做绑定，所以注释掉
+        // cache.ec.on('conv-started', function(data) {});
+
+        // 服务器端发给客户端，表示当前用户加入了某个对话。包括创建对话、或加入对话
+        cache.ec.on('conv-joined', function(data) {
+            // 不是当前用户自己加入
+            if (data.peerId !== data.initBy) {
+                cache.ec.emit(eNameIndex.join, data);
+            }
+        });
+
+        // 服务器端发给客户端，表示当前用户离开了某个对话，不再能收到对话的消息
+        cache.ec.on('conv-left', function(data) {
+            cache.ec.emit(eNameIndex.left, data);
+        });
+
+        // 服务器端发给客户端，表示当前对话有新人加入
+        cache.ec.on('conv-members-joined', function(data) {
+            cache.ec.emit(eNameIndex.join, data);
+        });
+
+        // 服务器端发给客户端，表示当前对话有新人离开
+        cache.ec.on('conv-members-left', function(data) {
+            cache.ec.emit(eNameIndex.left, data);
+        });
+
+        // 服务器端回复。表示 add 操作完成
+        // 因为 added 之后也会触发 members-joined，所以注释掉
+        // cache.ec.on('conv-added', function(data) {});
+
+        // 服务器端确认删除成功
+        // 因为 removed 之后也会触发 members-removed，所以注释掉
+        // cache.ec.on('conv-removed', function() {});
+
+        cache.ec.on('conv-error', function(data) {
+            cache.ec.emit(eNameIndex.error, data);
+            throw(data.code + ':' + data.reason);
+        });
+
+        // 查询对话的结果
+        // cache.ec.on('conv-results', function(data) {});
+
+        // cache.ec.on('conv-updated', function(data) {});
+
+        cache.ec.on('direct', function(data) {
+
+            // 增加多媒体消息的数据格式化
+            data.msg = engine.getMediaMsg(cache, data.msg);
+
+            // 收到消息，立刻告知服务器
+            engine.convAck(cache, {
+                cid: data.cid,
+                mid: data.id
+            });
+
+            cache.ec.emit(eNameIndex.message, data);
+        });
+
+        // 对要求回执的消息，服务器端会在对方客户端发送ack后发送回执
+        cache.ec.on('rcp', function(data) {
+            cache.ec.emit(eNameIndex.receipt, data);
+        });
+
+        // cache.ec.on('ack', function(data) {});
+
+        // 用户可以获取自己所在对话的历史记录
+        // cache.ec.on('logs', function(data) {});
+
+        // 清空 bindEvent，防止事件重复绑定
+        // engine.bindEvent = tool.noop;
+    };
 
     // 空函数
     tool.noop = function() {};
