@@ -323,6 +323,7 @@ void function(win) {
         };
 
         return {
+            clientId: '',
             cache: cache,
             open: function(callback) {
                 var me = this;
@@ -562,6 +563,7 @@ void function(win) {
             };
 
             var realtimeObj = newRealtimeObject();
+            realtimeObj.clientId = options.clientId;
             realtimeObj.cache.options = options;
             realtimeObj.cache.ec = tool.eventCenter();
             realtimeObj.cache.authFun = options.auth;
