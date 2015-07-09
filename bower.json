@@ -21,5 +21,9 @@
     "LeanCloud",
     "Realtime"
   ],
-  "license": "MIT"
+  "license": "MIT",
+  "devDependencies": {
+    "mocha": "~2.2.5",
+    "should": "~7.0.1"
+  }
 }
