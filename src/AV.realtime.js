@@ -1181,6 +1181,7 @@ void function(win) {
             // 派发全局 open 事件，表示 realtime 已经启动
             cache.ec.emit(eNameIndex.open, data);
         });
+
         // cache.ec.on('session-closed', function() {
             // session 被关闭，则关闭当前 websocket 连接
         // });
@@ -1260,9 +1261,6 @@ void function(win) {
 
         // 用户可以获取自己所在对话的历史记录
         // cache.ec.on('logs', function(data) {});
-
-        // 清空 bindEvent，防止事件重复绑定
-        // engine.bindEvent = tool.noop;
     };
 
     // 空函数
