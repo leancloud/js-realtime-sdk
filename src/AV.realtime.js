@@ -426,7 +426,7 @@ void function(win) {
                     // 只传入 callback
                     if (typeof argument === 'function') {
                         callback = argument;
-                    } 
+                    }
                     // 传入参数
                     else {
                         options = argument;
@@ -651,6 +651,12 @@ void function(win) {
 
     // 心跳程序
     engine.heartbeats = function(cache) {
+
+        // 当前 RealtimeObject 已经启动心跳程序
+        if (cache.openFlag) {
+            return;
+        }
+
         var timer;
         cache.ws.addEventListener('message', function() {
             if (timer) {
@@ -660,13 +666,15 @@ void function(win) {
                 engine.wsSend(cache, {});
             }, config.heartbeatsTime);
         });
-
-        // 防止多次实例化
-        engine.heartbeats = tool.noop;
     };
 
     // 守护进程，会派发 reuse 重连事件
     engine.guard = function(cache) {
+
+        // 当前 RealtimeObject 已经启动守护进程
+        if (cache.openFlag) {
+            return;
+        }
 
         // 超时是三分钟
         var timeLength = 3 * 60 * 1000;
@@ -693,9 +701,6 @@ void function(win) {
                 cache.ec.emit(eNameIndex.reuse);
             }
         });
-
-        // 防止多次实例化
-        engine.guard = tool.noop;
     };
 
     engine.connect = function(cache, options) {
@@ -1176,9 +1181,16 @@ void function(win) {
 
     // 绑定所有服务返回事件
     engine.bindEvent = function(cache) {
+
+        // RealtimeObject 已经初始化过，不再重复绑定事件
+        if (cache.openFlag) {
+            return;
+        }
+
         cache.ec.on('session-opened', function(data) {
             // 标记重试状态为 false，表示没有在重试
             cache.resuseFlag = false;
+            // 标记开启状态，已经开启
             cache.openFlag = true;
             // 派发全局 open 事件，表示 realtime 已经启动
             cache.ec.emit(eNameIndex.open, data);
@@ -1375,7 +1387,7 @@ void function(win) {
         var eventList = {};
         var eventOnceList = {};
 
-        var _on = function(eventName, fun, isOnce) {
+        var _on = function(eventName, fun, options) {
             if (!eventName) {
                 throw('No event name.');
             }
@@ -1384,6 +1396,13 @@ void function(win) {
             }
             var list = eventName.split(/\s+/);
             var tempList;
+            var isOnce;
+            var isSingle;
+            if (options) {
+                isOnce = options.once;
+                isSingle = options.single;
+            }
+
             if (!isOnce) {
                 tempList = eventList;
             }
@@ -1392,16 +1411,43 @@ void function(win) {
             }
             for (var i = 0, l = list.length; i < l; i ++) {
                 if (list[i]) {
-                    if (!tempList[list[i]]) {
-                        tempList[list[i]] = [];
+                    var itemEventList = tempList[list[i]];
+
+                    if (!itemEventList) {
+                        itemEventList = [];
+
+                        // 将新指针指向原链表
+                        tempList[list[i]] = itemEventList;
                     }
-                    tempList[list[i]].push(fun);
+
+                    if (isSingle) {
+
+                        // 标记是否存在重复的方法，如果有则为 true
+                        var flag = false;
+                        for (var m = 0, n = itemEventList.length; m < n; m ++) {
+                            if ((itemEventList[m]).toString() === (fun).toString()) {
+                                flag = true;
+                            }
+                        }
+
+                        if (!flag) {
+                            itemEventList.push(fun);
+                        }
+                    }
+                    else {
+                        itemEventList.push(fun);
+                    }
+
                 }
             }
         };
 
-        var _off = function(eventName, fun, isOnce) {
+        var _off = function(eventName, fun, options) {
             var tempList;
+            var isOnce;
+            if (options) {
+                isOnce = options.once;
+            }
             if (!isOnce) {
                 tempList = eventList;
             } else {
@@ -1441,9 +1487,20 @@ void function(win) {
                 _on(eventName, fun);
                 return this;
             },
+
+            // 方法绑定以后只会运行一次
             once: function(eventName, fun) {
-                _on(eventName, fun, true);
+                _on(eventName, fun, {
+                    once: true
+                });
                 return this;
+            },
+
+            // 同一个方法只会被绑定一次
+            one: function(eventName, fun) {
+                _on(eventName, fun, {
+                    single: true
+                });
             },
             emit: function(eventName, data) {
                 if (!eventName) {
@@ -1467,7 +1524,9 @@ void function(win) {
                     for (; i < l; i ++) {
                         if (eventOnceList[eventName][i]) {
                             eventOnceList[eventName][i].call(this, data);
-                            _off(eventName, eventOnceList[eventName][i], true);
+                            _off(eventName, eventOnceList[eventName][i], {
+                                once: true
+                            });
                         }
                     }
                     eventOnceList[eventName] = cleanNull(eventOnceList[eventName]);
