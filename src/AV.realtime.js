@@ -308,8 +308,8 @@ void function(win) {
             ws: undefined,
             // 事件中心
             ec: undefined,
-            // 所有已生成的 conversation 对象（缓存也并没有使用，暂时去掉）
-            // convIndex: {},
+            // 所有已生成的 conversation 对象
+            conv: {},
             // 是否已经 open 完毕，主要在 close 方法中检测
             openFlag: false,
             // 是否是用户关闭，如果不是将会断开重连
@@ -381,24 +381,36 @@ void function(win) {
                 if (!cache.openFlag) {
                     throw('Must call after open() has successed.');
                 }
-                var convObject = newConvObject(cache);
+
+                var convObject;
+
                 // 传入 convId
                 if (typeof argument === 'string') {
-                    // cache.convIndex[convObject.id] = convObject;
+                    var convId = argument;
+
+                    // 优先使用 cache 中的 conv
+                    if (cache.conv[convId]) {
+                        convObject = cache.conv[convId];
+                    }
+                    else {
+                        convObject = newConvObject(cache);
+                    }
 
                     // 去服务器端判断下当前 room id 是否存在
                     this.query({
                         where: {
-                            objectId: argument
+                            objectId: convId
                         }
                     }, function(data) {
 
                         // 如果服务器端有这个 id
                         if (data.length) {
-                            convObject.id = argument;
+                            convObject.id = convId;
                             convObject.name = data[0].name;
                             // 获取初始化时的属性
                             convObject.attr = data[0].attr;
+                            // 将 conv 写入 cache
+                            cache.conv[convId] = convObject;
                         }
 
                         if (callback) {
@@ -425,7 +437,7 @@ void function(win) {
                     // 只传入 callback
                     if (typeof argument === 'function') {
                         callback = argument;
-                    } 
+                    }
                     // 传入参数
                     else {
                         options = argument;
@@ -442,6 +454,8 @@ void function(win) {
                         serialId: engine.getSerialId(cache)
                     };
 
+                    convObject = newConvObject(cache);
+
                     engine.startConv(cache, options, callback);
 
                     // 服务器端确认收到对话创建，并创建成功
@@ -450,7 +464,8 @@ void function(win) {
                             convObject.id = data.cid;
                             convObject.name = options.name;
                             convObject.attr = options.attr;
-                            // cache.convIndex[convObject.id] = convObject;
+                            // 将 conv 写入 cache
+                            cache.conv[convObject.id] = convObject;
                             if (callback) {
                                 callback(convObject);
                             }
