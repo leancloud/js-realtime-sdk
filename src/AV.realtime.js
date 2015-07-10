@@ -1427,6 +1427,7 @@ void function(win) {
                         for (var m = 0, n = itemEventList.length; m < n; m ++) {
                             if ((itemEventList[m]).toString() === (fun).toString()) {
                                 flag = true;
+                                break;
                             }
                         }
 
@@ -1460,7 +1461,7 @@ void function(win) {
                     if (tempList[eventName][i] === fun) {
                         tempList[eventName][i] = null;
                         // 每次只清除一个相同事件绑定
-                        return;
+                        break;
                     }
                 }
             }
