@@ -317,7 +317,7 @@ void function(win) {
             // reuse 事件的重试 timer
             reuseTimer: undefined,
             // resuse 状态，如果为 true 表示内部已经在重试中
-            resuseFlag: false,
+            reuseFlag: false,
             // 当前的 serialId
             serialId: 2015
         };
@@ -686,8 +686,8 @@ void function(win) {
                 clearTimeout(timer);
             }
             timer = setTimeout(function() {
-                if (!cache.closeFlag && !cache.resuseFlag) {
-                    cache.resuseFlag = true;
+                if (!cache.closeFlag && !cache.reuseFlag) {
+                    cache.reuseFlag = true;
                     // 超时则派发重试事件
                     cache.ec.emit(eNameIndex.reuse);
                 }
@@ -696,8 +696,8 @@ void function(win) {
 
         // 监测断开事件
         cache.ec.on(eNameIndex.close + ' ' + 'session-closed', function() {
-            if (!cache.closeFlag && !cache.resuseFlag) {
-                cache.resuseFlag = true;
+            if (!cache.closeFlag && !cache.reuseFlag) {
+                cache.reuseFlag = true;
                 cache.ec.emit(eNameIndex.reuse);
             }
         });
@@ -1189,7 +1189,7 @@ void function(win) {
 
         cache.ec.on('session-opened', function(data) {
             // 标记重试状态为 false，表示没有在重试
-            cache.resuseFlag = false;
+            cache.reuseFlag = false;
             // 标记开启状态，已经开启
             cache.openFlag = true;
             // 派发全局 open 事件，表示 realtime 已经启动
