@@ -1498,7 +1498,7 @@ void function(win) {
             },
 
             // 同一个方法只会被绑定一次
-            one: function(eventName, fun) {
+            _one: function(eventName, fun) {
                 _on(eventName, fun, {
                     single: true
                 });
