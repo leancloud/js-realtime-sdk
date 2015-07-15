@@ -636,9 +636,10 @@ void function(win) {
     engine.wsSend = function(cache, data) {
         if (!cache.closeFlag) {
             if (!cache.ws) {
-                throw('The realtimeObject must opened first. Please listening to the "open" event.');
+                throw('The realtimeObject must opened first. Please listen to the "open" event.');
             }
             else {
+                data.peerId = cache.options.peerId;
                 cache.ws.send(JSON.stringify(data));
             }
         }
@@ -678,7 +679,7 @@ void function(win) {
                 clearTimeout(timer);
             }
             timer = setTimeout(function() {
-                engine.wsSend(cache, {});
+                cache.ws.send("{}");
             }, config.heartbeatsTime);
         });
     };
@@ -780,7 +781,6 @@ void function(win) {
             cmd: 'session',
             op: 'open',
             appId: cache.options.appId,
-            peerId: cache.options.peerId,
             ua: 'js/' + VERSION,
             i: options.serialId
         };
@@ -806,9 +806,6 @@ void function(win) {
         engine.wsSend(cache, cache,{
             cmd: 'session',
             op: 'close',
-            peerId: cache.options.peerId
-            // ASK: 这块用不用 appId
-            // appId: cache.options.appId
         });
     };
 
@@ -818,8 +815,6 @@ void function(win) {
             op: 'start',
             // m [] 初始的对话用户id列表，服务器默认会把自己加入
             m: options.members,
-            appId: cache.options.appId,
-            peerId: cache.options.peerId,
             // attr json对象，对话的任意初始属性
             attr: {
                 name: options.name || '',
@@ -854,8 +849,6 @@ void function(win) {
             op: 'add',
             cid: options.cid,
             m: options.members,
-            appId: cache.options.appId,
-            peerId: cache.options.peerId,
             i: options.serialId
         };
         if (cache.authFun) {
@@ -885,8 +878,6 @@ void function(win) {
             op: 'remove',
             cid: options.cid,
             m: options.members,
-            appId: cache.options.appId,
-            peerId: cache.options.peerId,
             i: options.serialId
         };
         if (cache.authFun && (options.members.length > 1 || options.members[0] != cache.options.peerId)) {
@@ -914,8 +905,6 @@ void function(win) {
         engine.wsSend(cache, {
             cmd: 'direct',
             cid: options.cid,
-            appId: cache.options.appId,
-            peerId: cache.options.peerId,
             msg: options.data,
             i: options.serialId,
             // r 是否需要回执需要则1，否则不传
@@ -930,8 +919,6 @@ void function(win) {
         engine.wsSend(cache, {
             cmd: 'conv',
             op: 'query',
-            appId: cache.options.appId,
-            peerId: cache.options.peerId,
             // where 可选，对象，默认为包含自己的查询 {"m": peerId}
             where: options.where || {
                 m: cache.options.peerId
@@ -954,8 +941,6 @@ void function(win) {
         engine.wsSend(cache, {
             cmd: 'session',
             op: 'query',
-            appId: cache.options.appId,
-            peerId: cache.options.peerId,
             i: options.serialId,
             sessionPeerIds: options.peerIdList
         });
@@ -971,8 +956,6 @@ void function(win) {
             // mid 消息 id，从消息 id 开始向前查询（和 t 共同使用，为防止某毫秒时刻有重复消息）
             mid: options.mid || undefined,
             limit: options.limit || 20,
-            appId: cache.options.appId,
-            peerId: cache.options.peerId,
             // i serial-id
             i: options.serialId
         });
@@ -982,8 +965,6 @@ void function(win) {
         engine.wsSend(cache, {
             cmd: 'conv',
             op: 'update',
-            appId: cache.options.appId,
-            peerId: cache.options.peerId,
             cid: options.cid,
             // attr 要修改的内容
             attr: options.data,
@@ -995,8 +976,6 @@ void function(win) {
         engine.wsSend(cache, {
             cmd: 'ack',
             cid: options.cid,
-            appId: cache.options.appId,
-            peerId: cache.options.peerId,
             mid: options.mid
         });
     };
@@ -1005,8 +984,6 @@ void function(win) {
         engine.wsSend(cache, {
             cmd: 'conv',
             op: 'count',
-            appId: cache.options.appId,
-            peerId: cache.options.peerId,
             i: options.serialId,
             cid: options.cid
         });
