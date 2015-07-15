@@ -1250,10 +1250,13 @@ void function(win) {
             data.msg = engine.getMediaMsg(cache, data.msg);
 
             // 收到消息，立刻告知服务器
-            engine.convAck(cache, {
-                cid: data.cid,
-                mid: data.id
-            });
+            // 暂态消息无需回复
+            if (!data.transient) {
+                engine.convAck(cache, {
+                    cid: data.cid,
+                    mid: data.id
+                });
+            }
 
             cache.ec.emit(eNameIndex.message, data);
         });
