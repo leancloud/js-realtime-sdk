@@ -751,7 +751,7 @@ void function(win) {
             default:
             throw('There is no this region.');
         }
-        url = protocol + 'router-' + node + '-push.avoscloud.com/v1/route?_t=' + tool.now() + '&appId=' + appId ;
+        url = protocol + 'router-' + node + '-push.leancloud.cn/v1/route?_t=' + tool.now() + '&appId=' + appId ;
         if (secure) {
           url += '&secure=1';
         }
