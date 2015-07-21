@@ -354,7 +354,7 @@ void function(win) {
             close: function() {
                 var cache = this.cache;
                 if (!cache.openFlag) {
-                    throw('Must call after open() has successed.');
+                    throw new Error('Must call after open() has successed.');
                 }
                 cache.closeFlag = true;
                 engine.closeSession(cache);
@@ -380,7 +380,7 @@ void function(win) {
             room: function(argument, callback) {
                 var cache = this.cache;
                 if (!cache.openFlag) {
-                    throw('Must call after open() has successed.');
+                    throw new Error('Must call after open() has successed.');
                 }
 
                 var convObject;
@@ -430,7 +430,7 @@ void function(win) {
                 else {
                     // 如果没有传入参数，则给一个错误提示
                     if (!argument) {
-                        throw('Createing room must have a callback function.');
+                        throw new Error('Createing room must have a callback function.');
                     }
 
                     var options;
@@ -479,14 +479,14 @@ void function(win) {
                 return convObject;
             },
             // conv 就是 room 的别名
-            conv: function(argument, callback) {
-                return this.room(argument, callback);
+            conv: function() {
+                return this.room.apply(this, arguments);
             },
             // 相关查询，包括用户列表查询，房间查询等
             query: function(argument, callback) {
                 var cache = this.cache;
                 if (!cache.openFlag) {
-                    throw('Must call after open() has successed.');
+                    throw new Error('Must call after open() has successed.');
                 }
                 var options = {};
                 switch(arguments.length) {
@@ -515,10 +515,10 @@ void function(win) {
             ping: function(argument, callback) {
                 var cache = this.cache;
                 if (!cache.openFlag) {
-                    throw('Must call after open() has successed.');
+                    throw new Error('Must call after open() has successed.');
                 }
                 if (!callback) {
-                    throw('Ping must have callback.');
+                    throw new Error('Ping must have callback.');
                 }
                 var peerIdList = [];
                 // 传入一个 id
@@ -549,10 +549,10 @@ void function(win) {
     // 主函数，启动通信并获得 realtimeObject
     AV.realtime = function(options, callback) {
         if (typeof options !== 'object') {
-            throw('AV.realtime need a argument at least.');
+            throw new Error('AV.realtime need a argument at least.');
         }
         else if (!options.appId) {
-            throw('Options must have appId.');
+            throw new Error('Options must have appId.');
         }
         else if (!win.WebSocket) {
             alert('Bowser must support WebSocket, please read LeanCloud doc and use plugin.');
@@ -636,7 +636,7 @@ void function(win) {
     engine.wsSend = function(cache, data) {
         if (!cache.closeFlag) {
             if (!cache.ws) {
-                throw('The realtimeObject must opened first. Please listening to the "open" event.');
+                throw new Error('The realtimeObject must opened first. Please listening to the "open" event.');
             }
             else {
                 cache.ws.send(JSON.stringify(data));
@@ -726,7 +726,7 @@ void function(win) {
         }
         else {
             cache.ec.emit(eNameIndex.error);
-            throw('WebSocket connet failed.');
+            throw new Error('WebSocket connet failed.');
         }
     };
 
@@ -748,7 +748,7 @@ void function(win) {
                 node = 'a0';
             break;
             default:
-            throw('There is no this region.');
+            throw new Error('There is no this region.');
         }
         url = protocol + 'router-' + node + '-push.avoscloud.com/v1/route?_t=' + tool.now() + '&appId=' + appId ;
         if (secure) {
@@ -794,7 +794,7 @@ void function(win) {
                     cmd.s = authResult.signature;
                     engine.wsSend(cache, cache.cmd);
                 } else {
-                    throw('Session open denied by application: ' + authResult);
+                    throw new Error('Session open denied by application: ' + authResult);
                 }
             });
         } else {
@@ -840,7 +840,7 @@ void function(win) {
                     cmd.s = authResult.signature;
                     engine.wsSend(cache, cmd);
                 } else {
-                    throw('Conversation creation denied by application: ' + authResult);
+                    throw new Error('Conversation creation denied by application: ' + authResult);
                 }
             });
         } else {
@@ -871,7 +871,7 @@ void function(win) {
                     cmd.s = authResult.signature;
                     engine.wsSend(cache, cmd);
                 } else {
-                    throw('Adding members to conversation denied by application: ' + authResult);
+                    throw new Error('Adding members to conversation denied by application: ' + authResult);
                 }
             });
         } else {
@@ -902,7 +902,7 @@ void function(win) {
                     cmd.s = authResult.signature;
                     engine.wsSend(cache, cmd);
                 } else {
-                    throw('Removing members from conversation denied by application: ' + authResult);
+                    throw new Error('Removing members from conversation denied by application: ' + authResult);
                 }
             });
         } else {
@@ -1077,7 +1077,7 @@ void function(win) {
     engine.setMediaMsg = function(cache, type, data) {
         var obj;
         if (type !== 'text' && !data.metaData) {
-            throw('Media Data must have metaData attribute.');
+            throw new Error('Media Data must have metaData attribute.');
         }
         switch(type) {
             case 'text':
@@ -1336,7 +1336,7 @@ void function(win) {
 
         xhr.onerror = function(data) {
             callback(null, data || {});
-            throw('Network error.');
+            throw new Error('Network error.');
         };
 
         // IE9 中需要设置所有的 xhr 事件回调，不然可能会无法执行后续操作
@@ -1404,10 +1404,10 @@ void function(win) {
 
         var _on = function(eventName, fun, options) {
             if (!eventName) {
-                throw('No event name.');
+                throw new Error('No event name.');
             }
             else if (!fun) {
-                throw('No callback function.');
+                throw new Error('No callback function.');
             }
             var list = eventName.split(/\s+/);
             var tempList;
@@ -1520,7 +1520,7 @@ void function(win) {
             },
             emit: function(eventName, data) {
                 if (!eventName) {
-                    throw('No emit event name.');
+                    throw new Error('No emit event name.');
                 }
                 var i = 0;
                 var l = 0;
