@@ -2042,8 +2042,9 @@ engine.wsError = function(cache, data) {
 engine.wsSend = function(cache, data) {
     if (!cache.closeFlag) {
         if (!cache.ws) {
-            throw new Error('The realtimeObject must opened first. Please listening to the "open" event.');
+            throw new Error('The realtimeObject must opened first. Please listen to the "open" event.');
         } else {
+            data.peerId = cache.options.peerId;
             cache.ws.send(JSON.stringify(data));
         }
     }
@@ -2083,7 +2084,7 @@ engine.heartbeats = function(cache) {
             clearTimeout(timer);
         }
         timer = setTimeout(function() {
-            engine.wsSend(cache, {});
+            cache.ws.send("{}");
         }, config.heartbeatsTime);
     });
 };
@@ -2154,7 +2155,7 @@ engine.getServer = function(cache, options, callback) {
         default:
             throw new Error('There is no this region.');
     }
-    url = protocol + 'router-' + node + '-push.avoscloud.com/v1/route?_t=' + tool.now() + '&appId=' + appId;
+    url = protocol + 'router-' + node + '-push.leancloud.cn/v1/route?_t=' + tool.now() + '&appId=' + appId;
     if (secure) {
         url += '&secure=1';
     }
@@ -2176,7 +2177,6 @@ engine.openSession = function(cache, options) {
         cmd: 'session',
         op: 'open',
         appId: cache.options.appId,
-        peerId: cache.options.peerId,
         ua: 'js/' + VERSION,
         i: options.serialId
     };
@@ -2201,10 +2201,7 @@ engine.openSession = function(cache, options) {
 engine.closeSession = function(cache) {
     engine.wsSend(cache, cache, {
         cmd: 'session',
-        op: 'close',
-        peerId: cache.options.peerId
-            // ASK: 这块用不用 appId
-            // appId: cache.options.appId
+        op: 'close'
     });
 };
 
@@ -2214,8 +2211,6 @@ engine.startConv = function(cache, options) {
         op: 'start',
         // m [] 初始的对话用户id列表，服务器默认会把自己加入
         m: options.members,
-        appId: cache.options.appId,
-        peerId: cache.options.peerId,
         // attr json对象，对话的任意初始属性
         attr: {
             name: options.name || '',
@@ -2250,8 +2245,6 @@ engine.convAdd = function(cache, options) {
         op: 'add',
         cid: options.cid,
         m: options.members,
-        appId: cache.options.appId,
-        peerId: cache.options.peerId,
         i: options.serialId
     };
     if (cache.authFun) {
@@ -2281,8 +2274,6 @@ engine.convRemove = function(cache, options) {
         op: 'remove',
         cid: options.cid,
         m: options.members,
-        appId: cache.options.appId,
-        peerId: cache.options.peerId,
         i: options.serialId
     };
     if (cache.authFun && (options.members.length > 1 || options.members[0] != cache.options.peerId)) {
@@ -2310,8 +2301,6 @@ engine.send = function(cache, options) {
     engine.wsSend(cache, {
         cmd: 'direct',
         cid: options.cid,
-        appId: cache.options.appId,
-        peerId: cache.options.peerId,
         msg: options.data,
         i: options.serialId,
         // r 是否需要回执需要则1，否则不传
@@ -2326,8 +2315,6 @@ engine.convQuery = function(cache, options) {
     engine.wsSend(cache, {
         cmd: 'conv',
         op: 'query',
-        appId: cache.options.appId,
-        peerId: cache.options.peerId,
         // where 可选，对象，默认为包含自己的查询 {"m": peerId}
         where: options.where || {
             m: cache.options.peerId
@@ -2350,8 +2337,6 @@ engine.querySession = function(cache, options) {
     engine.wsSend(cache, {
         cmd: 'session',
         op: 'query',
-        appId: cache.options.appId,
-        peerId: cache.options.peerId,
         i: options.serialId,
         sessionPeerIds: options.peerIdList
     });
@@ -2367,8 +2352,6 @@ engine.convLog = function(cache, options) {
         // mid 消息 id，从消息 id 开始向前查询（和 t 共同使用，为防止某毫秒时刻有重复消息）
         mid: options.mid || undefined,
         limit: options.limit || 20,
-        appId: cache.options.appId,
-        peerId: cache.options.peerId,
         // i serial-id
         i: options.serialId
     });
@@ -2378,8 +2361,6 @@ engine.convUpdate = function(cache, options) {
     engine.wsSend(cache, {
         cmd: 'conv',
         op: 'update',
-        appId: cache.options.appId,
-        peerId: cache.options.peerId,
         cid: options.cid,
         // attr 要修改的内容
         attr: options.data,
@@ -2391,8 +2372,6 @@ engine.convAck = function(cache, options) {
     engine.wsSend(cache, {
         cmd: 'ack',
         cid: options.cid,
-        appId: cache.options.appId,
-        peerId: cache.options.peerId,
         mid: options.mid
     });
 };
@@ -2401,8 +2380,6 @@ engine.convCount = function(cache, options) {
     engine.wsSend(cache, {
         cmd: 'conv',
         op: 'count',
-        appId: cache.options.appId,
-        peerId: cache.options.peerId,
         i: options.serialId,
         cid: options.cid
     });
@@ -2668,11 +2645,13 @@ engine.bindEvent = function(cache) {
         // 增加多媒体消息的数据格式化
         data.msg = engine.getMediaMsg(cache, data.msg);
 
-        // 收到消息，立刻告知服务器
-        engine.convAck(cache, {
-            cid: data.cid,
-            mid: data.id
-        });
+        // 暂态消息无需回复
+        if (!data.transient) {
+            engine.convAck(cache, {
+                cid: data.cid,
+                mid: data.id
+            });
+        }
 
         cache.ec.emit(eNameIndex.message, data);
     });
