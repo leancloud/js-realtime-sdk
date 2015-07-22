@@ -7,7 +7,7 @@
  * Each engineer has a duty to keep the code elegant
  */
 
-var request = require('superagent');
+var ajax = require('./tool/ajax');
 var extend = require('extend');
 
 // 当前版本
@@ -747,9 +747,8 @@ engine.getServer = function(cache, options, callback) {
     if (secure) {
         url += '&secure=1';
     }
-    request.get(url).end(function(error, response) {
-        if (response.ok) {
-            var data = response.body;
+    ajax(url, function(error, data) {
+        if (data) {
             data.expires = tool.now() + data.ttl * 1000;
             cache.server = data;
             callback(data);
