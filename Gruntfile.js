@@ -14,6 +14,13 @@ module.exports = function(grunt) {
                 }
             }
         },
+        uglify: {
+            dist: {
+                files: {
+                    'dist/AV.realtime.min.js': ['dist/AV.realtime.js']
+                }
+            }
+        },
         connect: {
             server: {
                 options: {
@@ -43,5 +50,5 @@ module.exports = function(grunt) {
     });
     grunt.registerTask('default', []);
     grunt.registerTask('test', ['browserify:test', 'connect', 'mocha_phantomjs', 'simplemocha']);
-    grunt.registerTask('release', ['browserify:dist']);
+    grunt.registerTask('release', ['browserify:dist', 'uglify:dist']);
 };
