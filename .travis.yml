@@ -12,6 +12,8 @@ after_success:
       cp -r demo target/;
       cp -r dist target/;
       cp -r plugin target/;
+      cp -r test target/;
+      cp -r bower_components target/;
       cd target && git init;
       git config user.name "leancloud";
       git config user.email "ci@leancloud.rocks";
