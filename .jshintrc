@@ -1,0 +1,5 @@
+{
+  "node": true,
+  "mocha": true,
+  "predef": ["Promise"]
+}
