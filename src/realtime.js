@@ -9,8 +9,8 @@
 
 'use strict';
 
-var ajax = require('./tool/ajax');
-var extend = require('extend');
+var ajax = require('./tool').ajax;
+var extend = require('./tool').extend;
 
 // 当前版本
 var VERSION = '2.2.0';
