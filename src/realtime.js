@@ -9,8 +9,9 @@
 
 'use strict';
 
-var ajax = require('./tool').ajax;
-var extend = require('./tool').extend;
+var tool = require('./tool');
+var ajax = tool.ajax;
+var extend = tool.extend;
 
 // 当前版本
 var VERSION = '2.2.0';
@@ -21,9 +22,6 @@ var config = {
   heartbeatsTime: 60 * 1000,
   WebSocket: global.WebSocket
 };
-
-// 命名空间，挂载一些工具方法
-var tool = {};
 
 // 命名空间，挂载私有方法
 var engine = {};
@@ -1246,204 +1244,6 @@ engine.bindEvent = function(cache) {
 
   // 用户可以获取自己所在对话的历史记录
   // cache.ec.on('logs', function(data) {});
-};
-
-// 空函数
-tool.noop = function() {};
-
-// 检查是否是 JSON 格式的字符串
-tool.isJSONString = function(obj) {
-  return /^\{.*\}$/.test(obj);
-};
-
-// 获取当前时间的时间戳
-tool.now = function() {
-  return new Date().getTime();
-};
-
-// HTML 转义
-tool.encodeHTML = function(source) {
-  var encodeHTML = function(str) {
-    if (typeof(str) === 'string') {
-      return str.replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;');
-      // 考虑到其中有可能是 JSON，所以不做 HTML 强过滤，仅对标签过滤
-      // .replace(/\\/g,'&#92;')
-      // .replace(/"/g,'&quot;')
-      // .replace(/'/g,'&#39;');
-    } else {
-      // 数字
-      return str;
-    }
-  };
-
-  // 对象类型
-  if (typeof(source) === 'object') {
-    for (var key in source) {
-      source[key] = tool.encodeHTML(source[key]);
-    }
-    return source;
-  } else {
-    // 非对象类型
-    return encodeHTML(source);
-  }
-};
-
-// 小型的私有事件中心
-tool.eventCenter = function() {
-  var eventList = {};
-  var eventOnceList = {};
-
-  var _on = function(eventName, fun, options) {
-    if (!eventName) {
-      throw new Error('No event name.');
-    } else if (!fun) {
-      throw new Error('No callback function.');
-    }
-    var list = eventName.split(/\s+/);
-    var tempList;
-    var isOnce;
-    var isSingle;
-    if (options) {
-      isOnce = options.once;
-      isSingle = options.single;
-    }
-
-    if (!isOnce) {
-      tempList = eventList;
-    } else {
-      tempList = eventOnceList;
-    }
-    for (var i = 0, l = list.length; i < l; i++) {
-      if (list[i]) {
-        var itemEventList = tempList[list[i]];
-
-        if (!itemEventList) {
-          itemEventList = [];
-
-          // 将新指针指向原链表
-          tempList[list[i]] = itemEventList;
-        }
-
-        if (isSingle) {
-
-          // 标记是否存在重复的方法，如果有则为 true
-          var flag = false;
-          for (var m = 0, n = itemEventList.length; m < n; m++) {
-            if ((itemEventList[m]).toString() === (fun).toString()) {
-              flag = true;
-              break;
-            }
-          }
-
-          if (!flag) {
-            itemEventList.push(fun);
-          }
-        } else {
-          itemEventList.push(fun);
-        }
-
-      }
-    }
-  };
-
-  var _off = function(eventName, fun, options) {
-    var tempList;
-    var isOnce;
-    if (options) {
-      isOnce = options.once;
-    }
-    if (!isOnce) {
-      tempList = eventList;
-    } else {
-      tempList = eventOnceList;
-    }
-    if (tempList[eventName]) {
-      var i = 0;
-      var l = tempList[eventName].length;
-      for (; i < l; i++) {
-        if (tempList[eventName][i] === fun) {
-          tempList[eventName][i] = null;
-          // 每次只清除一个相同事件绑定
-          break;
-        }
-      }
-    }
-  };
-
-  function cleanNull(list) {
-    var tempList = [];
-    var i = 0;
-    var l = list.length;
-    if (l) {
-      for (; i < l; i++) {
-        if (list[i]) {
-          tempList.push(list[i]);
-        }
-      }
-      return tempList;
-    } else {
-      return null;
-    }
-  }
-
-  return {
-    on: function(eventName, fun) {
-      _on(eventName, fun);
-      return this;
-    },
-
-    // 方法绑定以后只会运行一次
-    once: function(eventName, fun) {
-      _on(eventName, fun, {
-        once: true
-      });
-      return this;
-    },
-
-    // 同一个方法只会被绑定一次
-    _one: function(eventName, fun) {
-      _on(eventName, fun, {
-        single: true
-      });
-    },
-    emit: function(eventName, data) {
-      if (!eventName) {
-        throw new Error('No emit event name.');
-      }
-      var i = 0;
-      var l = 0;
-      if (eventList[eventName]) {
-        i = 0;
-        l = eventList[eventName].length;
-        for (; i < l; i++) {
-          if (eventList[eventName][i]) {
-            eventList[eventName][i].call(this, data);
-          }
-        }
-        eventList[eventName] = cleanNull(eventList[eventName]);
-      }
-      if (eventOnceList[eventName]) {
-        i = 0;
-        l = eventOnceList[eventName].length;
-        for (; i < l; i++) {
-          if (eventOnceList[eventName][i]) {
-            eventOnceList[eventName][i].call(this, data);
-            _off(eventName, eventOnceList[eventName][i], {
-              once: true
-            });
-          }
-        }
-        eventOnceList[eventName] = cleanNull(eventOnceList[eventName]);
-      }
-      return this;
-    },
-    off: function(eventName, fun) {
-      _off(eventName, fun);
-      return this;
-    }
-  };
 };
 
 if (typeof exports !== 'undefined') {

@@ -17,8 +17,9 @@ AV.realtime = require('./realtime');
 
 'use strict';
 
-var ajax = require('./tool').ajax;
-var extend = require('./tool').extend;
+var tool = require('./tool');
+var ajax = tool.ajax;
+var extend = tool.extend;
 
 // 当前版本
 var VERSION = '2.2.0';
@@ -29,9 +30,6 @@ var config = {
   heartbeatsTime: 60 * 1000,
   WebSocket: global.WebSocket
 };
-
-// 命名空间，挂载一些工具方法
-var tool = {};
 
 // 命名空间，挂载私有方法
 var engine = {};
@@ -1256,50 +1254,68 @@ engine.bindEvent = function(cache) {
   // cache.ec.on('logs', function(data) {});
 };
 
-// 空函数
-tool.noop = function() {};
+if (typeof exports !== 'undefined') {
+  // CommonJS 支持
+  if (typeof module !== 'undefined' && module.exports) {
+    exports = module.exports = realtime;
+  }
+  exports.realtime = realtime;
+  /* jshint -W117 */
+  /* ignore 'define' is not defined */
+} else if (typeof define === 'function' && define.amd) {
+  // AMD 支持
+  define('AV/realtime', [], function() {
+    return realtime;
+  });
+  /* jshint +W117 */
+}
 
-// 检查是否是 JSON 格式的字符串
-tool.isJSONString = function(obj) {
-  return /^\{.*\}$/.test(obj);
-};
+}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
+},{"./tool":6}],3:[function(require,module,exports){
+(function (global){
+'use strict';
+module.exports = function(options, callback) {
+  if (typeof options === 'string') {
+    options = {
+      url: options
+    };
+  }
+  var url = options.url;
+  var method = options.method || 'get';
+  var XMLHttpRequest = require('xmlhttprequest').XMLHttpRequest;
+  var xhr = new XMLHttpRequest();
 
-// 获取当前时间的时间戳
-tool.now = function() {
-  return new Date().getTime();
-};
+  xhr.open(method, url);
 
-// HTML 转义
-tool.encodeHTML = function(source) {
-  var encodeHTML = function(str) {
-    if (typeof(str) === 'string') {
-      return str.replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;');
-      // 考虑到其中有可能是 JSON，所以不做 HTML 强过滤，仅对标签过滤
-      // .replace(/\\/g,'&#92;')
-      // .replace(/"/g,'&quot;')
-      // .replace(/'/g,'&#39;');
+  xhr.onload = function(data) {
+    if ((xhr.status >= 200 && xhr.status < 300) || (global.XDomainRequest && !xhr.status)) {
+      callback(null, JSON.parse(xhr.responseText));
     } else {
-      // 数字
-      return str;
+      callback(JSON.parse(xhr.responseText));
     }
   };
 
-  // 对象类型
-  if (typeof(source) === 'object') {
-    for (var key in source) {
-      source[key] = tool.encodeHTML(source[key]);
-    }
-    return source;
-  } else {
-    // 非对象类型
-    return encodeHTML(source);
-  }
+  xhr.onerror = function(data) {
+    callback(data || {});
+    throw new Error('Network error.');
+  };
+
+  // IE9 中需要设置所有的 xhr 事件回调，不然可能会无法执行后续操作
+  xhr.onprogress = function() {};
+  xhr.ontimeout = function() {};
+  xhr.timeout = 0;
+
+  var body = JSON.stringify(options.data);
+
+  xhr.send(body);
+
 };
 
-// 小型的私有事件中心
-tool.eventCenter = function() {
+}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
+},{"xmlhttprequest":7}],4:[function(require,module,exports){
+'use strict';
+
+module.exports = function() {
   var eventList = {};
   var eventOnceList = {};
 
@@ -1454,65 +1470,7 @@ tool.eventCenter = function() {
   };
 };
 
-if (typeof exports !== 'undefined') {
-  // CommonJS 支持
-  if (typeof module !== 'undefined' && module.exports) {
-    exports = module.exports = realtime;
-  }
-  exports.realtime = realtime;
-  /* jshint -W117 */
-  /* ignore 'define' is not defined */
-} else if (typeof define === 'function' && define.amd) {
-  // AMD 支持
-  define('AV/realtime', [], function() {
-    return realtime;
-  });
-  /* jshint +W117 */
-}
-
-}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./tool":5}],3:[function(require,module,exports){
-(function (global){
-'use strict';
-module.exports = function(options, callback) {
-  if (typeof options === 'string') {
-    options = {
-      url: options
-    };
-  }
-  var url = options.url;
-  var method = options.method || 'get';
-  var XMLHttpRequest = require('xmlhttprequest').XMLHttpRequest;
-  var xhr = new XMLHttpRequest();
-
-  xhr.open(method, url);
-
-  xhr.onload = function(data) {
-    if ((xhr.status >= 200 && xhr.status < 300) || (global.XDomainRequest && !xhr.status)) {
-      callback(null, JSON.parse(xhr.responseText));
-    } else {
-      callback(JSON.parse(xhr.responseText));
-    }
-  };
-
-  xhr.onerror = function(data) {
-    callback(data || {});
-    throw new Error('Network error.');
-  };
-
-  // IE9 中需要设置所有的 xhr 事件回调，不然可能会无法执行后续操作
-  xhr.onprogress = function() {};
-  xhr.ontimeout = function() {};
-  xhr.timeout = 0;
-
-  var body = JSON.stringify(options.data);
-
-  xhr.send(body);
-
-};
-
-}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"xmlhttprequest":6}],4:[function(require,module,exports){
+},{}],5:[function(require,module,exports){
 'use strict';
 
 var hasOwn = Object.prototype.hasOwnProperty;
@@ -1604,12 +1562,61 @@ module.exports = function extend() {
   return target;
 };
 
-},{}],5:[function(require,module,exports){
+},{}],6:[function(require,module,exports){
 'use strict';
-exports.ajax = require('./ajax');
-exports.extend = require('./extend');
 
-},{"./ajax":3,"./extend":4}],6:[function(require,module,exports){
+var tool = {};
+
+tool.ajax = require('./ajax');
+tool.extend = require('./extend');
+// 小型的私有事件中心
+tool.eventCenter = require('./eventcenter');
+
+// 空函数
+tool.noop = function() {};
+
+// 检查是否是 JSON 格式的字符串
+tool.isJSONString = function(obj) {
+  return /^\{.*\}$/.test(obj);
+};
+
+// 获取当前时间的时间戳
+tool.now = function() {
+  return new Date().getTime();
+};
+
+// HTML 转义
+tool.encodeHTML = function(source) {
+  var encodeHTML = function(str) {
+    if (typeof(str) === 'string') {
+      return str.replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;');
+      // 考虑到其中有可能是 JSON，所以不做 HTML 强过滤，仅对标签过滤
+      // .replace(/\\/g,'&#92;')
+      // .replace(/"/g,'&quot;')
+      // .replace(/'/g,'&#39;');
+    } else {
+      // 数字
+      return str;
+    }
+  };
+
+  // 对象类型
+  if (typeof(source) === 'object') {
+    for (var key in source) {
+      source[key] = tool.encodeHTML(source[key]);
+    }
+    return source;
+  } else {
+    // 非对象类型
+    return encodeHTML(source);
+  }
+};
+
+module.exports = tool;
+
+},{"./ajax":3,"./eventcenter":4,"./extend":5}],7:[function(require,module,exports){
 exports.XMLHttpRequest = window.XMLHttpRequest || window.XDomainRequest;
 
-},{}]},{},[1,2]);
+},{}]},{},[1]);

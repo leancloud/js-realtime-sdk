@@ -11,7 +11,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/leeyeh/js-realtime-sdk.git"
+    "url": "git+https://github.com/leancloud/js-realtime-sdk.git"
   },
   "keywords": [
     "leancloud",
@@ -20,9 +20,9 @@
   ],
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/leeyeh/js-realtime-sdk/issues"
+    "url": "https://github.com/leancloud/js-realtime-sdk/issues"
   },
-  "homepage": "https://github.com/leeyeh/js-realtime-sdk#readme",
+  "homepage": "https://leancloud.cn/",
   "devDependencies": {
     "es6-promise": "^2.3.0",
     "grunt": "^0.4.5",
@@ -41,7 +41,6 @@
     "ws": "^0.7.2"
   },
   "dependencies": {
-    "extend": "^3.0.0",
     "xmlhttprequest": "^1.7.0"
   },
   "browser": {

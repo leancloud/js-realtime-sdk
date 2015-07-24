@@ -25,7 +25,7 @@ module.exports = function(grunt) {
     browserify: {
       dist: {
         files: {
-          'dist/AV.realtime.js': ['src/***.js']
+          'dist/AV.realtime.js': ['src/AV.realtime.js']
         }
       },
       test: {
@@ -92,6 +92,6 @@ module.exports = function(grunt) {
   grunt.registerTask('default', []);
   grunt.registerTask('hint', ['jshint', 'jscs']);
   grunt.registerTask('test', ['hint', 'browserify:test', 'connect', 'mocha_phantomjs', 'simplemocha']);
-  grunt.registerTask('sauce', ['saucelabs-mocha']);
+  grunt.registerTask('sauce', ['browserify:test', 'connect', 'saucelabs-mocha']);
   grunt.registerTask('release', ['browserify:dist', 'uglify:dist']);
 };

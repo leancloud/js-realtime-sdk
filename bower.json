@@ -16,6 +16,7 @@
     "changelog.md"
   ],
   "moduleType": [
+    "node",
     "amd",
     "globals"
   ],
