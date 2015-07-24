@@ -1,0 +1,66 @@
+<!doctype html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <title>Specs - LeanCloud Realtime JavaScript SDK</title>
+  <meta name="viewport" content="width=device-width">
+  <link rel="stylesheet" href="../../bower_components/mocha/mocha.css">
+</head>
+
+<body>
+  <div id="mocha"></div>
+  <script src="../../bower_components/mocha/mocha.js"></script>
+
+  <!--[if lt IE 10]>
+    <script type="text/javascript" src="../../plugin/web-socket-js/swfobject.js"></script>
+    <script type="text/javascript" src="../../plugin/web-socket-js/web_socket.js"></script>
+    <script type="text/javascript">
+    // 设置变量，配置插件中 WebSocketMain.swf 的引用路径
+    WEB_SOCKET_SWF_LOCATION = "../../plugin/web-socket-js/WebSocketMain.swf";
+    </script>
+  <![endif]-->
+
+  <script>
+    mocha.setup({
+      ui: 'bdd',
+      timeout: 10000
+    });
+  </script>
+  <script src="runner.browser.js"></script>
+  <script>
+    onload = function() {
+      var runner = (window.mochaPhantomJS ? mochaPhantomJS : mocha).run();
+
+      var failedTests = [];
+      runner.on('end', function() {
+        window.mochaResults = runner.stats;
+        window.mochaResults.reports = failedTests;
+      });
+
+      runner.on('fail', logFailure);
+
+      function logFailure(test, err) {
+
+        var flattenTitles = function(test) {
+          var titles = [];
+          while (test.parent.title) {
+            titles.push(test.parent.title);
+            test = test.parent;
+          }
+          return titles.reverse();
+        };
+
+        failedTests.push({
+          name: test.title,
+          result: false,
+          message: err.message,
+          stack: err.stack,
+          titles: flattenTitles(test)
+        });
+      };
+    };
+  </script>
+</body>
+
+</html>
