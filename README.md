@@ -10,9 +10,5 @@
 * `grunt test`
 * `grunt release`
 * 提交代码合并到 master
-* Github 生成 release 包
-* 发布到 npm 与 bower
-
-```
-bower register leancloud-realtime git@github.com:leancloud/js-realtime-sdk.git
-```
+* Github 生成 release 包（for bower）
+* 发布到 npm（`npm publish`，需 npm 协作者身份）
