@@ -30,7 +30,7 @@ module.exports = function(grunt) {
       },
       test: {
         files: {
-          'test/browser/runner.browser.js': 'test/browser/runner.js'
+          'test/browser/specs.browser.js': 'test/specs.js'
         }
       }
     },
@@ -55,7 +55,7 @@ module.exports = function(grunt) {
         ui: 'bdd'
       },
       all: {
-        src: ['test/runner.js']
+        src: ['test/specs.js']
       }
     },
     'mocha_phantomjs': {

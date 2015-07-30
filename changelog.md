@@ -1,3 +1,7 @@
+## 2.2.1
+### Features
+* 内置 [ws](https://www.npmjs.com/package/ws) 作为默认 WebSocket 实现，在 node 运行环境中使用时不再要求配置 WebSocket 类。
+
 ## 2.2.0
 ### Features
 * 支持 node 运行环境
