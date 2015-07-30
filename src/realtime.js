@@ -14,13 +14,14 @@ var ajax = tool.ajax;
 var extend = tool.extend;
 
 // 当前版本
-var VERSION = '2.2.0';
+var VERSION = '2.2.1';
 
 // 配置项
 var config = {
   // 心跳时间（一分钟）
   heartbeatsTime: 60 * 1000,
-  WebSocket: global.WebSocket
+  // ws 在 browserify 打包时会使用浏览器内置的 WebSocket 实现
+  WebSocket: require('ws')
 };
 
 // 命名空间，挂载私有方法
