@@ -1,0 +1,46 @@
+<!doctype html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <title>LeanEchoBot</title>
+  <meta name="description" content="">
+  <meta name="viewport" content="width=device-width">
+  <meta name="viewport" content="user-scalable=no">
+  <meta name="viewport" content="initial-scale=1,maximum-scale=1">
+  <script src="../../bower_components/vue/dist/vue.min.js"></script>
+
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+  <div id="demo">
+    <div class="greetings" v-show="!connected">
+      <p>你好，我是 LeanEchoBot。</p>
+      <form v-on="submit: connect">
+        <input autofocus type="text" v-model="clientId" placeholder="输入昵称">
+        <input type="submit" value="开始调戏">
+      </form>
+    </div>
+    <ul v-show="connected">
+      <li v-repeat="msg in msgs">
+        {{msg.fromPeerId}}: {{msg.msg}}
+      </li>
+    </ul>
+    <div v-show="botOffline">
+      LeanEchoBot 罢工了，通知<a href="{{email}}">维修工人</a>，或者<a target="_blank" href="https://github.com/leeyeh/realtime-echo-bot">自己组装一个</a>。
+    </div>
+
+    <form v-on="submit: send" v-show="connected">
+      <input type="text" v-model="draft">
+      <input type="submit" value="Fire">
+    </form>
+  </div>
+
+  <!-- 引入 LeanCloud 实时通信 SDK -->
+  <script src="../../dist/AV.realtime.js"></script>
+  <!-- Demo 逻辑文件 -->
+  <script src="test.js"></script>
+</body>
+
+</html>
