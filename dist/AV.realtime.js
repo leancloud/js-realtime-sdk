@@ -1,5 +1,7 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 (function (global){
+'use strict';
+
 var AV = global.AV = global.AV || {};
 AV.realtime = require('./realtime');
 
@@ -22,13 +24,14 @@ var ajax = tool.ajax;
 var extend = tool.extend;
 
 // 当前版本
-var VERSION = '2.2.0';
+var VERSION = '2.2.1';
 
 // 配置项
 var config = {
   // 心跳时间（一分钟）
   heartbeatsTime: 60 * 1000,
-  WebSocket: global.WebSocket
+  // ws 在 browserify 打包时会使用浏览器内置的 WebSocket 实现
+  WebSocket: require('ws')
 };
 
 // 命名空间，挂载私有方法
@@ -59,9 +62,9 @@ var eNameIndex = {
 };
 
 // 生成 conversation 对象，挂载所有 conversation 相关方法，每次调用实例化
-var newConvObject = function(cache) {
+var newConvObject = function newConvObject(cache) {
 
-  var addOrRemove = function(cid, argument, callback, cmd) {
+  var addOrRemove = function addOrRemove(cid, argument, callback, cmd) {
     var members = [];
     var options;
     var fun;
@@ -89,7 +92,7 @@ var newConvObject = function(cache) {
         engine.convRemove(cache, options);
         break;
     }
-    fun = function(data) {
+    fun = function (data) {
       if (data.i === options.serialId) {
         if (callback) {
           callback(data);
@@ -106,25 +109,25 @@ var newConvObject = function(cache) {
     id: '',
     // 创建 Conversation 时的默认属性
     attr: {},
-    add: function(argument, callback) {
+    add: function add(argument, callback) {
       addOrRemove(this.id, argument, callback, 'add');
       return this;
     },
-    remove: function(argument, callback) {
+    remove: function remove(argument, callback) {
       addOrRemove(this.id, argument, callback, 'remove');
       return this;
     },
     // 自己加入
-    join: function(callback) {
+    join: function join(callback) {
       this.add(cache.options.peerId, callback);
       return this;
     },
     // 自己离开
-    leave: function(callback) {
+    leave: function leave(callback) {
       this.remove(cache.options.peerId, callback);
       return this;
     },
-    send: function(data, argument1, argument2) {
+    send: function send(data, argument1, argument2) {
       var callback;
       var options = {};
       var me = this;
@@ -133,7 +136,7 @@ var newConvObject = function(cache) {
         case 2:
           callback = argument1;
           break;
-          // 三个参数时，第二个参数是配置项，第三个参数是回调
+        // 三个参数时，第二个参数是配置项，第三个参数是回调
         case 3:
           options = argument1;
           callback = argument2;
@@ -161,7 +164,7 @@ var newConvObject = function(cache) {
 
       // 如果是暂态消息，则不需回调，服务器也不会返回回调
       if (!options.transient) {
-        var fun = function(data) {
+        var fun = function fun(data) {
           if (data.i === options.serialId) {
             if (callback) {
               callback(data);
@@ -174,7 +177,7 @@ var newConvObject = function(cache) {
       engine.send(cache, options, callback);
       return this;
     },
-    log: function(argument, callback) {
+    log: function log(argument, callback) {
       var options = {};
       switch (arguments.length) {
         // 如果只有一个参数，那么是 callback
@@ -187,7 +190,7 @@ var newConvObject = function(cache) {
       }
       options.cid = options.cid || this.id;
       options.serialId = options.serialId || engine.getSerialId(cache);
-      var fun = function(data) {
+      var fun = function fun(data) {
         if (data.i === options.serialId) {
           if (callback) {
             // 对查出的类型进行过滤，兼容多端通信
@@ -208,9 +211,9 @@ var newConvObject = function(cache) {
       engine.convLog(cache, options);
       return this;
     },
-    receive: function(callback) {
+    receive: function receive(callback) {
       var id = this.id;
-      cache.ec.on(eNameIndex.message, function(data) {
+      cache.ec.on(eNameIndex.message, function (data) {
         // 是否是当前 room 的信息
         if (id === data.cid) {
           callback(data);
@@ -219,9 +222,9 @@ var newConvObject = function(cache) {
       return this;
     },
     // 获取信息回执
-    receipt: function(callback) {
+    receipt: function receipt(callback) {
       var id = this.id;
-      cache.ec.on(eNameIndex.receipt, function(data) {
+      cache.ec.on(eNameIndex.receipt, function (data) {
         // 是否是当前 room 的信息
         if (id === data.cid) {
           callback(data);
@@ -229,7 +232,7 @@ var newConvObject = function(cache) {
       });
       return this;
     },
-    list: function(callback) {
+    list: function list(callback) {
       var options = {};
       var id = this.id;
       options.where = {
@@ -237,7 +240,7 @@ var newConvObject = function(cache) {
         objectId: id
       };
       options.serialId = engine.getSerialId(cache);
-      var fun = function(data) {
+      var fun = function fun(data) {
         if (data.i === options.serialId) {
           if (callback) {
             if (data.results.length) {
@@ -254,13 +257,13 @@ var newConvObject = function(cache) {
       engine.convQuery(cache, options);
       return this;
     },
-    count: function(callback) {
+    count: function count(callback) {
       var id = this.id;
       var options = {
         cid: id,
         serialId: engine.getSerialId(cache)
       };
-      var fun = function(data) {
+      var fun = function fun(data) {
         if (data.i === options.serialId) {
           if (callback) {
             callback(data.count);
@@ -272,14 +275,14 @@ var newConvObject = function(cache) {
       engine.convCount(cache, options);
       return this;
     },
-    update: function(data, callback) {
+    update: function update(data, callback) {
       var id = this.id;
       var options = {
         cid: id,
         data: data,
         serialId: engine.getSerialId(cache)
       };
-      var fun = function(data) {
+      var fun = function fun(data) {
         if (data.i === options.serialId) {
           if (callback) {
             callback(data);
@@ -295,7 +298,7 @@ var newConvObject = function(cache) {
 };
 
 // 创建一个新的 realtime 对象，挂载所有 realtime 中的方法，每次调用实例化一个实例，支持单页多实例。
-var newRealtimeObject = function() {
+var newRealtimeObject = function newRealtimeObject() {
 
   // 缓存一些已经实例化的变量
   var cache = {
@@ -322,11 +325,11 @@ var newRealtimeObject = function() {
   return {
     clientId: '',
     cache: cache,
-    open: function(callback) {
+    open: function open(callback) {
       var me = this;
       var cache = this.cache;
       cache.closeFlag = false;
-      engine.getServer(cache, cache.options, function(data) {
+      engine.getServer(cache, cache.options, function (data) {
         if (data) {
           engine.connect(cache, {
             server: cache.server
@@ -337,18 +340,18 @@ var newRealtimeObject = function() {
         cache.ec.once(eNameIndex.open, callback);
       }
       // 断开重连
-      cache.ec.once(eNameIndex.reuse, function() {
+      cache.ec.once(eNameIndex.reuse, function () {
         if (cache.reuseTimer) {
           clearTimeout(cache.reuseTimer);
         }
-        cache.reuseTimer = setTimeout(function() {
+        cache.reuseTimer = setTimeout(function () {
           me.open();
         }, 5000);
       });
       return this;
     },
     // 表示关闭当前的 session 连接和 WebSocket 连接，并且回收内存
-    close: function() {
+    close: function close() {
       var cache = this.cache;
       if (!cache.openFlag) {
         throw new Error('Must call after open() has successed.');
@@ -358,23 +361,23 @@ var newRealtimeObject = function() {
       cache.ws.close();
       return this;
     },
-    on: function(eventName, callback) {
+    on: function on(eventName, callback) {
       this.cache.ec.on(eventName, callback);
       return this;
     },
-    once: function(eventName, callback) {
+    once: function once(eventName, callback) {
       this.cache.ec.once(eventName, callback);
       return this;
     },
-    emit: function(eventName, data) {
+    emit: function emit(eventName, data) {
       this.cache.ec.emit(eventName, data);
       return this;
     },
-    off: function(eventName, callback) {
+    off: function off(eventName, callback) {
       this.cache.ec.off(eventName, callback);
       return this;
     },
-    room: function(argument, callback) {
+    room: function room(argument, callback) {
       var cache = this.cache;
       if (!cache.openFlag) {
         throw new Error('Must call after open() has successed.');
@@ -398,7 +401,7 @@ var newRealtimeObject = function() {
           where: {
             objectId: convId
           }
-        }, function(data) {
+        }, function (data) {
 
           // 如果服务器端有这个 id
           if (data.length) {
@@ -453,7 +456,7 @@ var newRealtimeObject = function() {
         engine.startConv(cache, options, callback);
 
         // 服务器端确认收到对话创建，并创建成功
-        var fun = function(data) {
+        var fun = function fun(data) {
           if (data.i === options.serialId) {
             convObject.id = data.cid;
             convObject.name = options.name;
@@ -472,11 +475,11 @@ var newRealtimeObject = function() {
       return convObject;
     },
     // conv 就是 room 的别名
-    conv: function() {
+    conv: function conv() {
       return this.room.apply(this, arguments);
     },
     // 相关查询，包括用户列表查询，房间查询等
-    query: function(argument, callback) {
+    query: function query(argument, callback) {
       var cache = this.cache;
       if (!cache.openFlag) {
         throw new Error('Must call after open() has successed.');
@@ -492,7 +495,7 @@ var newRealtimeObject = function() {
           break;
       }
       options.serialId = engine.getSerialId(cache);
-      var fun = function(data) {
+      var fun = function fun(data) {
         if (data.i === options.serialId) {
           if (callback) {
             callback(data.results);
@@ -505,7 +508,7 @@ var newRealtimeObject = function() {
       return this;
     },
     // 判断用户是否在线
-    ping: function(argument, callback) {
+    ping: function ping(argument, callback) {
       var cache = this.cache;
       if (!cache.openFlag) {
         throw new Error('Must call after open() has successed.');
@@ -515,7 +518,7 @@ var newRealtimeObject = function() {
       }
       var peerIdList = [];
       // 传入一个 id
-      if (typeof(argument) === 'string') {
+      if (typeof argument === 'string') {
         peerIdList.push(argument);
       } else {
         // 传入的是数组
@@ -525,7 +528,7 @@ var newRealtimeObject = function() {
         serialId: engine.getSerialId(cache),
         peerIdList: peerIdList
       };
-      var fun = function(data) {
+      var fun = function fun(data) {
         if (data.i === options.serialId) {
           callback(data.onlineSessionPeerIds);
           cache.ec.off('session-query-result', fun);
@@ -539,7 +542,7 @@ var newRealtimeObject = function() {
 };
 
 // 主函数，启动通信并获得 realtimeObject
-var realtime = function(options, callback) {
+var realtime = function realtime(options, callback) {
   if (typeof options !== 'object') {
     throw new Error('realtime need a argument at least.');
   } else if (!options.appId) {
@@ -561,7 +564,7 @@ var realtime = function(options, callback) {
       // 是否开启服务器端认证，传入认证函数
       auth: options.auth,
       // 是否关闭 WebSocket 的安全链接，即由 wss 协议转为 ws 协议，关闭 SSL 保护。默认开启。
-      secure: typeof(options.secure) === 'undefined' ? secure : options.secure,
+      secure: typeof options.secure === 'undefined' ? secure : options.secure,
       // 服务器地区选项，默认为中国大陆
       region: options.region || 'cn'
     };
@@ -584,12 +587,12 @@ realtime.version = VERSION;
 realtime._tool = tool;
 realtime._engine = engine;
 
-realtime.config = function(newConfig) {
+realtime.config = function (newConfig) {
   extend(config, newConfig);
 };
 
 // WebSocket Open
-engine.wsOpen = function(cache) {
+engine.wsOpen = function (cache) {
   engine.bindEvent(cache);
   engine.openSession(cache, {
     serialId: engine.getSerialId(cache)
@@ -601,13 +604,13 @@ engine.wsOpen = function(cache) {
 };
 
 // WebSocket Close
-engine.wsClose = function(cache, event) {
+engine.wsClose = function (cache, event) {
   // 派发全局 close 事件，表示 realtime 已经关闭
   cache.ec.emit(eNameIndex.close, event);
 };
 
 // WebSocket Message
-engine.wsMessage = function(cache, msg) {
+engine.wsMessage = function (cache, msg) {
   var data = JSON.parse(msg.data);
 
   // 对服务端返回的数据进行逻辑包装
@@ -620,13 +623,13 @@ engine.wsMessage = function(cache, msg) {
   }
 };
 
-engine.wsError = function(cache, data) {
+engine.wsError = function (cache, data) {
   cache.ec.emit(eNameIndex.error, data);
-  throw (data);
+  throw data;
 };
 
 // WebSocket send message
-engine.wsSend = function(cache, data) {
+engine.wsSend = function (cache, data) {
   if (!cache.closeFlag) {
     if (!cache.ws) {
       throw new Error('The realtimeObject must opened first. Please listen to the "open" event.');
@@ -637,28 +640,28 @@ engine.wsSend = function(cache, data) {
   }
 };
 
-engine.createSocket = function(cache, server) {
+engine.createSocket = function (cache, server) {
   if (cache.ws) {
     cache.ws.close();
   }
   var ws = new config.WebSocket(server);
   cache.ws = ws;
-  ws.addEventListener('open', function() {
+  ws.addEventListener('open', function () {
     engine.wsOpen(cache);
   });
-  ws.addEventListener('close', function(event) {
+  ws.addEventListener('close', function (event) {
     engine.wsClose(cache, event);
   });
-  ws.addEventListener('message', function(msg) {
+  ws.addEventListener('message', function (msg) {
     engine.wsMessage(cache, msg);
   });
-  ws.addEventListener('error', function(data) {
+  ws.addEventListener('error', function (data) {
     engine.wsError(cache, data);
   });
 };
 
 // 心跳程序
-engine.heartbeats = function(cache) {
+engine.heartbeats = function (cache) {
 
   // 当前 RealtimeObject 已经启动心跳程序
   if (cache.openFlag) {
@@ -666,18 +669,18 @@ engine.heartbeats = function(cache) {
   }
 
   var timer;
-  cache.ws.addEventListener('message', function() {
+  cache.ws.addEventListener('message', function () {
     if (timer) {
       clearTimeout(timer);
     }
-    timer = setTimeout(function() {
+    timer = setTimeout(function () {
       cache.ws.send('{}');
     }, config.heartbeatsTime);
   });
 };
 
 // 守护进程，会派发 reuse 重连事件
-engine.guard = function(cache) {
+engine.guard = function (cache) {
 
   // 当前 RealtimeObject 已经启动守护进程
   if (cache.openFlag) {
@@ -689,11 +692,11 @@ engine.guard = function(cache) {
   var timer;
 
   // 结合心跳事件，如果长时间没有收到服务器的心跳，也要触发重连机制
-  cache.ws.addEventListener('message', function() {
+  cache.ws.addEventListener('message', function () {
     if (timer) {
       clearTimeout(timer);
     }
-    timer = setTimeout(function() {
+    timer = setTimeout(function () {
       if (!cache.closeFlag && !cache.reuseFlag) {
         cache.reuseFlag = true;
         // 超时则派发重试事件
@@ -703,7 +706,7 @@ engine.guard = function(cache) {
   });
 
   // 监测断开事件
-  cache.ec.on(eNameIndex.close + ' ' + 'session-closed', function() {
+  cache.ec.on(eNameIndex.close + ' ' + 'session-closed', function () {
     if (!cache.closeFlag && !cache.reuseFlag) {
       cache.reuseFlag = true;
       cache.ec.emit(eNameIndex.reuse);
@@ -711,7 +714,7 @@ engine.guard = function(cache) {
   });
 };
 
-engine.connect = function(cache, options) {
+engine.connect = function (cache, options) {
   var server = options.server;
   // 判断获取出缓存的时间是否是比较新的
   if (server && tool.now() <= server.expires) {
@@ -722,7 +725,7 @@ engine.connect = function(cache, options) {
   }
 };
 
-engine.getServer = function(cache, options, callback) {
+engine.getServer = function (cache, options, callback) {
   var appId = options.appId;
   // 是否获取 wss 的安全链接
   var secure = options.secure;
@@ -747,7 +750,7 @@ engine.getServer = function(cache, options, callback) {
   if (secure) {
     url += '&secure=1';
   }
-  ajax(url, function(error, data) {
+  ajax(url, function (error, data) {
     if (data) {
       data.expires = tool.now() + data.ttl * 1000;
       cache.server = data;
@@ -759,7 +762,7 @@ engine.getServer = function(cache, options, callback) {
 };
 
 // 打开 session
-engine.openSession = function(cache, options) {
+engine.openSession = function (cache, options) {
   var cmd = {
     cmd: 'session',
     op: 'open',
@@ -770,7 +773,7 @@ engine.openSession = function(cache, options) {
   if (cache.authFun) {
     cache.authFun({
       clientId: cache.options.peerId
-    }, function(authResult) {
+    }, function (authResult) {
       if (authResult && authResult.signature) {
         cmd.n = authResult.nonce;
         cmd.t = authResult.timestamp;
@@ -785,14 +788,14 @@ engine.openSession = function(cache, options) {
   }
 };
 
-engine.closeSession = function(cache) {
+engine.closeSession = function (cache) {
   engine.wsSend(cache, cache, {
     cmd: 'session',
     op: 'close'
   });
 };
 
-engine.startConv = function(cache, options) {
+engine.startConv = function (cache, options) {
   var cmd = {
     cmd: 'conv',
     op: 'start',
@@ -811,7 +814,7 @@ engine.startConv = function(cache, options) {
     cache.authFun({
       clientId: cache.options.peerId,
       members: options.members
-    }, function(authResult) {
+    }, function (authResult) {
       if (authResult && authResult.signature) {
         cmd.n = authResult.nonce;
         cmd.t = authResult.timestamp;
@@ -826,7 +829,7 @@ engine.startConv = function(cache, options) {
   }
 };
 
-engine.convAdd = function(cache, options) {
+engine.convAdd = function (cache, options) {
   var cmd = {
     cmd: 'conv',
     op: 'add',
@@ -840,7 +843,7 @@ engine.convAdd = function(cache, options) {
       members: options.members,
       convId: options.cid,
       action: 'invite'
-    }, function(authResult) {
+    }, function (authResult) {
       if (authResult && authResult.signature) {
         cmd.n = authResult.nonce;
         cmd.t = authResult.timestamp;
@@ -855,7 +858,7 @@ engine.convAdd = function(cache, options) {
   }
 };
 
-engine.convRemove = function(cache, options) {
+engine.convRemove = function (cache, options) {
   var cmd = {
     cmd: 'conv',
     op: 'remove',
@@ -869,7 +872,7 @@ engine.convRemove = function(cache, options) {
       members: options.members,
       convId: options.cid,
       action: 'kick'
-    }, function(authResult) {
+    }, function (authResult) {
       if (authResult && authResult.signature) {
         cmd.n = authResult.nonce;
         cmd.t = authResult.timestamp;
@@ -884,7 +887,7 @@ engine.convRemove = function(cache, options) {
   }
 };
 
-engine.send = function(cache, options) {
+engine.send = function (cache, options) {
   engine.wsSend(cache, {
     cmd: 'direct',
     cid: options.cid,
@@ -897,7 +900,7 @@ engine.send = function(cache, options) {
   });
 };
 
-engine.convQuery = function(cache, options) {
+engine.convQuery = function (cache, options) {
   options = options || {};
   engine.wsSend(cache, {
     cmd: 'conv',
@@ -920,7 +923,7 @@ engine.convQuery = function(cache, options) {
 };
 
 // 查询 session 在线情况
-engine.querySession = function(cache, options) {
+engine.querySession = function (cache, options) {
   engine.wsSend(cache, {
     cmd: 'session',
     op: 'query',
@@ -930,7 +933,7 @@ engine.querySession = function(cache, options) {
 };
 
 // 查询 conversation 的聊天记录
-engine.convLog = function(cache, options) {
+engine.convLog = function (cache, options) {
   engine.wsSend(cache, {
     cmd: 'logs',
     cid: options.cid,
@@ -944,7 +947,7 @@ engine.convLog = function(cache, options) {
   });
 };
 
-engine.convUpdate = function(cache, options) {
+engine.convUpdate = function (cache, options) {
   engine.wsSend(cache, {
     cmd: 'conv',
     op: 'update',
@@ -955,7 +958,7 @@ engine.convUpdate = function(cache, options) {
   });
 };
 
-engine.convAck = function(cache, options) {
+engine.convAck = function (cache, options) {
   engine.wsSend(cache, {
     cmd: 'ack',
     cid: options.cid,
@@ -963,7 +966,7 @@ engine.convAck = function(cache, options) {
   });
 };
 
-engine.convCount = function(cache, options) {
+engine.convCount = function (cache, options) {
   engine.wsSend(cache, {
     cmd: 'conv',
     op: 'count',
@@ -973,7 +976,7 @@ engine.convCount = function(cache, options) {
 };
 
 // 取出多媒体类型的格式（内置 HTML 转义逻辑）
-engine.getMediaMsg = function(cache, msg) {
+engine.getMediaMsg = function (cache, msg) {
 
   // 检查是否是 JSON 格式的一个 String 类型
   if (!tool.isJSONString(msg)) {
@@ -1034,7 +1037,7 @@ engine.getMediaMsg = function(cache, msg) {
 };
 
 // 生成多媒体特定格式的数据
-engine.setMediaMsg = function(cache, type, data) {
+engine.setMediaMsg = function (cache, type, data) {
   var obj;
   if (type !== 'text' && !data.metaData) {
     throw new Error('Media Data must have metaData attribute.');
@@ -1146,7 +1149,7 @@ engine.setMediaMsg = function(cache, type, data) {
 };
 
 // 取自增的 number 类型
-engine.getSerialId = function(cache) {
+engine.getSerialId = function (cache) {
   cache.serialId++;
   if (cache.serialId > 999999) {
     cache.serialId = 2015;
@@ -1155,14 +1158,14 @@ engine.getSerialId = function(cache) {
 };
 
 // 绑定所有服务返回事件
-engine.bindEvent = function(cache) {
+engine.bindEvent = function (cache) {
 
   // RealtimeObject 已经初始化过，不再重复绑定事件
   if (cache.openFlag) {
     return;
   }
 
-  cache.ec.on('session-opened', function(data) {
+  cache.ec.on('session-opened', function (data) {
     // 标记重试状态为 false，表示没有在重试
     cache.reuseFlag = false;
     // 标记开启状态，已经开启
@@ -1178,7 +1181,7 @@ engine.bindEvent = function(cache) {
   // 查询 session 在线情况
   // cache.ec.on('session-query-result', function() {});
 
-  cache.ec.on('session-error', function(data) {
+  cache.ec.on('session-error', function (data) {
     cache.ec.emit(eNameIndex.error, data);
   });
 
@@ -1187,7 +1190,7 @@ engine.bindEvent = function(cache) {
   // cache.ec.on('conv-started', function(data) {});
 
   // 服务器端发给客户端，表示当前用户加入了某个对话。包括创建对话、或加入对话
-  cache.ec.on('conv-joined', function(data) {
+  cache.ec.on('conv-joined', function (data) {
     // 不是当前用户自己加入
     if (data.peerId !== data.initBy) {
       cache.ec.emit(eNameIndex.join, data);
@@ -1195,17 +1198,17 @@ engine.bindEvent = function(cache) {
   });
 
   // 服务器端发给客户端，表示当前用户离开了某个对话，不再能收到对话的消息
-  cache.ec.on('conv-left', function(data) {
+  cache.ec.on('conv-left', function (data) {
     cache.ec.emit(eNameIndex.left, data);
   });
 
   // 服务器端发给客户端，表示当前对话有新人加入
-  cache.ec.on('conv-members-joined', function(data) {
+  cache.ec.on('conv-members-joined', function (data) {
     cache.ec.emit(eNameIndex.join, data);
   });
 
   // 服务器端发给客户端，表示当前对话有新人离开
-  cache.ec.on('conv-members-left', function(data) {
+  cache.ec.on('conv-members-left', function (data) {
     cache.ec.emit(eNameIndex.left, data);
   });
 
@@ -1217,9 +1220,9 @@ engine.bindEvent = function(cache) {
   // 因为 removed 之后也会触发 members-removed，所以注释掉
   // cache.ec.on('conv-removed', function() {});
 
-  cache.ec.on('conv-error', function(data) {
+  cache.ec.on('conv-error', function (data) {
     cache.ec.emit(eNameIndex.error, data);
-    throw (data.code + ':' + data.reason);
+    throw data.code + ':' + data.reason;
   });
 
   // 查询对话的结果
@@ -1227,7 +1230,7 @@ engine.bindEvent = function(cache) {
 
   // cache.ec.on('conv-updated', function(data) {});
 
-  cache.ec.on('direct', function(data) {
+  cache.ec.on('direct', function (data) {
 
     // 增加多媒体消息的数据格式化
     data.msg = engine.getMediaMsg(cache, data.msg);
@@ -1244,7 +1247,7 @@ engine.bindEvent = function(cache) {
   });
 
   // 对要求回执的消息，服务器端会在对方客户端发送ack后发送回执
-  cache.ec.on('rcp', function(data) {
+  cache.ec.on('rcp', function (data) {
     cache.ec.emit(eNameIndex.receipt, data);
   });
 
@@ -1263,18 +1266,18 @@ if (typeof exports !== 'undefined') {
   /* jshint -W117 */
   /* ignore 'define' is not defined */
 } else if (typeof define === 'function' && define.amd) {
-  // AMD 支持
-  define('AV/realtime', [], function() {
-    return realtime;
-  });
-  /* jshint +W117 */
-}
+    // AMD 支持
+    define('AV/realtime', [], function () {
+      return realtime;
+    });
+    /* jshint +W117 */
+  }
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./tool":6}],3:[function(require,module,exports){
+},{"./tool":6,"ws":7}],3:[function(require,module,exports){
 (function (global){
 'use strict';
-module.exports = function(options, callback) {
+module.exports = function (options, callback) {
   if (typeof options === 'string') {
     options = {
       url: options
@@ -1287,39 +1290,38 @@ module.exports = function(options, callback) {
 
   xhr.open(method, url);
 
-  xhr.onload = function(data) {
-    if ((xhr.status >= 200 && xhr.status < 300) || (global.XDomainRequest && !xhr.status)) {
+  xhr.onload = function (data) {
+    if (xhr.status >= 200 && xhr.status < 300 || global.XDomainRequest && !xhr.status) {
       callback(null, JSON.parse(xhr.responseText));
     } else {
       callback(JSON.parse(xhr.responseText));
     }
   };
 
-  xhr.onerror = function(data) {
+  xhr.onerror = function (data) {
     callback(data || {});
     throw new Error('Network error.');
   };
 
   // IE9 中需要设置所有的 xhr 事件回调，不然可能会无法执行后续操作
-  xhr.onprogress = function() {};
-  xhr.ontimeout = function() {};
+  xhr.onprogress = function () {};
+  xhr.ontimeout = function () {};
   xhr.timeout = 0;
 
   var body = JSON.stringify(options.data);
 
   xhr.send(body);
-
 };
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"xmlhttprequest":7}],4:[function(require,module,exports){
+},{"xmlhttprequest":8}],4:[function(require,module,exports){
 'use strict';
 
-module.exports = function() {
+module.exports = function () {
   var eventList = {};
   var eventOnceList = {};
 
-  var _on = function(eventName, fun, options) {
+  var _on = function _on(eventName, fun, options) {
     if (!eventName) {
       throw new Error('No event name.');
     } else if (!fun) {
@@ -1355,7 +1357,7 @@ module.exports = function() {
           // 标记是否存在重复的方法，如果有则为 true
           var flag = false;
           for (var m = 0, n = itemEventList.length; m < n; m++) {
-            if ((itemEventList[m]).toString() === (fun).toString()) {
+            if (itemEventList[m].toString() === fun.toString()) {
               flag = true;
               break;
             }
@@ -1367,12 +1369,11 @@ module.exports = function() {
         } else {
           itemEventList.push(fun);
         }
-
       }
     }
   };
 
-  var _off = function(eventName, fun, options) {
+  var _off = function _off(eventName, fun, options) {
     var tempList;
     var isOnce;
     if (options) {
@@ -1413,13 +1414,13 @@ module.exports = function() {
   }
 
   return {
-    on: function(eventName, fun) {
+    on: function on(eventName, fun) {
       _on(eventName, fun);
       return this;
     },
 
     // 方法绑定以后只会运行一次
-    once: function(eventName, fun) {
+    once: function once(eventName, fun) {
       _on(eventName, fun, {
         once: true
       });
@@ -1427,12 +1428,12 @@ module.exports = function() {
     },
 
     // 同一个方法只会被绑定一次
-    _one: function(eventName, fun) {
+    _one: function _one(eventName, fun) {
       _on(eventName, fun, {
         single: true
       });
     },
-    emit: function(eventName, data) {
+    emit: function emit(eventName, data) {
       if (!eventName) {
         throw new Error('No emit event name.');
       }
@@ -1463,7 +1464,7 @@ module.exports = function() {
       }
       return this;
     },
-    off: function(eventName, fun) {
+    off: function off(eventName, fun) {
       _off(eventName, fun);
       return this;
     }
@@ -1499,7 +1500,7 @@ var isPlainObject = function isPlainObject(obj) {
   // Own properties are enumerated firstly, so to speed up,
   // if last one is own, then all properties are own.
   var key;
-  for (key in obj) { /**/ }
+  for (key in obj) {/**/}
 
   return typeof key === 'undefined' || hasOwn.call(obj, key);
 };
@@ -1522,7 +1523,7 @@ module.exports = function extend() {
     target = arguments[1] || {};
     // skip the boolean and the target
     i = 2;
-  } else if ((typeof target !== 'object' && typeof target !== 'function') || target === null) {
+  } else if (typeof target !== 'object' && typeof target !== 'function' || target === null) {
     target = {};
   }
 
@@ -1551,8 +1552,8 @@ module.exports = function extend() {
 
             // Don't bring in undefined values
           } else if (typeof copy !== 'undefined') {
-            target[name] = copy;
-          }
+              target[name] = copy;
+            }
         }
       }
     }
@@ -1573,37 +1574,36 @@ tool.extend = require('./extend');
 tool.eventCenter = require('./eventcenter');
 
 // 空函数
-tool.noop = function() {};
+tool.noop = function () {};
 
 // 检查是否是 JSON 格式的字符串
-tool.isJSONString = function(obj) {
-  return /^\{.*\}$/.test(obj);
+tool.isJSONString = function (obj) {
+  return (/^\{.*\}$/.test(obj)
+  );
 };
 
 // 获取当前时间的时间戳
-tool.now = function() {
+tool.now = function () {
   return new Date().getTime();
 };
 
 // HTML 转义
-tool.encodeHTML = function(source) {
-  var encodeHTML = function(str) {
-    if (typeof(str) === 'string') {
-      return str.replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;');
+tool.encodeHTML = function (source) {
+  var encodeHTML = function encodeHTML(str) {
+    if (typeof str === 'string') {
+      return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
       // 考虑到其中有可能是 JSON，所以不做 HTML 强过滤，仅对标签过滤
       // .replace(/\\/g,'&#92;')
       // .replace(/"/g,'&quot;')
       // .replace(/'/g,'&#39;');
     } else {
-      // 数字
-      return str;
-    }
+        // 数字
+        return str;
+      }
   };
 
   // 对象类型
-  if (typeof(source) === 'object') {
+  if (typeof source === 'object') {
     for (var key in source) {
       source[key] = tool.encodeHTML(source[key]);
     }
@@ -1617,6 +1617,51 @@ tool.encodeHTML = function(source) {
 module.exports = tool;
 
 },{"./ajax":3,"./eventcenter":4,"./extend":5}],7:[function(require,module,exports){
+
+/**
+ * Module dependencies.
+ */
+
+var global = (function() { return this; })();
+
+/**
+ * WebSocket constructor.
+ */
+
+var WebSocket = global.WebSocket || global.MozWebSocket;
+
+/**
+ * Module exports.
+ */
+
+module.exports = WebSocket ? ws : null;
+
+/**
+ * WebSocket constructor.
+ *
+ * The third `opts` options object gets ignored in web browsers, since it's
+ * non-standard, and throws a TypeError if passed to the constructor.
+ * See: https://github.com/einaros/ws/issues/227
+ *
+ * @param {String} uri
+ * @param {Array} protocols (optional)
+ * @param {Object) opts (optional)
+ * @api public
+ */
+
+function ws(uri, protocols, opts) {
+  var instance;
+  if (protocols) {
+    instance = new WebSocket(uri, protocols);
+  } else {
+    instance = new WebSocket(uri);
+  }
+  return instance;
+}
+
+if (WebSocket) ws.prototype = WebSocket.prototype;
+
+},{}],8:[function(require,module,exports){
 exports.XMLHttpRequest = window.XMLHttpRequest || window.XDomainRequest;
 
 },{}]},{},[1]);

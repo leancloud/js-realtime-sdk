@@ -22,6 +22,12 @@ module.exports = function(grunt) {
   var HINT_SRCS = ['src/**/*.js', 'test/**/*.js', 'demo/**/*.js', '*.js', '!**/*.browser.js'];
 
   grunt.initConfig({
+    watch: {
+      scripts: {
+        files: HINT_SRCS,
+        tasks: ['hint', 'release']
+      },
+    },
     babel: {
       dist: {
         files: [{
@@ -104,4 +110,5 @@ module.exports = function(grunt) {
   grunt.registerTask('test', ['hint', 'babel', 'browserify:test', 'connect', 'mocha_phantomjs', 'simplemocha']);
   grunt.registerTask('sauce', ['browserify:test', 'connect', 'saucelabs-mocha']);
   grunt.registerTask('release', ['babel', 'browserify:dist', 'uglify:dist']);
+  grunt.registerTask('dev', ['hint', 'release', 'connect', 'watch']);
 };
