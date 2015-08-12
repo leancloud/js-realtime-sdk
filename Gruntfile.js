@@ -22,10 +22,26 @@ module.exports = function(grunt) {
   var HINT_SRCS = ['src/**/*.js', 'test/**/*.js', 'demo/**/*.js', '*.js', '!**/*.browser.js'];
 
   grunt.initConfig({
+    watch: {
+      scripts: {
+        files: HINT_SRCS,
+        tasks: ['hint', 'release']
+      },
+    },
+    babel: {
+      dist: {
+        files: [{
+          expand: true,
+          cwd: 'src/',
+          src: '**/*.js',
+          dest: 'lib/'
+        }]
+      }
+    },
     browserify: {
       dist: {
         files: {
-          'dist/AV.realtime.js': ['src/AV.realtime.js']
+          'dist/AV.realtime.js': ['lib/AV.realtime.js']
         }
       },
       test: {
@@ -91,7 +107,8 @@ module.exports = function(grunt) {
   });
   grunt.registerTask('default', []);
   grunt.registerTask('hint', ['jshint', 'jscs']);
-  grunt.registerTask('test', ['hint', 'browserify:test', 'connect', 'mocha_phantomjs', 'simplemocha']);
+  grunt.registerTask('test', ['hint', 'babel', 'browserify:test', 'connect', 'mocha_phantomjs', 'simplemocha']);
   grunt.registerTask('sauce', ['browserify:test', 'connect', 'saucelabs-mocha']);
-  grunt.registerTask('release', ['browserify:dist', 'uglify:dist']);
+  grunt.registerTask('release', ['babel', 'browserify:dist', 'uglify:dist']);
+  grunt.registerTask('dev', ['hint', 'release', 'connect', 'watch']);
 };

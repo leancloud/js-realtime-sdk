@@ -12,7 +12,7 @@ var appId = '9p6hyhh60av3ukkni3i9z53q1l8yy3cijj6sie3cewft18vm';
 
 var convName = 'js-realtime-sdk-testconv';
 
-var realtime = require('../src/realtime');
+var realtime = require('..');
 
 var rt;
 var rt2;
