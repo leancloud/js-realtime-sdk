@@ -236,7 +236,6 @@ var newConvObject = function newConvObject(cache) {
       var options = {};
       var id = this.id;
       options.where = {
-        m: cache.options.peerId,
         objectId: id
       };
       options.serialId = engine.getSerialId(cache);
