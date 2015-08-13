@@ -67,7 +67,7 @@ module.exports = function(grunt) {
     },
     simplemocha: {
       options: {
-        timeout: 10000,
+        timeout: 20000,
         ui: 'bdd'
       },
       all: {
