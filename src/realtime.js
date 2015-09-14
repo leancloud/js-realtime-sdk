@@ -14,7 +14,7 @@ var ajax = tool.ajax;
 var extend = tool.extend;
 
 // 当前版本
-var VERSION = '2.2.1';
+var VERSION = '2.3.0';
 
 // 配置项
 var config = {
@@ -38,9 +38,19 @@ var eNameIndex = {
   // 新建一个 conversation 时派发
   create: 'create',
   // conversation 新增加成员
+  // deprecated
   join: 'join',
   // conversation 成员离开
+  // deprecated
   left: 'left',
+  // 当前用户被加入会话
+  invited: 'invited',
+  // 当前用户被踢出会话
+  kicked: 'kicked',
+  // 用户加入会话
+  membersjoined: 'membersjoined',
+  // 用户离开会话
+  membersleft: 'membersleft',
   // conversation 内发送的数据
   message: 'message',
   // conversation 消息回执
@@ -1181,24 +1191,30 @@ engine.bindEvent = function(cache) {
   // 服务器端发给客户端，表示当前用户加入了某个对话。包括创建对话、或加入对话
   cache.ec.on('conv-joined', function(data) {
     // 不是当前用户自己加入
+    // join 事件已废弃
+    // 这里把当前用户主动操作的情况过滤掉了，为了兼容保持原样。
     if (data.peerId !== data.initBy) {
       cache.ec.emit(eNameIndex.join, data);
     }
+    cache.ec.emit(eNameIndex.invited, data);
   });
 
   // 服务器端发给客户端，表示当前用户离开了某个对话，不再能收到对话的消息
   cache.ec.on('conv-left', function(data) {
     cache.ec.emit(eNameIndex.left, data);
+    cache.ec.emit(eNameIndex.kicked, data);
   });
 
   // 服务器端发给客户端，表示当前对话有新人加入
   cache.ec.on('conv-members-joined', function(data) {
     cache.ec.emit(eNameIndex.join, data);
+    cache.ec.emit(eNameIndex.membersjoined, data);
   });
 
   // 服务器端发给客户端，表示当前对话有新人离开
   cache.ec.on('conv-members-left', function(data) {
     cache.ec.emit(eNameIndex.left, data);
+    cache.ec.emit(eNameIndex.membersleft, data);
   });
 
   // 服务器端回复。表示 add 操作完成
