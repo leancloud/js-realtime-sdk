@@ -9,8 +9,8 @@ AV.realtime = require('./realtime');
 },{"./realtime":2}],2:[function(require,module,exports){
 (function (global){
 /**
- * @author wangxiao
- * @date 2015-05-25
+ * @author wangxiao liye
+ * @date 2015-10-15
  * @homepage http://github.com/leancloud/js-realtime-sdk/
  *
  * 每位工程师都有保持代码优雅的义务
@@ -24,7 +24,7 @@ var ajax = tool.ajax;
 var extend = tool.extend;
 
 // 当前版本
-var VERSION = '2.3.0';
+var VERSION = '2.3.1';
 
 // 配置项
 var config = {
@@ -1302,6 +1302,11 @@ module.exports = function (options, callback) {
   var method = options.method || 'get';
   var XMLHttpRequest = require('xmlhttprequest').XMLHttpRequest;
   var xhr = new XMLHttpRequest();
+
+  // 浏览器兼容，IE8+
+  if (global.XDomainRequest) {
+    xhr = new global.XDomainRequest();
+  }
 
   xhr.open(method, url);
 

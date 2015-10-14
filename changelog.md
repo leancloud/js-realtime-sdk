@@ -1,3 +1,11 @@
+## 2.3.0
+### Features
+* 增加 `invited`, `kicked`, `membersjoined`, `membersleft` 事件，废弃 `join`, `left` 事件
+
+### Bug Fixes
+* 修复 IE8、IE9 无法连接服务器的 bug
+* 修复没有加入的 conversation 无法查询成员的 bug
+
 ## 2.2.1
 ### Features
 * 内置 [ws](https://www.npmjs.com/package/ws) 作为默认 WebSocket 实现，在 node 运行环境中使用时不再要求配置 WebSocket 类。
