@@ -6,9 +6,15 @@
 ## 贡献
 如果你希望为这个项目贡献代码，请按以下步骤进行：
 * fork 这个项目
-* `grunt dev` 在本地进行调试
+* 在目录中执行 `npm install` 安装所需 node 依赖包
+* 在目录中执行 `bower install` 安装所需 Web 依赖库
+* 执行 `grunt dev` 浏览器打开 http://localhost:8000 本地进行调试
+* 修改 `src` 目录中的源码，系统会自动生成调试代码
+* `grunt release` 打包生成 dist
 * 确保 `grunt test` 的测试全部 pass
 * 提交并发起 PR
+
+其他说明：`grunt dev` 会监听每次 `src` 目录中的改动，自动进行 `grunt release` 打包操作，不需要再手动执行一次。
 
 项目的目录结构说明如下：
 ```

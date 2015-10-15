@@ -1,7 +1,6 @@
 /**
- * @author wangxiao
- * @date 2015-05-25
- * @homepage http://github.com/leancloud/js-realtime-sdk/
+ * @author wangxiao liye
+ * @see http://github.com/leancloud/js-realtime-sdk/
  *
  * 每位工程师都有保持代码优雅的义务
  * Each engineer has a duty to keep the code elegant

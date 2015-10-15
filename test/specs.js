@@ -8,7 +8,7 @@ var sinon = require('sinon');
 require('should-sinon');
 
 // 请将 AppId 改为你自己的 AppId
-var appId = '9p6hyhh60av3ukkni3i9z53q1l8yy3cijj6sie3cewft18vm';
+var appId = 'anruhhk6visejjip57psvv5uuv8sggrzdfl9pg2bghgsiy35';
 
 var convName = 'js-realtime-sdk-testconv';
 
@@ -139,7 +139,7 @@ describe('RealtimeObject', function() {
       }).should.throw();
     });
     it('fetch an exsiting room', function(done) {
-      rt.room('55a8d0d3e4b0ffa2f8a9a1bd', function(room) {
+      rt.room('559d08a1e4b0a35bc5062ba1', function(room) {
         room.should.have.properties(['id', 'name', 'attr']);
         done();
       });
