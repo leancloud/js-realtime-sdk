@@ -10,8 +10,7 @@ AV.realtime = require('./realtime');
 (function (global){
 /**
  * @author wangxiao liye
- * @date 2015-10-15
- * @homepage http://github.com/leancloud/js-realtime-sdk/
+ * @see http://github.com/leancloud/js-realtime-sdk/
  *
  * 每位工程师都有保持代码优雅的义务
  * Each engineer has a duty to keep the code elegant
@@ -24,7 +23,7 @@ var ajax = tool.ajax;
 var extend = tool.extend;
 
 // 当前版本
-var VERSION = '2.3.1';
+var VERSION = '2.3.0';
 
 // 配置项
 var config = {
