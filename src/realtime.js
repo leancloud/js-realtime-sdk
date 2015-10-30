@@ -776,7 +776,7 @@ engine.openSession = function(cache, options) {
         cmd.n = authResult.nonce;
         cmd.t = authResult.timestamp;
         cmd.s = authResult.signature;
-        engine.wsSend(cache, cache.cmd);
+        engine.wsSend(cache, cmd);
       } else {
         throw new Error('Session open denied by application: ' + authResult);
       }
