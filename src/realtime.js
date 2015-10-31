@@ -1030,6 +1030,10 @@ engine.getMediaMsg = function(cache, msg) {
     case -6:
       obj.type = 'file';
       break;
+    // 自定义类型，返回全部自定义数据
+    default:
+      obj = msg;
+      break;
   }
   return obj;
 };
