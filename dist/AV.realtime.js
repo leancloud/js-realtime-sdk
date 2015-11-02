@@ -786,7 +786,7 @@ engine.openSession = function (cache, options) {
         cmd.n = authResult.nonce;
         cmd.t = authResult.timestamp;
         cmd.s = authResult.signature;
-        engine.wsSend(cache, cache.cmd);
+        engine.wsSend(cache, cmd);
       } else {
         throw new Error('Session open denied by application: ' + authResult);
       }
@@ -1039,6 +1039,10 @@ engine.getMediaMsg = function (cache, msg) {
       break;
     case -6:
       obj.type = 'file';
+      break;
+    // 自定义类型，返回全部自定义数据
+    default:
+      obj = msg;
       break;
   }
   return obj;
