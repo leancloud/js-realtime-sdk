@@ -38,6 +38,7 @@
     "grunt-saucelabs": "^8.6.1",
     "grunt-simple-mocha": "^0.4.0",
     "load-grunt-tasks": "^3.2.0",
+    "qiniu": "^6.1.8",
     "should": "^7.0.2",
     "should-sinon": "0.0.3",
     "sinon": "^1.15.4"

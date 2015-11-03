@@ -111,4 +111,41 @@ module.exports = function(grunt) {
   });
   grunt.registerTask('release', ['babel', 'browserify:dist', 'uglify:dist']);
   grunt.registerTask('dev', ['hint', 'release', 'connect', 'watch']);
+  grunt.registerTask('cdn', 'Upload dist to CDN.', function() {
+
+    grunt.task.requires('release');
+    var done = this.async();
+    var version = require('./package.json').version;
+    uploadCDN('./dist/AV.realtime.js', version, function() {
+      uploadCDN('./dist/AV.realtime.min.js', version, done);
+    });
+  });
+  grunt.registerTask('upload', ['release', 'cdn']);
+
+  var qiniu = require('qiniu');
+  var path = require('path');
+  var fs = require('fs');
+
+  qiniu.conf.ACCESS_KEY = process.env.CDN_QINIU_KEY;
+  qiniu.conf.SECRET_KEY = process.env.CDN_QINIU_SECRET;
+
+  function uploadCDN(file, version, cb) {
+    var bucketname = 'paas_files';
+    var key = 'static/js/' + path.basename(file, '.js') + '-' +
+      version + '.js';
+    var putPolicy = new qiniu.rs.PutPolicy(bucketname + ':' + key);
+    var uptoken = putPolicy.token();
+    var extra = new qiniu.io.PutExtra();
+    extra.mimeType = 'application/javascript';
+    var buffer = fs.readFileSync(file);
+    qiniu.io.put(uptoken, key, buffer, extra, function(err, ret) {
+      if (!err) {
+        console.log('https://cdn1.lncld.net/' + ret.key);
+      } else {
+        console.log(err);
+      }
+      cb();
+    });
+  }
+
 };

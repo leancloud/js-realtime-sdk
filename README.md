@@ -44,3 +44,4 @@
 * push to master
 * GitHub 生成 release 包（for bower）
 * 发布到 npm（`npm publish`，需 npm 协作者身份）
+* `grunt upload` 发布到 CDN
