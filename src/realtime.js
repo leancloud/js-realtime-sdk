@@ -13,7 +13,7 @@ var ajax = tool.ajax;
 var extend = tool.extend;
 
 // 当前版本
-var VERSION = '2.3.0';
+var VERSION = '2.3.1';
 
 // 配置项
 var config = {

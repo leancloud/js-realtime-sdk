@@ -1,3 +1,10 @@
+## 2.3.1
+### Features
+* 支持接收自定义类型消息
+
+### Bug Fixes
+* 修复一个可能导致签名校验失败的 bug
+
 ## 2.3.0
 ### Features
 * 增加 `invited`, `kicked`, `membersjoined`, `membersleft` 事件，废弃 `join`, `left` 事件

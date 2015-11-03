@@ -10,11 +10,8 @@
 * 在目录中执行 `bower install` 安装所需 Web 依赖库
 * 执行 `grunt dev` 浏览器打开 http://localhost:8000 本地进行调试
 * 修改 `src` 目录中的源码，系统会自动生成调试代码
-* `grunt release` 打包生成 dist
 * 确保 `grunt test` 的测试全部 pass
-* 提交并发起 PR
-
-其他说明：`grunt dev` 会监听每次 `src` 目录中的改动，自动进行 `grunt release` 打包操作，不需要再手动执行一次。
+* 提交改动并发起 PR，请不要提交 dist 与 lib 下的变动
 
 项目的目录结构说明如下：
 ```
@@ -44,6 +41,6 @@
 * 修改 changelog.md
 * `grunt test`
 * `grunt release` and commit all changed files
-* 提交 PR 到 master
-* （merge 后）Github 生成 release 包（for bower）
+* push to master
+* GitHub 生成 release 包（for bower）
 * 发布到 npm（`npm publish`，需 npm 协作者身份）

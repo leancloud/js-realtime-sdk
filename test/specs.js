@@ -8,7 +8,8 @@ var sinon = require('sinon');
 require('should-sinon');
 
 // 请将 AppId 改为你自己的 AppId
-var appId = 'anruhhk6visejjip57psvv5uuv8sggrzdfl9pg2bghgsiy35';
+var APP_ID = process.env.APP_ID || 'anruhhk6visejjip57psvv5uuv8sggrzdfl9pg2bghgsiy35';
+var REGION = process.env.REGION;
 
 var convName = 'js-realtime-sdk-testconv';
 
@@ -31,13 +32,15 @@ before(function(done) {
   Promise.all([
     new Promise(function(resolve) {
       rt = realtime({
-        appId: appId,
+        appId: APP_ID,
+        region: REGION,
         clientId: 'js-realtime-sdk-test-client1'
       }, resolve);
     }),
     new Promise(function(resolve) {
       rt2 = realtime({
-        appId: appId,
+        appId: APP_ID,
+        region: REGION,
         clientId: 'js-realtime-sdk-test-client2'
       }, resolve);
     })
@@ -61,7 +64,8 @@ describe('realtime', function() {
       Promise.all([
         new Promise(function(resolve) {
           rt3 = realtime({
-            appId: appId,
+            appId: APP_ID,
+            region: REGION,
             clientId: 'js-realtime-sdk-test-client-for-init'
           }, resolve);
         }),
@@ -139,7 +143,8 @@ describe('RealtimeObject', function() {
       }).should.throw();
     });
     it('fetch an exsiting room', function(done) {
-      rt.room('559d08a1e4b0a35bc5062ba1', function(room) {
+      var id = process.env.EXSITING_ROOM_ID || '559d08a1e4b0a35bc5062ba1';
+      rt.room(id, function(room) {
         room.should.have.properties(['id', 'name', 'attr']);
         done();
       });
