@@ -4,19 +4,8 @@ module.exports = function(grunt) {
   var SAUCE_BROWSERS = [{
     browserName: 'chrome'
   }, {
-    browserName: 'firefox'
-  }, {
-    browserName: 'internet explorer',
-    version: '11.0'
-  }, {
     browserName: 'internet explorer',
     version: '10.0'
-  }, {
-    browserName: 'internet explorer',
-    version: '9.0'
-  }, {
-    browserName: 'internet explorer',
-    version: '8.0'
   }];
 
   var HINT_SRCS = ['src/**/*.js', 'test/**/*.js', 'demo/**/*.js', '*.js', '!**/*.browser.js'];
@@ -92,7 +81,9 @@ module.exports = function(grunt) {
           urls: ['http://localhost:8000/test/browser/'],
           build: process.env.CI_BUILD_NUMBER,
           testname: 'Sauce Test for LeanCloud realtime SDK',
-          browsers: SAUCE_BROWSERS
+          browsers: SAUCE_BROWSERS,
+          throttled: 3,
+          tunnelArgs: ['--vm-version', 'dev-varnish']
         }
       }
     },
@@ -110,8 +101,14 @@ module.exports = function(grunt) {
   });
   grunt.registerTask('default', []);
   grunt.registerTask('hint', ['jshint', 'jscs']);
-  grunt.registerTask('test', ['hint', 'babel', 'browserify:test', 'connect', 'mocha_phantomjs', 'simplemocha']);
-  grunt.registerTask('sauce', ['browserify:test', 'connect', 'saucelabs-mocha']);
+  grunt.registerTask('sauce', ['babel', 'browserify:test', 'connect', 'saucelabs-mocha']);
+  grunt.registerTask('test', '', function() {
+    var tasks = ['hint', 'babel', 'browserify:test', 'connect', /*'mocha_phantomjs',*/ 'simplemocha'];
+    if (process.env.RUN_SAUCE) {
+      tasks.push('saucelabs-mocha');
+    }
+    grunt.task.run(tasks);
+  });
   grunt.registerTask('release', ['babel', 'browserify:dist', 'uglify:dist']);
   grunt.registerTask('dev', ['hint', 'release', 'connect', 'watch']);
 };
