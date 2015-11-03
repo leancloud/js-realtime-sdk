@@ -47,6 +47,9 @@ module.exports = function(grunt) {
       test: {
         files: {
           'test/browser/specs.browser.js': 'test/specs.js'
+        },
+        options: {
+          transform: ['envify']
         }
       }
     },
