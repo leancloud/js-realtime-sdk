@@ -7,7 +7,7 @@ module.exports = function(options, callback) {
   }
   var url = options.url;
   var method = options.method || 'get';
-  var XMLHttpRequest = require('xmlhttprequest').XMLHttpRequest;
+  var XMLHttpRequest = require('./xmlhttprequest').XMLHttpRequest;
   var xhr = new XMLHttpRequest();
 
   // 浏览器兼容，IE8+
