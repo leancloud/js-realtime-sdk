@@ -446,6 +446,7 @@ var newRealtimeObject = function() {
           // 默认的数据，可以放 Conversation 名字等
           attr: options.attr || {},
           transient: options.transient || false,
+          unique: options.unique || false,
           serialId: engine.getSerialId(cache)
         };
 
@@ -805,6 +806,7 @@ engine.startConv = function(cache, options) {
       attr: options.attr || {}
     },
     i: options.serialId,
+    unique: options.unique || false,
     // 是否是开放聊天室，无人数限制
     transient: options.transient || false
   };
