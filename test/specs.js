@@ -156,6 +156,22 @@ describe('RealtimeObject', function() {
       });
     });
     it('create a room');
+    it('create a unique room', function(done) {
+      rt.room({
+        name: convName,
+        members: ['LeanCloud-unique'],
+        unique: true
+      }, function(room1) {
+        rt.room({
+          name: convName,
+          members: ['LeanCloud-unique'],
+          unique: true
+        }, function(room2) {
+          room1.id.should.equal(room2.id);
+          done();
+        });
+      });
+    });
     it('RoomObject instance should be cached', function(done) {
       var room = rt.room({
         name: convName,
