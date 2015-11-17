@@ -23,7 +23,7 @@ var ajax = tool.ajax;
 var extend = tool.extend;
 
 // 当前版本
-var VERSION = '2.3.1';
+var VERSION = '2.3.2';
 
 // 配置项
 var config = {
@@ -456,6 +456,7 @@ var newRealtimeObject = function newRealtimeObject() {
           // 默认的数据，可以放 Conversation 名字等
           attr: options.attr || {},
           transient: options.transient || false,
+          unique: options.unique || false,
           serialId: engine.getSerialId(cache)
         };
 
@@ -815,6 +816,7 @@ engine.startConv = function (cache, options) {
       attr: options.attr || {}
     },
     i: options.serialId,
+    unique: options.unique || false,
     // 是否是开放聊天室，无人数限制
     transient: options.transient || false
   };
@@ -1292,7 +1294,7 @@ if (typeof exports !== 'undefined') {
   }
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./tool":6,"ws":7}],3:[function(require,module,exports){
+},{"./tool":6,"ws":8}],3:[function(require,module,exports){
 (function (global){
 'use strict';
 module.exports = function (options, callback) {
@@ -1303,7 +1305,7 @@ module.exports = function (options, callback) {
   }
   var url = options.url;
   var method = options.method || 'get';
-  var XMLHttpRequest = require('xmlhttprequest').XMLHttpRequest;
+  var XMLHttpRequest = require('./xmlhttprequest').XMLHttpRequest;
   var xhr = new XMLHttpRequest();
 
   // 浏览器兼容，IE8+
@@ -1337,7 +1339,7 @@ module.exports = function (options, callback) {
 };
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"xmlhttprequest":8}],4:[function(require,module,exports){
+},{"./xmlhttprequest":7}],4:[function(require,module,exports){
 'use strict';
 
 module.exports = function () {
@@ -1640,6 +1642,11 @@ tool.encodeHTML = function (source) {
 module.exports = tool;
 
 },{"./ajax":3,"./eventcenter":4,"./extend":5}],7:[function(require,module,exports){
+"use strict";
+
+exports.XMLHttpRequest = window.XMLHttpRequest || window.XDomainRequest;
+
+},{}],8:[function(require,module,exports){
 
 /**
  * Module dependencies.
@@ -1683,8 +1690,5 @@ function ws(uri, protocols, opts) {
 }
 
 if (WebSocket) ws.prototype = WebSocket.prototype;
-
-},{}],8:[function(require,module,exports){
-exports.XMLHttpRequest = window.XMLHttpRequest || window.XDomainRequest;
 
 },{}]},{},[1]);

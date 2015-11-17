@@ -1,3 +1,8 @@
+## 2.3.2
+### Features
+* 支持 React Native
+* 创建对话支持 `unique` 参数
+
 ## 2.3.1
 ### Features
 * 支持接收自定义类型消息
