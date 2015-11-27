@@ -927,11 +927,7 @@ engine.convQuery = function(cache, options) {
     cmd: 'conv',
     op: 'query',
     // where 可选，对象，默认为包含自己的查询 {"m": peerId}
-    where: options.where || {
-      m: cache.options.peerId
-      // conversation 的 id
-      // objectId: options.cid
-    },
+    where: where,
     // sort 可选，字符串，默认为 -lm，最近对话反序
     sort: options.sort || '-lm',
     // limit 可选，数字，默认10
