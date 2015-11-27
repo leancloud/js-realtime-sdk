@@ -902,6 +902,27 @@ engine.send = function(cache, options) {
 
 engine.convQuery = function(cache, options) {
   options = options || {};
+  var where = options.where || {};
+
+  // 默认为包含自己的查询 {"m": peerId}
+  where.m = where.m || cache.options.peerId;
+  // 同时查找含有数组中 id 的用户所在的 conversation
+  if (typeof where.m !== 'string') {
+    where.m = {
+      $all: where.m
+    };
+  }
+
+  // 批量查找 room 信息
+  if (where.roomIds || where.convIds) {
+    where.objectId = {
+      $in: where.roomIds || where.convIds
+    };
+    // 避免对查询项产生干扰
+    delete where.roomIds;
+    delete where.convIds;
+  }
+
   engine.wsSend(cache, {
     cmd: 'conv',
     op: 'query',
