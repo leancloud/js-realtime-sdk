@@ -1033,26 +1033,29 @@ engine.getMediaMsg = function(cache, msg) {
   switch (msg._lctype) {
     case -1:
       obj.type = 'text';
-      break;
+    break;
     case -2:
       obj.type = 'image';
-      break;
+    break;
     case -3:
       obj.type = 'audio';
-      break;
+    break;
     case -4:
       obj.type = 'video';
-      break;
+    break;
     case -5:
       obj.type = 'location';
-      break;
+      if (msg._lcloc) {
+        obj.location = msg._lcloc;
+      }
+    break;
     case -6:
       obj.type = 'file';
-      break;
+    break;
     // 自定义类型，返回全部自定义数据
     default:
       obj = msg;
-      break;
+    break;
   }
   return obj;
 };
@@ -1071,7 +1074,7 @@ engine.setMediaMsg = function(cache, type, data) {
         // _lcattrs 是用来存储用户自定义的一些键值对
         _lcattrs: data.attr
       };
-      break;
+    break;
     case 'image':
       obj = {
         _lctype: -2,
@@ -1094,7 +1097,7 @@ engine.setMediaMsg = function(cache, type, data) {
           }
         }
       };
-      break;
+    break;
     case 'audio':
       obj = {
         _lctype: -3,
@@ -1115,7 +1118,7 @@ engine.setMediaMsg = function(cache, type, data) {
           }
         }
       };
-      break;
+    break;
     case 'video':
       obj = {
         _lctype: -4,
@@ -1136,7 +1139,7 @@ engine.setMediaMsg = function(cache, type, data) {
           }
         }
       };
-      break;
+    break;
     case 'location':
       obj = {
         _lctype: -5,
@@ -1150,7 +1153,7 @@ engine.setMediaMsg = function(cache, type, data) {
           latitude: data.metaData.latitude
         }
       };
-      break;
+    break;
     case 'file':
       obj = {
         _lctype: -6,
@@ -1163,7 +1166,7 @@ engine.setMediaMsg = function(cache, type, data) {
           size: data.metaData.size
         }
       };
-      break;
+    break;
   }
   obj = JSON.stringify(obj);
   return obj;
