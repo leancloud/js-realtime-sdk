@@ -1045,6 +1045,9 @@ engine.getMediaMsg = function(cache, msg) {
       break;
     case -5:
       obj.type = 'location';
+      if (msg._lcloc) {
+        obj.location = msg._lcloc;
+      }
       break;
     case -6:
       obj.type = 'file';
