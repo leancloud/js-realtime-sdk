@@ -569,7 +569,7 @@ var realtime = function(options, callback) {
     };
 
     var realtimeObj = newRealtimeObject();
-    realtimeObj.clientId = options.clientId;
+    realtimeObj.clientId = options.peerId;
     realtimeObj.cache.options = options;
     realtimeObj.cache.ec = tool.eventCenter();
     realtimeObj.cache.authFun = options.auth;
