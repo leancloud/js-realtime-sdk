@@ -1,3 +1,9 @@
+## 2.3.3
+### Bug Fixes
+* query 方法支持搜索多个 members 同时所在的房间
+* query 方法支持搜索多个 roomId 所在的 room 信息
+* 支持地位位置信息的传递
+
 ## 2.3.2
 ### Features
 * 支持 React Native

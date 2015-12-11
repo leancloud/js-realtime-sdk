@@ -13,7 +13,7 @@ var ajax = tool.ajax;
 var extend = tool.extend;
 
 // 当前版本
-var VERSION = '2.3.2';
+var VERSION = '2.3.3';
 
 // 配置项
 var config = {
@@ -569,7 +569,7 @@ var realtime = function(options, callback) {
     };
 
     var realtimeObj = newRealtimeObject();
-    realtimeObj.clientId = options.clientId;
+    realtimeObj.clientId = options.peerId;
     realtimeObj.cache.options = options;
     realtimeObj.cache.ec = tool.eventCenter();
     realtimeObj.cache.authFun = options.auth;
