@@ -43,7 +43,7 @@ bindEvent(document.body, 'keydown', function(e) {
 });
 
 function main() {
-  showLog('正在链接服务器，请等待。。。');
+  showLog('正在连接服务器，请等待。。。');
   var val = inputName.value;
   if (val) {
     clientId = val;
