@@ -1,3 +1,7 @@
+## 2.3.4
+### Bug Fixes
+* 去掉 query 方法中会自动增加获取当前用户所在的 room 问题
+
 ## 2.3.3
 ### Bug Fixes
 * query 方法支持搜索多个 members 同时所在的房间
