@@ -1,6 +1,6 @@
 ## 2.3.4
 ### Bug Fixes
-* 去掉 query 方法中会自动增加获取当前用户所在的 room 问题
+* 修复 query 方法自动增加当前用户为条件的 Bug
 
 ## 2.3.3
 ### Bug Fixes
