@@ -1,3 +1,7 @@
+## 2.3.4
+### Bug Fixes
+* 修复 query 方法自动增加当前用户为条件的 Bug
+
 ## 2.3.3
 ### Bug Fixes
 * query 方法支持搜索多个 members 同时所在的房间

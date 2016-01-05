@@ -23,7 +23,7 @@ var ajax = tool.ajax;
 var extend = tool.extend;
 
 // 当前版本
-var VERSION = '2.3.3';
+var VERSION = '2.3.4';
 
 // 配置项
 var config = {
@@ -513,6 +513,11 @@ var newRealtimeObject = function newRealtimeObject() {
         }
       };
       cache.ec.on('conv-results', fun);
+      if (!options.where) {
+        options.where = {};
+        // 默认查找的当前用户所在的 conv
+        options.where.m = cache.options.peerId;
+      }
       engine.convQuery(cache, options);
       return this;
     },
@@ -914,10 +919,8 @@ engine.convQuery = function (cache, options) {
   options = options || {};
   var where = options.where || {};
 
-  // 默认为包含自己的查询 {"m": peerId}
-  where.m = where.m || cache.options.peerId;
   // 同时查找含有数组中 id 的用户所在的 conversation
-  if (typeof where.m !== 'string') {
+  if (where.m && typeof where.m !== 'string') {
     where.m = {
       $all: where.m
     };
