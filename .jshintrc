@@ -1,5 +1,8 @@
 {
   "node": true,
   "mocha": true,
-  "predef": ["Promise"]
+  "predef": ["Promise"],
+  "globals": {
+    "window": true
+  }
 }

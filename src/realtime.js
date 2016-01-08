@@ -302,8 +302,6 @@ var newRealtimeObject = function() {
   var cache = {
     // 基础配置，包括 appId，peerId 等
     options: undefined,
-    // WebSocket 实例
-    ws: undefined,
     // 事件中心
     ec: undefined,
     // 所有已生成的 conversation 对象
@@ -328,11 +326,9 @@ var newRealtimeObject = function() {
       var cache = this.cache;
       cache.closeFlag = false;
       engine.getServer(cache, cache.options, function(data) {
-        if (data) {
-          engine.connect(cache, {
-            server: cache.server
-          });
-        }
+        engine.connect(cache, {
+          server: cache.server
+        });
       });
       if (callback) {
         cache.ec.once(eNameIndex.open, callback);
@@ -356,7 +352,7 @@ var newRealtimeObject = function() {
       }
       cache.closeFlag = true;
       engine.closeSession(cache);
-      cache.ws.close();
+      realtime._ws.close();
       return this;
     },
     on: function(eventName, callback) {
@@ -587,9 +583,19 @@ var realtime = function(options, callback) {
 // 赋值版本号
 realtime.version = VERSION;
 
-// 挂载私有方法
+// 工具方法
 realtime._tool = tool;
+
+// 底层核心方法
 realtime._engine = engine;
+
+// 全局 WebSocket，后续创建的实例也都复用此 Socket
+realtime._ws = undefined;
+
+// 与 Push 复用一个 WebSocket
+if (window && window.AV && window.AV.push && window.AV.push._ws) {
+  realtime._ws = window.AV.push._ws;
+}
 
 realtime.config = function(newConfig) {
   extend(config, newConfig);
@@ -601,10 +607,14 @@ engine.wsOpen = function(cache) {
   engine.openSession(cache, {
     serialId: engine.getSerialId(cache)
   });
-  // 启动心跳
-  engine.heartbeats(cache);
-  // 启动守护进程
-  engine.guard(cache);
+
+  // 心跳进程在一个位置维护
+  if (!realtime._ws) {
+    // 启动心跳
+    engine.heartbeats(cache);
+    // 启动守护进程
+    engine.guard(cache);
+  }
 };
 
 // WebSocket Close
@@ -618,7 +628,7 @@ engine.wsMessage = function(cache, msg) {
   var data = JSON.parse(msg.data);
 
   // 对服务端返回的数据进行逻辑包装
-  if (data.cmd) {
+  if (data.cmd && data.peerId === cache.options.peerId) {
     var eventName = data.cmd;
     if (data.op) {
       eventName += '-' + data.op;
@@ -635,31 +645,32 @@ engine.wsError = function(cache, data) {
 // WebSocket send message
 engine.wsSend = function(cache, data) {
   if (!cache.closeFlag) {
-    if (!cache.ws) {
+    if (!realtime._ws) {
       throw new Error('The realtimeObject must opened first. Please listen to the "open" event.');
     } else {
       data.peerId = cache.options.peerId;
-      cache.ws.send(JSON.stringify(data));
+      realtime._ws.send(JSON.stringify(data));
     }
   }
 };
 
 engine.createSocket = function(cache, server) {
-  if (cache.ws) {
-    cache.ws.close();
+
+  // 如果没有已经实例化的 websocket 则创建
+  if (!realtime._ws) {
+    realtime._ws = new config.WebSocket(server);
   }
-  var ws = new config.WebSocket(server);
-  cache.ws = ws;
-  ws.addEventListener('open', function() {
+
+  realtime._ws.addEventListener('open', function() {
     engine.wsOpen(cache);
   });
-  ws.addEventListener('close', function(event) {
+  realtime._ws.addEventListener('close', function(event) {
     engine.wsClose(cache, event);
   });
-  ws.addEventListener('message', function(msg) {
+  realtime._ws.addEventListener('message', function(msg) {
     engine.wsMessage(cache, msg);
   });
-  ws.addEventListener('error', function(data) {
+  realtime._ws.addEventListener('error', function(data) {
     engine.wsError(cache, data);
   });
 };
@@ -673,12 +684,12 @@ engine.heartbeats = function(cache) {
   }
 
   var timer;
-  cache.ws.addEventListener('message', function() {
+  realtime._ws.addEventListener('message', function() {
     if (timer) {
       clearTimeout(timer);
     }
     timer = setTimeout(function() {
-      cache.ws.send('{}');
+      realtime._ws.send('{}');
     }, config.heartbeatsTime);
   });
 };
@@ -696,7 +707,7 @@ engine.guard = function(cache) {
   var timer;
 
   // 结合心跳事件，如果长时间没有收到服务器的心跳，也要触发重连机制
-  cache.ws.addEventListener('message', function() {
+  realtime._ws.addEventListener('message', function() {
     if (timer) {
       clearTimeout(timer);
     }
@@ -719,6 +730,11 @@ engine.guard = function(cache) {
 };
 
 engine.connect = function(cache, options) {
+  // 如果 WebSocket 已被实例化，则直接复用
+  if (realtime._ws) {
+    engine.createSocket(cache);
+    return;
+  }
   var server = options.server;
   // 判断获取出缓存的时间是否是比较新的
   if (server && tool.now() <= server.expires) {
@@ -730,6 +746,11 @@ engine.connect = function(cache, options) {
 };
 
 engine.getServer = function(cache, options, callback) {
+  // 如果已经有实例化的 WebSocket 则直接返回。
+  if (realtime._ws) {
+    callback();
+    return;
+  }
   var appId = options.appId;
   // 是否获取 wss 的安全链接
   var secure = options.secure;
