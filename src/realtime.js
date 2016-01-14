@@ -6,21 +6,18 @@
  * Each engineer has a duty to keep the code elegant
  */
 
-'use strict';
+import { version } from '../package.json';
+import { ajax } from './tool/ajax';
+import { eventCenter } from './tool/eventcenter';
+import * as tool from './tool/index';
 
-var tool = require('./tool');
-var ajax = tool.ajax;
-var extend = tool.extend;
-
-// 当前版本
-var VERSION = '2.3.5';
+var extend = Object.assign;
 
 // 配置项
 var config = {
   // 心跳时间（一分钟）
   heartbeatsTime: 60 * 1000,
-  // ws 在 browserify 打包时会使用浏览器内置的 WebSocket 实现
-  WebSocket: require('ws')
+  WebSocket: global.WebSocket || global.MozWebSocket || require('ws')
 };
 
 // 命名空间，挂载私有方法
@@ -193,11 +190,11 @@ var newConvObject = function(cache) {
         if (data.i === options.serialId) {
           if (callback) {
             // 对查出的类型进行过滤，兼容多端通信
-            for (var i = 0, l = data.logs.length; i < l; i++) {
-              data.logs[i].data = engine.getMediaMsg(cache, data.logs[i].data);
+            for (var log of data.logs) {
+              log.data = engine.getMediaMsg(cache, log.data);
               // 增加字段，兼容接收消息的字段
-              data.logs[i].fromPeerId = data.logs[i].from;
-              data.logs[i].msg = data.logs[i].data;
+              log.fromPeerId = log.from;
+              log.msg = log.data;
             }
             callback(data.logs);
           }
@@ -576,7 +573,7 @@ var realtime = function(options, callback) {
     var realtimeObj = newRealtimeObject();
     realtimeObj.clientId = options.peerId;
     realtimeObj.cache.options = options;
-    realtimeObj.cache.ec = tool.eventCenter();
+    realtimeObj.cache.ec = eventCenter();
     realtimeObj.cache.authFun = options.auth;
     realtimeObj.open(callback);
 
@@ -585,7 +582,7 @@ var realtime = function(options, callback) {
 };
 
 // 赋值版本号
-realtime.version = VERSION;
+realtime.version = version;
 
 // 挂载私有方法
 realtime._tool = tool;
@@ -734,8 +731,8 @@ engine.getServer = function(cache, options, callback) {
   // 是否获取 wss 的安全链接
   var secure = options.secure;
   var url = '';
-  var protocol = 'http://';
-  if (global.location && global.location.protocol === 'https:' && secure) {
+  var protocol = '//';
+  if (secure) {
     protocol = 'https://';
   }
   var node = '';
@@ -771,7 +768,7 @@ engine.openSession = function(cache, options) {
     cmd: 'session',
     op: 'open',
     appId: cache.options.appId,
-    ua: 'js/' + VERSION,
+    ua: 'js/' + version,
     i: options.serialId
   };
   if (cache.authFun) {
@@ -1290,18 +1287,4 @@ engine.bindEvent = function(cache) {
   // cache.ec.on('logs', function(data) {});
 };
 
-if (typeof exports !== 'undefined') {
-  // CommonJS 支持
-  if (typeof module !== 'undefined' && module.exports) {
-    exports = module.exports = realtime;
-  }
-  exports.realtime = realtime;
-  /* jshint -W117 */
-  /* ignore 'define' is not defined */
-} else if (typeof define === 'function' && define.amd) {
-  // AMD 支持
-  define('AV/realtime', [], function() {
-    return realtime;
-  });
-  /* jshint +W117 */
-}
+export default realtime;

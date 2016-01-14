@@ -1,3 +1,4 @@
 bower_components
 node_modules
-test/browser/specs.browser.js
+test/browser/specs.*
+test/specs.bundle.*

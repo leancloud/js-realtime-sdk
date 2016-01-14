@@ -11,6 +11,8 @@
 <body>
   <div id="mocha"></div>
   <script src="../../bower_components/mocha/mocha.js"></script>
+  <!-- sinon 使用 rollup 打包有各种问题，直接使用浏览器版本了 -->
+  <script src="../../bower_components/sinon/index.js"></script>
 
   <!--[if lt IE 10]>
     <script type="text/javascript" src="../../plugin/web-socket-js/swfobject.js"></script>
@@ -27,7 +29,7 @@
       timeout: 20000
     });
   </script>
-  <script src="specs.browser.js"></script>
+  <script src="specs.js"></script>
   <script>
     onload = function() {
       var runner = (window.mochaPhantomJS ? mochaPhantomJS : mocha).run();

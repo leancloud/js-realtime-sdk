@@ -1,5 +1,5 @@
-'use strict';
-module.exports = function(options, callback) {
+import { XMLHttpRequest } from 'leancloud-xmlhttprequest';
+export const  ajax = (options, callback) => {
   if (typeof options === 'string') {
     options = {
       url: options
@@ -7,18 +7,12 @@ module.exports = function(options, callback) {
   }
   var url = options.url;
   var method = options.method || 'get';
-  var XMLHttpRequest = require('./xmlhttprequest').XMLHttpRequest;
   var xhr = new XMLHttpRequest();
-
-  // 浏览器兼容，IE8+
-  if (global.XDomainRequest) {
-    xhr = new global.XDomainRequest();
-  }
 
   xhr.open(method, url);
 
   xhr.onload = function(data) {
-    if ((xhr.status >= 200 && xhr.status < 300) || (global.XDomainRequest && !xhr.status)) {
+    if ((xhr.status >= 200 && xhr.status < 300)) {
       callback(null, JSON.parse(xhr.responseText));
     } else {
       callback(JSON.parse(xhr.responseText));

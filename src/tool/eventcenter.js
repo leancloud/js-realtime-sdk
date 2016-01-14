@@ -1,6 +1,4 @@
-'use strict';
-
-module.exports = function() {
+export const eventCenter = () => {
   var eventList = {};
   var eventOnceList = {};
 
@@ -153,4 +151,4 @@ module.exports = function() {
       return this;
     }
   };
-};
+}

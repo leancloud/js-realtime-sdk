@@ -1,27 +1,17 @@
-'use strict';
-
-var tool = {};
-
-tool.ajax = require('./ajax');
-tool.extend = require('./extend');
-// 小型的私有事件中心
-tool.eventCenter = require('./eventcenter');
-
-// 空函数
-tool.noop = function() {};
+export function noop() {}
 
 // 检查是否是 JSON 格式的字符串
-tool.isJSONString = function(obj) {
+export function isJSONString(obj) {
   return /^\{.*\}$/.test(obj);
-};
+}
 
 // 获取当前时间的时间戳
-tool.now = function() {
+export function now() {
   return new Date().getTime();
-};
+}
 
 // HTML 转义
-tool.encodeHTML = function(source) {
+export function encodeHTML(source) {
   var encodeHTML = function(str) {
     if (typeof(str) === 'string') {
       return str.replace(/&/g, '&amp;')
@@ -47,6 +37,4 @@ tool.encodeHTML = function(source) {
     // 非对象类型
     return encodeHTML(source);
   }
-};
-
-module.exports = tool;
+}

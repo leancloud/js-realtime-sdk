@@ -6,7 +6,7 @@
     "WangXiao <xwang@leancloud.rocks>"
   ],
   "description": "LeanCloud JavaScript Realtime SDK",
-  "main": "dist/AV.realtime.js",
+  "main": "dist/bundle.browser.min.js",
   "ignore": [
     "**/.*",
     "demo",
@@ -26,6 +26,7 @@
   ],
   "license": "MIT",
   "devDependencies": {
-    "mocha": "~2.2.5"
+    "mocha": "~2.2.5",
+    "sinon": "http://sinonjs.org/releases/sinon-1.17.2.js"
   }
 }

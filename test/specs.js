@@ -1,19 +1,16 @@
 /* jshint -W064 */
-'use strict';
+import 'should';
+import 'should-sinon';
+import realtime from '../src/realtime';
 
-require('es6-promise').polyfill();
-require('should');
-var Should = require('should/as-function');
-var sinon = require('sinon');
-require('should-sinon');
+import Should from 'should/as-function';
+var sinon = (typeof window !== 'undefined' && window.sinon) || require('sinon');
 
 // 请将 AppId 改为你自己的 AppId
 var APP_ID = process.env.APP_ID || 'anruhhk6visejjip57psvv5uuv8sggrzdfl9pg2bghgsiy35';
 var REGION = process.env.REGION;
 
 var convName = 'js-realtime-sdk-testconv';
-
-var realtime = require('..');
 
 var rt;
 var rt2;
@@ -78,14 +75,14 @@ describe('realtime', function() {
     });
   });
 
-  describe('version', function() {
-    it('consistency ', function() {
-      var bowerData = require('../bower.json');
-      var packageData = require('../package.json');
-      bowerData.version.should.equal(realtime.version);
-      packageData.version.should.equal(realtime.version);
-    });
-  });
+  // describe('version', function() {
+  //   it('consistency ', function() {
+  //     var bowerData = require('../bower.json');
+  //     var packageData = require('../package.json');
+  //     bowerData.version.should.equal(realtime.version);
+  //     packageData.version.should.equal(realtime.version);
+  //   });
+  // });
 });
 
 describe('RealtimeObject', function() {
@@ -151,7 +148,7 @@ describe('RealtimeObject', function() {
     });
     it('fetch a none-existing room', function(done) {
       rt.room('noneexistingroomid', function(room) {
-        Should.equal(room, null);
+        Should(room).equal(null);
         done();
       });
     });
@@ -178,7 +175,7 @@ describe('RealtimeObject', function() {
       }, function(room1) {
         // console.log('new room created: ', room);
         rt.room(room1.id, function(room2) {
-          Should(room1).be.exactly(room2);
+          room1.should.be.exactly(room2);
           done();
         });
       });
