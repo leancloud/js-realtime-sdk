@@ -184,9 +184,9 @@ var global = typeof window !== 'undefined' ? window :
   grunt.registerTask('lint', [/*'eslint'*/]);
   grunt.registerTask('sauce', ['rollup:test', 'connect', 'saucelabs-mocha']);
   grunt.registerTask('test', '', function() {
-    var tasks = ['lint', 'rollup:test', 'connect', /*'mocha_phantomjs',*/ 'simplemocha'];
+    var tasks = ['lint', 'rollup:test', 'rollup:test-browser', 'envify:test-browser', 'connect', /*'mocha_phantomjs',*/ 'simplemocha'];
     if (process.env.SAUCE_USERNAME && process.env.SAUCE_ACCESS_KEY) {
-      tasks = tasks.concat(['rollup:test-browser', 'envify', 'saucelabs-mocha']);
+      tasks = tasks.concat(['saucelabs-mocha']);
     } else {
       grunt.log.writeln('Skip saucelabs test, set SAUCE_USERNAME and SAUCE_ACCESS_KEY to start it.');
     }

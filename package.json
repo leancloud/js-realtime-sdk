@@ -8,7 +8,7 @@
     "test": "test"
   },
   "scripts": {
-    "test": "grunt test"
+    "test": "grunt test --stack"
   },
   "repository": {
     "type": "git",
