@@ -194,7 +194,24 @@ describe('RealtimeObject', function() {
     });
   });
 
-  describe('#query()', function() {});
+  describe('#query()', function() {
+    it('compact', function(done) {
+      rt.query({
+        compact: true
+      }, function(conv) {
+        conv[0].should.not.have.property('m');
+        done();
+      });
+    });
+    it('withLastMessages', function(done) {
+      rt.query({
+        withLastMessages: true
+      }, function(conv) {
+        conv[0].should.have.property('msg');
+        done();
+      });
+    });
+  });
 
   describe('#ping()', function() {});
 });

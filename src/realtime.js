@@ -494,6 +494,13 @@ var newRealtimeObject = function() {
           break;
       }
       options.serialId = engine.getSerialId(cache);
+      options.flag = 0;
+      if (options.compact) {
+        options.flag |= 1;
+      }
+      if (options.withLastMessages) {
+        options.flag |= 2;
+      }
       var fun = function(data) {
         if (data.i === options.serialId) {
           if (callback) {
@@ -937,6 +944,10 @@ engine.convQuery = function(cache, options) {
     limit: options.limit || 10,
     // skip 可选，数字，默认0
     skip: options.skip || 0,
+    // bitflag
+    // 0001 - 不返回成员列表
+    // 0010 - 返回对话最近一条消息
+    flag: options.flag,
     // i serial-id
     i: options.serialId
   });
