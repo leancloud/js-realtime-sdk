@@ -51,6 +51,7 @@
     "sinon": "2.0.0-pre"
   },
   "dependencies": {
+    "es6-promise": "^3.0.2",
     "leancloud-xmlhttprequest": "^1.8.1",
     "ws": "^1.0.1"
   },

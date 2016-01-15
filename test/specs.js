@@ -2,8 +2,9 @@
 import 'should';
 import 'should-sinon';
 import realtime from '../src/realtime';
-
 import Should from 'should/as-function';
+var Promise = require('es6-promise').Promise;
+
 var sinon = (typeof window !== 'undefined' && window.sinon) || require('sinon');
 
 // 请将 AppId 改为你自己的 AppId
