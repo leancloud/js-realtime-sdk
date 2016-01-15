@@ -10,13 +10,8 @@ module.exports = function(grunt) {
     return {
       intro() {
         return `
-var rollupEnv = ${envString};
-var process = process || {};
-window.process = process;
-process.env = process.env || {};
-Object.keys(rollupEnv).forEach(function (prop) {
-  process.env[prop] = rollupEnv[prop];
-});`;
+window.process = window.process || {};
+process.env = process.env || {};`;
       }
     };
   };
@@ -121,10 +116,17 @@ var global = typeof window !== 'undefined' ? window :
               include: 'node_modules/**',
             }),
             commonjsGlobal(),
-            env(process.env)
+            env()
           ],
           format: 'umd',
           moduleName: 'AV.realtime'
+        }
+      }
+    },
+    envify: {
+      'test-browser': {
+        files: {
+          'test/browser/specs.env.js': ['test/browser/specs.js']
         }
       }
     },
@@ -184,7 +186,7 @@ var global = typeof window !== 'undefined' ? window :
   grunt.registerTask('test', '', function() {
     var tasks = ['lint', 'rollup:test', 'connect', /*'mocha_phantomjs',*/ 'simplemocha'];
     if (process.env.SAUCE_USERNAME && process.env.SAUCE_ACCESS_KEY) {
-      tasks = tasks.concat(['rollup:test-browser', 'saucelabs-mocha']);
+      tasks = tasks.concat(['rollup:test-browser', 'envify', 'saucelabs-mocha']);
     } else {
       grunt.log.writeln('Skip saucelabs test, set SAUCE_USERNAME and SAUCE_ACCESS_KEY to start it.');
     }

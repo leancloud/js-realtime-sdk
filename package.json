@@ -33,6 +33,8 @@
     "grunt-contrib-connect": "^0.11",
     "grunt-contrib-uglify": "^0.9.1",
     "grunt-contrib-watch": "^0.6.1",
+    "grunt-env": "^0.4.4",
+    "grunt-envify": "0.0.3",
     "grunt-eslint": "^17.3.1",
     "grunt-rollup": "^0.6.1",
     "grunt-saucelabs": "^8.6.1",
