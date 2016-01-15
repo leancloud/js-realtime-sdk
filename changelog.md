@@ -1,3 +1,7 @@
+## 2.4.0
+### Features
+* query 方法新增参数 `compact`, `withLastMessages`
+
 ## 2.3.5
 ### Bug Fixes
 * 修复 query 方法自动增加当前用户为条件的 Bug
