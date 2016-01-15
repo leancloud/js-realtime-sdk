@@ -11,6 +11,8 @@ import { ajax } from './tool/ajax';
 import { eventCenter } from './tool/eventcenter';
 import * as tool from './tool/index';
 
+import { Promise } from 'rsvp';
+
 var extend = Object.assign;
 
 // 配置项

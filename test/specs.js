@@ -3,7 +3,7 @@ import 'should';
 import 'should-sinon';
 import realtime from '../src/realtime';
 import Should from 'should/as-function';
-var Promise = require('es6-promise').Promise;
+import { Promise } from 'rsvp';
 
 var sinon = (typeof window !== 'undefined' && window.sinon) || require('sinon');
 

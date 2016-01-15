@@ -63,6 +63,9 @@ var global = typeof window !== 'undefined' ? window :
             }),
             commonjs({
               include: 'node_modules/**',
+              namedExports: {
+                'rsvp': ['Promise']
+              }
             })
           ],
           format: 'cjs'
@@ -83,6 +86,9 @@ var global = typeof window !== 'undefined' ? window :
             commonjsGlobal(),
             commonjs({
               include: 'node_modules/**',
+              namedExports: {
+                'rsvp': ['Promise']
+              }
             })
           ],
           format: 'umd',
@@ -112,10 +118,13 @@ var global = typeof window !== 'undefined' ? window :
               main: true,
               browser: true
             }),
+            commonjsGlobal(),
             commonjs({
               include: 'node_modules/**',
+              namedExports: {
+                'rsvp': ['Promise']
+              }
             }),
-            commonjsGlobal(),
             env()
           ],
           format: 'umd',
