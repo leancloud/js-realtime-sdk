@@ -56,7 +56,7 @@ var global = typeof window !== 'undefined' ? window :
         options: {
           plugins: [
             json(),
-            babel(),
+            babel({ runtimeHelpers: true , exclude: 'node_modules/**' }),
             npm({
               jsnext: true,
               main: true
@@ -77,7 +77,7 @@ var global = typeof window !== 'undefined' ? window :
         options: {
           plugins: [
             json(),
-            babel(),
+            babel({ runtimeHelpers: true , exclude: 'node_modules/**' }),
             npm({
               jsnext: true,
               main: true,
@@ -101,7 +101,7 @@ var global = typeof window !== 'undefined' ? window :
         options: {
           plugins: [
             json(),
-            babel(),
+            babel({ runtimeHelpers: true , exclude: 'node_modules/**' }),
           ],
           format: 'cjs'
         }
@@ -112,7 +112,7 @@ var global = typeof window !== 'undefined' ? window :
         options: {
           plugins: [
             json(),
-            babel(),
+            babel({ runtimeHelpers: true , exclude: 'node_modules/**' }),
             npm({
               jsnext: true,
               main: true,
