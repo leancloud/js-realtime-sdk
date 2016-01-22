@@ -9,7 +9,6 @@ const WebSocket = global.WebSocket || global.MozWebSocket || require('ws');
 const HEARTBEAT_TIME = 60000;
 const TIMEOUT_TIME = 180000;
 
-
 class Connection extends EventEmitter {
   constructor(url, options) {
     debug(`initializing connection [${url}]`);
@@ -78,39 +77,30 @@ class Connection extends EventEmitter {
   onleaveopened() {
     this._stopConnectionKeeper();
   }
-  onbeforedisconnect() {
-    this._retryCount = 1;
-  }
   ondisconnect() {
     debug('disconnect');
     this._destroyWs();
-  }
-  onretry() {
-    debug(`retry [${this._retryCount}]`);
-  }
-  onbeforeretryfail() {
-    this._retryCount++;
-  }
-  onretryfail() {
-    debug('retry fail');
+    this._retryCount = 0;
+    this.retry();
   }
   onreconnect() {
     debug('reconnect');
   }
-  ondisconnected() {
+  onretry() {
     setTimeout(() => {
       if (this.is('disconnected')) {
-        this.retry();
+        this._createWs(this._url, this._options).then(
+          () => this.reconnect(),
+          () => this.retry()
+        );
+        debug(`retry [${this._retryCount}]`);
+        this.emit('retry', this._retryCount);
       }
-    }, (this._retryCount - 1) * 3000);
-  }
-  onreconnecting() {
-    this._createWs(this._url, this._options).then(
-      () => this.reconnect(),
-      error => this.retryfail(error)
-    );
+    }, this._retryCount * 3000);
+    this._retryCount++;
   }
   onclose() {
+    debug('close');
     this._ws.close();
   }
   onerror(event, from, to, error) {
@@ -173,18 +163,14 @@ StateMachine.create({
   }, {
     name: 'retry',
     from: 'disconnected',
-    to: 'reconnecting',
-  }, {
-    name: 'reconnect',
-    from: 'reconnecting',
-    to: 'opened',
-  }, {
-    name: 'retryfail',
-    from: 'reconnecting',
     to: 'disconnected',
   }, {
+    name: 'reconnect',
+    from: 'disconnected',
+    to: 'opened',
+  }, {
     name: 'close',
-    from: ['opened', 'disconnected', 'reconnecting'],
+    from: ['opened', 'disconnected'],
     to: 'closed',
   }, {
     name: 'throw',
