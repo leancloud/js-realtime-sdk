@@ -1,7 +1,9 @@
-import { Promise } from 'rsvp';
-import * as Errors from './errors';
+// WebSocket with auto reconnecting feature and EventEmitter interface.
 
-const debug = require('debug')('LC:Connection');
+import { Promise } from 'rsvp';
+import { tryAll } from './utils';
+
+const debug = require('debug')('LC:WebSocketPlus');
 const EventEmitter = require('eventemitter3');
 const StateMachine = require('javascript-state-machine');
 
@@ -9,54 +11,47 @@ const WebSocket = global.WebSocket || global.MozWebSocket || require('ws');
 const HEARTBEAT_TIME = 60000;
 const TIMEOUT_TIME = 180000;
 
-class Connection extends EventEmitter {
-  constructor(url, options) {
-    debug(`initializing connection [${url}]`);
+class WebSocketPlus extends EventEmitter {
+  constructor(getUrls, protocol) {
+    debug(`initializing connection`);
+    if (typeof WebSocket === 'undefined') {
+      throw new Error('WebSocket is undefined. Polyfill is required in this runtime.');
+    }
     super();
-    this._url = url;
-    this._options = Object.assign({
-      pushUnread: true,
-    }, options);
+    if (typeof getUrls !== 'function') {
+      this._getUrls = () => Promise.resolve(getUrls);
+    } else {
+      this._getUrls = getUrls;
+    }
+    this._protocol = protocol;
     this.init();
-    this._createWs(url, this._options).then(
+    this._createWs(this._getUrls, this._protocol).then(
       () => this.open(),
       error => this.throw(error)
     );
   }
 
-  _createWs(url, options) {
-    let protocolsVersion = 1;
-    if (options.pushUnread) {
-      // 不推送离线消息，而是发送对话的未读通知
-      protocolsVersion = 3;
-    }
-    const ws = this._ws = new WebSocket(
-      url,
-      `lc.protobuf.${protocolsVersion}`
-    );
-    ws.onclose = event => {
-      debug(`ws closed [${event.code}] ${event.reason}`);
-      // socket closed manully, ignore close event.
-      if (this.isFinished()) return;
-      const fatalError = [
-        Errors.APP_NOT_AVAILABLE,
-        Errors.INVALID_LOGIN,
-        Errors.INVALID_ORIGIN,
-      ].find(error => error.code === event.code);
-      if (fatalError) {
-        // in these cases, SDK should throw.
-        const error = new Error(`${fatalError.message || event.reason}`);
-        error.code = event.code;
-        this.throw(error);
-      } else {
-        // reconnect
-        this.disconnect();
+  _createWs(getUrls, protocol) {
+    return getUrls().then(wsUrls => {
+      let urls = wsUrls;
+      if (!(urls instanceof Array)) {
+        urls = [urls];
       }
-    };
-    ws.onmessage = event => this.handleMessage(event.data);
-    return new Promise((resolve, reject) => {
-      ws.onopen = resolve;
-      ws.onerror = reject;
+      return tryAll(
+        urls.map(url => (resolve, reject) => {
+          debug(`connect to [${url}] ${protocol}`);
+          const ws = new WebSocket(
+            url, protocol
+          );
+          ws.onopen = () => resolve(ws);
+          ws.onerror = reject;
+        })
+      ).then(ws => {
+        this._ws = ws;
+        this._ws.onclose = this._handleClose.bind(this);
+        this._ws.onmessage = this.handleMessage.bind(this);
+        return ws;
+      });
     });
   }
   _destroyWs() {
@@ -89,7 +84,7 @@ class Connection extends EventEmitter {
   onretry() {
     setTimeout(() => {
       if (this.is('disconnected')) {
-        this._createWs(this._url, this._options).then(
+        this._createWs(this._getUrls, this._protocol).then(
           () => this.reconnect(),
           () => this.retry()
         );
@@ -139,13 +134,25 @@ class Connection extends EventEmitter {
     this._clearTimers();
   }
 
-  handleMessage(data) {
-    debug('message', data);
+  _handleClose(event) {
+    debug(`ws closed [${event.code}] ${event.reason}`);
+    // socket closed manully, ignore close event.
+    if (this.isFinished()) return;
+    this.handleClose(event);
+  }
+  handleClose() {
+    // reconnect
+    this.disconnect();
+  }
+
+  handleMessage(event) {
+    debug('message', event.data);
+    this.emit('meesage', event.data);
   }
 }
 
 StateMachine.create({
-  target: Connection.prototype,
+  target: WebSocketPlus.prototype,
   initial: {
     state: 'initialized',
     event: 'init',
@@ -179,4 +186,4 @@ StateMachine.create({
   }],
 });
 
-export default Connection;
+export default WebSocketPlus;

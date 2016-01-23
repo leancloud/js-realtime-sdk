@@ -57,6 +57,8 @@
     "javascript-state-machine": "^2.3.5",
     "leancloud-xmlhttprequest": "^1.8.1",
     "rsvp": "^3.1.0",
+    "superagent": "^1.7.1",
+    "superagent-promise": "^1.1.0",
     "ws": "^1.0.1"
   },
   "browser": {
