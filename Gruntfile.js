@@ -34,7 +34,7 @@ var global = typeof window !== 'undefined' ? window :
     version: '10.0'
   }];
 
-  var HINT_SRCS = ['src/**/*.js', 'test/**/*.js', 'demo/**/*.js', '!**/browser/**/*.js', '!**/*.browser.js'];
+  var HINT_SRCS = ['src/**/*.js', 'test/**/*.js', /* 'demo/**\/*.js', */ '!**/browser/**/*.js', '!**/*.browser.js', '!**/*.bundle.js'];
 
   grunt.initConfig({
     watch: {
@@ -190,7 +190,7 @@ var global = typeof window !== 'undefined' ? window :
     }
   });
   grunt.registerTask('default', []);
-  grunt.registerTask('lint', [/*'eslint'*/]);
+  grunt.registerTask('lint', ['eslint']);
   grunt.registerTask('sauce', ['rollup:test', 'connect', 'saucelabs-mocha']);
   grunt.registerTask('test', '', function() {
     var tasks = ['lint', 'rollup:test', 'rollup:test-browser', 'envify:test-browser', 'connect', /*'mocha_phantomjs',*/ 'simplemocha'];

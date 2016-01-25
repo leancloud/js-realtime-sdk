@@ -1,11 +1,18 @@
-/* jshint -W064 */
+/* eslint-disable no-unused-expressions */
 import 'should';
 import 'should-sinon';
 import WebsocketPlus from '../src/websocket-plus';
-import Should from 'should/as-function';
 import { Promise } from 'rsvp';
 
-var sinon = (typeof window !== 'undefined' && window.sinon) || require('sinon');
+const sinon = (typeof window !== 'undefined' && window.sinon) || require('sinon');
+
+const testAsync = (asserts, done) => () => {
+  try {
+    asserts();
+  } catch (e) {
+    return done(e);
+  }
+};
 
 describe('WebsocketPlus', () => {
   describe('open', () => {
@@ -26,13 +33,13 @@ describe('WebsocketPlus', () => {
     it('backup endpoint', (done) => {
       const ws = new WebsocketPlus([
         'ws://404.websocket.org',
-        'ws://echo.websocket.org'
+        'ws://echo.websocket.org',
       ]);
       ws.on('open', done);
     });
     it('promised endpoints', (done) => {
       const ws = new WebsocketPlus(Promise.resolve([
-        'wss://echo.websocket.org'
+        'wss://echo.websocket.org',
       ]));
       ws.on('open', done);
     });
@@ -55,33 +62,25 @@ describe('WebsocketPlus', () => {
         ws._ws.close();
       });
       const disconnectCallback = sinon.spy();
-      ws.on('disconnect', disconnectCallback)
+      ws.on('disconnect', disconnectCallback);
       ws.on('reconnect', testAsync(() => {
         disconnectCallback.should.be.calledOnce();
         ws.is('connected').should.be.true;
         done();
       }, done));
     });
-    it('should not reconnect when closed manully', (done) => {
+    it('should not reconnect when closed manually', (done) => {
       const ws = new WebsocketPlus('ws://echo.websocket.org');
       ws.on('open', () => {
-        ws._ws.close();
+        ws.close();
       });
       const disconnectCallback = sinon.spy();
-      ws.on('disconnect', disconnectCallback)
+      ws.on('disconnect', disconnectCallback);
       setTimeout(testAsync(() => {
-        disconnectCallback.should.not.be.called();
+        disconnectCallback.should.have.callCount(0);
         ws.is('closed').should.be.true;
         done();
-      }, done), 500);
+      }, done), 1000);
     });
-  })
+  });
 });
-
-const testAsync = (asserts, done) => () => {
-  try {
-    asserts();
-  } catch (e) {
-    return done(e);
-  }
-}

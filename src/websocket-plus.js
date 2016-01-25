@@ -49,10 +49,9 @@ class WebSocketPlus extends EventEmitter {
           ws.onerror = error => {
             if (error instanceof Error) {
               return reject(error);
-            } else {
-              // in browser, error event is useless
-              return reject(new Error(`Failed to connect [${url}]`));
             }
+            // in browser, error event is useless
+            return reject(new Error(`Failed to connect [${url}]`));
           };
         })
       ).then(ws => {
@@ -147,7 +146,7 @@ class WebSocketPlus extends EventEmitter {
 
   _handleClose(event) {
     debug(`ws closed [${event.code}] ${event.reason}`);
-    // socket closed manully, ignore close event.
+    // socket closed manually, ignore close event.
     if (this.isFinished()) return;
     this.handleClose(event);
   }

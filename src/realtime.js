@@ -105,7 +105,7 @@ export default class Realtime extends EventEmitter {
     );
   }
 
-  createIMClient(clientId) {
+  createIMClient() {
     return this._connect();
   }
 
