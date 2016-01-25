@@ -1,22 +1,21 @@
 import WebSocketPlus from './websocket-plus';
 import * as Errors from './errors';
 import { Promise } from 'rsvp';
+import { default as d } from 'debug';
+import EventEmitter from 'eventemitter3';
+import { default as superagentPromise } from 'superagent-promise';
+import superagent from 'superagent';
 
-const debug = require('debug')('LC:Realtime');
-const EventEmitter = require('eventemitter3');
-const agent = require('superagent-promise')(require('superagent'), Promise);
+const agent = superagentPromise(superagent, Promise);
+const debug = d('LC:Realtime');
 
 export default class Realtime extends EventEmitter {
-  static connect(options) {
-    return new this(options)._promise;
-  }
-
   constructor(options) {
     debug('initializing Realtime');
     super();
     this._options = Object.assign({
       appId: undefined,
-      clientId: undefined,
+      appKey: undefined,
       region: 'cn',
       pushUnread: true,
       ssl: true,
@@ -24,6 +23,14 @@ export default class Realtime extends EventEmitter {
     if (typeof this._options.appId !== 'string') {
       throw new TypeError(`appId [${this._options.appId}] is not a string`);
     }
+    if (typeof this._options.appKey !== 'string') {
+      throw new TypeError(`appKey is not a string`);
+    }
+  }
+
+  _connect() {
+    if (this._promise) return this._promise;
+
     let protocolsVersion = 1;
     if (this._options.pushUnread) {
       // 不推送离线消息，而是发送对话的未读通知
@@ -38,7 +45,7 @@ export default class Realtime extends EventEmitter {
       );
       ws.on('open', () => resolve(this));
       ws.on('error', reject);
-      // overwrite handleClose
+      // override handleClose
       ws.handleClose = function handleClose(event) {
         const fatalError = [
           Errors.APP_NOT_AVAILABLE,
@@ -56,7 +63,10 @@ export default class Realtime extends EventEmitter {
         }
       };
     });
+
+    return this._promise;
   }
+
 
   _getEndpoints(options) {
     // TODO: cache
@@ -93,5 +103,13 @@ export default class Realtime extends EventEmitter {
     }).then(
       res => res.body
     );
+  }
+
+  createIMClient(clientId) {
+    return this._connect();
+  }
+
+  createPushClient() {
+    return this._connect();
   }
 }

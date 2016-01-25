@@ -1,11 +1,13 @@
-// WebSocket with auto reconnecting feature and EventEmitter interface.
+// WebSocket with auto reconnecting feature, backup endpoint and EventEmitter interface.
 
 import { Promise } from 'rsvp';
 import { tryAll } from './utils';
 
-const debug = require('debug')('LC:WebSocketPlus');
-const EventEmitter = require('eventemitter3');
-const StateMachine = require('javascript-state-machine');
+import { default as d } from 'debug';
+import EventEmitter from 'eventemitter3';
+import StateMachine from 'javascript-state-machine';
+
+const debug = d('LC:WebSocketPlus');
 
 const WebSocket = global.WebSocket || global.MozWebSocket || require('ws');
 const HEARTBEAT_TIME = 60000;
@@ -39,12 +41,19 @@ class WebSocketPlus extends EventEmitter {
       }
       return tryAll(
         urls.map(url => (resolve, reject) => {
-          debug(`connect to [${url}] ${protocol}`);
-          const ws = new WebSocket(
+          debug(`connect [${url}] ${protocol}`);
+          const ws = protocol ? new WebSocket(
             url, protocol
-          );
+          ) : new WebSocket(url);
           ws.onopen = () => resolve(ws);
-          ws.onerror = reject;
+          ws.onerror = error => {
+            if (error instanceof Error) {
+              return reject(error);
+            } else {
+              // in browser, error event is useless
+              return reject(new Error(`Failed to connect [${url}]`));
+            }
+          };
         })
       ).then(ws => {
         this._ws = ws;
@@ -66,20 +75,22 @@ class WebSocketPlus extends EventEmitter {
     debug('open');
     this.emit('open');
   }
-  onopened() {
+  onconnected() {
     this._startConnectionKeeper();
   }
-  onleaveopened() {
+  onleaveconnected() {
     this._stopConnectionKeeper();
   }
   ondisconnect() {
     debug('disconnect');
     this._destroyWs();
     this._retryCount = 0;
+    this.emit('disconnect');
     this.retry();
   }
   onreconnect() {
     debug('reconnect');
+    this.emit('reconnect');
   }
   onretry() {
     setTimeout(() => {
@@ -123,7 +134,7 @@ class WebSocketPlus extends EventEmitter {
   }
   _startConnectionKeeper() {
     debug('start connection keeper');
-    this._ws.addEventListener('message', this._postponeTimers);
+    this._ws.addEventListener('message', this._postponeTimers.bind(this));
     this._postponeTimers();
   }
   _stopConnectionKeeper() {
@@ -145,9 +156,14 @@ class WebSocketPlus extends EventEmitter {
     this.disconnect();
   }
 
+  send(data) {
+    debug('send', data);
+    this._ws.send(data);
+  }
+
   handleMessage(event) {
     debug('message', event.data);
-    this.emit('meesage', event.data);
+    this.emit('message', event.data);
   }
 }
 
@@ -162,10 +178,10 @@ StateMachine.create({
   events: [{
     name: 'open',
     from: 'initialized',
-    to: 'opened',
+    to: 'connected',
   }, {
     name: 'disconnect',
-    from: 'opened',
+    from: 'connected',
     to: 'disconnected',
   }, {
     name: 'retry',
@@ -174,10 +190,10 @@ StateMachine.create({
   }, {
     name: 'reconnect',
     from: 'disconnected',
-    to: 'opened',
+    to: 'connected',
   }, {
     name: 'close',
-    from: ['opened', 'disconnected'],
+    from: ['connected', 'disconnected'],
     to: 'closed',
   }, {
     name: 'throw',

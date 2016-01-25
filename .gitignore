@@ -1,4 +1,5 @@
 bower_components
 node_modules
-test/browser/specs.*
-test/specs.bundle.*
+test/browser/index.*
+!test/browser/index.html
+test/index.bundle.*

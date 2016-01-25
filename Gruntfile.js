@@ -96,8 +96,8 @@ var global = typeof window !== 'undefined' ? window :
         }
       },
       test: {
-        dest: 'test/specs.bundle.js',
-        src: 'test/specs.js',
+        dest: 'test/index.bundle.js',
+        src: 'test/index.js',
         options: {
           plugins: [
             json(),
@@ -107,8 +107,8 @@ var global = typeof window !== 'undefined' ? window :
         }
       },
       'test-browser': {
-        dest: 'test/browser/specs.js',
-        src: 'test/specs.js',
+        dest: 'test/browser/index.js',
+        src: 'test/index.js',
         options: {
           plugins: [
             json(),
@@ -135,7 +135,7 @@ var global = typeof window !== 'undefined' ? window :
     envify: {
       'test-browser': {
         files: {
-          'test/browser/specs.env.js': ['test/browser/specs.js']
+          'test/browser/index.env.js': ['test/browser/index.js']
         }
       }
     },
@@ -164,7 +164,7 @@ var global = typeof window !== 'undefined' ? window :
         ui: 'bdd'
       },
       all: {
-        src: ['test/specs.bundle.js']
+        src: ['test/index.bundle.js']
       }
     },
     'mocha_phantomjs': {
