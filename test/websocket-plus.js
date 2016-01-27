@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-expressions */
 import 'should';
 import 'should-sinon';
 import WebsocketPlus from '../src/websocket-plus';
@@ -19,7 +18,7 @@ describe('WebsocketPlus', () => {
     it('basic', (done) => {
       const ws = new WebsocketPlus('wss://echo.websocket.org');
       ws.on('open', () => {
-        ws.is('connected').should.be.true;
+        ws.is('connected').should.be.true();
         done();
       });
     });
@@ -47,12 +46,12 @@ describe('WebsocketPlus', () => {
 
   it('close', (done) => {
     const ws = new WebsocketPlus('ws://echo.websocket.org');
-    ws.on('open', () => {
+    ws.on('open', testAsync(() => {
       ws.close();
-      ws.is('closed').should.be.true;
+      ws.is('closed').should.be.true();
       (() => ws.open()).should.throw();
       done();
-    });
+    }, done));
   });
 
   describe('Auto reconnecting', () => {
@@ -65,7 +64,7 @@ describe('WebsocketPlus', () => {
       ws.on('disconnect', disconnectCallback);
       ws.on('reconnect', testAsync(() => {
         disconnectCallback.should.be.calledOnce();
-        ws.is('connected').should.be.true;
+        ws.is('connected').should.be.true();
         done();
       }, done));
     });
@@ -78,7 +77,7 @@ describe('WebsocketPlus', () => {
       ws.on('disconnect', disconnectCallback);
       setTimeout(testAsync(() => {
         disconnectCallback.should.have.callCount(0);
-        ws.is('closed').should.be.true;
+        ws.is('closed').should.be.true();
         done();
       }, done), 1000);
     });

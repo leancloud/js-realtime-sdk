@@ -5,6 +5,7 @@ import { default as d } from 'debug';
 import EventEmitter from 'eventemitter3';
 import { default as superagentPromise } from 'superagent-promise';
 import superagent from 'superagent';
+import { tap } from './utils';
 
 const agent = superagentPromise(superagent, Promise);
 const debug = d('LC:Realtime');
@@ -13,6 +14,12 @@ export default class Realtime extends EventEmitter {
   constructor(options) {
     debug('initializing Realtime');
     super();
+    if (typeof options.appId !== 'string') {
+      throw new TypeError(`appId [${options.appId}] is not a string`);
+    }
+    if (typeof options.appKey !== 'string') {
+      throw new TypeError(`appKey is not a string`);
+    }
     this._options = Object.assign({
       appId: undefined,
       appKey: undefined,
@@ -20,12 +27,7 @@ export default class Realtime extends EventEmitter {
       pushUnread: true,
       ssl: true,
     }, options);
-    if (typeof this._options.appId !== 'string') {
-      throw new TypeError(`appId [${this._options.appId}] is not a string`);
-    }
-    if (typeof this._options.appKey !== 'string') {
-      throw new TypeError(`appKey is not a string`);
-    }
+    this._cache = {};
   }
 
   _connect() {
@@ -67,10 +69,34 @@ export default class Realtime extends EventEmitter {
     return this._promise;
   }
 
+  _getCache(key) {
+    const cache = this._cache[key];
+    if (cache) {
+      const expired = cache.expiredAt && cache.expiredAt < Date.now();
+      if (!expired) {
+        return cache.value;
+      }
+    }
+    return null;
+  }
+
+  _setCache(key, value, expiredTime) {
+    const cache = this._cache[key] = {
+      value,
+    };
+    if (typeof expiredTime === 'number') {
+      cache.expiredAt = Date.now() + expiredTime;
+    }
+  }
 
   _getEndpoints(options) {
-    // TODO: cache
-    return this._fetchEndpointsInfo(options).then(info => {
+    return Promise.resolve(
+      this._getCache('endpoints')
+      || this._fetchEndpointsInfo(options).then(
+        tap(info => this._setCache('endpoints', info, info.ttl))
+      )
+    )
+    .then(info => {
       debug(`endpoint info:`, info);
       return [info.server, info.secondary];
     });
@@ -96,13 +122,17 @@ export default class Realtime extends EventEmitter {
     }
     const protocol = global.location ? '//' : 'https://';
 
-    return agent.get(`${protocol}${router}`).query({
-      appId,
-      secure: ssl,
-      _t: Date.now(),
-    }).then(
-      res => res.body
-    );
+    return agent
+      .get(`${protocol}${router}`)
+      .query({
+        appId,
+        secure: ssl,
+        _t: Date.now(),
+      })
+      .timeout(20000)
+      .then(
+        res => res.body
+      );
   }
 
   createIMClient() {

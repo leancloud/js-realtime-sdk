@@ -40,7 +40,7 @@ var global = typeof window !== 'undefined' ? window :
     watch: {
       scripts: {
         files: HINT_SRCS,
-        tasks: ['lint', 'release']
+        tasks: ['build-test', 'release']
       },
     },
     eslint: {
@@ -191,18 +191,18 @@ var global = typeof window !== 'undefined' ? window :
   });
   grunt.registerTask('default', []);
   grunt.registerTask('lint', ['eslint']);
-  grunt.registerTask('sauce', ['rollup:test', 'connect', 'saucelabs-mocha']);
+  grunt.registerTask('build-test', ['rollup:test', 'rollup:test-browser', 'envify:test-browser']);
   grunt.registerTask('test', '', function() {
-    var tasks = ['lint', 'rollup:test', 'rollup:test-browser', 'envify:test-browser', 'connect', /*'mocha_phantomjs',*/ 'simplemocha'];
+    var tasks = ['lint', 'build-test', /*'mocha_phantomjs',*/ 'simplemocha'];
     if (process.env.SAUCE_USERNAME && process.env.SAUCE_ACCESS_KEY) {
-      tasks = tasks.concat(['saucelabs-mocha']);
+      tasks = tasks.concat(['connect', 'saucelabs-mocha']);
     } else {
       grunt.log.writeln('Skip saucelabs test, set SAUCE_USERNAME and SAUCE_ACCESS_KEY to start it.');
     }
     grunt.task.run(tasks);
   });
   grunt.registerTask('release', ['rollup:dist-browser', 'rollup:dist', 'uglify:browser']);
-  grunt.registerTask('dev', ['lint', 'release', 'connect', 'watch']);
+  grunt.registerTask('dev', ['build-test', 'release', 'connect', 'watch']);
   grunt.registerTask('cdn', 'Upload dist to CDN.', function() {
 
     grunt.task.requires('release');
