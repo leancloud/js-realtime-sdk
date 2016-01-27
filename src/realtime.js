@@ -6,6 +6,10 @@ import EventEmitter from 'eventemitter3';
 import { default as superagentPromise } from 'superagent-promise';
 import superagent from 'superagent';
 import { tap } from './utils';
+import WebSocketMessage from '../proto/message';
+
+const m = new WebSocketMessage();
+m.toString();
 
 const agent = superagentPromise(superagent, Promise);
 const debug = d('LC:Realtime');

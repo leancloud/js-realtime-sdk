@@ -61,13 +61,11 @@ var global = typeof window !== 'undefined' ? window :
             babel({ runtimeHelpers: true , exclude: 'node_modules/**' }),
             npm({
               jsnext: true,
-              main: true
+              main: true,
+              skip: ['memcpy'],
             }),
             commonjs({
-              include: 'node_modules/**',
-              namedExports: {
-                'rsvp': ['Promise']
-              }
+              include: ['node_modules/**', 'proto/**'],
             })
           ],
           format: 'cjs'
@@ -87,10 +85,7 @@ var global = typeof window !== 'undefined' ? window :
             }),
             commonjsGlobal(),
             commonjs({
-              include: 'node_modules/**',
-              namedExports: {
-                'rsvp': ['Promise']
-              }
+              include: ['node_modules/**', 'proto/**'],
             })
           ],
           format: 'umd',
@@ -130,10 +125,7 @@ var global = typeof window !== 'undefined' ? window :
             }),
             commonjsGlobal(),
             commonjs({
-              include: 'node_modules/**',
-              namedExports: {
-                'rsvp': ['Promise']
-              }
+              include: ['node_modules/**', 'proto/**'],
             }),
             env()
           ],

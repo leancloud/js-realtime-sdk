@@ -8,7 +8,8 @@
     "test": "test"
   },
   "scripts": {
-    "test": "grunt test --stack"
+    "test": "grunt test --stack",
+    "convert-pb": "pbjs proto/message.proto -t commonjs > proto/message.js"
   },
   "repository": {
     "type": "git",
@@ -58,7 +59,8 @@
     "debug": "^2.2.0",
     "eventemitter3": "^1.1.1",
     "javascript-state-machine": "^2.3.5",
-    "rsvp": "^3.1.0",
+    "protobufjs": "^5.0.1",
+    "rsvp": "git+https://github.com/leeyeh/rsvp.js.git#es6-build",
     "superagent": "^1.7.1",
     "superagent-promise": "^1.1.0",
     "ws": "^1.0.1"
