@@ -1,9 +1,11 @@
+/* eslint-disable */
 module.exports = function(grunt) {
   require('load-grunt-tasks')(grunt);
   var npm = require('rollup-plugin-npm');
   var json = require('rollup-plugin-json');
   var babel = require('rollup-plugin-babel');
   var commonjs = require('rollup-plugin-commonjs');
+  var istanbul = require('rollup-plugin-istanbul');
 
   var env = function () {
     var envString = JSON.stringify(process.env);
@@ -102,6 +104,14 @@ var global = typeof window !== 'undefined' ? window :
           plugins: [
             json(),
             babel({ runtimeHelpers: true , exclude: 'node_modules/**' }),
+            istanbul({
+              exclude: ['test/*.js'],
+              instrumenter: require('istanbul'),
+              instrumenterConfig: {
+                esModules: true,
+                noCompact: true,
+              }
+            }),
           ],
           format: 'cjs'
         }
@@ -150,21 +160,23 @@ var global = typeof window !== 'undefined' ? window :
         }
       }
     },
+    mocha_istanbul: {
+      options: {
+        timeout: 20000,
+      },
+      coverage: {
+        src: ['test/index.bundle.js'],
+        options: {
+          root: './src',
+        }
+      },
+    },
     connect: {
       server: {
         options: {
           port: 8000,
           base: ''
         }
-      }
-    },
-    simplemocha: {
-      options: {
-        timeout: 20000,
-        ui: 'bdd'
-      },
-      all: {
-        src: ['test/index.bundle.js']
       }
     },
     'mocha_phantomjs': {
@@ -193,7 +205,7 @@ var global = typeof window !== 'undefined' ? window :
   grunt.registerTask('lint', ['eslint']);
   grunt.registerTask('build-test', ['rollup:test', 'rollup:test-browser', 'envify:test-browser']);
   grunt.registerTask('test', '', function() {
-    var tasks = ['lint', 'build-test', /*'mocha_phantomjs',*/ 'simplemocha'];
+    var tasks = ['lint', 'build-test', /*'mocha_phantomjs',*/ 'mocha_istanbul'];
     if (process.env.SAUCE_USERNAME && process.env.SAUCE_ACCESS_KEY) {
       tasks = tasks.concat(['connect', 'saucelabs-mocha']);
     } else {

@@ -70,16 +70,16 @@ describe('WebsocketPlus', () => {
     });
     it('should not reconnect when closed manually', (done) => {
       const ws = new WebsocketPlus('ws://echo.websocket.org');
-      ws.on('open', () => {
-        ws.close();
-      });
       const disconnectCallback = sinon.spy();
       ws.on('disconnect', disconnectCallback);
-      setTimeout(testAsync(() => {
-        disconnectCallback.should.have.callCount(0);
-        ws.is('closed').should.be.true();
-        done();
-      }, done), 1000);
+      ws.on('open', () => {
+        ws.close();
+        setTimeout(testAsync(() => {
+          disconnectCallback.should.have.callCount(0);
+          ws.is('closed').should.be.true();
+          done();
+        }, done), 1000);
+      });
     });
   });
 });
