@@ -2,6 +2,7 @@ import 'should';
 import 'should-sinon';
 import should from 'should/as-function';
 import Realtime from '../src/realtime';
+import Connection from '../src/connection';
 import { testAsync } from './test-utils';
 
 const sinon = (typeof window !== 'undefined' && window.sinon) || require('sinon');
@@ -25,14 +26,50 @@ describe('Realtime', () => {
       })).should.not.throw
     );
   });
-  it('_connect', (done) => {
-    const realtime = new Realtime({
-      appId: APP_ID,
-      appKey: APP_KEY,
-      region: REGION,
-      pushUnread: false,
+  describe('_connect/_disconnect', () => {
+    it('connection should be reused', (done) => {
+      const realtime = new Realtime({
+        appId: APP_ID,
+        appKey: APP_KEY,
+        region: REGION,
+        pushUnread: false,
+      });
+      let firstConnection;
+      realtime._connect()
+        .then(connection => {
+          connection.should.be.a.instanceof(Connection);
+          firstConnection = connection;
+        })
+        .then(() => realtime._connect())
+        .then(connection => {
+          connection.should.be.exactly(firstConnection);
+          done();
+        })
+        .catch(done);
     });
-    realtime._connect().then(() => done(), done);
+    it('_disconnect', (done) => {
+      const realtime = new Realtime({
+        appId: APP_ID,
+        appKey: APP_KEY,
+        region: REGION,
+        pushUnread: false,
+      });
+      realtime._connect()
+        .then(connection => {
+          should(realtime._connectPromise).not.be.undefined();
+          return connection;
+        })
+        .then(connection => {
+          realtime._disconnect();
+          return connection;
+        })
+        .then(connection => {
+          should(realtime._connectPromise).be.undefined();
+          connection.current.should.be.equal('closed');
+          done();
+        })
+        .catch(done);
+    });
   });
   describe('endpoints cache', () => {
     it('getter/setter', (done) => {

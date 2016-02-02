@@ -1,4 +1,4 @@
-import WebSocketPlus from './websocket-plus';
+import Connection from './connection';
 import * as Errors from './errors';
 import { Promise } from 'rsvp';
 import { default as d } from 'debug';
@@ -6,10 +6,8 @@ import EventEmitter from 'eventemitter3';
 import { default as superagentPromise } from 'superagent-promise';
 import superagent from 'superagent';
 import { tap } from './utils';
-import WebSocketMessage from '../proto/message';
-
-const m = new WebSocketMessage();
-m.toString();
+import Client from './client';
+import IMClient from './im-client';
 
 const agent = superagentPromise(superagent, Promise);
 const debug = d('LC:Realtime');
@@ -32,10 +30,11 @@ export default class Realtime extends EventEmitter {
       ssl: true,
     }, options);
     this._cache = {};
+    this._clients = {};
   }
 
   _connect() {
-    if (this._promise) return this._promise;
+    if (this._connectPromise) return this._connectPromise;
 
     let protocolsVersion = 1;
     if (this._options.pushUnread) {
@@ -44,15 +43,15 @@ export default class Realtime extends EventEmitter {
     }
     const protocol = `lc.protobuf.${protocolsVersion}`;
 
-    this._promise = new Promise((resolve, reject) => {
-      const ws = new WebSocketPlus(
+    this._connectPromise = new Promise((resolve, reject) => {
+      const connect = new Connection(
         () => this._getEndpoints(this._options),
         protocol
       );
-      ws.on('open', () => resolve(this));
-      ws.on('error', reject);
+      connect.on('open', () => resolve(connect));
+      connect.on('error', reject);
       // override handleClose
-      ws.handleClose = function handleClose(event) {
+      connect.handleClose = function handleClose(event) {
         const fatalError = [
           Errors.APP_NOT_AVAILABLE,
           Errors.INVALID_LOGIN,
@@ -70,7 +69,7 @@ export default class Realtime extends EventEmitter {
       };
     });
 
-    return this._promise;
+    return this._connectPromise;
   }
 
   _getCache(key) {
@@ -139,8 +138,47 @@ export default class Realtime extends EventEmitter {
       );
   }
 
-  createIMClient() {
-    return this._connect();
+  _disconnect() {
+    if (this._connectPromise) {
+      this._connectPromise.then(connection => connection.close());
+    }
+    delete this._connectPromise;
+  }
+
+  _register(client) {
+    if (!(client instanceof Client)) {
+      throw new TypeError(`${client} is not a Client`);
+    }
+    this._clients[client.id] = client;
+    client.on('destroy', this._deregister.bind(this));
+  }
+
+  _deregister(client) {
+    if (!(client instanceof Client)) {
+      throw new TypeError(`${client} is not a Client`);
+    }
+    delete this._clients[client.id];
+    if (Object.getOwnPropertyNames(this._clients).length === 0) {
+      this._disconnect();
+    }
+  }
+
+  createIMClient(id) {
+    return this._connect().then(connection => {
+      const client = new IMClient(id, connection);
+      connection.on('reconnect', () => client._openSession(this._options.appId));
+      return client._openSession(this._options.appId)
+        .then(command => {
+          const peerId = command.peerId;
+          if (!peerId) {
+            console.warn(`Unexpected session opend without peerId.`);
+            return;
+          }
+          client.id = peerId;
+          this._register(client);
+        })
+        .then(() => client);
+    });
   }
 
   createPushClient() {

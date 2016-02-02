@@ -31,6 +31,7 @@ class WebSocketPlus extends EventEmitter {
       () => this.open(),
       error => this.throw(error)
     );
+    this.__postponeTimers = this._postponeTimers.bind(this);
   }
 
   _createWs(getUrls, protocol) {
@@ -57,7 +58,7 @@ class WebSocketPlus extends EventEmitter {
       ).then(ws => {
         this._ws = ws;
         this._ws.onclose = this._handleClose.bind(this);
-        this._ws.onmessage = this.handleMessage.bind(this);
+        this._ws.onmessage = this._handleMessage.bind(this);
         return ws;
       });
     });
@@ -113,13 +114,24 @@ class WebSocketPlus extends EventEmitter {
     this.emit('error', error);
   }
 
+  ping() {
+    if (this._ws.ping) {
+      this._ws.ping();
+    } else {
+      console.warning(`The WebSocket implement does not support sending ping frame.
+        Override ping method to use application defined ping/pong mechanism.`);
+    }
+  }
+
   _postponeTimers() {
+    debug('_postponeTimers');
     this._clearTimers();
     this._heartbeatTimer = setInterval(() => {
       debug('ping');
-      this._ws.send('{}');
+      this.ping();
     }, HEARTBEAT_TIME);
     this._timeoutTimer = setTimeout(() => {
+      debug('timeout');
       this.disconnect();
     }, TIMEOUT_TIME);
   }
@@ -133,14 +145,15 @@ class WebSocketPlus extends EventEmitter {
   }
   _startConnectionKeeper() {
     debug('start connection keeper');
-    this._ws.addEventListener('message', this._postponeTimers.bind(this));
+    const addListener = this._ws.addListener || this._ws.addEventListener;
+    addListener.call(this._ws, 'message', this.__postponeTimers);
     this._postponeTimers();
   }
   _stopConnectionKeeper() {
     debug('stop connection keeper');
     // websockets/ws#489
-    const removeListener = this._ws.removeEventListener || this._ws.removeListener;
-    removeListener.call(this._ws, 'message', this._postponeTimers);
+    const removeListener = this._ws.removeListener || this._ws.removeEventListener;
+    removeListener.call(this._ws, 'message', this.__postponeTimers);
     this._clearTimers();
   }
 
@@ -160,9 +173,12 @@ class WebSocketPlus extends EventEmitter {
     this._ws.send(data);
   }
 
-  handleMessage(event) {
+  _handleMessage(event) {
     debug('message', event.data);
-    this.emit('message', event.data);
+    this.handleMessage(event.data);
+  }
+  handleMessage(message) {
+    this.emit('message', message);
   }
 }
 

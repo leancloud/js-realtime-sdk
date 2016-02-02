@@ -9,7 +9,7 @@
   },
   "scripts": {
     "test": "grunt test --stack",
-    "convert-pb": "pbjs proto/message.proto -t commonjs > proto/message.js"
+    "convert-pb": "pbjs proto/message.proto -t commonjs > proto/message-compiled.js"
   },
   "repository": {
     "type": "git",

@@ -99,8 +99,11 @@ var global = typeof window !== 'undefined' ? window :
           plugins: [
             json(),
             babel({ runtimeHelpers: true , exclude: 'node_modules/**' }),
+            commonjs({
+              include: ['proto/**'],
+            }),
             istanbul({
-              exclude: ['test/*.js'],
+              exclude: ['test/*.js', 'proto/*.js'],
               instrumenter: require('istanbul'),
               instrumenterConfig: {
                 esModules: true,

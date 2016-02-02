@@ -21,6 +21,7 @@ enum CommandType {
   read = 11;
   presence = 12;
   report = 13;
+  echo = 14;
 }
 
 enum OpType {
