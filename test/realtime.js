@@ -3,6 +3,7 @@ import 'should-sinon';
 import should from 'should/as-function';
 import Realtime from '../src/realtime';
 import Connection from '../src/connection';
+import Client from '../src/client';
 import { testAsync } from './test-utils';
 
 const sinon = (typeof window !== 'undefined' && window.sinon) || require('sinon');
@@ -107,5 +108,28 @@ describe('Realtime', () => {
         })
         .catch(done);
     });
+  });
+  it('_register/_deregister', (done) => {
+    const realtime = new Realtime({
+      appId: APP_ID,
+      appKey: APP_KEY,
+      region: REGION,
+      pushUnread: false,
+    });
+    const _disconnect = sinon.spy(realtime, '_disconnect');
+    realtime._connect()
+      .then(connection => {
+        const a = new Client('a', connection);
+        const b = new Client('b', connection);
+        realtime._register(a);
+        realtime._register(b);
+        (() => realtime._register(new Client(undefined, connection))).should.throw();
+        realtime._deregister(a);
+        _disconnect.should.not.be.called();
+        realtime._deregister(b);
+        _disconnect.should.be.calledOnce();
+        done();
+      })
+      .catch(done);
   });
 });

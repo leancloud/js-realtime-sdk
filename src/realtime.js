@@ -149,6 +149,9 @@ export default class Realtime extends EventEmitter {
     if (!(client instanceof Client)) {
       throw new TypeError(`${client} is not a Client`);
     }
+    if (!client.id) {
+      throw new Error('Client must have id to be registerd');
+    }
     this._clients[client.id] = client;
     client.on('destroy', this._deregister.bind(this));
   }
@@ -156,6 +159,9 @@ export default class Realtime extends EventEmitter {
   _deregister(client) {
     if (!(client instanceof Client)) {
       throw new TypeError(`${client} is not a Client`);
+    }
+    if (!client.id) {
+      throw new Error('Client must have id to be unregisterd');
     }
     delete this._clients[client.id];
     if (Object.getOwnPropertyNames(this._clients).length === 0) {
