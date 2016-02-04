@@ -97,11 +97,6 @@ var global = typeof window !== 'undefined' ? window :
         src: 'test/index.js',
         options: {
           plugins: [
-            json(),
-            babel({ runtimeHelpers: true , exclude: 'node_modules/**' }),
-            commonjs({
-              include: ['proto/**'],
-            }),
             istanbul({
               exclude: ['test/*.js', 'proto/*.js'],
               instrumenter: require('istanbul'),
@@ -109,6 +104,11 @@ var global = typeof window !== 'undefined' ? window :
                 esModules: true,
                 noCompact: true,
               }
+            }),
+            json(),
+            babel({ runtimeHelpers: true , exclude: 'node_modules/**' }),
+            commonjs({
+              include: ['proto/**'],
             }),
           ],
           format: 'cjs'
@@ -155,16 +155,16 @@ var global = typeof window !== 'undefined' ? window :
         }
       }
     },
-    mocha_istanbul: {
+    mochaTest: {
       options: {
         timeout: 20000,
       },
-      coverage: {
-        src: ['test/index.bundle.js'],
-        options: {
-          root: './src',
-        }
-      },
+      src: ['test/index.bundle.js']
+    },
+    storeCoverage: {
+      options: {
+        dir: 'coverage'
+      }
     },
     connect: {
       server: {
@@ -200,7 +200,7 @@ var global = typeof window !== 'undefined' ? window :
   grunt.registerTask('lint', ['eslint']);
   grunt.registerTask('build-test', ['rollup:test', 'rollup:test-browser', 'envify:test-browser']);
   grunt.registerTask('test', '', function() {
-    var tasks = ['lint', 'build-test', /*'mocha_phantomjs',*/ 'mocha_istanbul'];
+    var tasks = ['lint', 'build-test', /*'mocha_phantomjs',*/ 'mochaTest', 'storeCoverage'];
     if (process.env.SAUCE_USERNAME && process.env.SAUCE_ACCESS_KEY) {
       tasks = tasks.concat(['connect', 'saucelabs-mocha']);
     } else {

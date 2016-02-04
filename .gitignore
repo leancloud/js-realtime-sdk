@@ -3,3 +3,4 @@ node_modules
 test/browser/index.*
 !test/browser/index.html
 test/index.bundle.*
+coverage
