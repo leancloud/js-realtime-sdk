@@ -44,14 +44,15 @@ export default class Realtime extends EventEmitter {
     const protocol = `lc.protobuf.${protocolsVersion}`;
 
     this._connectPromise = new Promise((resolve, reject) => {
-      const connect = new Connection(
+      const connection = new Connection(
         () => this._getEndpoints(this._options),
         protocol
       );
-      connect.on('open', () => resolve(connect));
-      connect.on('error', reject);
+      connection.binaryType = 'arraybuffer';
+      connection.on('open', () => resolve(connection));
+      connection.on('error', reject);
       // override handleClose
-      connect.handleClose = function handleClose(event) {
+      connection.handleClose = function handleClose(event) {
         const fatalError = [
           Errors.APP_NOT_AVAILABLE,
           Errors.INVALID_LOGIN,

@@ -24,6 +24,7 @@ process.env = process.env || {};`;
 var global = typeof window !== 'undefined' ? window :
              typeof global !== 'undefined' ? global :
              this;
+var require = require || function(id) {throw new Error('Unexpected required ' + id)};
 `;
       }
     };
@@ -98,7 +99,7 @@ var global = typeof window !== 'undefined' ? window :
         options: {
           plugins: [
             istanbul({
-              exclude: ['test/*.js', 'proto/*.js'],
+              exclude: ['test/*.js', 'proto/*.js', '*.json'],
               instrumenter: require('istanbul'),
               instrumenterConfig: {
                 esModules: true,

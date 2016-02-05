@@ -46,6 +46,7 @@ class WebSocketPlus extends EventEmitter {
           const ws = protocol ? new WebSocket(
             url, protocol
           ) : new WebSocket(url);
+          ws.binaryType = this.binaryType || 'blob';
           ws.onopen = () => resolve(ws);
           ws.onerror = error => {
             if (error instanceof Error) {
@@ -118,7 +119,7 @@ class WebSocketPlus extends EventEmitter {
     if (this._ws.ping) {
       this._ws.ping();
     } else {
-      console.warning(`The WebSocket implement does not support sending ping frame.
+      console.warn(`The WebSocket implement does not support sending ping frame.
         Override ping method to use application defined ping/pong mechanism.`);
     }
   }

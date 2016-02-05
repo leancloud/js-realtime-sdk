@@ -1,8 +1,7 @@
 import Client from './client';
 import { GenericCommand, SessionCommand } from '../proto/message';
 import { default as d } from 'debug';
-
-const VERSION = require('../package.json').version;
+import { version as VERSION } from '../package.json';
 
 const debug = d('LC:IMClient');
 
