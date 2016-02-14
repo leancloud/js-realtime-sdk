@@ -64,7 +64,7 @@
     "eventemitter3": "^1.1.1",
     "javascript-state-machine": "^2.3.5",
     "protobufjs": "^5.0.1",
-    "rsvp": "git+https://github.com/leeyeh/rsvp.js.git#es6-build",
+    "rsvp": "^3.2.1",
     "superagent": "^1.7.1",
     "superagent-promise": "^1.1.0",
     "ws": "^1.0.1"
