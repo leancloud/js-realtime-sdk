@@ -44,6 +44,7 @@ export default class Realtime extends EventEmitter {
     const protocol = `lc.protobuf.${protocolsVersion}`;
 
     this._connectPromise = new Promise((resolve, reject) => {
+      debug('No connection established, create a new one.');
       const connection = new Connection(
         () => this._getEndpoints(this._options),
         protocol
@@ -53,11 +54,11 @@ export default class Realtime extends EventEmitter {
       connection.on('error', reject);
       // override handleClose
       connection.handleClose = function handleClose(event) {
-        const fatalError = [
+        const fatalError = Array.find([
           Errors.APP_NOT_AVAILABLE,
           Errors.INVALID_LOGIN,
           Errors.INVALID_ORIGIN,
-        ].find(error => error.code === event.code);
+        ], error => error.code === event.code);
         if (fatalError) {
           // in these cases, SDK should throw.
           const error = new Error(`${fatalError.message || event.reason}`);

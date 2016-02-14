@@ -9,6 +9,7 @@ const COMMAND_TIMEOUT = 30000;
 
 export default class Connection extends WebSocketPlus {
   constructor(...args) {
+    debug(`initializing Connection`);
     super(...args);
     this._commands = {};
     this._serialId = 0;
