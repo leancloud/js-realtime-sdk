@@ -1,7 +1,7 @@
 /* eslint-disable */
 module.exports = function(grunt) {
   require('load-grunt-tasks')(grunt);
-  var npm = require('rollup-plugin-npm');
+  var nodeResolve = require('rollup-plugin-node-resolve');
   var json = require('rollup-plugin-json');
   var babel = require('rollup-plugin-babel');
   var commonjs = require('rollup-plugin-commonjs');
@@ -60,7 +60,7 @@ var require = require || function(id) {throw new Error('Unexpected required ' + 
           plugins: [
             json(),
             babel({ runtimeHelpers: true , exclude: 'node_modules/**' }),
-            npm({
+            nodeResolve({
               jsnext: true,
               main: true,
               skip: ['memcpy'],
@@ -79,7 +79,7 @@ var require = require || function(id) {throw new Error('Unexpected required ' + 
           plugins: [
             json(),
             babel({ runtimeHelpers: true , exclude: 'node_modules/**' }),
-            npm({
+            nodeResolve({
               jsnext: true,
               main: true,
               browser: true
@@ -122,7 +122,7 @@ var require = require || function(id) {throw new Error('Unexpected required ' + 
           plugins: [
             json(),
             babel({ runtimeHelpers: true , exclude: 'node_modules/**' }),
-            npm({
+            nodeResolve({
               jsnext: true,
               main: true,
               browser: true
