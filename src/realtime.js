@@ -742,7 +742,7 @@ engine.getServer = function(cache, options, callback) {
   var secure = options.secure;
   var url = '';
   var protocol = 'http://';
-  if (global.location && global.location.protocol === 'https:' && secure) {
+  if (global.location && global.location.protocol === 'https:') {
     protocol = 'https://';
   }
   var node = '';
