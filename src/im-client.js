@@ -18,7 +18,7 @@ export default class IMClient extends Client {
       appId,
       peerId: this.id,
       sessionMessage: new SessionCommand({
-        ua: 'js/' + VERSION,
+        ua: `js/${VERSION}`,
         r: isReconnect,
       }),
     });
