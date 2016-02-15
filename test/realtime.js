@@ -154,6 +154,6 @@ describe('Realtime', () => {
       .then(client => {
         client.id.should.be.a.String();
         done();
-      });
+      }).catch(done);
   });
 });

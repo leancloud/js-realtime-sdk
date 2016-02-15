@@ -176,16 +176,10 @@ export default class Realtime extends EventEmitter {
       const client = new IMClient(id, connection);
       connection.on('reconnect', () => client._openSession(this._options.appId));
       return client._openSession(this._options.appId)
-        .then(command => {
-          const peerId = command.peerId;
-          if (!peerId) {
-            console.warn(`Unexpected session opend without peerId.`);
-            return;
-          }
-          client.id = peerId;
+        .then(() => {
           this._register(client);
-        })
-        .then(() => client);
+          return client;
+        });
     });
   }
 
