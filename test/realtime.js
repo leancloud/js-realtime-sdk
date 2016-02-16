@@ -29,7 +29,7 @@ describe('Realtime', () => {
     );
   });
   describe('_connect/_disconnect', () => {
-    it('connection should be reused', (done) => {
+    it('connection should be reused', () => {
       const realtime = new Realtime({
         appId: APP_ID,
         appKey: APP_KEY,
@@ -37,7 +37,7 @@ describe('Realtime', () => {
         pushUnread: false,
       });
       let firstConnection;
-      realtime._connect()
+      return realtime._connect()
         .then(connection => {
           connection.should.be.a.instanceof(Connection);
           firstConnection = connection;
@@ -45,18 +45,16 @@ describe('Realtime', () => {
         .then(() => realtime._connect())
         .then(connection => {
           connection.should.be.exactly(firstConnection);
-          done();
-        })
-        .catch(done);
+        });
     });
-    it('_disconnect', (done) => {
+    it('_disconnect', () => {
       const realtime = new Realtime({
         appId: APP_ID,
         appKey: APP_KEY,
         region: REGION,
         pushUnread: false,
       });
-      realtime._connect()
+      return realtime._connect()
         .then(connection => {
           should(realtime._connectPromise).not.be.undefined();
           return connection;
@@ -68,9 +66,7 @@ describe('Realtime', () => {
         .then(connection => {
           should(realtime._connectPromise).be.undefined();
           connection.current.should.be.equal('closed');
-          done();
-        })
-        .catch(done);
+        });
     });
   });
   describe('endpoints cache', () => {
@@ -89,7 +85,7 @@ describe('Realtime', () => {
         done();
       }, done), 110);
     });
-    it('_getEndpoints should use cache', (done) => {
+    it('_getEndpoints should use cache', () => {
       const _fetchEndpointsInfo =
         sinon.spy(Realtime.prototype, '_fetchEndpointsInfo');
       const realtime = new Realtime({
@@ -98,19 +94,17 @@ describe('Realtime', () => {
         region: REGION,
         pushUnread: false,
       });
-      realtime._getEndpoints(realtime._options)
+      return realtime._getEndpoints(realtime._options)
         .then(() => {
           _fetchEndpointsInfo.should.be.calledOnce();
         })
         .then(() => realtime._getEndpoints(realtime._options))
         .then(() => {
           _fetchEndpointsInfo.should.be.calledOnce();
-          done();
-        })
-        .catch(done);
+        });
     });
   });
-  it('_register/_deregister', (done) => {
+  it('_register/_deregister', () => {
     const realtime = new Realtime({
       appId: APP_ID,
       appKey: APP_KEY,
@@ -118,7 +112,7 @@ describe('Realtime', () => {
       pushUnread: false,
     });
     const _disconnect = sinon.spy(realtime, '_disconnect');
-    realtime._connect()
+    return realtime._connect()
       .then(connection => {
         const a = new Client('a', connection);
         const b = new Client('b', connection);
@@ -133,11 +127,9 @@ describe('Realtime', () => {
         _disconnect.should.be.calledOnce();
         (() => realtime._deregister({})).should.throw();
         (() => realtime._deregister(c)).should.throw();
-        done();
-      })
-      .catch(done);
+      });
   });
-  it('createIMClient', (done) => {
+  it('create and close IMClient', () => {
     const realtime = new Realtime({
       appId: APP_ID,
       appKey: APP_KEY,
@@ -145,15 +137,19 @@ describe('Realtime', () => {
       pushUnread: false,
     });
     const id = 'test-client';
-    realtime.createIMClient(id)
+    return realtime.createIMClient()
       .then(client => {
         client.should.be.instanceof(IMClient);
-        client.id.should.be.equal(id);
-      })
-      .then(() => realtime.createIMClient())
-      .then(client => {
         client.id.should.be.a.String();
-        done();
-      }).catch(done);
+        realtime._clients.should.have.properties(client.id);
+      })
+      .then(() => realtime.createIMClient(id))
+      .then(client => {
+        client.id.should.be.equal(id);
+        realtime._clients.should.have.properties(id);
+        return client.close();
+      }).then(() => {
+        realtime._clients.should.not.have.properties(id);
+      });
   });
 });

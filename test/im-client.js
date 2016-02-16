@@ -17,7 +17,7 @@ const CLIENT_ID = 'test-client';
 
 describe('IMClient', () => {
   let client;
-  before(done => {
+  before(() =>
     new Realtime({
       appId: APP_ID,
       appKey: APP_KEY,
@@ -25,21 +25,19 @@ describe('IMClient', () => {
       pushUnread: false,
     }).createIMClient(CLIENT_ID).then(c => {
       client = c;
-      done();
-    });
-  });
+    })
+  );
 
   describe('ping', () => {
     it('type check', () => {
       (() => client.ping('1')).should.throw();
     });
 
-    it('ping result', done => {
+    it('ping result', () =>
       client.ping(['non-exists-client-id', CLIENT_ID])
         .then(ids => {
           ids.should.eql([CLIENT_ID]);
-          done();
-        }).catch(done);
-    });
+        })
+    );
   });
 });

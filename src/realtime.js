@@ -152,10 +152,9 @@ export default class Realtime extends EventEmitter {
       throw new TypeError(`${client} is not a Client`);
     }
     if (!client.id) {
-      throw new Error('Client must have id to be registerd');
+      throw new Error('Client must have an id to be registerd');
     }
     this._clients[client.id] = client;
-    client.on('destroy', this._deregister.bind(this));
   }
 
   _deregister(client) {
@@ -163,7 +162,7 @@ export default class Realtime extends EventEmitter {
       throw new TypeError(`${client} is not a Client`);
     }
     if (!client.id) {
-      throw new Error('Client must have id to be unregisterd');
+      throw new Error('Client must have an id to be unregisterd');
     }
     delete this._clients[client.id];
     if (Object.getOwnPropertyNames(this._clients).length === 0) {
@@ -174,8 +173,9 @@ export default class Realtime extends EventEmitter {
   createIMClient(id) {
     return this._connect().then(connection => {
       const client = new IMClient(id, connection);
-      connection.on('reconnect', () => client._openSession(this._options.appId));
-      return client._openSession(this._options.appId)
+      connection.on('reconnect', () => client._open(this._options.appId, true));
+      client.on('close', () => this._deregister(client), this);
+      return client._open(this._options.appId)
         .then(() => {
           this._register(client);
           return client;

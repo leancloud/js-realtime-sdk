@@ -17,7 +17,7 @@ export default class IMClient extends Client {
     return this._connection.send(command);
   }
 
-  _openSession(appId, isReconnect = false) {
+  _open(appId, isReconnect = false) {
     debug('open sessoin');
     const command = new GenericCommand({
       cmd: 'session',
@@ -36,6 +36,19 @@ export default class IMClient extends Client {
       }
       this.id = peerId;
     });
+  }
+
+  close() {
+    debug('close sessoin');
+    const command = new GenericCommand({
+      cmd: 'session',
+      op: 'query',
+    });
+    return this._send(command).then(
+      () => {
+        this.emit('close');
+      }
+    );
   }
 
   ping(ids) {
