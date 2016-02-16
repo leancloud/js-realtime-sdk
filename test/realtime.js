@@ -4,7 +4,6 @@ import should from 'should/as-function';
 import Realtime from '../src/realtime';
 import Connection from '../src/connection';
 import Client from '../src/client';
-import IMClient from '../src/im-client';
 import { testAsync } from './test-utils';
 
 const sinon = (typeof window !== 'undefined' && window.sinon) || require('sinon');
@@ -127,29 +126,6 @@ describe('Realtime', () => {
         _disconnect.should.be.calledOnce();
         (() => realtime._deregister({})).should.throw();
         (() => realtime._deregister(c)).should.throw();
-      });
-  });
-  it('create and close IMClient', () => {
-    const realtime = new Realtime({
-      appId: APP_ID,
-      appKey: APP_KEY,
-      region: REGION,
-      pushUnread: false,
-    });
-    const id = 'test-client';
-    return realtime.createIMClient()
-      .then(client => {
-        client.should.be.instanceof(IMClient);
-        client.id.should.be.a.String();
-        realtime._clients.should.have.properties(client.id);
-      })
-      .then(() => realtime.createIMClient(id))
-      .then(client => {
-        client.id.should.be.equal(id);
-        realtime._clients.should.have.properties(id);
-        return client.close();
-      }).then(() => {
-        realtime._clients.should.not.have.properties(id);
       });
   });
 });

@@ -170,9 +170,9 @@ export default class Realtime extends EventEmitter {
     }
   }
 
-  createIMClient(id) {
+  createIMClient(id, options) {
     return this._connect().then(connection => {
-      const client = new IMClient(id, connection);
+      const client = new IMClient(id, connection, options);
       connection.on('reconnect', () => client._open(this._options.appId, true));
       client.on('close', () => this._deregister(client), this);
       return client._open(this._options.appId)
