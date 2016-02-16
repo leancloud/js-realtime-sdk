@@ -33,6 +33,18 @@ var require = require || function(id) {throw new Error('Unexpected required ' + 
   var SAUCE_BROWSERS = [{
     browserName: 'chrome'
   }, {
+    browserName: 'chrome',
+    version: '31'
+  }, {
+    browserName: 'firefox',
+    version: 'beta'
+  }, {
+    browserName: 'iPhone',
+    version: '8.0'
+  }, {
+    browserName: 'android',
+    version: '4.4'
+  }, {
     browserName: 'internet explorer',
     version: '10.0'
   }];
@@ -191,7 +203,7 @@ var require = require || function(id) {throw new Error('Unexpected required ' + 
           build: process.env.CI_BUILD_NUMBER,
           testname: 'Sauce Test for LeanCloud realtime SDK',
           browsers: SAUCE_BROWSERS,
-          throttled: 3,
+          throttled: 5,
           tunnelArgs: ['--vm-version', 'dev-varnish']
         }
       }
