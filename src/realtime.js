@@ -5,7 +5,7 @@ import { default as d } from 'debug';
 import EventEmitter from 'eventemitter3';
 import { default as superagentPromise } from 'superagent-promise';
 import superagent from 'superagent';
-import { tap } from './utils';
+import { tap, Cache } from './utils';
 import Client from './client';
 import IMClient from './im-client';
 
@@ -29,7 +29,7 @@ export default class Realtime extends EventEmitter {
       pushUnread: true,
       ssl: true,
     }, options);
-    this._cache = {};
+    this._cache = new Cache();
     this._clients = {};
   }
 
@@ -74,31 +74,11 @@ export default class Realtime extends EventEmitter {
     return this._connectPromise;
   }
 
-  _getCache(key) {
-    const cache = this._cache[key];
-    if (cache) {
-      const expired = cache.expiredAt && cache.expiredAt < Date.now();
-      if (!expired) {
-        return cache.value;
-      }
-    }
-    return null;
-  }
-
-  _setCache(key, value, expiredTime) {
-    const cache = this._cache[key] = {
-      value,
-    };
-    if (typeof expiredTime === 'number') {
-      cache.expiredAt = Date.now() + expiredTime;
-    }
-  }
-
   _getEndpoints(options) {
     return Promise.resolve(
-      this._getCache('endpoints')
+      this._cache.get('endpoints')
       || this._fetchEndpointsInfo(options).then(
-        tap(info => this._setCache('endpoints', info, info.ttl))
+        tap(info => this._cache.set('endpoints', info, info.ttl))
       )
     )
     .then(info => {

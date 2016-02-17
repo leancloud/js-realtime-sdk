@@ -9,3 +9,29 @@ export const tryAll = promiseConstructors => {
 };
 
 export const tap = interceptor => value => (interceptor(value), value);
+
+export class Cache {
+  constructor() {
+    this._map = {};
+  }
+
+  get(key) {
+    const cache = this._map[key];
+    if (cache) {
+      const expired = cache.expiredAt && cache.expiredAt < Date.now();
+      if (!expired) {
+        return cache.value;
+      }
+    }
+    return null;
+  }
+
+  set(key, value, ttl) {
+    const cache = this._map[key] = {
+      value,
+    };
+    if (typeof ttl === 'number') {
+      cache.expiredAt = Date.now() + ttl;
+    }
+  }
+}

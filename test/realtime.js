@@ -4,7 +4,6 @@ import should from 'should/as-function';
 import Realtime from '../src/realtime';
 import Connection from '../src/connection';
 import Client from '../src/client';
-import { testAsync } from './test-utils';
 
 const sinon = (typeof window !== 'undefined' && window.sinon) || require('sinon');
 
@@ -69,21 +68,6 @@ describe('Realtime', () => {
     });
   });
   describe('endpoints cache', () => {
-    it('getter/setter', (done) => {
-      const realtime = new Realtime({
-        appId: APP_ID,
-        appKey: APP_KEY,
-      });
-      should(realtime._getCache('__test')).be.null();
-      realtime._setCache('__test', 1);
-      realtime._getCache('__test').should.equal(1);
-      realtime._setCache('__test', '1', 100);
-      realtime._getCache('__test').should.equal('1');
-      setTimeout(testAsync(() => {
-        should(realtime._getCache('__test')).be.null();
-        done();
-      }, done), 110);
-    });
     it('_getEndpoints should use cache', () => {
       const _fetchEndpointsInfo =
         sinon.spy(Realtime.prototype, '_fetchEndpointsInfo');

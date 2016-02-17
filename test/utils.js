@@ -1,7 +1,9 @@
 import 'should';
 import 'should-sinon';
-import { tap, tryAll } from '../src/utils';
+import should from 'should/as-function';
+import { tap, tryAll, Cache } from '../src/utils';
 import { Promise } from 'rsvp';
+import { testAsync } from './test-utils';
 
 const sinon = (typeof window !== 'undefined' && window.sinon) || require('sinon');
 
@@ -43,6 +45,21 @@ describe('utils', () => {
           failCallback.should.have.callCount(0);
         }
       );
+    });
+  });
+
+  describe('Cache', () => {
+    it('get/set', (done) => {
+      const cache = new Cache();
+      should(cache.get('__test')).be.null();
+      cache.set('__test', 1);
+      cache.get('__test').should.equal(1);
+      cache.set('__test', '1', 100);
+      cache.get('__test').should.equal('1');
+      setTimeout(testAsync(() => {
+        should(cache.get('__test')).be.null();
+        done();
+      }, done), 110);
     });
   });
 });
