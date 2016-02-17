@@ -2,10 +2,28 @@ import WebSocketPlus from './websocket-plus';
 import { GenericCommand } from '../proto/message';
 import { Promise } from 'rsvp';
 import { default as d } from 'debug';
+import isPlainObject from 'lodash/isPlainObject';
 
 const debug = d('LC:Connection');
 
 const COMMAND_TIMEOUT = 30000;
+
+// debug utility
+const removeNull = obj => {
+  const object = Object.assign({}, obj);
+  for (const prop in object) {
+    if (object.hasOwnProperty(prop)) {
+      const value = object[prop];
+      if (value === null) {
+        delete object[prop];
+      } else if (isPlainObject(value)) {
+        object[prop] = removeNull(value);
+      }
+    }
+  }
+  return object;
+};
+const trim = message => removeNull(JSON.parse(JSON.stringify(message)));
 
 export default class Connection extends WebSocketPlus {
   constructor(...args) {
@@ -19,7 +37,7 @@ export default class Connection extends WebSocketPlus {
     let message = msg;
     this._serialId ++;
     message.i = this._serialId;
-    debug(message, 'sent');
+    debug(trim(message), 'sent');
 
     if (message.toArrayBuffer) {
       message = message.toArrayBuffer();
@@ -55,7 +73,7 @@ export default class Connection extends WebSocketPlus {
     let message;
     try {
       message = GenericCommand.decode(msg);
-      debug(message, 'recieved');
+      debug(trim(message), 'recieved');
     } catch (e) {
       console.warn('Decode message failed', msg);
     }
