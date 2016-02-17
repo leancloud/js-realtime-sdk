@@ -38,6 +38,7 @@ describe('IMClient', () => {
         region: REGION,
         pushUnread: false,
       });
+      const closeCallback = sinon.spy();
       return rt
         .createIMClient()
         .then(client1 => {
@@ -47,10 +48,12 @@ describe('IMClient', () => {
         })
         .then(() => rt.createIMClient(CLIENT_ID))
         .then(client2 => {
+          client2.on('close', closeCallback);
           client2.id.should.be.equal(CLIENT_ID);
           rt._clients.should.have.properties(CLIENT_ID);
           return client2.close();
         }).then(() => {
+          closeCallback.should.be.calledOnce();
           rt._clients.should.not.have.properties(CLIENT_ID);
         });
     });

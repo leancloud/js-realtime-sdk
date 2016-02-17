@@ -76,11 +76,13 @@ export default class IMClient extends Client {
     debug('close sessoin');
     const command = new GenericCommand({
       cmd: 'session',
-      op: 'query',
+      op: 'close',
     });
     return this._send(command).then(
       () => {
-        this.emit('close');
+        this.emit('close', {
+          code: 0,
+        });
       }
     );
   }
