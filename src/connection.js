@@ -68,6 +68,16 @@ export default class Connection extends WebSocketPlus {
     });
   }
 
+  static _createError(message) {
+    const {
+      code, reason, appCode, detail,
+      } = message.errorMessage;
+    const error = new Error(reason || detail);
+    return Object.assign(error, {
+      code, appCode, detail,
+    });
+  }
+
   handleMessage(msg) {
     if (msg === '{}') return;
     let message;
@@ -81,10 +91,18 @@ export default class Connection extends WebSocketPlus {
     const serialId = message.i;
     if (serialId) {
       if (this._commands[serialId]) {
-        this._commands[serialId].resolve(message);
+        if (message.cmd === 'error') {
+          this._commands[serialId].reject(this.constructor._createError(message));
+        } else {
+          this._commands[serialId].resolve(message);
+        }
         delete this._commands[serialId];
       } else {
-        this.emit('message', message);
+        if (message.cmd === 'error') {
+          this.emit('error', this.constructor._createError(message));
+        } else {
+          this.emit('message', message);
+        }
       }
     }
   }
