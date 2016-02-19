@@ -70,7 +70,7 @@ describe('Realtime', () => {
   describe('endpoints cache', () => {
     it('_getEndpoints should use cache', () => {
       const _fetchEndpointsInfo =
-        sinon.spy(Realtime.prototype, '_fetchEndpointsInfo');
+        sinon.spy(Realtime, '_fetchEndpointsInfo');
       const realtime = new Realtime({
         appId: APP_ID,
         appKey: APP_KEY,

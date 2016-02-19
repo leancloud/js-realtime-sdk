@@ -29,7 +29,7 @@ export default class Realtime extends EventEmitter {
       pushUnread: true,
       ssl: true,
     }, options);
-    this._cache = new Cache();
+    this._cache = new Cache('endpoints');
     this._clients = {};
   }
 
@@ -77,7 +77,7 @@ export default class Realtime extends EventEmitter {
   _getEndpoints(options) {
     return Promise.resolve(
       this._cache.get('endpoints')
-      || this._fetchEndpointsInfo(options).then(
+      || this.constructor._fetchEndpointsInfo(options).then(
         tap(info => this._cache.set('endpoints', info, info.ttl))
       )
     )
@@ -87,7 +87,7 @@ export default class Realtime extends EventEmitter {
     });
   }
 
-  _fetchEndpointsInfo(options) {
+  static _fetchEndpointsInfo(options) {
     debug('fetch endpoint info');
     const {
       appId,
@@ -132,7 +132,7 @@ export default class Realtime extends EventEmitter {
       throw new TypeError(`${client} is not a Client`);
     }
     if (!client.id) {
-      throw new Error('Client must have an id to be registerd');
+      throw new Error('Client must have an id to be registered');
     }
     this._clients[client.id] = client;
   }
@@ -142,7 +142,7 @@ export default class Realtime extends EventEmitter {
       throw new TypeError(`${client} is not a Client`);
     }
     if (!client.id) {
-      throw new Error('Client must have an id to be unregisterd');
+      throw new Error('Client must have an id to be deregistered');
     }
     delete this._clients[client.id];
     if (Object.getOwnPropertyNames(this._clients).length === 0) {

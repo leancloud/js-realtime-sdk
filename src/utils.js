@@ -1,4 +1,5 @@
 import { Promise } from 'rsvp';
+import { default as d } from 'debug';
 
 export const tryAll = promiseConstructors => {
   const promise = new Promise(promiseConstructors[0]);
@@ -10,8 +11,10 @@ export const tryAll = promiseConstructors => {
 
 export const tap = interceptor => value => (interceptor(value), value);
 
+const debug = d('LC:Cache');
 export class Cache {
-  constructor() {
+  constructor(name = 'anonymous') {
+    this.name = name;
     this._map = {};
   }
 
@@ -20,13 +23,17 @@ export class Cache {
     if (cache) {
       const expired = cache.expiredAt && cache.expiredAt < Date.now();
       if (!expired) {
+        debug(`[${this.name}] hit: ${key} ${cache.value}`);
         return cache.value;
       }
+      debug(`[${this.name}] expired: ${key}`);
     }
+    debug(`[${this.name}] missed: ${key}`);
     return null;
   }
 
   set(key, value, ttl) {
+    debug(`[${this.name}] set: ${key} ${value} ${ttl}`);
     const cache = this._map[key] = {
       value,
     };
