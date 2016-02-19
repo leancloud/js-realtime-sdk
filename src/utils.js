@@ -42,3 +42,14 @@ export class Cache {
     }
   }
 }
+
+export const decodeDate = date => {
+  if (!date) return date;
+  if (typeof date === 'string') {
+    return new Date(date);
+  }
+  if (date.__type === 'Date' && date.iso) {
+    return new Date(date.iso);
+  }
+  return date;
+};

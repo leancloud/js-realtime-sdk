@@ -143,11 +143,62 @@ export default class IMClient extends Client {
     return this._send(command)
       .then(resCommand => JSON.parse(resCommand.convMessage.results.data))
       .then(conversations => conversations.map(
-        conversation => new Conversation(conversation)
+        conversationRawData => Conversation._parseFromRawJSON(conversationRawData)
       ))
       .then(tap(conversations => conversations.map(conversation =>
         this._conversationCache.set(conversation.id, conversation)
       )));
   }
 
+  createConversation(options) {
+    let attr = {};
+    const {
+      name,
+      attributes,
+      members,
+      isTransient,
+      isUnique,
+    } = options;
+    if (name) {
+      if (typeof name !== 'string') {
+        throw new TypeError(`conversation name ${name} is not a string`);
+      }
+      attr.name = name;
+    }
+    if (attributes) {
+      attr.attr = attributes;
+    }
+    attr = new JsonObjectMessage({
+      data: JSON.stringify(attr),
+    });
+
+    const startCommandJson = {
+      m: members,
+      attr,
+      transient: isTransient,
+      unique: isUnique,
+    };
+
+    const command = new GenericCommand({
+      cmd: 'conv',
+      op: 'start',
+      convMessage: new ConvCommand(startCommandJson),
+    });
+
+    return this._send(command)
+      .then(resCommand => new Conversation({
+        id: resCommand.cid,
+        createdAt: resCommand.cdate,
+        updatedAt: resCommand.cdate,
+        lastMessageAt: null,
+        members,
+        attributes,
+        name,
+        isTransient,
+        creator: this.id,
+      }))
+      .then(tap(conversation =>
+        this._conversationCache.set(conversation.id, conversation)
+      ));
+  }
 }
