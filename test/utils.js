@@ -1,7 +1,7 @@
 import 'should';
 import 'should-sinon';
 import should from 'should/as-function';
-import { tap, tryAll, Cache } from '../src/utils';
+import { tap, tryAll, Cache, keyRemap } from '../src/utils';
 import { Promise } from 'rsvp';
 import { testAsync } from './test-utils';
 
@@ -60,6 +60,21 @@ describe('utils', () => {
         should(cache.get('__test')).be.null();
         done();
       }, done), 110);
+    });
+  });
+
+  describe('keyRemap', () => {
+    it('remap', () => {
+      keyRemap({
+        a: 'x',
+        b: 'y',
+      }, {
+        a: 1,
+        c: 2,
+      }).should.be.eql({
+        x: 1,
+        c: 2,
+      });
     });
   });
 });

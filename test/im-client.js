@@ -7,6 +7,7 @@ import Realtime from '../src/realtime';
 // import Client from '../src/client';
 import IMClient from '../src/im-client';
 import ConversationQuery from '../src/conversation-query';
+import Conversation from '../src/conversation';
 // import { testAsync } from './test-utils';
 //
 const sinon = (typeof window !== 'undefined' && window.sinon) || require('sinon');
@@ -113,7 +114,7 @@ describe('IMClient', () => {
     it('should be a ConversationQuery', () => {
       client.getQuery().should.be.instanceof(ConversationQuery);
     });
-    it('should match one conversation', () =>
+    it('equalTo', () =>
       client.getQuery().equalTo('objectId', EXSITING_ROOM_ID).find()
         .then(conversations => {
           conversations.length.should.be.equal(1);
@@ -130,7 +131,11 @@ describe('IMClient', () => {
     );
     it('should match one conversation', () =>
       client.getConversation(EXSITING_ROOM_ID).then(conversation => {
+        conversation.should.be.instanceof(Conversation);
         conversation.id.should.be.equal(EXSITING_ROOM_ID);
+        conversation.createdAt.should.be.a.Date();
+        conversation.updatedAt.should.be.a.Date();
+        conversation.lastMessageAt.should.be.a.Date();
       })
     );
     it('should use cache', () =>
@@ -139,6 +144,30 @@ describe('IMClient', () => {
         client.getConversation(EXSITING_ROOM_ID),
       ]).then(conversations => {
         conversations[0].should.be.exactly(conversations[1]);
+      })
+    );
+  });
+
+  describe('createConversation', () => {
+    it('should create a converation', () =>
+      client.createConversation({
+        members: ['hjiang'],
+      }).then(conversation => {
+        conversation.should.be.instanceof(Conversation);
+        conversation.members.should.have.length(2);
+        conversation.members.should.containDeep(['hjiang', CLIENT_ID]);
+        conversation.createdAt.should.be.a.Date();
+        conversation.updatedAt.should.be.a.Date();
+        should(conversation.lastMessageAt).be.null();
+      })
+    );
+    it('unique', () =>
+      Promise.all([0, 0].map(() => client.createConversation({
+        name: 'unique room',
+        members: ['hjiang', 'jfeng'],
+        isUnique: true,
+      }))).then(conversations => {
+        conversations[0].id.should.be.exactly(conversations[1].id);
       })
     );
   });

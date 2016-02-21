@@ -1,6 +1,5 @@
 import EventEmitter from 'eventemitter3';
-import keyRemap from 'key-remap';
-import { decodeDate } from './utils';
+import { decodeDate, keyRemap } from './utils';
 
 export default class Conversation extends EventEmitter {
   constructor(data) {
@@ -20,17 +19,18 @@ export default class Conversation extends EventEmitter {
     this.createdAt = decodeDate(this.createdAt);
     this.updatedAt = decodeDate(this.updatedAt);
     this.lastMessageAt = decodeDate(this.lastMessageAt);
+    this.members = Array.from(new Set(this.members));
     this._pendingAttributes = {};
   }
 
   static _parseFromRawJSON(rawJson) {
     const json = keyRemap({
-      id: 'objectId',
-      lastMessageAt: 'lm',
-      members: 'm',
-      attributes: 'attr',
-      isTransient: 'tr',
-      creator: 'c',
+      objectId: 'id',
+      lm: 'lastMessageAt',
+      m: 'members',
+      attr: 'attributes',
+      tr: 'isTransient',
+      c: 'creator',
     }, rawJson);
     return new this(json);
   }

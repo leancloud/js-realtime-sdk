@@ -150,7 +150,7 @@ export default class IMClient extends Client {
       )));
   }
 
-  createConversation(options) {
+  createConversation(options = {}) {
     let attr = {};
     const {
       name,
@@ -159,6 +159,12 @@ export default class IMClient extends Client {
       isTransient,
       isUnique,
     } = options;
+    if (!members) {
+      throw new Error('members required to create conversation');
+    }
+    if (!Array.isArray(members)) {
+      throw new TypeError(`conversation members ${members} is not an array`);
+    }
     if (name) {
       if (typeof name !== 'string') {
         throw new TypeError(`conversation name ${name} is not a string`);
@@ -186,17 +192,14 @@ export default class IMClient extends Client {
     });
 
     return this._send(command)
-      .then(resCommand => new Conversation({
-        id: resCommand.cid,
-        createdAt: resCommand.cdate,
-        updatedAt: resCommand.cdate,
+      .then(resCommand => new Conversation(Object.assign({}, options, {
+        id: resCommand.convMessage.cid,
+        createdAt: resCommand.convMessage.cdate,
+        updatedAt: resCommand.convMessage.cdate,
         lastMessageAt: null,
-        members,
-        attributes,
-        name,
-        isTransient,
         creator: this.id,
-      }))
+        members: members.concat([this.id]),
+      })))
       .then(tap(conversation =>
         this._conversationCache.set(conversation.id, conversation)
       ));
