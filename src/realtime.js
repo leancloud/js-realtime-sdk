@@ -20,7 +20,7 @@ export default class Realtime extends EventEmitter {
       throw new TypeError(`appId [${options.appId}] is not a string`);
     }
     if (typeof options.appKey !== 'string') {
-      throw new TypeError(`appKey is not a string`);
+      throw new TypeError('appKey is not a string');
     }
     this._options = Object.assign({
       appId: undefined,
@@ -76,13 +76,16 @@ export default class Realtime extends EventEmitter {
 
   _getEndpoints(options) {
     return Promise.resolve(
-      this._cache.get('endpoints')
-      || this.constructor._fetchEndpointsInfo(options).then(
-        tap(info => this._cache.set('endpoints', info, info.ttl))
-      )
+      this._cache.get('endpoints') ||
+      this
+        .constructor
+        ._fetchEndpointsInfo(options)
+        .then(
+          tap(info => this._cache.set('endpoints', info, info.ttl))
+        )
     )
     .then(info => {
-      debug(`endpoint info:`, info);
+      debug('endpoint info:', info);
       return [info.server, info.secondary];
     });
   }

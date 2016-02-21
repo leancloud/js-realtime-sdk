@@ -31,7 +31,7 @@ describe('IMClient', () => {
     });
     return realtime
       .createIMClient(CLIENT_ID)
-      .then(c => client = c);
+      .then(c => (client = c));
   });
 
   describe('create and close', () => {

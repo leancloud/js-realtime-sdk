@@ -27,7 +27,7 @@ const trim = message => removeNull(JSON.parse(JSON.stringify(message)));
 
 export default class Connection extends WebSocketPlus {
   constructor(...args) {
-    debug(`initializing Connection`);
+    debug('initializing Connection');
     super(...args);
     this._commands = {};
     this._serialId = 0;
@@ -92,9 +92,13 @@ export default class Connection extends WebSocketPlus {
     if (serialId) {
       if (this._commands[serialId]) {
         if (message.cmd === 'error') {
-          this._commands[serialId].reject(this.constructor._createError(message));
+          this
+            ._commands[serialId]
+            .reject(this.constructor._createError(message));
         } else {
-          this._commands[serialId].resolve(message);
+          this
+            ._commands[serialId]
+            .resolve(message);
         }
         delete this._commands[serialId];
       } else {
