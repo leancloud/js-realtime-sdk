@@ -4,4 +4,5 @@ export const testAsync = (asserts, done) => () => {
   } catch (e) {
     return done(e);
   }
+  return true;
 };

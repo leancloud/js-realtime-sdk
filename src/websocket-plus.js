@@ -15,7 +15,7 @@ const TIMEOUT_TIME = 180000;
 
 class WebSocketPlus extends EventEmitter {
   constructor(getUrls, protocol) {
-    debug(`initializing WebSocketPlus`);
+    debug('initializing WebSocketPlus');
     if (typeof WebSocket === 'undefined') {
       throw new Error('WebSocket is undefined. Polyfill is required in this runtime.');
     }

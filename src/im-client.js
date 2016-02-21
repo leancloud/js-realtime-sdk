@@ -30,55 +30,57 @@ export default class IMClient extends Client {
 
   _open(appId, isReconnect = false) {
     debug('open session');
-    return Promise.resolve(new GenericCommand({
-      cmd: 'session',
-      op: 'open',
-      appId,
-      sessionMessage: new SessionCommand({
-        ua: `js/${VERSION}`,
-        r: isReconnect,
-      }),
-    }))
-    .then(cmd => {
-      const command = cmd;
-      if (this.options.signatureFactory) {
-        debug(`call signatureFactory with [${this.id}]`);
-        return Promise.resolve()
-          .then(() => this.options.signatureFactory(this.id))
-          .then(tap(signatureResult => debug('signatureResult', signatureResult)))
-          .then((signatureResult = {}) => {
-            const {
-              signature,
-              timestamp,
-              nonce,
-            } = signatureResult;
-            if (typeof signature !== 'string'
-                || typeof timestamp !== 'number'
-                || typeof nonce !== 'string') {
-              throw new Error('malformed signature');
-            }
-            Object.assign(command.sessionMessage, {
-              s: signature,
-              t: timestamp,
-              n: nonce,
+    return Promise
+      .resolve(new GenericCommand({
+        cmd: 'session',
+        op: 'open',
+        appId,
+        sessionMessage: new SessionCommand({
+          ua: `js/${VERSION}`,
+          r: isReconnect,
+        }),
+      }))
+      .then(cmd => {
+        const command = cmd;
+        if (this.options.signatureFactory) {
+          debug(`call signatureFactory with [${this.id}]`);
+          return Promise
+            .resolve()
+            .then(() => this.options.signatureFactory(this.id))
+            .then(tap(signatureResult => debug('signatureResult', signatureResult)))
+            .then((signatureResult = {}) => {
+              const {
+                signature,
+                timestamp,
+                nonce,
+              } = signatureResult;
+              if (typeof signature !== 'string'
+                  || typeof timestamp !== 'number'
+                  || typeof nonce !== 'string') {
+                throw new Error('malformed signature');
+              }
+              Object.assign(command.sessionMessage, {
+                s: signature,
+                t: timestamp,
+                n: nonce,
+              });
+              return command;
+            }, error => {
+              debug(error);
+              throw new Error(`signatureFactory error: ${error.message}`);
             });
-            return command;
-          }, error => {
-            debug(error);
-            throw new Error(`signatureFactory error: ${error.message}`);
-          });
-      }
-      return command;
-    })
-    .then(this._send.bind(this))
-    .then(resCommand => {
-      const peerId = resCommand.peerId;
-      if (!peerId) {
-        console.warn(`Unexpected session opened without peerId.`);
-        return;
-      }
-      this.id = peerId;
-    });
+        }
+        return command;
+      })
+      .then(this._send.bind(this))
+      .then(resCommand => {
+        const peerId = resCommand.peerId;
+        if (!peerId) {
+          console.warn('Unexpected session opened without peerId.');
+          return;
+        }
+        this.id = peerId;
+      });
   }
 
   close() {
@@ -120,7 +122,8 @@ export default class IMClient extends Client {
     if (cachedConversation) {
       return Promise.resolve(cachedConversation);
     }
-    return this.getQuery()
+    return this
+      .getQuery()
       .equalTo('objectId', id)
       .find()
       .then(conversations => conversations[0] || null);
@@ -140,7 +143,8 @@ export default class IMClient extends Client {
       op: 'query',
       convMessage: new ConvCommand(queryJSON),
     });
-    return this._send(command)
+    return this
+      ._send(command)
       .then(resCommand => JSON.parse(resCommand.convMessage.results.data))
       .then(conversations => conversations.map(
         conversationRawData => Conversation._parseFromRawJSON(conversationRawData)
@@ -191,7 +195,8 @@ export default class IMClient extends Client {
       convMessage: new ConvCommand(startCommandJson),
     });
 
-    return this._send(command)
+    return this
+      ._send(command)
       .then(resCommand => new Conversation(Object.assign({}, options, {
         id: resCommand.convMessage.cid,
         createdAt: resCommand.convMessage.cdate,
