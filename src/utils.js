@@ -53,3 +53,11 @@ export const decodeDate = date => {
   }
   return date;
 };
+
+export const keyRemap = (keymap, obj) =>
+  Object.keys(obj).reduce((newObj, key) => {
+    const newKey = keymap[key] || key;
+    return Object.assign(newObj, {
+      [newKey]: obj[key],
+    });
+  }, {});
