@@ -40,7 +40,7 @@
     "grunt-env": "^0.4.4",
     "grunt-envify": "0.0.3",
     "grunt-eslint": "^18.0.0",
-    "grunt-istanbul": "^0.6.1",
+    "grunt-istanbul": "^0.7.0",
     "grunt-mocha-test": "^0.12.7",
     "grunt-rollup": "^0.6.1",
     "grunt-saucelabs": "^8.6.1",
