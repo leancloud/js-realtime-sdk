@@ -8,7 +8,7 @@ import {
   JsonObjectMessage,
 } from '../proto/message';
 import { Promise } from 'rsvp';
-import { tap, Cache } from './utils';
+import { tap, Cache, keyRemap } from './utils';
 import { default as d } from 'debug';
 import { version as VERSION } from '../package.json';
 
@@ -116,7 +116,7 @@ export default class IMClient extends Client {
 
   getConversation(id) {
     if (typeof id !== 'string') {
-      return new TypeError(`${id} is not a String`);
+      throw new TypeError(`${id} is not a String`);
     }
     const cachedConversation = this._conversationCache.get(id);
     if (cachedConversation) {
@@ -146,12 +146,22 @@ export default class IMClient extends Client {
     return this
       ._send(command)
       .then(resCommand => JSON.parse(resCommand.convMessage.results.data))
-      .then(conversations => conversations.map(
-        conversationRawData => Conversation._parseFromRawJSON(conversationRawData)
-      ))
+      .then(conversations => conversations.map(this._parseConversationFromRawData.bind(this)))
       .then(tap(conversations => conversations.map(conversation =>
         this._conversationCache.set(conversation.id, conversation)
       )));
+  }
+
+  _parseConversationFromRawData(rawData) {
+    const data = keyRemap({
+      objectId: 'id',
+      lm: 'lastMessageAt',
+      m: 'members',
+      attr: 'attributes',
+      tr: 'isTransient',
+      c: 'creator',
+    }, rawData);
+    return new Conversation(data, this);
   }
 
   createConversation(options = {}) {
@@ -163,9 +173,6 @@ export default class IMClient extends Client {
       isTransient,
       isUnique,
     } = options;
-    if (!members) {
-      throw new Error('members required to create conversation');
-    }
     if (!Array.isArray(members)) {
       throw new TypeError(`conversation members ${members} is not an array`);
     }
@@ -204,7 +211,7 @@ export default class IMClient extends Client {
         lastMessageAt: null,
         creator: this.id,
         members: members.concat([this.id]),
-      })))
+      }), this))
       .then(tap(conversation =>
         this._conversationCache.set(conversation.id, conversation)
       ));

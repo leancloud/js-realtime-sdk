@@ -17,7 +17,7 @@ const APP_KEY = process.env.APP_KEY || 'xhiibo2eiyokjdu2y3kqcb7334rtw4x33zam98bu
 const REGION = process.env.REGION || 'cn';
 const EXSITING_ROOM_ID = process.env.EXSITING_ROOM_ID || '559d08a1e4b0a35bc5062ba1';
 const NON_EXSITING_ROOM_ID = '555555555555555555555555';
-const CLIENT_ID = 'test-client';
+const CLIENT_ID = 'leeyeh';
 
 describe('IMClient', () => {
   let client;
@@ -124,6 +124,10 @@ describe('IMClient', () => {
   });
 
   describe('getConversation', () => {
+    it('param check', () => {
+      (() => client.getConversation()).should.throw();
+      (() => client.getConversation(1)).should.throw();
+    });
     it('should return null if no match', () =>
       client.getConversation(NON_EXSITING_ROOM_ID).then(conversation => {
         should(conversation).be.null();
@@ -149,9 +153,13 @@ describe('IMClient', () => {
   });
 
   describe('createConversation', () => {
-    it('should create a converation', () =>
+    it('should create a conversation', () =>
       client.createConversation({
         members: ['hjiang'],
+        name: '135',
+        attributes: {
+          foo: 'bar',
+        },
       }).then(conversation => {
         conversation.should.be.instanceof(Conversation);
         conversation.members.should.have.length(2);
@@ -159,8 +167,13 @@ describe('IMClient', () => {
         conversation.createdAt.should.be.a.Date();
         conversation.updatedAt.should.be.a.Date();
         should(conversation.lastMessageAt).be.null();
+        conversation.name.should.be.equal('135');
+        conversation.attributes.should.be.eql({ foo: 'bar' });
       })
     );
+    it('members required', () => {
+      (() => client.createConversation()).should.throw();
+    });
     it('unique', () =>
       Promise.all([0, 0].map(() => client.createConversation({
         name: 'unique room',

@@ -1,8 +1,9 @@
 import EventEmitter from 'eventemitter3';
-import { decodeDate, keyRemap } from './utils';
+import { decodeDate } from './utils';
+import IMClient from './im-client';
 
 export default class Conversation extends EventEmitter {
-  constructor(data) {
+  constructor(data, client) {
     super();
     Object.assign(this, {
       // id,
@@ -21,17 +22,11 @@ export default class Conversation extends EventEmitter {
     this.lastMessageAt = decodeDate(this.lastMessageAt);
     this.members = Array.from(new Set(this.members));
     this._pendingAttributes = {};
+    if (client instanceof IMClient) {
+      this._client = client;
+    } else {
+      throw new TypeError('Conversation must be initialized with a client');
+    }
   }
 
-  static _parseFromRawJSON(rawJson) {
-    const json = keyRemap({
-      objectId: 'id',
-      lm: 'lastMessageAt',
-      m: 'members',
-      attr: 'attributes',
-      tr: 'isTransient',
-      c: 'creator',
-    }, rawJson);
-    return new this(json);
-  }
 }
