@@ -4,12 +4,20 @@ import should from 'should/as-function';
 import Realtime from '../src/realtime';
 import Connection from '../src/connection';
 import Client from '../src/client';
+import { CommandType } from '../proto/message';
 
 const sinon = (typeof window !== 'undefined' && window.sinon) || require('sinon');
 
 const APP_ID = process.env.APP_ID || 'anruhhk6visejjip57psvv5uuv8sggrzdfl9pg2bghgsiy35';
 const APP_KEY = process.env.APP_KEY || 'xhiibo2eiyokjdu2y3kqcb7334rtw4x33zam98buxzkjuq5g';
 const REGION = process.env.REGION || 'cn';
+
+const createRealtime = (options) => new Realtime(Object.assign({
+  appId: APP_ID,
+  appKey: APP_KEY,
+  region: REGION,
+  pushUnread: false,
+}, options));
 
 describe('Realtime', () => {
   describe('constructor', () => {
@@ -28,12 +36,7 @@ describe('Realtime', () => {
   });
   describe('_connect/_disconnect', () => {
     it('connection should be reused', () => {
-      const realtime = new Realtime({
-        appId: APP_ID,
-        appKey: APP_KEY,
-        region: REGION,
-        pushUnread: false,
-      });
+      const realtime = createRealtime();
       let firstConnection;
       return realtime._connect()
         .then(connection => {
@@ -46,12 +49,7 @@ describe('Realtime', () => {
         });
     });
     it('_disconnect', () => {
-      const realtime = new Realtime({
-        appId: APP_ID,
-        appKey: APP_KEY,
-        region: REGION,
-        pushUnread: false,
-      });
+      const realtime = createRealtime();
       return realtime._connect()
         .then(connection => {
           should(realtime._connectPromise).not.be.undefined();
@@ -71,12 +69,7 @@ describe('Realtime', () => {
     it('_getEndpoints should use cache', () => {
       const _fetchEndpointsInfo =
         sinon.spy(Realtime, '_fetchEndpointsInfo');
-      const realtime = new Realtime({
-        appId: APP_ID,
-        appKey: APP_KEY,
-        region: REGION,
-        pushUnread: false,
-      });
+      const realtime = createRealtime();
       return realtime._getEndpoints(realtime._options)
         .then(() => {
           _fetchEndpointsInfo.should.be.calledOnce();
@@ -88,12 +81,7 @@ describe('Realtime', () => {
     });
   });
   it('_register/_deregister', () => {
-    const realtime = new Realtime({
-      appId: APP_ID,
-      appKey: APP_KEY,
-      region: REGION,
-      pushUnread: false,
-    });
+    const realtime = createRealtime();
     const _disconnect = sinon.spy(realtime, '_disconnect');
     return realtime._connect()
       .then(connection => {
@@ -112,4 +100,10 @@ describe('Realtime', () => {
         (() => realtime._deregister(c)).should.throw();
       });
   });
+
+  it.skip('ping', () =>
+    createRealtime({ _debug: true })._connect()
+      .then(connection => connection.ping())
+      .then(resCommand => resCommand.cmd.should.be.equal(CommandType.echo))
+  );
 });

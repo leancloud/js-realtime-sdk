@@ -39,10 +39,10 @@ export default class Connection extends WebSocketPlus {
     message.i = this._serialId;
     debug(trim(message), 'sent');
 
-    if (message.toArrayBuffer) {
-      message = message.toArrayBuffer();
-    } else if (message.toBuffer) {
+    if (message.toBuffer) {
       message = message.toBuffer();
+    } else if (message.toArrayBuffer) {
+      message = message.toArrayBuffer();
     } else {
       throw new TypeError(`${message} is not a GenericCommand`);
     }
@@ -79,7 +79,6 @@ export default class Connection extends WebSocketPlus {
   }
 
   handleMessage(msg) {
-    if (msg === '{}') return;
     let message;
     try {
       message = GenericCommand.decode(msg);
@@ -112,10 +111,8 @@ export default class Connection extends WebSocketPlus {
   }
 
   ping() {
-    this.send(new GenericCommand({
-      // cmd: 'echo',
-      cmd: 'session',
-      op: 'open',
+    return this.send(new GenericCommand({
+      cmd: 'echo',
     }));
   }
 }

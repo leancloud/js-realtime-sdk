@@ -6,6 +6,9 @@ export default class ConversationQuery {
     if (value instanceof Date) {
       return { __type: 'Date', iso: value.toJSON() };
     }
+    if (value instanceof RegExp) {
+      return value.source;
+    }
     return value;
   }
 
@@ -15,10 +18,10 @@ export default class ConversationQuery {
 
   static _calculateFlag(options) {
     return [
-      'compact',
       'withLastMessages',
+      'compact',
     ].reduce(
-      (prev, key) => prev >> 1 + (Boolean)(options[key]),
+      (prev, key) => (prev << 1) + (Boolean)(options[key]),
       0
     );
   }
@@ -55,9 +58,8 @@ export default class ConversationQuery {
    * @param peerIds
    * @return
    */
-
   containsMembers(peerIds) {
-    return this._containsAll('m', peerIds);
+    return this.containsAll('m', peerIds);
   }
 
   /**
@@ -73,7 +75,7 @@ export default class ConversationQuery {
       peerIdsSet.add(this._client.id);
     }
     this.sizeEqualTo('m', peerIdsSet.size);
-    return this.containsMembers(peerIdsSet);
+    return this.containsMembers(Array.from(peerIdsSet));
   }
 
   /**

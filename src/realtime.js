@@ -96,6 +96,7 @@ export default class Realtime extends EventEmitter {
       appId,
       region,
       ssl,
+      _debug,
     } = options;
     let router;
     switch (region) {
@@ -115,6 +116,7 @@ export default class Realtime extends EventEmitter {
       .query({
         appId,
         secure: ssl,
+        debug: _debug,
         _t: Date.now(),
       })
       .timeout(20000)

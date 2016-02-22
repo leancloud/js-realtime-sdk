@@ -3,20 +3,16 @@ import 'should-sinon';
 import should from 'should/as-function';
 import { Promise } from 'rsvp';
 import Realtime from '../src/realtime';
-// import Connection from '../src/connection';
-// import Client from '../src/client';
 import IMClient from '../src/im-client';
-import ConversationQuery from '../src/conversation-query';
 import Conversation from '../src/conversation';
-// import { testAsync } from './test-utils';
-//
+
 const sinon = (typeof window !== 'undefined' && window.sinon) || require('sinon');
 
 const APP_ID = process.env.APP_ID || 'anruhhk6visejjip57psvv5uuv8sggrzdfl9pg2bghgsiy35';
 const APP_KEY = process.env.APP_KEY || 'xhiibo2eiyokjdu2y3kqcb7334rtw4x33zam98buxzkjuq5g';
 const REGION = process.env.REGION || 'cn';
-const EXSITING_ROOM_ID = process.env.EXSITING_ROOM_ID || '559d08a1e4b0a35bc5062ba1';
-const NON_EXSITING_ROOM_ID = '555555555555555555555555';
+const EXISTING_ROOM_ID = process.env.EXSITING_ROOM_ID || '559d08a1e4b0a35bc5062ba1';
+const NON_EXISTING_ROOM_ID = '555555555555555555555555';
 const CLIENT_ID = 'leeyeh';
 
 describe('IMClient', () => {
@@ -110,33 +106,20 @@ describe('IMClient', () => {
     );
   });
 
-  describe('query', () => {
-    it('should be a ConversationQuery', () => {
-      client.getQuery().should.be.instanceof(ConversationQuery);
-    });
-    it('equalTo', () =>
-      client.getQuery().equalTo('objectId', EXSITING_ROOM_ID).find()
-        .then(conversations => {
-          conversations.length.should.be.equal(1);
-          conversations[0].id.should.be.equal(EXSITING_ROOM_ID);
-        })
-    );
-  });
-
   describe('getConversation', () => {
     it('param check', () => {
       (() => client.getConversation()).should.throw();
       (() => client.getConversation(1)).should.throw();
     });
     it('should return null if no match', () =>
-      client.getConversation(NON_EXSITING_ROOM_ID).then(conversation => {
+      client.getConversation(NON_EXISTING_ROOM_ID).then(conversation => {
         should(conversation).be.null();
       })
     );
     it('should match one conversation', () =>
-      client.getConversation(EXSITING_ROOM_ID).then(conversation => {
+      client.getConversation(EXISTING_ROOM_ID).then(conversation => {
         conversation.should.be.instanceof(Conversation);
-        conversation.id.should.be.equal(EXSITING_ROOM_ID);
+        conversation.id.should.be.equal(EXISTING_ROOM_ID);
         conversation.createdAt.should.be.a.Date();
         conversation.updatedAt.should.be.a.Date();
         conversation.lastMessageAt.should.be.a.Date();
@@ -144,8 +127,8 @@ describe('IMClient', () => {
     );
     it('should use cache', () =>
       Promise.all([
-        client.getConversation(EXSITING_ROOM_ID),
-        client.getConversation(EXSITING_ROOM_ID),
+        client.getConversation(EXISTING_ROOM_ID),
+        client.getConversation(EXISTING_ROOM_ID),
       ]).then(conversations => {
         conversations[0].should.be.exactly(conversations[1]);
       })

@@ -156,6 +156,7 @@ export default class IMClient extends Client {
     const data = keyRemap({
       objectId: 'id',
       lm: 'lastMessageAt',
+      msg: 'lastMessage',
       m: 'members',
       attr: 'attributes',
       tr: 'isTransient',
