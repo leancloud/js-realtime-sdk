@@ -72,13 +72,14 @@ var require = require || function(id) {throw new Error('Unexpected required ' + 
           plugins: [
             json(),
             babel({ runtimeHelpers: true , exclude: 'node_modules/**' }),
-            nodeResolve({
-              jsnext: true,
-              main: true,
-              skip: ['memcpy'],
-            }),
+            //nodeResolve({
+            //  jsnext: true,
+            //  main: true,
+            //  skip: ['memcpy'],
+            //}),
             commonjs({
-              include: ['node_modules/**', 'proto/**'],
+              //include: ['node_modules/**', 'proto/**'],
+              include: ['proto/**'],
             })
           ],
           format: 'cjs'
