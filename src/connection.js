@@ -6,7 +6,7 @@ import isPlainObject from 'lodash/isPlainObject';
 
 const debug = d('LC:Connection');
 
-const COMMAND_TIMEOUT = 30000;
+const COMMAND_TIMEOUT = 20000;
 
 // debug utility
 const removeNull = obj => {
@@ -33,18 +33,18 @@ export default class Connection extends WebSocketPlus {
     this._serialId = 0;
   }
 
-  send(msg, waitingForRespond = true) {
-    let message = msg;
+  send(command, waitingForRespond = true) {
     this._serialId ++;
-    message.i = this._serialId;
-    debug(trim(message), 'sent');
+    command.i = this._serialId; // eslint-disable-line no-param-reassign
+    debug(trim(command), 'sent');
 
-    if (message.toBuffer) {
-      message = message.toBuffer();
-    } else if (message.toArrayBuffer) {
-      message = message.toArrayBuffer();
+    let message;
+    if (command.toBuffer) {
+      message = command.toBuffer();
+    } else if (command.toArrayBuffer) {
+      message = command.toArrayBuffer();
     } else {
-      throw new TypeError(`${message} is not a GenericCommand`);
+      throw new TypeError(`${command} is not a GenericCommand`);
     }
 
     super.send(message);
@@ -60,6 +60,7 @@ export default class Connection extends WebSocketPlus {
       setTimeout(
         () => {
           if (this._commands[this._serialId]) {
+            debug(trim(command), 'timeout');
             reject(new Error('Command Timeout.'));
           }
         },
