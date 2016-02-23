@@ -98,6 +98,7 @@ describe('Realtime', () => {
         _disconnect.should.be.calledOnce();
         (() => realtime._deregister({})).should.throw();
         (() => realtime._deregister(c)).should.throw();
+        _disconnect.restore();
       });
   });
 

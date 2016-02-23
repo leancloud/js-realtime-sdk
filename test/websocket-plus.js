@@ -59,6 +59,7 @@ describe('WebsocketPlus', () => {
         disconnectCallback.should.be.calledOnce();
         ws.is('connected').should.be.true();
         done();
+        ws.close();
       }, done));
     });
     it('should not reconnect when closed manually', (done) => {

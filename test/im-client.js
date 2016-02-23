@@ -32,6 +32,8 @@ describe('IMClient', () => {
       .then(c => (client = c));
   });
 
+  after(() => client.close());
+
   describe('create and close', () => {
     it('create and close', () => {
       const rt = new Realtime({

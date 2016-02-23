@@ -31,6 +31,9 @@
   </script>
   <script src="index.env.js"></script>
   <script>
+    var scroll = setInterval(function() {
+      scrollTo(0,9999);
+    }, 500);
     onload = function() {
       var runner = (window.mochaPhantomJS ? mochaPhantomJS : mocha).run();
 
@@ -38,6 +41,7 @@
       runner.on('end', function() {
         window.mochaResults = runner.stats;
         window.mochaResults.reports = failedTests;
+        clearTimeout(scroll);
       });
 
       runner.on('fail', logFailure);

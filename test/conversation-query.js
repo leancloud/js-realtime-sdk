@@ -21,6 +21,7 @@ describe('ConversationQuery', () => {
       .createIMClient(CLIENT_ID)
       .then(c => (client = c))
   );
+  after(() => client.close());
 
   it('_calculateFlag', () => {
     const calculate = ConversationQuery._calculateFlag;

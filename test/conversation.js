@@ -9,6 +9,7 @@ import {
 } from './configs';
 
 describe('Conversation', () => {
+  let client;
   let conversation;
   before(() =>
     new Realtime({
@@ -18,9 +19,13 @@ describe('Conversation', () => {
       pushUnread: false,
     })
       .createIMClient(CLIENT_ID)
-      .then(client => client.getConversation(EXISTING_ROOM_ID))
+      .then(c => {
+        client = c;
+        return client.getConversation(EXISTING_ROOM_ID);
+      })
       .then(conv => (conversation = conv))
   );
+  after(() => client.close());
 
   it('update', () => {
     const timestamp = Date.now();
