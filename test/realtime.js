@@ -8,9 +8,11 @@ import { CommandType } from '../proto/message';
 
 const sinon = (typeof window !== 'undefined' && window.sinon) || require('sinon');
 
-const APP_ID = process.env.APP_ID || 'anruhhk6visejjip57psvv5uuv8sggrzdfl9pg2bghgsiy35';
-const APP_KEY = process.env.APP_KEY || 'xhiibo2eiyokjdu2y3kqcb7334rtw4x33zam98buxzkjuq5g';
-const REGION = process.env.REGION || 'cn';
+import {
+  APP_ID,
+  APP_KEY,
+  REGION,
+} from './configs';
 
 const createRealtime = (options) => new Realtime(Object.assign({
   appId: APP_ID,
@@ -46,6 +48,7 @@ describe('Realtime', () => {
         .then(() => realtime._connect())
         .then(connection => {
           connection.should.be.exactly(firstConnection);
+          connection.close();
         });
     });
     it('_disconnect', () => {

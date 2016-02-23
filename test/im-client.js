@@ -59,6 +59,7 @@ describe('IMClient', () => {
         }).then(() => {
           closeCallback.should.be.calledOnce();
           rt._clients.should.not.have.properties(CLIENT_ID);
+          rt._disconnect();
         });
     });
 
