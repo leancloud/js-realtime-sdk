@@ -171,7 +171,7 @@ var require = require || function(id) {throw new Error('Unexpected required ' + 
     },
     mochaTest: {
       options: {
-        timeout: 25000,
+        timeout: 30000,
       },
       src: ['test/index.bundle.js']
     },

@@ -62,6 +62,7 @@ export default class Connection extends WebSocketPlus {
           if (this._commands[this._serialId]) {
             debug(trim(command), 'timeout');
             reject(new Error('Command Timeout.'));
+            delete this._commands[this._serialId];
           }
         },
         COMMAND_TIMEOUT
