@@ -126,21 +126,24 @@ export default class Conversation extends EventEmitter {
         data: JSON.stringify(attr),
       }),
     });
-    return this._client._send(new GenericCommand({
-      cmd: 'conv',
-      op: 'update',
-      convMessage,
-    })).then(resCommand => {
-      this.updatedAt = resCommand.convMessage.udate;
-      if (typeof this._pendingAttributes !== 'undefined') {
-        this._attributes = this._pendingAttributes;
-        delete this._pendingAttributes;
-      }
-      if (typeof this._pendingNamed !== 'undefined') {
-        this._name = this._pendingName;
-        delete this._pendingName;
-      }
-      return this;
-    });
+    return this
+      ._client
+      ._send(new GenericCommand({
+        cmd: 'conv',
+        op: 'update',
+        convMessage,
+      }))
+      .then(resCommand => {
+        this.updatedAt = resCommand.convMessage.udate;
+        if (typeof this._pendingAttributes !== 'undefined') {
+          this._attributes = this._pendingAttributes;
+          delete this._pendingAttributes;
+        }
+        if (typeof this._pendingNamed !== 'undefined') {
+          this._name = this._pendingName;
+          delete this._pendingName;
+        }
+        return this;
+      });
   }
 }
