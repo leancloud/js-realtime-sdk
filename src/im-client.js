@@ -147,9 +147,35 @@ export default class IMClient extends Client {
       ._send(command)
       .then(resCommand => JSON.parse(resCommand.convMessage.results.data))
       .then(conversations => conversations.map(this._parseConversationFromRawData.bind(this)))
-      .then(tap(conversations => conversations.map(conversation =>
-        this._conversationCache.set(conversation.id, conversation)
-      )));
+      .then(conversations => conversations.map(fetchedConversation => {
+        let conversation = this._conversationCache.get(fetchedConversation.id);
+        if (!conversation) {
+          conversation = fetchedConversation;
+          debug('no match, set cache');
+          this._conversationCache.set(fetchedConversation.id, fetchedConversation);
+        } else {
+          debug('update cached conversation');
+          [
+            'name',
+            'creator',
+            'createdAt',
+            'updatedAt',
+            'lastMessageAt',
+            'lastMessage',
+            'mutedMembers',
+            'members',
+            '_attributes',
+            'isTransient',
+            'muted',
+          ].forEach(key => {
+            const value = fetchedConversation[key];
+            if (value !== null) conversation[key] = value;
+          });
+          delete conversation._pendingAttributes;
+          delete conversation._pendingName;
+        }
+        return conversation;
+      }));
   }
 
   _parseConversationFromRawData(rawData) {
@@ -161,6 +187,7 @@ export default class IMClient extends Client {
       attr: 'attributes',
       tr: 'isTransient',
       c: 'creator',
+      mu: 'mutedMembers',
     }, rawData);
     return new Conversation(data, this);
   }

@@ -258,4 +258,14 @@ describe('ConversationQuery', () => {
         conversations[0].should.have.property('lastMessage');
       })
   );
+  it('should use cache', () =>
+    Promise.all([
+      client.getQuery().equalTo('objectId', EXISTING_ROOM_ID)
+        .find().then(conversations => conversations[0]),
+      client.getQuery().equalTo('objectId', EXISTING_ROOM_ID)
+        .find().then(conversations => conversations[0]),
+    ]).then(conversations => {
+      conversations[0].should.be.exactly(conversations[1]);
+    })
+  );
 });
