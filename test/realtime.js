@@ -107,29 +107,29 @@ describe('Realtime', () => {
 });
 
 describe('Connection', () => {
-  it('ping', () => {
-    let connection;
-    return createRealtime()._connect()
+  let client;
+  let connection;
+  before(() =>
+    createRealtime().createIMClient()
       .then(c => {
-        connection = c;
+        client = c;
+        connection = client._connection;
         return connection.ping();
       })
+  );
+  after(() => connection.close());
+
+  it('ping', () =>
+    connection.ping()
       .then(resCommand => {
         resCommand.cmd.should.be.equal(CommandType.echo);
-        connection.close();
-      });
-  });
-  it('send error', () => {
-    let connection;
-    return createRealtime().createIMClient()
-      .then(client => {
-        connection = client._connection;
-        return connection.send(new GenericCommand({
-          cmd: 'conv',
-          op: 'update',
-          peerId: client.id,
-        })).should.be.rejectedWith('CONVERSATION_UPDATE_FAILED');
       })
-      .then(() => connection.close());
-  });
+  );
+  it('send error', () =>
+    connection.send(new GenericCommand({
+      cmd: 'conv',
+      op: 'update',
+      peerId: client.id,
+    })).should.be.rejectedWith('CONVERSATION_UPDATE_FAILED')
+  );
 });
