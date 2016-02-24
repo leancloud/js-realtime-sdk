@@ -10,13 +10,6 @@ import {
 } from './configs';
 
 describe('Conversation', () => {
-  let isIE10;
-  if (global.navigator) {
-    isIE10 = /MSIE 10\.0/.test(global.navigator.userAgent);
-  }
-  if (isIE10) return;
-  // this case will cause the test never end in IE10 when run on Saucelabs.
-  // It passes when run manually  let client;
   let client;
   let conversation;
   before(() => {
