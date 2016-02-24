@@ -23,6 +23,8 @@ export default class Conversation extends EventEmitter {
       // createdAt,
       // updatedAt,
       // lastMessageAt,
+      // lastMessage,
+      mutedMembers: [],
       members: [],
       _attributes: {},
       isTransient: false,
@@ -31,9 +33,6 @@ export default class Conversation extends EventEmitter {
       attributes: '_attributes',
       name: '_name',
     }, data));
-    // this.createdAt = decodeDate(this.createdAt);
-    // this.updatedAt = decodeDate(this.updatedAt);
-    // this.lastMessageAt = decodeDate(this.lastMessageAt);
     this.members = Array.from(new Set(this.members));
     if (client instanceof IMClient) {
       this._client = client;
@@ -106,6 +105,21 @@ export default class Conversation extends EventEmitter {
     debug(...params, `[${this.id}]`);
   }
 
+  _send(command) {
+    /* eslint-disable no-param-reassign */
+    if (command.cmd === null) {
+      command.cmd = 'conv';
+    }
+    if (command.convMessage === null) {
+      command.convMessage = new ConvCommand();
+    }
+    if (command.convMessage.cid === null) {
+      command.convMessage.cid = this.id;
+    }
+    /* eslint-enable no-param-reassign */
+    return this._client._send(command);
+  }
+
   save() {
     this._debug('save');
     const attr = {};
@@ -121,15 +135,12 @@ export default class Conversation extends EventEmitter {
     }
     this._debug(`attr: ${JSON.stringify(attr)}`);
     const convMessage = new ConvCommand({
-      cid: this.id,
       attr: new JsonObjectMessage({
         data: JSON.stringify(attr),
       }),
     });
     return this
-      ._client
       ._send(new GenericCommand({
-        cmd: 'conv',
         op: 'update',
         convMessage,
       }))
@@ -145,5 +156,40 @@ export default class Conversation extends EventEmitter {
         }
         return this;
       });
+  }
+
+  fetch() {
+    return this
+      ._client
+      .getQuery()
+      .equalTo('objectId', this.id)
+      .find()
+      .then(() => this);
+  }
+
+  mute() {
+    this._debug('mute');
+    return this._send(new GenericCommand({
+      op: 'mute',
+    })).then(() => {
+      this.muted = true;
+      this.mutedMembers = Array.from(
+        new Set(this.mutedMembers).add(this._client.id)
+      );
+      return this;
+    });
+  }
+
+  unmute() {
+    this._debug('unmute');
+    return this._send(new GenericCommand({
+      op: 'unmute',
+    })).then(() => {
+      this.muted = false;
+      this.mutedMembers = Array.from(
+        new Set(this.mutedMembers).delete(this._client.id)
+      );
+      return this;
+    });
   }
 }
