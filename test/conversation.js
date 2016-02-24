@@ -17,6 +17,7 @@ describe('Conversation', () => {
   if (isIE10) return;
   // this case will cause the test never end in IE10 when run on Saucelabs.
   // It passes when run manually  let client;
+  let client;
   let conversation;
   before(() =>
     new Realtime({
@@ -57,6 +58,7 @@ describe('Conversation', () => {
         lean: 'cloud',
         lee: 'yeh',
       });
+      return conv.save();
     });
   });
 });

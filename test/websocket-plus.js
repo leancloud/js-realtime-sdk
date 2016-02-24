@@ -13,6 +13,7 @@ describe('WebsocketPlus', () => {
       ws.on('open', () => {
         ws.is('connected').should.be.true();
         done();
+        ws.close();
       });
     });
     it('error', (done) => {
@@ -27,13 +28,19 @@ describe('WebsocketPlus', () => {
         'ws://404.websocket.org',
         'ws://echo.websocket.org',
       ]);
-      ws.on('open', done);
+      ws.on('open', () => {
+        done();
+        ws.close();
+      });
     });
     it('promised endpoints', (done) => {
       const ws = new WebsocketPlus(Promise.resolve([
         'wss://echo.websocket.org',
       ]));
-      ws.on('open', done);
+      ws.on('open', () => {
+        done();
+        ws.close();
+      });
     });
   });
 
