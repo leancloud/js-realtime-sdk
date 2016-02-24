@@ -4,7 +4,7 @@ import should from 'should/as-function';
 import Realtime from '../src/realtime';
 import Connection from '../src/connection';
 import Client from '../src/client';
-import { CommandType } from '../proto/message';
+import { GenericCommand, CommandType } from '../proto/message';
 
 const sinon = (typeof window !== 'undefined' && window.sinon) || require('sinon');
 
@@ -104,10 +104,32 @@ describe('Realtime', () => {
         _disconnect.restore();
       });
   });
+});
 
-  it.skip('ping', () =>
-    createRealtime({ _debug: true })._connect()
-      .then(connection => connection.ping())
-      .then(resCommand => resCommand.cmd.should.be.equal(CommandType.echo))
-  );
+describe('Connection', () => {
+  it('ping', () => {
+    let connection;
+    return createRealtime()._connect()
+      .then(c => {
+        connection = c;
+        return connection.ping();
+      })
+      .then(resCommand => {
+        resCommand.cmd.should.be.equal(CommandType.echo);
+        connection.close();
+      });
+  });
+  it('send error', () => {
+    let connection;
+    return createRealtime().createIMClient()
+      .then(client => {
+        connection = client._connection;
+        return connection.send(new GenericCommand({
+          cmd: 'conv',
+          op: 'update',
+          peerId: client.id,
+        })).should.be.rejectedWith('CONVERSATION_UPDATE_FAILED');
+      })
+      .then(() => connection.close());
+  });
 });

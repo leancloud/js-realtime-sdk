@@ -1,5 +1,5 @@
 import WebSocketPlus from './websocket-plus';
-import { GenericCommand } from '../proto/message';
+import { GenericCommand, CommandType } from '../proto/message';
 import { Promise } from 'rsvp';
 import { default as d } from 'debug';
 import isPlainObject from 'lodash/isPlainObject';
@@ -92,7 +92,7 @@ export default class Connection extends WebSocketPlus {
     const serialId = message.i;
     if (serialId) {
       if (this._commands[serialId]) {
-        if (message.cmd === 'error') {
+        if (message.cmd === CommandType.error) {
           this
             ._commands[serialId]
             .reject(this.constructor._createError(message));
@@ -103,7 +103,7 @@ export default class Connection extends WebSocketPlus {
         }
         delete this._commands[serialId];
       } else {
-        if (message.cmd === 'error') {
+        if (message.cmd === CommandType.error) {
           this.emit('error', this.constructor._createError(message));
         } else {
           this.emit('message', message);
