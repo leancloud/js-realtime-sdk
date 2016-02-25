@@ -10,7 +10,7 @@ import {
   OpType,
 } from '../proto/message';
 import { Promise } from 'rsvp';
-import { tap, Cache, keyRemap, difference } from './utils';
+import { tap, Cache, keyRemap, difference, trim } from './utils';
 import { default as d } from 'debug';
 import { version as VERSION } from '../package.json';
 
@@ -190,7 +190,14 @@ export default class IMClient extends Client {
     });
     return this
       ._send(command)
-      .then(resCommand => JSON.parse(resCommand.convMessage.results.data))
+      .then(resCommand => {
+        try {
+          return JSON.parse(resCommand.convMessage.results.data);
+        } catch (error) {
+          const commandString = JSON.stringify(trim(resCommand));
+          throw new Error(`Parse query result failed: ${error.message}. Command: ${commandString}`);
+        }
+      })
       .then(conversations => conversations.map(this._parseConversationFromRawData.bind(this)))
       .then(conversations => conversations.map(fetchedConversation => {
         let conversation = this._conversationCache.get(fetchedConversation.id);
