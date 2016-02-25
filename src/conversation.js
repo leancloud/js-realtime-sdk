@@ -1,6 +1,6 @@
 import EventEmitter from 'eventemitter3';
 import { Promise } from 'rsvp';
-import { decodeDate, keyRemap } from './utils';
+import { decodeDate, keyRemap, union, difference } from './utils';
 import IMClient from './im-client';
 import {
   GenericCommand,
@@ -174,9 +174,7 @@ export default class Conversation extends EventEmitter {
     })).then(() => {
       if (!this.isTransient) {
         this.muted = true;
-        this.mutedMembers = Array.from(
-          new Set(this.mutedMembers).add(this._client.id)
-        );
+        this.mutedMembers = union(this.mutedMembers, [this._client.id]);
       }
       return this;
     });
@@ -189,9 +187,7 @@ export default class Conversation extends EventEmitter {
     })).then(() => {
       if (!this.isTransient) {
         this.muted = false;
-        this.mutedMembers = Array.from(
-          new Set(this.mutedMembers).delete(this._client.id)
-        );
+        this.mutedMembers = difference(this.mutedMembers, [this._client.id]);
       }
       return this;
     });
@@ -217,9 +213,7 @@ export default class Conversation extends EventEmitter {
       convMessage,
     })).then(() => {
       if (!this.isTransient) {
-        this.members = Array.from(
-          clientIds.reduce((members, clientId) => members.add(clientId), new Set(this.members))
-        );
+        this.members = union(this.members, clientIds);
       }
       return this;
     });
@@ -237,9 +231,7 @@ export default class Conversation extends EventEmitter {
       convMessage,
     })).then(() => {
       if (!this.isTransient) {
-        this.members = Array.from(
-          clientIds.reduce((members, clientId) => members.delete(clientId), new Set(this.members))
-        );
+        this.members = difference(this.members, clientIds);
       }
       return this;
     });

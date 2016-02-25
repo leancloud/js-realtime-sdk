@@ -1,13 +1,13 @@
 import 'should';
 import 'should-sinon';
 import should from 'should/as-function';
-import { tap, tryAll, Cache, keyRemap } from '../src/utils';
+import { tap, tryAll, Cache, keyRemap, union, difference } from '../src/utils';
 import { Promise } from 'rsvp';
 import { testAsync } from './test-utils';
 
 const sinon = (typeof window !== 'undefined' && window.sinon) || require('sinon');
 
-describe('utils', () => {
+describe('Utils', () => {
   describe('tap', () => {
     it('should return previous promise', () => {
       const interceptor = sinon.stub().returns(2);
@@ -76,5 +76,12 @@ describe('utils', () => {
         c: 2,
       });
     });
+  });
+
+  describe('iterator tools', () => {
+    const a = [1, 1, 2, 3];
+    const b = [2, 3, 4, 2];
+    it('union', () => union(a, b).should.be.eql([1, 2, 3, 4]));
+    it('difference', () => difference(a, b).should.be.eql([1]));
   });
 });
