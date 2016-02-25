@@ -172,10 +172,12 @@ export default class Conversation extends EventEmitter {
     return this._send(new GenericCommand({
       op: 'mute',
     })).then(() => {
-      this.muted = true;
-      this.mutedMembers = Array.from(
-        new Set(this.mutedMembers).add(this._client.id)
-      );
+      if (!this.isTransient) {
+        this.muted = true;
+        this.mutedMembers = Array.from(
+          new Set(this.mutedMembers).add(this._client.id)
+        );
+      }
       return this;
     });
   }
@@ -185,10 +187,60 @@ export default class Conversation extends EventEmitter {
     return this._send(new GenericCommand({
       op: 'unmute',
     })).then(() => {
-      this.muted = false;
-      this.mutedMembers = Array.from(
-        new Set(this.mutedMembers).delete(this._client.id)
-      );
+      if (!this.isTransient) {
+        this.muted = false;
+        this.mutedMembers = Array.from(
+          new Set(this.mutedMembers).delete(this._client.id)
+        );
+      }
+      return this;
+    });
+  }
+
+  count() {
+    this._debug('unmute');
+    return this._send(new GenericCommand({
+      op: 'count',
+    })).then(resCommand => resCommand.convMessage.count);
+  }
+
+  add(clientIds) {
+    this._debug('add', clientIds);
+    if (typeof clientIds === 'string') {
+      clientIds = [clientIds]; // eslint-disable-line no-param-reassign
+    }
+    const convMessage = new ConvCommand({
+      m: clientIds,
+    });
+    return this._send(new GenericCommand({
+      op: 'add',
+      convMessage,
+    })).then(() => {
+      if (!this.isTransient) {
+        this.members = Array.from(
+          clientIds.reduce((members, clientId) => members.add(clientId), new Set(this.members))
+        );
+      }
+      return this;
+    });
+  }
+  remove(clientIds) {
+    this._debug('remove', clientIds);
+    if (typeof clientIds === 'string') {
+      clientIds = [clientIds]; // eslint-disable-line no-param-reassign
+    }
+    const convMessage = new ConvCommand({
+      m: clientIds,
+    });
+    return this._send(new GenericCommand({
+      op: 'remove',
+      convMessage,
+    })).then(() => {
+      if (!this.isTransient) {
+        this.members = Array.from(
+          clientIds.reduce((members, clientId) => members.delete(clientId), new Set(this.members))
+        );
+      }
       return this;
     });
   }

@@ -80,4 +80,15 @@ describe('Conversation', () => {
       conv.mutedMembers.should.not.containEql(CLIENT_ID);
     })
   );
+  it('count', () => conversation.count().should.be.fulfilledWith(2));
+  it('add/remove', () =>
+    client.createConversation({ members: ['nsun'] })
+      .then(conv => conv.add('rguo'))
+      .then(conv => {
+        conv.members.should.containEql('rguo');
+        return conv.remove('rguo');
+      }).then(conv => {
+        conv.members.should.not.containEql('rguo');
+      })
+  );
 });
