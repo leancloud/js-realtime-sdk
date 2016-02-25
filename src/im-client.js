@@ -6,9 +6,11 @@ import {
   SessionCommand,
   ConvCommand,
   JsonObjectMessage,
+  CommandType,
+  OpType,
 } from '../proto/message';
 import { Promise } from 'rsvp';
-import { tap, Cache, keyRemap } from './utils';
+import { tap, Cache, keyRemap, difference } from './utils';
 import { default as d } from 'debug';
 import { version as VERSION } from '../package.json';
 
@@ -18,6 +20,49 @@ export default class IMClient extends Client {
   constructor(...args) {
     super(...args);
     this._conversationCache = new Cache(`client:${this.id}`);
+  }
+
+  _dispatchMessage(message) {
+    if (message.cmd === CommandType.conv) {
+      return this._dispatchConvMessage(message);
+    }
+    return this.emit('unhandledmessage', message);
+  }
+
+  _dispatchConvMessage(message) {
+    const { convMessage, initBy } = message;
+    switch (message.op) {
+      case OpType.joined: {
+        let conversation = this._conversationCache.get(convMessage.cid);
+        // 如果缓存中存在这个 conversation, 且已经有当前 client 了, 则不再派发事件 (可能是当前 client 发起的)
+        if (conversation && new Set(conversation.members).has(this.id)) break;
+        conversation = this.getConversation(convMessage.cid);
+        this.emit('invited', {
+          conversation,
+          invitedBy: initBy,
+        });
+        return;
+      }
+      case OpType.left: {
+        let conversation = this._conversationCache.get(convMessage.cid);
+        // 如果缓存中不存在这个 conversation, 不派发事件
+        if (!conversation) break;
+        conversation = this.getConversation(convMessage.cid);
+        const members = new Set(conversation.members);
+        // 如果该 conversation 不包含当前 client, 不派发事件 (可能是当前 client 发起的)
+        if (!members.has(this.id)) break;
+        conversation.members = difference(members, [this.id]);
+        const event = {
+          kickedBy: initBy,
+        };
+        this.emit('kicked', Object.assign({
+          conversation,
+        }, event));
+        conversation.emit('kicked', event);
+        return;
+      }
+      default:
+    }
   }
 
   _send(cmd) {

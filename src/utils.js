@@ -1,4 +1,5 @@
 import { Promise } from 'rsvp';
+import isPlainObject from 'lodash/isPlainObject';
 import { default as d } from 'debug';
 
 export const tryAll = promiseConstructors => {
@@ -66,3 +67,21 @@ export const union = (a, b) => Array.from(new Set([...a, ...b]));
 export const difference = (a, b) => Array.from(
   (bSet => new Set(a.filter(x => !bSet.has(x))))(new Set(b))
 );
+
+// debug utility
+const removeNull = obj => {
+  if (!isPlainObject(obj)) return obj;
+  const object = Object.assign({}, obj);
+  for (const prop in object) {
+    if (object.hasOwnProperty(prop)) {
+      const value = object[prop];
+      if (value === null) {
+        delete object[prop];
+      } else {
+        object[prop] = removeNull(value);
+      }
+    }
+  }
+  return object;
+};
+export const trim = message => removeNull(JSON.parse(JSON.stringify(message)));

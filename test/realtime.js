@@ -125,11 +125,30 @@ describe('Connection', () => {
         resCommand.cmd.should.be.equal(CommandType.echo);
       })
   );
-  it('send error', () =>
+  it('send command error', () =>
     connection.send(new GenericCommand({
       cmd: 'conv',
       op: 'update',
       peerId: client.id,
     })).should.be.rejectedWith('CONVERSATION_UPDATE_FAILED')
   );
+  it('message dispatch', () => {
+    const clientMessageEventCallback = sinon.spy(client, '_dispatchMessage');
+    connection.emit('message', new GenericCommand({
+      cmd: 1,
+    }));
+    connection.emit('message', new GenericCommand({
+      cmd: 1,
+      peerId: 'fake clientId',
+    }));
+    clientMessageEventCallback.should.not.be.called();
+    const validMessage = new GenericCommand({
+      cmd: 1,
+      peerId: client.id,
+    });
+    connection.emit('message', validMessage);
+    clientMessageEventCallback.should.be.calledOnce();
+    clientMessageEventCallback.should.be.calledWith(validMessage);
+    clientMessageEventCallback.restore();
+  });
 });

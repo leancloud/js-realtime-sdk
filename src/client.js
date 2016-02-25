@@ -9,4 +9,8 @@ export default class Client extends EventEmitter {
       options,
     });
   }
+
+  _dispatchMessage(message) {
+    this.emit('message', message);
+  }
 }

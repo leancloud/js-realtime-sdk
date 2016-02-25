@@ -5,7 +5,7 @@ import { default as d } from 'debug';
 import EventEmitter from 'eventemitter3';
 import { default as superagentPromise } from 'superagent-promise';
 import superagent from 'superagent';
-import { tap, Cache } from './utils';
+import { tap, Cache, trim } from './utils';
 import Client from './client';
 import IMClient from './im-client';
 
@@ -52,6 +52,7 @@ export default class Realtime extends EventEmitter {
       connection.binaryType = 'arraybuffer';
       connection.on('open', () => resolve(connection));
       connection.on('error', reject);
+      connection.on('message', this._dispatchMessage.bind(this));
       // override handleClose
       connection.handleClose = function handleClose(event) {
         const fatalError = Array.find([
@@ -153,6 +154,20 @@ export default class Realtime extends EventEmitter {
     if (Object.getOwnPropertyNames(this._clients).length === 0) {
       this._disconnect();
     }
+  }
+
+  _dispatchMessage(message) {
+    if (message.peerId !== null) {
+      const client = this._clients[message.peerId];
+      if (client) {
+        return client._dispatchMessage(message);
+      }
+      return debug(
+        '[WARN] Unexpected message received without any live client match',
+        trim(message)
+      );
+    }
+    return debug('[WARN] Unexpected message received without peerId', trim(message));
   }
 
   createIMClient(id, options) {
