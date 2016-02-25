@@ -42,8 +42,7 @@ var require = require || function(id) {throw new Error('Unexpected required ' + 
     browserName: 'android',
     version: '4.4'
   }, {
-    browserName: 'internet explorer',
-    version: '10.0'
+    browserName: 'MicrosoftEdge'
   }, {
     browserName: 'chrome',
     version: '31'
