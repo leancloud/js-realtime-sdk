@@ -31,27 +31,25 @@ export default class IMClient extends Client {
   }
 
   _dispatchConvMessage(message) {
-    const { convMessage, initBy, m } = message;
+    const {
+      convMessage,
+      convMessage: {
+        initBy, m,
+      },
+    } = message;
     switch (message.op) {
       case OpType.joined: {
-        const conversation = this._conversationCache.get(convMessage.cid);
-        // 如果缓存中存在这个 conversation, 且已经有当前 client 了, 不派发事件 (可能是当前 client 发起的)
-        if (conversation && new Set(conversation.members).has(this.id)) return Promise.resolve();
         return this.getConversation(convMessage.cid).then(
-          conv => this.emit('invited', {
-            conversation: conv,
+          conversation => this.emit('invited', {
+            conversation,
             invitedBy: initBy,
           })
         );
       }
       case OpType.left: {
-        const cached = this._conversationCache.get(convMessage.cid);
         return this.getConversation(convMessage.cid).then(conversation => {
-          const members = new Set(conversation.members);
-          // 如果缓存中存在这个 conversation, 且不包含当前 client, 不派发事件 (可能是当前 client 发起的)
-          if (cached && !members.has(this.id)) return;
           // eslint-disable-next-line no-param-reassign
-          conversation.members = difference(members, [this.id]);
+          conversation.members = difference(conversation.members, [this.id]);
           const event = {
             kickedBy: initBy,
           };
@@ -63,9 +61,8 @@ export default class IMClient extends Client {
       }
       case OpType.members_joined: {
         return this.getConversation(convMessage.cid).then(conversation => {
-          const members = new Set(conversation.members);
           // eslint-disable-next-line no-param-reassign
-          conversation.members = union(members, convMessage.m);
+          conversation.members = union(conversation.members, convMessage.m);
           const event = {
             invitedBy: initBy,
             members: m,
@@ -78,9 +75,8 @@ export default class IMClient extends Client {
       }
       case OpType.members_left: {
         return this.getConversation(convMessage.cid).then(conversation => {
-          const members = new Set(conversation.members);
           // eslint-disable-next-line no-param-reassign
-          conversation.members = difference(members, convMessage.m);
+          conversation.members = difference(conversation.members, convMessage.m);
           const event = {
             kickedBy: initBy,
             members: m,
@@ -92,6 +88,7 @@ export default class IMClient extends Client {
         });
       }
       default:
+        this.emit('unhandledmessage', message);
         return Promise.reject(new Error('Unrecognized conversation command'));
     }
   }

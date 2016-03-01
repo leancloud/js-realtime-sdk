@@ -133,7 +133,7 @@ describe('Connection', () => {
     })).should.be.rejectedWith('CONVERSATION_UPDATE_FAILED')
   );
   it('message dispatch', () => {
-    const clientMessageEventCallback = sinon.spy(client, '_dispatchMessage');
+    const clientMessageEventCallback = sinon.stub(client, '_dispatchMessage');
     connection.emit('message', new GenericCommand({
       cmd: 1,
     }));
