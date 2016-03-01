@@ -35,7 +35,7 @@ describe('IMClient', () => {
   after(() => client.close());
 
   describe('create and close', () => {
-    it('create and close', () => {
+    it('normal create and close', () => {
       const rt = new Realtime({
         appId: APP_ID,
         appKey: APP_KEY,
@@ -58,13 +58,19 @@ describe('IMClient', () => {
             client2.id.should.be.equal(CLIENT_ID);
             rt._clients.should.have.properties(CLIENT_ID);
             return client2.close();
-          }).then(() => {
+          })
+          .then(() => {
             closeCallback.should.be.calledOnce();
             rt._clients.should.not.have.properties(CLIENT_ID);
             rt._disconnect();
           }),
       ]);
     });
+
+    it(
+      'create one client twice should throw',
+      () => realtime.createIMClient(CLIENT_ID).should.be.rejectedWith(/already created/)
+    );
 
     describe('with signatureFactory', () => {
       it('normal case', () => {
@@ -74,24 +80,24 @@ describe('IMClient', () => {
           nonce: 'nonce',
         });
         return realtime
-          .createIMClient(CLIENT_ID, {
+          .createIMClient('ycui', {
             signatureFactory,
           })
           .should.be.fulfilled()
           .then(() => {
-            signatureFactory.should.be.calledWith(CLIENT_ID);
+            signatureFactory.should.be.calledWith('ycui');
           });
       });
       it('malformed signature', () =>
         realtime
-          .createIMClient(CLIENT_ID, {
+          .createIMClient(undefined, {
             signatureFactory: () => undefined,
           })
           .should.be.rejectedWith('malformed signature')
       );
       it('signatureFactory throws', () =>
         realtime
-          .createIMClient(CLIENT_ID, {
+          .createIMClient(undefined, {
             signatureFactory: () => {
               throw new Error('error message');
             },

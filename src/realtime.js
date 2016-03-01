@@ -171,6 +171,12 @@ export default class Realtime extends EventEmitter {
   }
 
   createIMClient(id, options) {
+    if (id) {
+      if (this._clients[id] !== undefined) {
+        return Promise.reject(new Error(`IMClient[${id}] is already created`));
+      }
+      this._clients[id] = null;
+    }
     return this._connect().then(connection => {
       const client = new IMClient(id, connection, options);
       connection.on('reconnect', () => client._open(this._options.appId, true));
