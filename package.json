@@ -45,7 +45,7 @@
     "grunt-rollup": "^0.6.2",
     "grunt-saucelabs": "^8.6.1",
     "istanbul": "git+https://github.com/Victorystick/istanbul.git#es-modules-support",
-    "load-grunt-tasks": "^3.2.0",
+    "load-grunt-tasks": "^3.4.1",
     "mocha": "^2.3.4",
     "qiniu": "^6.1.9",
     "rollup": "^0.25.3",
