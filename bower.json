@@ -27,6 +27,6 @@
   "license": "MIT",
   "devDependencies": {
     "mocha": "~2.4.5",
-    "sinon": "http://sinonjs.org/releases/sinon-1.17.2.js"
+    "sinon": "http://sinonjs.org/releases/sinon-1.17.3.js"
   }
 }

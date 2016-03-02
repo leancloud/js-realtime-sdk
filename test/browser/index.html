@@ -35,6 +35,10 @@
     var scroll = setInterval(function() {
       scrollTo(0,9999);
     }, 500);
+    window.onclick = function() {
+      clearTimeout(scroll);
+    };
+
     onload = function() {
       var runner = (window.mochaPhantomJS ? mochaPhantomJS : mocha).run();
 
