@@ -17,8 +17,8 @@ export default class Connection extends WebSocketPlus {
   }
 
   send(command, waitingForRespond = true) {
-    this._serialId ++;
-    command.i = this._serialId; // eslint-disable-line no-param-reassign
+    const serialId = ++ this._serialId;
+    command.i = serialId; // eslint-disable-line no-param-reassign
     debug(trim(command), 'sent');
 
     let message;
@@ -36,16 +36,16 @@ export default class Connection extends WebSocketPlus {
       return Promise.resolve();
     }
     return new Promise((resolve, reject) => {
-      this._commands[this._serialId] = {
+      this._commands[serialId] = {
         resolve,
         reject,
       };
       setTimeout(
         () => {
-          if (this._commands[this._serialId]) {
+          if (this._commands[serialId]) {
             debug(trim(command), 'timeout');
             reject(new Error('Command Timeout.'));
-            delete this._commands[this._serialId];
+            delete this._commands[serialId];
           }
         },
         COMMAND_TIMEOUT
