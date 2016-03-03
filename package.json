@@ -68,6 +68,7 @@
     "rsvp": "^3.2.1",
     "superagent": "^1.7.1",
     "superagent-promise": "^1.1.0",
+    "uuid": "^2.0.1",
     "ws": "^1.0.1"
   },
   "browser": {

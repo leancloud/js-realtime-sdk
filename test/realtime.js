@@ -1,6 +1,7 @@
 import 'should';
 import 'should-sinon';
 import should from 'should/as-function';
+import { Promise } from 'rsvp';
 import Realtime from '../src/realtime';
 import Connection from '../src/connection';
 import Client from '../src/client';
@@ -36,34 +37,34 @@ describe('Realtime', () => {
       })).should.not.throw
     );
   });
-  describe('_connect/_disconnect', () => {
+  describe('_open/_close', () => {
     it('connection should be reused', () => {
       const realtime = createRealtime();
       let firstConnection;
-      return realtime._connect()
+      return realtime._open()
         .then(connection => {
           connection.should.be.a.instanceof(Connection);
           firstConnection = connection;
         })
-        .then(() => realtime._connect())
+        .then(() => realtime._open())
         .then(connection => {
           connection.should.be.exactly(firstConnection);
           connection.close();
         });
     });
-    it('_disconnect', () => {
+    it('_close', () => {
       const realtime = createRealtime();
-      return realtime._connect()
+      return realtime._open()
         .then(connection => {
-          should(realtime._connectPromise).not.be.undefined();
+          should(realtime._openPromise).not.be.undefined();
           return connection;
         })
         .then(connection => {
-          realtime._disconnect();
+          realtime._close();
           return connection;
         })
         .then(connection => {
-          should(realtime._connectPromise).be.undefined();
+          should(realtime._openPromise).be.undefined();
           connection.current.should.be.equal('closed');
         });
     });
@@ -85,8 +86,8 @@ describe('Realtime', () => {
   });
   it('_register/_deregister', () => {
     const realtime = createRealtime();
-    const _disconnect = sinon.spy(realtime, '_disconnect');
-    return realtime._connect()
+    const _disconnect = sinon.spy(realtime, '_close');
+    return realtime._open()
       .then(connection => {
         const a = new Client('a', connection);
         const b = new Client('b', connection);
@@ -103,6 +104,22 @@ describe('Realtime', () => {
         (() => realtime._deregister(c)).should.throw();
         _disconnect.restore();
       });
+  });
+  describe('events', () => {
+    it('disconnect/reconnect', () => {
+      const realtime = createRealtime();
+      return realtime._open()
+        .then(connection => {
+          const callbackPromise = Promise.all(['disconnect', 'reconnect'].map(
+            event => new Promise((resolve) => {
+              realtime.on(event, resolve);
+            })
+          ));
+          connection._ws.close();
+          callbackPromise.then(() => connection.close());
+          return callbackPromise;
+        });
+    });
   });
 });
 

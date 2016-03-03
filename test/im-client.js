@@ -32,7 +32,7 @@ describe('IMClient', () => {
       .then(c => (client = c));
   });
 
-  after(() => client.close());
+  after(() => realtime._close());
 
   describe('create and close', () => {
     it('normal create and close', () => {
@@ -62,7 +62,7 @@ describe('IMClient', () => {
           .then(() => {
             closeCallback.should.be.calledOnce();
             rt._clients.should.not.have.properties(CLIENT_ID);
-            rt._disconnect();
+            rt._close();
           }),
       ]);
     });

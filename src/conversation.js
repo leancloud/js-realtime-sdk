@@ -6,7 +6,10 @@ import {
   GenericCommand,
   ConvCommand,
   JsonObjectMessage,
+  DirectCommand,
 } from '../proto/message';
+import { createError } from './errors';
+import Message from './messages/message';
 import isEmpty from 'lodash/isEmpty';
 import isPlainObject from 'lodash/isPlainObject';
 import { default as d } from 'debug';
@@ -39,6 +42,15 @@ export default class Conversation extends EventEmitter {
     } else {
       throw new TypeError('Conversation must be initialized with a client');
     }
+    [
+      'kicked',
+      'membersjoined',
+      'membersleft',
+      'message',
+    ].forEach(event => this.on(
+      event,
+      payload => this._debug(`${event} event emitted.`, payload)
+    ));
   }
 
   set createdAt(value) {
@@ -110,10 +122,10 @@ export default class Conversation extends EventEmitter {
     if (command.cmd === null) {
       command.cmd = 'conv';
     }
-    if (command.convMessage === null) {
+    if (command.cmd === 'conv' && command.convMessage === null) {
       command.convMessage = new ConvCommand();
     }
-    if (command.convMessage.cid === null) {
+    if (command.convMessage && command.convMessage.cid === null) {
       command.convMessage.cid = this.id;
     }
     /* eslint-enable no-param-reassign */
@@ -234,6 +246,49 @@ export default class Conversation extends EventEmitter {
         this.members = difference(this.members, clientIds);
       }
       return this;
+    });
+  }
+
+  send(message) {
+    debug(message, 'send');
+    if (!(message instanceof Message)) {
+      throw new TypeError(`${message} is not a Message`);
+    }
+    message._setProps({
+      cid: this.id,
+      from: this._client.id,
+    });
+    let msg = message.toJSON();
+    if (typeof msg !== 'string') {
+      msg = JSON.stringify(msg);
+    }
+    return this._send(new GenericCommand({
+      cmd: 'direct',
+      directMessage: new DirectCommand({
+        msg,
+        cid: this.id,
+        r: message.needReceipt,
+        transient: message.transient,
+        dt: message.id,
+      }),
+    })).then(resCommand => {
+      const {
+        ackMessage: {
+          uid,
+          t,
+          code,
+          reason,
+          appCode,
+        },
+      } = resCommand;
+      if (code !== null) {
+        throw createError({
+          code, reason, appCode,
+        });
+      }
+      message.id = uid; // eslint-disable-line no-param-reassign
+      message.timestamp = t.toNumber(); // eslint-disable-line no-param-reassign
+      return message;
     });
   }
 }

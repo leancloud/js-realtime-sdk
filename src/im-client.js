@@ -19,12 +19,34 @@ const debug = d('LC:IMClient');
 export default class IMClient extends Client {
   constructor(...args) {
     super(...args);
+    if (!this._messageParser) {
+      throw new Error('IMClient must be initialized with a MessageParser');
+    }
     this._conversationCache = new Cache(`client:${this.id}`);
+    [
+      'invited',
+      'kicked',
+      'membersjoined',
+      'membersleft',
+      'message',
+      'unhandledmessage',
+    ].forEach(event => this.on(
+      event,
+      payload => this._debug(`${event} event emitted.`, payload)
+    ));
+  }
+
+  _debug(...params) {
+    debug(...params, `[${this.id}]`);
   }
 
   _dispatchMessage(message) {
+    this._debug(trim(message), 'received');
     if (message.cmd === CommandType.conv) {
       return this._dispatchConvMessage(message);
+    }
+    if (message.cmd === CommandType.direct) {
+      return this._dispatchDirectMessage(message);
     }
     this.emit('unhandledmessage', message);
     return Promise.resolve();
@@ -50,47 +72,78 @@ export default class IMClient extends Client {
         return this.getConversation(convMessage.cid).then(conversation => {
           // eslint-disable-next-line no-param-reassign
           conversation.members = difference(conversation.members, [this.id]);
-          const event = {
+          const payload = {
             kickedBy: initBy,
           };
           this.emit('kicked', Object.assign({
             conversation,
-          }, event));
-          conversation.emit('kicked', event);
+          }, payload));
+          conversation.emit('kicked', payload);
         });
       }
       case OpType.members_joined: {
         return this.getConversation(convMessage.cid).then(conversation => {
           // eslint-disable-next-line no-param-reassign
           conversation.members = union(conversation.members, convMessage.m);
-          const event = {
+          const payload = {
             invitedBy: initBy,
             members: m,
           };
           this.emit('membersjoined', Object.assign({
             conversation,
-          }, event));
-          conversation.emit('membersjoined', event);
+          }, payload));
+          conversation.emit('membersjoined', payload);
         });
       }
       case OpType.members_left: {
         return this.getConversation(convMessage.cid).then(conversation => {
           // eslint-disable-next-line no-param-reassign
           conversation.members = difference(conversation.members, convMessage.m);
-          const event = {
+          const payload = {
             kickedBy: initBy,
             members: m,
           };
           this.emit('membersleft', Object.assign({
             conversation,
-          }, event));
-          conversation.emit('membersleft', event);
+          }, payload));
+          conversation.emit('membersleft', payload);
         });
       }
       default:
         this.emit('unhandledmessage', message);
         return Promise.reject(new Error('Unrecognized conversation command'));
     }
+  }
+
+  _dispatchDirectMessage(originalMessage) {
+    const {
+      directMessage,
+      directMessage: {
+        id, cid, fromPeerId, timestamp, transient,
+      },
+    } = originalMessage;
+    return this.getConversation(directMessage.cid).then(conversation => {
+      let msg;
+      try {
+        msg = JSON.parse(directMessage.msg);
+      } catch (error) {
+        msg = directMessage.msg;
+      }
+      const messageProps = {
+        id,
+        cid,
+        timestamp: timestamp.toNumber(),
+        from: fromPeerId,
+        transient,
+      };
+      const message = this._messageParser.parse(msg);
+      message._setProps(messageProps);
+      this.emit('message', {
+        conversation,
+        message,
+      });
+      conversation.emit('message', message);
+    });
   }
 
   _send(cmd) {
@@ -102,7 +155,7 @@ export default class IMClient extends Client {
   }
 
   _open(appId, isReconnect = false) {
-    debug('open session');
+    this._debug('open session');
     return Promise
       .resolve(new GenericCommand({
         cmd: 'session',
@@ -116,11 +169,11 @@ export default class IMClient extends Client {
       .then(cmd => {
         const command = cmd;
         if (this.options.signatureFactory) {
-          debug(`call signatureFactory with [${this.id}]`);
+          this._debug(`call signatureFactory with [${this.id}]`);
           return Promise
             .resolve()
             .then(() => this.options.signatureFactory(this.id))
-            .then(tap(signatureResult => debug('signatureResult', signatureResult)))
+            .then(tap(signatureResult => this._debug('signatureResult', signatureResult)))
             .then((signatureResult = {}) => {
               const {
                 signature,
@@ -139,7 +192,7 @@ export default class IMClient extends Client {
               });
               return command;
             }, error => {
-              debug(error);
+              this._debug(error);
               throw new Error(`signatureFactory error: ${error.message}`);
             });
         }
@@ -157,7 +210,7 @@ export default class IMClient extends Client {
   }
 
   close() {
-    debug('close session');
+    this._debug('close session');
     const command = new GenericCommand({
       cmd: 'session',
       op: 'close',
@@ -172,7 +225,7 @@ export default class IMClient extends Client {
   }
 
   ping(ids) {
-    debug('ping');
+    this._debug('ping');
     if (!(ids instanceof Array)) {
       throw new TypeError(`ids ${ids} is not an Array`);
     }
@@ -231,10 +284,10 @@ export default class IMClient extends Client {
         let conversation = this._conversationCache.get(fetchedConversation.id);
         if (!conversation) {
           conversation = fetchedConversation;
-          debug('no match, set cache');
+          this._debug('no match, set cache');
           this._conversationCache.set(fetchedConversation.id, fetchedConversation);
         } else {
-          debug('update cached conversation');
+          this._debug('update cached conversation');
           [
             'name',
             'creator',

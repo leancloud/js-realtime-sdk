@@ -63,3 +63,13 @@ export const INVALID_MESSAGING_TARGET = {
 export const MESSAGE_REJECTED_BY_APP = {
   code: 4402,
 };
+
+export const createError = errorMessage => {
+  const {
+    code, reason, appCode, detail,
+    } = errorMessage;
+  const error = new Error(reason || detail);
+  return Object.assign(error, {
+    code, appCode, detail,
+  });
+};

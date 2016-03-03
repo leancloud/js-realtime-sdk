@@ -8,6 +8,8 @@ import superagent from 'superagent';
 import { tap, Cache, trim } from './utils';
 import Client from './client';
 import IMClient from './im-client';
+import MessageParser from './message-parser';
+import Message from './messages/message';
 
 const agent = superagentPromise(superagent, Promise);
 const debug = d('LC:Realtime');
@@ -31,10 +33,16 @@ export default class Realtime extends EventEmitter {
     }, options);
     this._cache = new Cache('endpoints');
     this._clients = {};
+    this._messageParser = new MessageParser();
+    this._messageParser.register(Message);
+    ['disconnect', 'reconnect'].forEach(event => this.on(
+      event,
+      payload => debug(`${event} event emitted.`, payload)
+    ));
   }
 
-  _connect() {
-    if (this._connectPromise) return this._connectPromise;
+  _open() {
+    if (this._openPromise) return this._openPromise;
 
     let protocolsVersion = 1;
     if (this._options.pushUnread) {
@@ -43,7 +51,7 @@ export default class Realtime extends EventEmitter {
     }
     const protocol = `lc.protobuf.${protocolsVersion}`;
 
-    this._connectPromise = new Promise((resolve, reject) => {
+    this._openPromise = new Promise((resolve, reject) => {
       debug('No connection established, create a new one.');
       const connection = new Connection(
         () => this._getEndpoints(this._options),
@@ -53,6 +61,10 @@ export default class Realtime extends EventEmitter {
       connection.on('open', () => resolve(connection));
       connection.on('error', reject);
       connection.on('message', this._dispatchMessage.bind(this));
+      // event proxy
+      ['disconnect', 'reconnect'].forEach(
+        event => connection.on(event, payload => this.emit(event, payload))
+      );
       // override handleClose
       connection.handleClose = function handleClose(event) {
         const fatalError = Array.find([
@@ -72,7 +84,7 @@ export default class Realtime extends EventEmitter {
       };
     });
 
-    return this._connectPromise;
+    return this._openPromise;
   }
 
   _getEndpoints(options) {
@@ -126,11 +138,11 @@ export default class Realtime extends EventEmitter {
       );
   }
 
-  _disconnect() {
-    if (this._connectPromise) {
-      this._connectPromise.then(connection => connection.close());
+  _close() {
+    if (this._openPromise) {
+      this._openPromise.then(connection => connection.close());
     }
-    delete this._connectPromise;
+    delete this._openPromise;
   }
 
   _register(client) {
@@ -152,7 +164,7 @@ export default class Realtime extends EventEmitter {
     }
     delete this._clients[client.id];
     if (Object.getOwnPropertyNames(this._clients).length === 0) {
-      this._disconnect();
+      this._close();
     }
   }
 
@@ -160,7 +172,7 @@ export default class Realtime extends EventEmitter {
     if (message.peerId !== null) {
       const client = this._clients[message.peerId];
       if (client) {
-        return client._dispatchMessage(message);
+        return Promise.resolve(client._dispatchMessage(message)).catch(debug);
       }
       return debug(
         '[WARN] Unexpected message received without any live client match',
@@ -177,8 +189,10 @@ export default class Realtime extends EventEmitter {
       }
       this._clients[id] = null;
     }
-    return this._connect().then(connection => {
-      const client = new IMClient(id, connection, options);
+    return this._open().then(connection => {
+      const client = new IMClient(id, options, connection, {
+        _messageParser: this._messageParser,
+      });
       connection.on('reconnect', () => client._open(this._options.appId, true));
       client.on('close', () => this._deregister(client), this);
       return client._open(this._options.appId)
@@ -190,6 +204,10 @@ export default class Realtime extends EventEmitter {
   }
 
   createPushClient() {
-    return this._connect();
+    return this._open();
+  }
+
+  register(...params) {
+    return this._messageParser.register(...params);
   }
 }

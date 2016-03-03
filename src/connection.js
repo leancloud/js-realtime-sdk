@@ -1,4 +1,5 @@
 import WebSocketPlus from './websocket-plus';
+import { createError } from './errors';
 import { GenericCommand, CommandType } from '../proto/message';
 import { Promise } from 'rsvp';
 import { default as d } from 'debug';
@@ -53,16 +54,6 @@ export default class Connection extends WebSocketPlus {
     });
   }
 
-  static _createError(message) {
-    const {
-      code, reason, appCode, detail,
-      } = message.errorMessage;
-    const error = new Error(reason || detail);
-    return Object.assign(error, {
-      code, appCode, detail,
-    });
-  }
-
   handleMessage(msg) {
     let message;
     try {
@@ -78,7 +69,7 @@ export default class Connection extends WebSocketPlus {
         if (message.cmd === CommandType.error) {
           this
             ._commands[serialId]
-            .reject(this.constructor._createError(message));
+            .reject(createError(message.errorMessage));
         } else {
           this
             ._commands[serialId]
@@ -86,11 +77,14 @@ export default class Connection extends WebSocketPlus {
         }
         delete this._commands[serialId];
       } else {
-        if (message.cmd === CommandType.error) {
-          this.emit('error', this.constructor._createError(message));
-        } else {
-          this.emit('message', message);
-        }
+        console.warn(`Unexpected command received with serialId [${serialId}],
+         which have timed out or never been requested.`);
+      }
+    } else {
+      if (message.cmd === CommandType.error) {
+        this.emit('error', createError(message.errorMessage));
+      } else {
+        this.emit('message', message);
       }
     }
   }

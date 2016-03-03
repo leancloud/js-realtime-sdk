@@ -1,7 +1,7 @@
 import EventEmitter from 'eventemitter3';
 
 export default class Client extends EventEmitter {
-  constructor(id, connection, options = {}) {
+  constructor(id, options = {}, connection, props) {
     if (!(id === undefined || typeof id === 'string')) {
       throw new TypeError(`Client id [${id}] is not a String`);
     }
@@ -10,7 +10,7 @@ export default class Client extends EventEmitter {
       id,
       _connection: connection,
       options,
-    });
+    }, props);
   }
 
   _dispatchMessage(message) {
