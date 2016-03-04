@@ -106,7 +106,7 @@ describe('Realtime', () => {
       });
   });
   describe('events', () => {
-    it('disconnect/reconnect', () => {
+    it('should proxy disconnect/reconnect event', () => {
       const realtime = createRealtime();
       return realtime._open()
         .then(connection => {
@@ -115,7 +115,8 @@ describe('Realtime', () => {
               realtime.on(event, resolve);
             })
           ));
-          connection._ws.close();
+          connection.emit('disconnect');
+          connection.emit('reconnect');
           callbackPromise.then(() => connection.close());
           return callbackPromise;
         });
