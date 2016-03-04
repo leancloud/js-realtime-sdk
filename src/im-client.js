@@ -5,11 +5,14 @@ import {
   GenericCommand,
   SessionCommand,
   ConvCommand,
+  AckCommand,
   JsonObjectMessage,
   CommandType,
   OpType,
 } from '../proto/message';
 import { Promise } from 'rsvp';
+import throttle from 'lodash/throttle';
+import groupBy from 'lodash/groupBy';
 import { tap, Cache, keyRemap, union, difference, trim } from './utils';
 import { default as d } from 'debug';
 import { version as VERSION } from '../package.json';
@@ -23,6 +26,7 @@ export default class IMClient extends Client {
       throw new Error('IMClient must be initialized with a MessageParser');
     }
     this._conversationCache = new Cache(`client:${this.id}`);
+    this._ackMessageBuffer = [];
     [
       'invited',
       'kicked',
@@ -143,7 +147,43 @@ export default class IMClient extends Client {
         message,
       });
       conversation.emit('message', message);
+      if (!(transient || conversation.transient)) {
+        this._sendAck(message);
+      }
     });
+  }
+
+  _sendAck(message) {
+    this._debug('send ack for', message);
+    this._ackMessageBuffer.push(message);
+    if (!this._doSendAckThrottled) {
+      this._doSendAckThrottled = throttle(this._doSendAck.bind(this), 1000);
+    }
+    return this._doSendAckThrottled();
+  }
+
+  _doSendAck() {
+    if (!this._ackMessageBuffer.length) {
+      return Promise.resolve();
+    }
+    const groupedAckMessages = groupBy(
+      this._ackMessageBuffer,
+      message => message.cid
+    );
+    debug('do send ack', groupedAckMessages);
+    return Promise.all(Object.keys(groupedAckMessages).map(cid => {
+      const convAckMessages = groupedAckMessages[cid];
+      const timestamps = convAckMessages.map(message => message.timestamp);
+      const command = new GenericCommand({
+        cmd: 'ack',
+        ackMessage: new AckCommand({
+          cid,
+          fromts: Math.min(timestamps),
+          tots: Math.max(timestamps),
+        }),
+      });
+      return this._send(command);
+    }));
   }
 
   _send(cmd) {
@@ -298,7 +338,7 @@ export default class IMClient extends Client {
             'mutedMembers',
             'members',
             '_attributes',
-            'isTransient',
+            'transient',
             'muted',
           ].forEach(key => {
             const value = fetchedConversation[key];
@@ -318,7 +358,7 @@ export default class IMClient extends Client {
       msg: 'lastMessage',
       m: 'members',
       attr: 'attributes',
-      tr: 'isTransient',
+      tr: 'transient',
       c: 'creator',
       mu: 'mutedMembers',
     }, rawData);
@@ -331,7 +371,7 @@ export default class IMClient extends Client {
       name,
       attributes,
       members,
-      isTransient,
+      transient,
       isUnique,
     } = options;
     if (!Array.isArray(members)) {
@@ -353,7 +393,7 @@ export default class IMClient extends Client {
     const startCommandJson = {
       m: members,
       attr,
-      transient: isTransient,
+      transient,
       unique: isUnique,
     };
 

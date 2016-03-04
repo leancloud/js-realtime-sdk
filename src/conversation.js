@@ -30,7 +30,7 @@ export default class Conversation extends EventEmitter {
       mutedMembers: [],
       members: [],
       _attributes: {},
-      isTransient: false,
+      transient: false,
       muted: false,
     }, keyRemap({
       attributes: '_attributes',
@@ -184,7 +184,7 @@ export default class Conversation extends EventEmitter {
     return this._send(new GenericCommand({
       op: 'mute',
     })).then(() => {
-      if (!this.isTransient) {
+      if (!this.transient) {
         this.muted = true;
         this.mutedMembers = union(this.mutedMembers, [this._client.id]);
       }
@@ -197,7 +197,7 @@ export default class Conversation extends EventEmitter {
     return this._send(new GenericCommand({
       op: 'unmute',
     })).then(() => {
-      if (!this.isTransient) {
+      if (!this.transient) {
         this.muted = false;
         this.mutedMembers = difference(this.mutedMembers, [this._client.id]);
       }
@@ -224,7 +224,7 @@ export default class Conversation extends EventEmitter {
       op: 'add',
       convMessage,
     })).then(() => {
-      if (!this.isTransient) {
+      if (!this.transient) {
         this.members = union(this.members, clientIds);
       }
       return this;
@@ -242,7 +242,7 @@ export default class Conversation extends EventEmitter {
       op: 'remove',
       convMessage,
     })).then(() => {
-      if (!this.isTransient) {
+      if (!this.transient) {
         this.members = difference(this.members, clientIds);
       }
       return this;
