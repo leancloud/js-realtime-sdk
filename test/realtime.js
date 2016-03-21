@@ -148,7 +148,7 @@ describe('Connection', () => {
       cmd: 'conv',
       op: 'update',
       peerId: client.id,
-    })).should.be.rejectedWith('CONVERSATION_UPDATE_FAILED')
+    })).should.be.rejectedWith('CONVERSATION_UPDATE_REJECTED')
   );
   it('message dispatch', () => {
     const clientMessageEventCallback = sinon.stub(client, '_dispatchMessage');
