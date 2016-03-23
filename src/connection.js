@@ -58,7 +58,7 @@ export default class Connection extends WebSocketPlus {
     let message;
     try {
       message = GenericCommand.decode(msg);
-      debug('↓',trim(message), 'received');
+      debug('↓', trim(message), 'received');
     } catch (e) {
       console.warn('Decode message failed', msg);
     }
