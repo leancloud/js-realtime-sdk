@@ -20,7 +20,7 @@ export default class Connection extends WebSocketPlus {
   send(command, waitingForRespond = true) {
     const serialId = ++ this._serialId;
     command.i = serialId; // eslint-disable-line no-param-reassign
-    debug(trim(command), 'sent');
+    debug('↑', trim(command), 'sent');
 
     let message;
     if (command.toBuffer) {
@@ -44,7 +44,7 @@ export default class Connection extends WebSocketPlus {
       setTimeout(
         () => {
           if (this._commands[serialId]) {
-            debug(trim(command), 'timeout');
+            debug('✗', trim(command), 'timeout');
             reject(new Error('Command Timeout.'));
             delete this._commands[serialId];
           }
@@ -58,7 +58,7 @@ export default class Connection extends WebSocketPlus {
     let message;
     try {
       message = GenericCommand.decode(msg);
-      debug(trim(message), 'received');
+      debug('↓',trim(message), 'received');
     } catch (e) {
       console.warn('Decode message failed', msg);
     }
