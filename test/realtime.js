@@ -72,7 +72,9 @@ describe('Realtime', () => {
   describe('endpoints cache', () => {
     it('_getEndpoints should use cache', () => {
       const _fetchEndpointsInfo =
-        sinon.spy(Realtime, '_fetchEndpointsInfo');
+        sinon.stub(Realtime, '_fetchEndpointsInfo').returns(Promise.resolve({
+          ttl: 1000,
+        }));
       const realtime = createRealtime();
       return realtime._getEndpoints(realtime._options)
         .then(() => {
@@ -81,6 +83,7 @@ describe('Realtime', () => {
         .then(() => realtime._getEndpoints(realtime._options))
         .then(() => {
           _fetchEndpointsInfo.should.be.calledOnce();
+          _fetchEndpointsInfo.restore();
         });
     });
   });
