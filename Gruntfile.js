@@ -201,7 +201,7 @@ var require = require || function(id) {throw new Error('Unexpected required ' + 
           build: process.env.CI_BUILD_NUMBER,
           testname: 'Sauce Test for LeanCloud realtime SDK',
           browsers: SAUCE_BROWSERS,
-          throttled: 5,
+          throttled: 2,
           tunnelArgs: ['--vm-version', 'dev-varnish']
         }
       }
