@@ -182,16 +182,16 @@ export default class IMClient extends Client {
           tots: Math.max(timestamps),
         }),
       });
-      return this._send(command);
+      return this._send(command, false);
     }));
   }
 
-  _send(cmd) {
+  _send(cmd, ...args) {
     const command = cmd;
     if (this.id) {
       command.peerId = this.id;
     }
-    return this._connection.send(command);
+    return this._connection.send(command, ...args);
   }
 
   _open(appId, isReconnect = false) {
