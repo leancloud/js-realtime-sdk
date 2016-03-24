@@ -12,7 +12,6 @@ import {
 } from '../proto/message';
 import { Promise } from 'rsvp';
 import throttle from 'lodash/throttle';
-import groupBy from 'lodash/groupBy';
 import { tap, Cache, keyRemap, union, difference, trim } from './utils';
 import { default as d } from 'debug';
 import { version as VERSION } from '../package.json';
@@ -26,7 +25,7 @@ export default class IMClient extends Client {
       throw new Error('IMClient must be initialized with a MessageParser');
     }
     this._conversationCache = new Cache(`client:${this.id}`);
-    this._ackMessageBuffer = [];
+    this._ackMessageBuffer = {};
     [
       'invited',
       'kicked',
@@ -136,7 +135,7 @@ export default class IMClient extends Client {
       const messageProps = {
         id,
         cid,
-        timestamp: timestamp.toNumber(),
+        timestamp: new Date(timestamp.toNumber()),
         from: fromPeerId,
         transient,
       };
@@ -155,7 +154,14 @@ export default class IMClient extends Client {
 
   _sendAck(message) {
     this._debug('send ack for', message);
-    this._ackMessageBuffer.push(message);
+    const { cid } = message;
+    if (!cid) {
+      return Promise.reject(new Error('missing cid'));
+    }
+    if (!this._ackMessageBuffer[cid]) {
+      this._ackMessageBuffer[cid] = [];
+    }
+    this._ackMessageBuffer[cid].push(message);
     if (!this._doSendAckThrottled) {
       this._doSendAckThrottled = throttle(this._doSendAck.bind(this), 1000);
     }
@@ -163,26 +169,23 @@ export default class IMClient extends Client {
   }
 
   _doSendAck() {
-    if (!this._ackMessageBuffer.length) {
+    if (!this._connection.is('connected')) {
+      // if not connected, just skip everything
       return Promise.resolve();
     }
-    const groupedAckMessages = groupBy(
-      this._ackMessageBuffer,
-      message => message.cid
-    );
-    debug('do send ack', groupedAckMessages);
-    return Promise.all(Object.keys(groupedAckMessages).map(cid => {
-      const convAckMessages = groupedAckMessages[cid];
+    debug('do send ack', this._ackMessageBuffer);
+    return Promise.all(Object.keys(this._ackMessageBuffer).map(cid => {
+      const convAckMessages = this._ackMessageBuffer[cid];
       const timestamps = convAckMessages.map(message => message.timestamp);
       const command = new GenericCommand({
         cmd: 'ack',
         ackMessage: new AckCommand({
           cid,
-          fromts: Math.min(timestamps),
-          tots: Math.max(timestamps),
+          fromts: Math.min.apply(null, timestamps),
+          tots: Math.max.apply(null, timestamps),
         }),
       });
-      return this._send(command, false);
+      return this._send(command, false).then(() => delete this._ackMessageBuffer[cid]);
     }));
   }
 

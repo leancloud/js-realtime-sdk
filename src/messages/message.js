@@ -5,7 +5,7 @@ export default class Message {
     Object.assign(this, { content }, {
       id: uuid.v4(),
       cid: null,
-      timestamp: Date.now(),
+      timestamp: new Date(),
       from: undefined,
       needReceipt: false,
       transient: false,
