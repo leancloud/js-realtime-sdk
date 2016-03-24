@@ -10,6 +10,7 @@ import Client from './client';
 import IMClient from './im-client';
 import MessageParser from './message-parser';
 import Message from './messages/message';
+import TextMessage from './messages/text-message';
 
 const agent = superagentPromise(superagent, Promise);
 const debug = d('LC:Realtime');
@@ -34,7 +35,10 @@ export default class Realtime extends EventEmitter {
     this._cache = new Cache('endpoints');
     this._clients = {};
     this._messageParser = new MessageParser();
-    this._messageParser.register(Message);
+    [
+      Message,
+      TextMessage,
+    ].forEach(this._messageParser.register.bind(this._messageParser));
     ['disconnect', 'reconnect'].forEach(event => this.on(
       event,
       payload => debug(`${event} event emitted.`, payload)
@@ -44,11 +48,11 @@ export default class Realtime extends EventEmitter {
   _open() {
     if (this._openPromise) return this._openPromise;
 
-    let protocolsVersion = 1;
-    if (this._options.pushUnread) {
-      // 不推送离线消息，而是发送对话的未读通知
-      protocolsVersion = 3;
-    }
+    const protocolsVersion = 3;
+    // if (this._options.pushUnread) {
+    //  // 不推送离线消息，而是发送对话的未读通知
+    //  protocolsVersion = 3;
+    // }
     const protocol = `lc.protobuf.${protocolsVersion}`;
 
     this._openPromise = new Promise((resolve, reject) => {

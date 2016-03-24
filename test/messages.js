@@ -4,6 +4,8 @@ import { Promise } from 'rsvp';
 import uuid from 'uuid';
 import Realtime from '../src/realtime';
 import Message from '../src/messages/message';
+import TypedMessage from '../src/messages/typed-message';
+import TextMessage from '../src/messages/text-message';
 
 import {
   APP_ID,
@@ -14,9 +16,45 @@ import {
 // const sinon = (typeof window !== 'undefined' && window.sinon) || require('sinon');
 
 describe('Messages', () => {
-  // describe('Message', () => {
-  //
-  // });
+  describe('TypedMessage', () => {
+    it('toJSON', () => {
+      new TypedMessage()
+        .setAttrs({
+          lean: 'cloud',
+        })
+        .setText('rocks')
+        .toJSON()
+        .should.eql({
+          _lctext: 'rocks',
+          _lcattrs: {
+            lean: 'cloud',
+          },
+          _lctype: 0,
+        });
+    });
+  });
+  describe('TextMessage', () => {
+    it('param check', () => {
+      (() => new TextMessage({})).should.throw(TypeError);
+    });
+    it('parse and toJSON', () => {
+      const json = {
+        _lctext: 'leancloud',
+        _lcattrs: {
+          lean: 'cloud',
+        },
+        _lctype: -1,
+      };
+      const message = new TextMessage(json._lctext)
+        .setAttrs(json._lcattrs);
+      message.toJSON().should.eql(json);
+      const parsedMessage = TextMessage.parse(json);
+      parsedMessage.should.be.instanceof(TextMessage);
+      parsedMessage.getText().should.eql(json._lctext);
+      parsedMessage.getAttrs().should.eql(json._lcattrs);
+      parsedMessage.toJSON().should.eql(json);
+    });
+  });
 
   describe('sending messages', () => {
     // let realtime;
@@ -49,6 +87,7 @@ describe('Messages', () => {
         conversationZwang = conversation;
       });
     });
+
     after(() => Promise.all([
       wchen.close(),
       zwang.close(),
@@ -61,8 +100,24 @@ describe('Messages', () => {
       const sendPromise = conversationWchen.send(new Message('hello'));
       return Promise.all([receivePromise, sendPromise]).then(messages => {
         const [receivedMessage, sentMessage] = messages;
+        receivedMessage.id.should.be.eql(sentMessage.id);
+        receivedMessage.content.should.be.eql(sentMessage.content);
+      });
+    });
+    it('sending typed message', () => {
+      const receivePromise = new Promise((resolve) => {
+        conversationZwang.on('message', resolve);
+      });
+      const sendPromise = conversationWchen.send(
+        new TextMessage('hello').setAttrs({
+          leancloud: 'rocks',
+        })
+      );
+      return Promise.all([receivePromise, sendPromise]).then(messages => {
+        const [receivedMessage, sentMessage] = messages;
         receivedMessage.id.should.be.equal(sentMessage.id);
-        receivedMessage.content.should.be.equal(sentMessage.content);
+        receivedMessage.getText().should.be.eql(sentMessage.getText());
+        receivedMessage.getAttrs().should.be.eql(sentMessage.getAttrs());
       });
     });
   });

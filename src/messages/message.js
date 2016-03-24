@@ -1,7 +1,7 @@
 import uuid from 'uuid';
 
 export default class Message {
-  constructor(content, props) {
+  constructor(content) {
     Object.assign(this, { content }, {
       id: uuid.v4(),
       cid: null,
@@ -10,9 +10,6 @@ export default class Message {
       needReceipt: false,
       transient: false,
     });
-    if (props) {
-      this._setProps(props);
-    }
   }
 
   _setProps(props) {
@@ -28,15 +25,15 @@ export default class Message {
     this.transient = transient;
   }
 
-  toJSON(content = this.content) {
-    return content;
+  toJSON(json = this.content) {
+    return json;
   }
 
   static validate() {
     return true;
   }
 
-  static parse(content) {
-    return new this(content);
+  static parse(json, message) {
+    return message || new this(json);
   }
 }
