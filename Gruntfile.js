@@ -199,9 +199,11 @@ var require = require || function(id) {throw new Error('Unexpected required ' + 
         options: {
           urls: ['http://localhost:8000/test/browser/'],
           build: process.env.CI_BUILD_NUMBER,
-          testname: 'Sauce Test for LeanCloud realtime SDK',
+          testname: 'Sauce Test for LeanCloud Realtime SDK',
           browsers: SAUCE_BROWSERS,
           throttled: 2,
+          pollInterval: 3000,
+          statusCheckAttempts: 200,
           tunnelArgs: ['--vm-version', 'dev-varnish']
         }
       }
