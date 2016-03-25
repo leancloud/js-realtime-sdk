@@ -339,4 +339,36 @@ export default class Conversation extends EventEmitter {
       })
     );
   }
+
+  getMessagesIterator({ beforeTime, beforeMessageId, limit } = {}) {
+    let promise;
+    return {
+      next: () => {
+        if (promise === undefined) {
+          // first call
+          promise = this.queryMessages({
+            limit,
+            beforeTime,
+            beforeMessageId,
+          });
+        } else {
+          promise = promise.then(prevMessages => {
+            if (prevMessages.length < limit) {
+              // no more messages
+              return [];
+            }
+            return this.queryMessages({
+              beforeTime: prevMessages[0].timestamp,
+              beforeMessageId: prevMessages[0].id,
+              limit,
+            });
+          });
+        }
+        return {
+          value: promise,
+          done: false,
+        };
+      },
+    };
+  }
 }

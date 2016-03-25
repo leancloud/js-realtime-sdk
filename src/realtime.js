@@ -107,14 +107,8 @@ export default class Realtime extends EventEmitter {
     });
   }
 
-  static _fetchEndpointsInfo(options) {
+  static _fetchEndpointsInfo({ appId, region, ssl, _debug }) {
     debug('fetch endpoint info');
-    const {
-      appId,
-      region,
-      ssl,
-      _debug,
-    } = options;
     let router;
     switch (region) {
       case 'cn':

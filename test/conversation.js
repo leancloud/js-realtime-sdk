@@ -128,6 +128,20 @@ describe('Conversation', () => {
         messages.should.be.an.empty();
       })
     );
+    it('MessageIterator', () => {
+      const iterator = conversation.getMessagesIterator({
+        limit: 2,
+      });
+      return Promise.all([iterator.next().value, iterator.next().value])
+        .then(([page1, page2]) => {
+          page1.should.be.an.Array();
+          page2.should.be.an.Array();
+          if (page2[0]) {
+            page2[0].timestamp.should.lessThan(page1[0].timestamp);
+            page2[0].timestamp.should.lessThan(page1[1].timestamp);
+          }
+        });
+    });
   });
 
   describe('message dispatch', () => {
