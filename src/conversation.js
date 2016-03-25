@@ -7,6 +7,7 @@ import {
   ConvCommand,
   JsonObjectMessage,
   DirectCommand,
+  LogsCommand,
 } from '../proto/message';
 import { createError } from './errors';
 import Message from './messages/message';
@@ -294,5 +295,48 @@ export default class Conversation extends EventEmitter {
       this.lastMessageAt = message.timestamp;
       return message;
     });
+  }
+
+  queryMessages(options = {}) {
+    this._debug('query messages', options);
+    if (options.beforeMessageId && !options.beforeTime) {
+      throw new Error('query option beforeMessageId must be used with option beforeTime');
+    }
+    if (options.afterMessageId && !options.afterTime) {
+      throw new Error('query option afterMessageId must be used with option afterTime');
+    }
+    const conditions = keyRemap({
+      beforeTime: 't',
+      beforeMessageId: 'mid',
+      afterTime: 'tt',
+      afterMessageId: 'tmid',
+      limit: 'l',
+    }, options);
+    if (conditions.t instanceof Date) {
+      conditions.t = conditions.t.getTime();
+    }
+    if (conditions.tt instanceof Date) {
+      conditions.tt = conditions.tt.getTime();
+    }
+    return this._send(new GenericCommand({
+      cmd: 'logs',
+      logsMessage: new LogsCommand(
+        Object.assign(conditions, {
+          cid: this.id,
+        })
+      ),
+    })).then(resCommand =>
+      resCommand.logsMessage.logs.map(log => {
+        const messageProps = {
+          id: log.msgId,
+          cid: this.id,
+          timestamp: new Date(log.timestamp.toNumber()),
+          from: log.from,
+        };
+        const message = this._client._messageParser.parse(log.data);
+        message._setProps(messageProps);
+        return message;
+      })
+    );
   }
 }

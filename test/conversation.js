@@ -5,6 +5,7 @@ import {
   GenericCommand,
   ConvCommand,
 } from '../proto/message';
+import Message from '../src/messages/message';
 
 import {
   APP_ID,
@@ -99,6 +100,35 @@ describe('Conversation', () => {
         conv.members.should.not.containEql('rguo');
       })
   );
+  describe('Message Query', () => {
+    it('queryMessages', () =>
+      conversation.queryMessages().then(messages => {
+        messages.should.be.an.Array();
+        messages[0].should.be.instanceof(Message);
+      })
+    );
+    it('with limit', () =>
+      conversation.queryMessages({
+        limit: 0,
+      }).then(messages => {
+        messages.should.be.an.empty();
+      })
+    );
+    it('beforeTime', () =>
+      conversation.queryMessages({
+        beforeTime: 1,
+      }).then(messages => {
+        messages.should.be.an.empty();
+      })
+    );
+    it('afterTime', () =>
+      conversation.queryMessages({
+        afterTime: new Date(),
+      }).then(messages => {
+        messages.should.be.an.empty();
+      })
+    );
+  });
 
   describe('message dispatch', () => {
     let client2;
