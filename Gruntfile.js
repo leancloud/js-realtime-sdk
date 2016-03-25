@@ -64,7 +64,7 @@ var require = require || function(id) {throw new Error('Unexpected required ' + 
       },
       dist: {
         dest: 'dist/bundle.js',
-        src: 'src/realtime.js',
+        src: 'src/index.js',
         options: {
           plugins: [
             json(),
@@ -84,7 +84,7 @@ var require = require || function(id) {throw new Error('Unexpected required ' + 
       },
       'dist-browser': {
         dest: 'dist/bundle.browser.js',
-        src: 'src/realtime.js',
+        src: 'src/index.js',
         options: {
           plugins: [
             json(),
@@ -100,7 +100,7 @@ var require = require || function(id) {throw new Error('Unexpected required ' + 
             })
           ],
           format: 'umd',
-          moduleName: 'AV.realtime'
+          moduleName: 'AV'
         }
       },
       test: {
@@ -144,7 +144,7 @@ var require = require || function(id) {throw new Error('Unexpected required ' + 
             env()
           ],
           format: 'umd',
-          moduleName: 'AV.realtime'
+          moduleName: 'AV'
         }
       }
     },
