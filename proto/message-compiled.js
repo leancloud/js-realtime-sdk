@@ -1,4 +1,4 @@
-module.exports = require("protobufjs").newBuilder({})['import']({
+module.exports = require("protobufjs/dist/protobuf-light").newBuilder({})['import']({
     "package": "push_server.messages",
     "options": {
         "objc_class_prefix": "AVIM"

@@ -11,7 +11,7 @@
     "test": "grunt test --stack && npm run report",
     "report": "istanbul report --include coverage/coverage.json --print text lcovonly",
     "doc": "jsdoc src -r -d docs -t node_modules/docdash",
-    "convert-pb": "pbjs proto/message.proto -t commonjs > proto/message-compiled.js"
+    "convert-pb": "pbjs proto/message.proto -t commonjs > proto/message-compiled.js && sed -i '' 's/protobufjs/protobufjs\\\/dist\\\/protobuf-light/g' ./proto/message-compiled.js"
   },
   "repository": {
     "type": "git",
