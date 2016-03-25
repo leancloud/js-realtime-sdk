@@ -100,8 +100,10 @@ describe('Messages', () => {
       const sendPromise = conversationWchen.send(new Message('hello'));
       return Promise.all([receivePromise, sendPromise]).then(messages => {
         const [receivedMessage, sentMessage] = messages;
-        receivedMessage.id.should.be.eql(sentMessage.id);
-        receivedMessage.content.should.be.eql(sentMessage.content);
+        receivedMessage.id.should.eql(sentMessage.id);
+        receivedMessage.content.should.eql(sentMessage.content);
+        conversationZwang.lastMessage.content.should.eql(sentMessage.content);
+        conversationWchen.lastMessage.content.should.eql(sentMessage.content);
       });
     });
     it('sending typed message', () => {
@@ -116,8 +118,8 @@ describe('Messages', () => {
       return Promise.all([receivePromise, sendPromise]).then(messages => {
         const [receivedMessage, sentMessage] = messages;
         receivedMessage.id.should.be.equal(sentMessage.id);
-        receivedMessage.getText().should.be.eql(sentMessage.getText());
-        receivedMessage.getAttrs().should.be.eql(sentMessage.getAttrs());
+        receivedMessage.getText().should.eql(sentMessage.getText());
+        receivedMessage.getAttrs().should.eql(sentMessage.getAttrs());
       });
     });
   });

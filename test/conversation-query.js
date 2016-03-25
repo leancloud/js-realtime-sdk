@@ -1,5 +1,6 @@
 import ConversationQuery from '../src/conversation-query';
 import Realtime from '../src/realtime';
+import Message from '../src/messages/message';
 
 import {
   APP_ID,
@@ -255,7 +256,7 @@ describe('ConversationQuery', () => {
       .find()
       .then(conversations => {
         conversations.length.should.be.equal(1);
-        conversations[0].should.have.property('lastMessage');
+        conversations[0].lastMessage.should.be.instanceof(Message);
       })
   );
   it('should use cache', () =>

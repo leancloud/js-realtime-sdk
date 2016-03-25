@@ -126,12 +126,6 @@ export default class IMClient extends Client {
       },
     } = originalMessage;
     return this.getConversation(directMessage.cid).then(conversation => {
-      let msg;
-      try {
-        msg = JSON.parse(directMessage.msg);
-      } catch (error) {
-        msg = directMessage.msg;
-      }
       const messageProps = {
         id,
         cid,
@@ -139,8 +133,10 @@ export default class IMClient extends Client {
         from: fromPeerId,
         transient,
       };
-      const message = this._messageParser.parse(msg);
+      const message = this._messageParser.parse(directMessage.msg);
       message._setProps(messageProps);
+      conversation.lastMessage = message; // eslint-disable-line no-param-reassign
+      conversation.lastMessageAt = message.timestamp; // eslint-disable-line no-param-reassign
       this.emit('message', {
         conversation,
         message,
@@ -365,6 +361,9 @@ export default class IMClient extends Client {
       c: 'creator',
       mu: 'mutedMembers',
     }, rawData);
+    if (data.lastMessage) {
+      data.lastMessage = this._messageParser.parse(data.lastMessage);
+    }
     return new Conversation(data, this);
   }
 

@@ -286,8 +286,12 @@ export default class Conversation extends EventEmitter {
           code, reason, appCode,
         });
       }
-      message.id = uid; // eslint-disable-line no-param-reassign
-      message.timestamp = t.toNumber(); // eslint-disable-line no-param-reassign
+      message._setProps({
+        id: uid,
+        timestamp: new Date(t.toNumber()),
+      });
+      this.lastMessage = message;
+      this.lastMessageAt = message.timestamp;
       return message;
     });
   }

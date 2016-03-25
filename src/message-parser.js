@@ -21,8 +21,14 @@ export default class MessageParser {
     }
   }
 
-  parse(content) {
-    debug('parsing message:', content);
+  parse(text) {
+    debug('parsing message:', text);
+    let content;
+    try {
+      content = JSON.parse(text);
+    } catch (error) {
+      content = text;
+    }
     for (const Klass of this._messageClasses) {
       try {
         const contentCopy = isPlainObject(content) ? Object.assign({}, content) : content;
