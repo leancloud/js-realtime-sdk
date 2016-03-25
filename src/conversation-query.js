@@ -26,6 +26,10 @@ export default class ConversationQuery {
     );
   }
 
+  /**
+   * Create a ConversationQuery
+   * @param  {IMClient} client
+   */
   constructor(client) {
     this._client = client;
     this._where = {};
@@ -54,9 +58,8 @@ export default class ConversationQuery {
 
   /**
    * 增加查询条件，指定聊天室的组员包含某些成员即可返回
-   *
-   * @param peerIds
-   * @return
+   * @param {string[]} peerIds - 成员 ID 列表
+   * @return {ConversationQuery} self
    */
   containsMembers(peerIds) {
     return this.containsAll('m', peerIds);
@@ -65,9 +68,9 @@ export default class ConversationQuery {
   /**
    * 增加查询条件，指定聊天室的组员条件满足条件的才返回
    *
-   * @param peerIds
-   * @param includeSelf 是否包含自己
-   * @return
+   * @param {string[]} - 成员 ID 列表
+   * @param {Boolean} includeSelf - 是否包含自己
+   * @return {ConversationQuery} self
    */
   withMembers(peerIds, includeSelf) {
     const peerIdsSet = new Set(peerIds);
@@ -79,11 +82,11 @@ export default class ConversationQuery {
   }
 
   /**
-   * 增加查询条件，当conversation的属性中对应的字段满足等于条件时即可返回
+   * 增加查询条件，当 conversation 的属性中对应的字段满足等于条件时即可返回
    *
-   * @param key
+   * @param {string} key
    * @param value
-   * @return
+   * @return {ConversationQuery} self
    */
   equalTo(key, value) {
     this._where[key] = this.constructor._encode(value);
@@ -91,10 +94,10 @@ export default class ConversationQuery {
   }
 
   /**
-   * 增加查询条件，当conversation的属性中对应的字段满足小于条件时即可返回*
-   * @param key
+   * 增加查询条件，当 conversation 的属性中对应的字段满足小于条件时即可返回
+   * @param {string} key
    * @param value
-   * @return
+   * @return {ConversationQuery} self
    */
   lessThan(key, value) {
     return this._addCondition(key, '$lt', value);
@@ -102,22 +105,22 @@ export default class ConversationQuery {
 
 
   /**
-   * 增加查询条件，当conversation的属性中对应的字段满足小于等于条件时即可返回
+   * 增加查询条件，当 conversation 的属性中对应的字段满足小于等于条件时即可返回
 
-   * @param key
+   * @param {string} key
    * @param value
-   * @return
+   * @return {ConversationQuery} self
    */
   lessThanOrEqualTo(key, value) {
     return this._addCondition(key, '$lte', value);
   }
 
   /**
-   * 增加查询条件，当conversation的属性中对应的字段满足大于条件时即可返回
+   * 增加查询条件，当 conversation 的属性中对应的字段满足大于条件时即可返回
    *
-   * @param key
+   * @param {string} key
    * @param value
-   * @return
+   * @return {ConversationQuery} self
    */
 
   greaterThan(key, value) {
@@ -125,11 +128,11 @@ export default class ConversationQuery {
   }
 
   /**
-   * 增加查询条件，当conversation的属性中对应的字段满足大于等于条件时即可返回
+   * 增加查询条件，当 conversation 的属性中对应的字段满足大于等于条件时即可返回
    *
-   * @param key
+   * @param {string} key
    * @param value
-   * @return
+   * @return {ConversationQuery} self
    */
 
   greaterThanOrEqualTo(key, value) {
@@ -137,33 +140,33 @@ export default class ConversationQuery {
   }
 
   /**
-   * 增加查询条件，当conversation的属性中对应的字段满足不等于条件时即可返回
+   * 增加查询条件，当 conversation 的属性中对应的字段满足不等于条件时即可返回
    *
-   * @param key
+   * @param {string} key
    * @param value
-   * @return
+   * @return {ConversationQuery} self
    */
   notEqualTo(key, value) {
     return this._addCondition(key, '$ne', value);
   }
 
   /**
-   * 增加查询条件，当conversation的属性中对应的字段对应的值包含在指定值中时即可返回
+   * 增加查询条件，当 conversation 的属性中对应的字段对应的值包含在指定值中时即可返回
    *
-   * @param key
+   * @param {string} key
    * @param values
-   * @return
+   * @return {ConversationQuery} self
    */
   containedIn(key, values) {
     return this._addCondition(key, '$in', values);
   }
 
   /**
-   * 增加查询条件，当conversation的属性中对应的字段对应的值不包含在指定值中时即可返回
+   * 增加查询条件，当 conversation 的属性中对应的字段对应的值不包含在指定值中时即可返回
    *
-   * @param key
+   * @param {string} key
    * @param values
-   * @return
+   * @return {ConversationQuery} self
    */
   notContainsIn(key, values) {
     return this._addCondition(key, '$nin', values);
@@ -171,61 +174,60 @@ export default class ConversationQuery {
   /**
    * 增加查询条件，当conversation的属性中对应的字段中的元素包含所有的值才可返回
    *
-   * @param key
+   * @param {string} key
    * @param values
-   * @return
+   * @return {ConversationQuery} self
    */
   containsAll(key, values) {
     return this._addCondition(key, '$all', values);
   }
 
   /**
-   * 增加查询条件，当conversation的属性中对应的字段对应的值包含此字符串即可返回
+   * 增加查询条件，当 conversation 的属性中对应的字段对应的值包含此字符串即可返回
    *
-   * @param key
-   * @param subString
-   * @return
+   * @param {string} key
+   * @param {string} subString
+   * @return {ConversationQuery} self
    */
   contains(key, subString) {
     return this._addCondition(key, '$regex', ConversationQuery._quote(subString));
   }
 
   /**
-   * 增加查询条件，当conversation的属性中对应的字段对应的值以此字符串起始即可返回
+   * 增加查询条件，当 conversation 的属性中对应的字段对应的值以此字符串起始即可返回
    *
-   * @param key
-   * @param prefix
-   * @return
+   * @param {string} key
+   * @param {string} prefix
+   * @return {ConversationQuery} self
    */
   startsWith(key, prefix) {
     return this._addCondition(key, '$regex', `^${ConversationQuery._quote(prefix)}`);
   }
 
   /**
-   * 增加查询条件，当conversation的属性中对应的字段对应的值以此字符串结束即可返回
+   * 增加查询条件，当 conversation 的属性中对应的字段对应的值以此字符串结束即可返回
    *
-   * @param key
-   * @param suffix
-   * @return
+   * @param {string} key
+   * @param {string} suffix
+   * @return {ConversationQuery} self
    */
   endsWith(key, suffix) {
     return this._addCondition(key, '$regex', `${ConversationQuery._quote(suffix)}$`);
   }
 
   /**
-   * 增加查询条件，当conversation的属性中对应的字段对应的值满足提供的正则表达式即可返回
+   * 增加查询条件，当 conversation 的属性中对应的字段对应的值满足提供的正则表达式即可返回
    *
-   * @param key
-   * @param regex
-   * @param modifiers 正则表达式的匹配模式，比如'-i'表示忽视大小写区分等
-   * @return
+   * @param {string} key
+   * @param {RegExp} regex
+   * @return {ConversationQuery} self
    */
-  matches(key, regex, modifiers = '') {
+  matches(key, regex) {
     this._addCondition(key, '$regex', regex);
     // Javascript regex options support mig as inline options but store them
     // as properties of the object. We support mi & should migrate them to
     // modifiers
-    let _modifiers = modifiers;
+    let _modifiers = '';
     if (regex.ignoreCase) { _modifiers += 'i'; }
     if (regex.multiline) { _modifiers += 'm'; }
 
@@ -236,21 +238,21 @@ export default class ConversationQuery {
   }
 
   /**
-   * 添加查询约束条件，查找key类型是数组，该数组的长度匹配提供的数值
+   * 添加查询约束条件，查找 key 类型是数组，该数组的长度匹配提供的数值
    *
-   * @param key
-   * @param value
-   * @return
+   * @param {string} key
+   * @param {Number} length
+   * @return {ConversationQuery} self
    */
-  sizeEqualTo(key, value) {
-    return this._addCondition(key, '$size', value);
+  sizeEqualTo(key, length) {
+    return this._addCondition(key, '$size', length);
   }
 
   /**
    * 设置返回集合的大小上限
    *
-   * @param limit 上限
-   * @return
+   * @param {Number} limit - 上限
+   * @return {ConversationQuery} self
    */
   limit(limit) {
     this._limit = limit;
@@ -260,8 +262,8 @@ export default class ConversationQuery {
   /**
    * 设置返回集合的起始位置，一般用于分页
    *
-   * @param skip 起始位置跳过几个对象
-   * @return
+   * @param {Number} skip - 起始位置跳过几个对象
+   * @return {ConversationQuery} self
    */
   skip(skip) {
     this._skip = skip;
@@ -271,8 +273,8 @@ export default class ConversationQuery {
   /**
    * 设置返回集合按照指定key进行增序排列
    *
-   * @param key
-   * @return
+   * @param {string} key
+   * @return {ConversationQuery} self
    */
   ascending(key) {
     this._order = key;
@@ -282,8 +284,8 @@ export default class ConversationQuery {
   /**
    * 设置返回集合按照指定key进行增序排列，如果已设置其他排序，原排序的优先级较高
    *
-   * @param key
-   * @return
+   * @param {string} key
+   * @return {ConversationQuery} self
    */
   addAscending(key) {
     if (this._order) {
@@ -297,8 +299,8 @@ export default class ConversationQuery {
   /**
    * 设置返回集合按照指定 key 进行降序排列
    *
-   * @param key
-   * @return
+   * @param {string} key
+   * @return {ConversationQuery} self
    */
   descending(key) {
     this._order = `-${key}`;
@@ -306,10 +308,10 @@ export default class ConversationQuery {
   }
 
   /**
-   * 设置返回集合按照指定key进行降序排列，如果已设置其他排序，原排序的优先级较高
+   * 设置返回集合按照指定 key 进行降序排列，如果已设置其他排序，原排序的优先级较高
    *
-   * @param key
-   * @return
+   * @param {string} key
+   * @return {ConversationQuery} self
    */
   addDescending(key) {
     if (this._order) {
@@ -320,16 +322,30 @@ export default class ConversationQuery {
     return key;
   }
 
+  /**
+   * 设置返回的 conversations 带上最后一条消息
+   * @param  {Boolean} enabled
+   * @return {ConversationQuery} self
+   */
   withLastMessages(enabled) {
     this._extraOptions.withLastMessages = enabled;
     return this;
   }
 
+  /**
+   * 设置返回的 conversations 为精简模式，即不含成员列表
+   * @param  {Boolean} enabled
+   * @return {ConversationQuery} self
+   */
   compact(enabled) {
     this._extraOptions.compact = enabled;
     return this;
   }
 
+  /**
+   * 执行查询
+   * @return {Promise.<Conversation[]>}
+   */
   find() {
     return this._client._executeQuery(this);
   }

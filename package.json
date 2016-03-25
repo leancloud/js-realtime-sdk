@@ -10,6 +10,7 @@
   "scripts": {
     "test": "grunt test --stack && npm run report",
     "report": "istanbul report --include coverage/coverage.json --print text lcovonly",
+    "doc": "jsdoc src -r -d docs -t node_modules/docdash",
     "convert-pb": "pbjs proto/message.proto -t commonjs > proto/message-compiled.js"
   },
   "repository": {
@@ -31,6 +32,7 @@
     "babel-plugin-transform-es2015-classes": "^6.5.2",
     "babel-plugin-transform-runtime": "^6.6.0",
     "babel-preset-es2015-rollup": "^1.1.1",
+    "docdash": "^0.1.0",
     "eslint-config-airbnb": "^6.0.0",
     "eslint-plugin-react": "^4.0.0",
     "grunt": "^0.4.5",
@@ -45,6 +47,7 @@
     "grunt-rollup": "^0.6.2",
     "grunt-saucelabs": "^8.6.1",
     "istanbul": "git+https://github.com/Victorystick/istanbul.git#es-modules-support",
+    "jsdoc": "^3.4.0",
     "load-grunt-tasks": "^3.4.1",
     "mocha": "^2.3.4",
     "qiniu": "^6.1.9",
