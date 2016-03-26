@@ -30,17 +30,28 @@ export default class MessageParser {
       content = text;
     }
     for (const Klass of this._messageClasses) {
+      const contentCopy = isPlainObject(content) ? Object.assign({}, content) : content;
+      let valid;
+      let result;
       try {
-        const contentCopy = isPlainObject(content) ? Object.assign({}, content) : content;
-        if (Klass.validate(contentCopy)) {
-          const result = Klass.parse(contentCopy);
-          if (result !== undefined) {
-            debug('parse result:', result);
-            return result;
-          }
-        }
+        valid = Klass.validate(contentCopy);
       } catch (error) {
         // eslint-disable-line no-empty
+      }
+      if (valid) {
+        try {
+          result = Klass.parse(contentCopy);
+        } catch (error) {
+          console.warn('parsing a valid message content error', {
+            error,
+            Klass,
+            content: contentCopy,
+          });
+        }
+        if (result !== undefined) {
+          debug('parse result:', result);
+          return result;
+        }
       }
     }
     throw new Error('No Message Class matched');
