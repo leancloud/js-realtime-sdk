@@ -11,7 +11,7 @@
     "test": "grunt test --stack && npm run report",
     "report": "istanbul report --include coverage/coverage.json --print text lcovonly",
     "doc": "jsdoc src -r -d docs -t node_modules/docdash",
-    "convert-pb": "pbjs proto/message.proto -t commonjs > proto/message-compiled.js && sed -i '' 's/protobufjs/protobufjs\\\/dist\\\/protobuf-light/g' ./proto/message-compiled.js"
+    "convert-pb": "pbjs proto/message.proto -t commonjs > proto/message-compiled.js && sed -i '' 's/protobufjs/protobufjs\\/dist\\/protobuf-light/g' ./proto/message-compiled.js"
   },
   "repository": {
     "type": "git",
@@ -28,7 +28,7 @@
   },
   "homepage": "https://leancloud.cn/",
   "devDependencies": {
-    "babel-eslint": "6.0.0-beta.6",
+    "babel-eslint": "^6.0.0",
     "babel-plugin-transform-es2015-classes": "^6.5.2",
     "babel-plugin-transform-runtime": "^6.6.0",
     "babel-preset-es2015-rollup": "^1.1.1",
