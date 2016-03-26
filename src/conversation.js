@@ -249,9 +249,17 @@ export default class Conversation extends EventEmitter {
       return this;
     });
   }
+  join() {
+    this._debug('join');
+    return this.add(this._client.id);
+  }
+  quit() {
+    this._debug('quit');
+    return this.remove(this._client.id);
+  }
 
   send(message) {
-    debug(message, 'send');
+    this._debug(message, 'send');
     if (!(message instanceof Message)) {
       throw new TypeError(`${message} is not a Message`);
     }
@@ -353,7 +361,7 @@ export default class Conversation extends EventEmitter {
           });
         } else {
           promise = promise.then(prevMessages => {
-            if (prevMessages.length < limit) {
+            if (prevMessages.length === 0 || prevMessages.length < limit) {
               // no more messages
               return [];
             }

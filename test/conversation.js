@@ -100,6 +100,16 @@ describe('Conversation', () => {
         conv.members.should.not.containEql('rguo');
       })
   );
+  it('join/quit', () =>
+    client.createConversation({ members: ['rguo'] })
+      .then(conv => conv.quit())
+      .then(conv => {
+        conv.members.should.not.containEql(CLIENT_ID);
+        return conv.join();
+      }).then(conv => {
+        conv.members.should.containEql(CLIENT_ID);
+      })
+  );
   describe('Message Query', () => {
     it('queryMessages', () =>
       conversation.queryMessages().then(messages => {
