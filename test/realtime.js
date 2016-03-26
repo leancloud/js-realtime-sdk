@@ -109,19 +109,22 @@ describe('Realtime', () => {
       });
   });
   describe('events', () => {
-    it('should proxy disconnect/reconnect event', () => {
+    it('should proxy network events', () => {
       const realtime = createRealtime();
       return realtime._open()
         .then(connection => {
-          const callbackPromise = Promise.all(['disconnect', 'reconnect'].map(
+          const callbackPromise = Promise.all(['retry', 'disconnect', 'reconnect'].map(
             event => new Promise((resolve) => {
               realtime.on(event, resolve);
             })
           ));
           connection.emit('disconnect');
+          connection.emit('retry', 2);
           connection.emit('reconnect');
           callbackPromise.then(() => connection.close());
-          return callbackPromise;
+          return callbackPromise.then(([retryPayload]) => {
+            retryPayload.should.equal(2);
+          });
         });
     });
   });

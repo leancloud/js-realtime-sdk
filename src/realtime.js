@@ -39,10 +39,6 @@ export default class Realtime extends EventEmitter {
       Message,
       TextMessage,
     ].forEach(this._messageParser.register.bind(this._messageParser));
-    ['disconnect', 'reconnect'].forEach(event => this.on(
-      event,
-      payload => debug(`${event} event emitted.`, payload)
-    ));
   }
 
   _open() {
@@ -66,8 +62,11 @@ export default class Realtime extends EventEmitter {
       connection.on('error', reject);
       connection.on('message', this._dispatchMessage.bind(this));
       // event proxy
-      ['disconnect', 'reconnect'].forEach(
-        event => connection.on(event, payload => this.emit(event, payload))
+      ['disconnect', 'reconnect', 'retry'].forEach(
+        event => connection.on(event, payload => {
+          debug(`${event} event emitted.`, payload);
+          this.emit(event, payload);
+        })
       );
       // override handleClose
       connection.handleClose = function handleClose(event) {

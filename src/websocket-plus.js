@@ -95,7 +95,7 @@ class WebSocketPlus extends EventEmitter {
   }
   onretry() {
     setTimeout(() => {
-      if (this.is('disconnected')) {
+      if (this.is('offline')) {
         this._createWs(this._getUrls, this._protocol).then(
           () => this.reconnect(),
           () => this.retry()
@@ -198,18 +198,18 @@ StateMachine.create({
   }, {
     name: 'disconnect',
     from: 'connected',
-    to: 'disconnected',
+    to: 'offline',
   }, {
     name: 'retry',
-    from: 'disconnected',
-    to: 'disconnected',
+    from: 'offline',
+    to: 'offline',
   }, {
     name: 'reconnect',
-    from: 'disconnected',
+    from: 'offline',
     to: 'connected',
   }, {
     name: 'close',
-    from: ['connected', 'disconnected'],
+    from: ['connected', 'offline'],
     to: 'closed',
   }, {
     name: 'throw',
