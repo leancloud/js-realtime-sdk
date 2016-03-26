@@ -19,7 +19,7 @@ describe('Messages', () => {
   describe('TypedMessage', () => {
     it('toJSON', () => {
       new TypedMessage()
-        .setAttrs({
+        .setAttributes({
           lean: 'cloud',
         })
         .setText('rocks')
@@ -46,12 +46,12 @@ describe('Messages', () => {
         _lctype: -1,
       };
       const message = new TextMessage(json._lctext)
-        .setAttrs(json._lcattrs);
+        .setAttributes(json._lcattrs);
       message.toJSON().should.eql(json);
       const parsedMessage = TextMessage.parse(json);
       parsedMessage.should.be.instanceof(TextMessage);
       parsedMessage.getText().should.eql(json._lctext);
-      parsedMessage.getAttrs().should.eql(json._lcattrs);
+      parsedMessage.getAttributes().should.eql(json._lcattrs);
       parsedMessage.toJSON().should.eql(json);
     });
   });
@@ -111,7 +111,7 @@ describe('Messages', () => {
         conversationZwang.on('message', resolve);
       });
       const sendPromise = conversationWchen.send(
-        new TextMessage('hello').setAttrs({
+        new TextMessage('hello').setAttributes({
           leancloud: 'rocks',
         })
       );
@@ -119,7 +119,7 @@ describe('Messages', () => {
         const [receivedMessage, sentMessage] = messages;
         receivedMessage.id.should.be.equal(sentMessage.id);
         receivedMessage.getText().should.eql(sentMessage.getText());
-        receivedMessage.getAttrs().should.eql(sentMessage.getAttrs());
+        receivedMessage.getAttributes().should.eql(sentMessage.getAttributes());
       });
     });
   });

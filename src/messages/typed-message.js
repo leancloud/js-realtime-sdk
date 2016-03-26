@@ -4,6 +4,19 @@ export default class TypedMessage extends Message {
   constructor() {
     super({});
   }
+  set text(text) {
+    return this.setText(text);
+  }
+  get text() {
+    return this.getText();
+  }
+
+  set attributes(attributes) {
+    return this.setAttributes(attributes);
+  }
+  get attributes() {
+    return this.getAttributes();
+  }
 
   setText(text) {
     this.content.text = text;
@@ -13,11 +26,11 @@ export default class TypedMessage extends Message {
     return this.content.text;
   }
 
-  setAttrs(attrs) {
-    this.content.attrs = attrs;
+  setAttributes(attributes) {
+    this.content.attrs = attributes;
     return this;
   }
-  getAttrs() {
+  getAttributes() {
     return this.content.attrs;
   }
 
@@ -30,14 +43,14 @@ export default class TypedMessage extends Message {
   toJSON(json) {
     return super.toJSON(Object.assign({
       _lctext: this.getText(),
-      _lcattrs: this.getAttrs(),
+      _lcattrs: this.getAttributes(),
     }, this._getExtras(), json));
   }
 
   static parse(json, message = new this()) {
     message
       .setText(json._lctext)
-      .setAttrs(json._lcattrs);
+      .setAttributes(json._lcattrs);
     return super.parse(json, message);
   }
 }
