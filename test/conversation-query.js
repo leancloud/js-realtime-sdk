@@ -1,13 +1,13 @@
 import ConversationQuery from '../src/conversation-query';
 import Realtime from '../src/realtime';
 import Message from '../src/messages/message';
+import { Promise } from 'rsvp';
 
 import {
   APP_ID,
   APP_KEY,
   REGION,
   EXISTING_ROOM_ID,
-  CLIENT_ID,
 } from './configs';
 
 describe('ConversationQuery', () => {
@@ -19,7 +19,7 @@ describe('ConversationQuery', () => {
       region: REGION,
       pushUnread: false,
     })
-      .createIMClient(CLIENT_ID)
+      .createIMClient()
       .then(c => (client = c))
   );
   after(() => client.close());
@@ -62,7 +62,13 @@ describe('ConversationQuery', () => {
   it('withMembers', () =>
     Promise.all([
       client.getQuery().equalTo('objectId', EXISTING_ROOM_ID)
-        .withMembers(['hjiang'], true)
+        .withMembers(['hjiang', 'leeyeh'], true)
+        .find()
+        .then(conversations => {
+          conversations.length.should.be.equal(0);
+        }),
+      client.getQuery().equalTo('objectId', EXISTING_ROOM_ID)
+        .withMembers(['hjiang', 'leeyeh'])
         .find()
         .then(conversations => {
           conversations.length.should.be.equal(1);
