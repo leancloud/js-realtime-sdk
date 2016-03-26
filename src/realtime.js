@@ -126,7 +126,7 @@ export default class Realtime extends EventEmitter {
       .query({
         appId,
         secure: ssl,
-        debug: _debug || process.env.LC_DEBUG,
+        debug: _debug,
         _t: Date.now(),
       })
       .timeout(20000)
