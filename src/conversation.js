@@ -381,7 +381,7 @@ export default class Conversation extends EventEmitter {
     if (!(message instanceof Message)) {
       throw new TypeError(`${message} is not a Message`);
     }
-    message._setProps({
+    Object.assign(message, {
       cid: this.id,
       from: this._client.id,
     });
@@ -413,7 +413,7 @@ export default class Conversation extends EventEmitter {
           code, reason, appCode,
         });
       }
-      message._setProps({
+      Object.assign(message, {
         id: uid,
         timestamp: new Date(t.toNumber()),
       });
@@ -471,7 +471,7 @@ export default class Conversation extends EventEmitter {
           from: log.from,
         };
         const message = this._client._messageParser.parse(log.data);
-        message._setProps(messageProps);
+        Object.assign(message, messageProps);
         return message;
       })
     );

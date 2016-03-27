@@ -13,8 +13,7 @@ export default class MessageParser {
       messageClass &&
       messageClass.parse &&
       messageClass.prototype &&
-      messageClass.prototype.toJSON &&
-      messageClass.prototype._setProps
+      messageClass.prototype.toJSON
     ) {
       this._messageClasses.unshift(messageClass);
     } else {

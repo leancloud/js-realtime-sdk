@@ -176,7 +176,7 @@ export default class IMClient extends Client {
         transient,
       };
       const message = this._messageParser.parse(directMessage.msg);
-      message._setProps(messageProps);
+      Object.assign(message, messageProps);
       conversation.lastMessage = message; // eslint-disable-line no-param-reassign
       conversation.lastMessageAt = message.timestamp; // eslint-disable-line no-param-reassign
       this.emit('message', {
