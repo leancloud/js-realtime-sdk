@@ -5,6 +5,7 @@ import { default as d } from 'debug';
 import EventEmitter from 'eventemitter3';
 import { default as superagentPromise } from 'superagent-promise';
 import superagent from 'superagent';
+import uuid from 'uuid';
 import { tap, Cache, trim } from './utils';
 import Client from './client';
 import IMClient from './im-client';
@@ -16,6 +17,14 @@ const agent = superagentPromise(superagent, Promise);
 const debug = d('LC:Realtime');
 
 export default class Realtime extends EventEmitter {
+  /**
+   * @param  {Object} options
+   * @param  {String} options.appId
+   * @param  {String} options.appKey
+   * @param  {String} [options.region='cn'] 节点 id
+   * @param  {Boolean} [options.pushOfflineMessages=false] 启用推送离线消息模式（默认为发送未读消息通知模式）
+   * @param  {Boolean} [options.ssl=true] 使用 wss 进行连接
+   */
   constructor(options) {
     debug('initializing Realtime');
     super();
@@ -29,9 +38,10 @@ export default class Realtime extends EventEmitter {
       appId: undefined,
       appKey: undefined,
       region: 'cn',
-      pushUnread: true,
+      pushOfflineMessages: false,
       ssl: true,
     }, options);
+    this._id = uuid.v4();
     this._cache = new Cache('endpoints');
     this._clients = {};
     this._messageParser = new MessageParser();
@@ -44,11 +54,11 @@ export default class Realtime extends EventEmitter {
   _open() {
     if (this._openPromise) return this._openPromise;
 
-    const protocolsVersion = 3;
-    // if (this._options.pushUnread) {
-    //  // 不推送离线消息，而是发送对话的未读通知
-    //  protocolsVersion = 3;
-    // }
+    let protocolsVersion = 3;
+    if (this._options.pushOfflineMessages) {
+      // 不推送离线消息，而是发送对话的未读通知
+      protocolsVersion = 1;
+    }
     const protocol = `lc.protobuf.${protocolsVersion}`;
 
     this._openPromise = new Promise((resolve, reject) => {
@@ -179,7 +189,14 @@ export default class Realtime extends EventEmitter {
     return debug('[WARN] Unexpected message received without peerId', trim(message));
   }
 
-  createIMClient(id, options) {
+  /**
+   * 创建一个即时通讯客户端
+   * @param  {String} [id] 客户端 id，如果不指定，服务端会随机生成一个
+   * @param  {Object} [clientOptions] 详细参数 @see {@link IMClient}
+   * @param  {String} [tag] 客户端类型标记，以支持单点登录功能
+   * @return {Promise.<IMClient>}
+   */
+  createIMClient(id, clientOptions, tag) {
     if (id) {
       if (this._clients[id] !== undefined) {
         return Promise.reject(new Error(`IMClient[${id}] is already created`));
@@ -187,12 +204,12 @@ export default class Realtime extends EventEmitter {
       this._clients[id] = null;
     }
     return this._open().then(connection => {
-      const client = new IMClient(id, options, connection, {
+      const client = new IMClient(id, clientOptions, connection, {
         _messageParser: this._messageParser,
       });
-      connection.on('reconnect', () => client._open(this._options.appId, true));
+      connection.on('reconnect', () => client._open(this._options.appId, tag, this._id, true));
       client.on('close', () => this._deregister(client), this);
-      return client._open(this._options.appId)
+      return client._open(this._options.appId, tag, this._id)
         .then(() => {
           this._register(client);
           return client;
@@ -204,6 +221,11 @@ export default class Realtime extends EventEmitter {
     return this._open();
   }
 
+  /**
+   * 注册消息类
+   * @param  {Function} messageClass 消息类，{@link Message} 的子类
+   * @throws {TypeError} 如果 messageClass 不是 {@link Message} 的子类抛出异常
+   */
   register(...params) {
     return this._messageParser.register(...params);
   }

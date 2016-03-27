@@ -50,9 +50,10 @@ describe('Conversation', () => {
       conv.should.be.exactly(conversation);
       conv.name.should.be.equal(name);
       conv.attributes.should.be.eql({ timestamp });
-      conv.setAttributes({ lean: 'cloud' }, true);
-      conv.setAttribute('lee', 'yeh');
-      return conv.save();
+      return conv
+        .setAttributes({ lean: 'cloud' }, true)
+        .setAttribute('lee', 'yeh')
+        .save();
     }).then(conv => {
       conv.name.should.be.equal(name);
       conv.attributes.should.be.eql({

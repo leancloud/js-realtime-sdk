@@ -10,6 +10,7 @@ import {
   CommandType,
   OpType,
 } from '../proto/message';
+import * as Errors from './errors';
 import { Promise } from 'rsvp';
 import throttle from 'lodash/throttle';
 import { tap, Cache, keyRemap, union, difference, trim } from './utils';
@@ -19,7 +20,18 @@ import { version as VERSION } from '../package.json';
 const debug = d('LC:IMClient');
 
 export default class IMClient extends Client {
+  /**
+   * 无法直接实例化，请使用 {@link Realtime#createIMClient} 创建新的 IMClient。
+   *
+   * @param  {String} [id] 客户端 id
+   * @param  {Object} [options]
+   * @param  {Function} [options.signatureFactory] open session 时的签名方法 // TODO need details
+   */
   constructor(...args) {
+    /**
+     * @var id {String} 客户端 id
+     * @memberof IMClient#
+     */
     super(...args);
     if (!this._messageParser) {
       throw new Error('IMClient must be initialized with a MessageParser');
@@ -43,6 +55,10 @@ export default class IMClient extends Client {
     debug(...params, `[${this.id}]`);
   }
 
+  /**
+   * @override
+   * @private
+   */
   _dispatchMessage(message) {
     this._debug(trim(message), 'received');
     if (message.cmd === CommandType.conv) {
@@ -51,8 +67,34 @@ export default class IMClient extends Client {
     if (message.cmd === CommandType.direct) {
       return this._dispatchDirectMessage(message);
     }
+    if (message.cmd === CommandType.session) {
+      return this._dispatchSessionMessage(message);
+    }
     this.emit('unhandledmessage', message);
     return Promise.resolve();
+  }
+
+  _dispatchSessionMessage(message) {
+    const {
+      sessionMessage: {
+        code, reason,
+      },
+    } = message;
+    switch (message.op) {
+      case OpType.closed: {
+        if (code === Errors.SESSION_CONFLICT.code) {
+          this.emit('conflict', {
+            code, reason,
+          });
+        }
+        return this.emit('close', {
+          code, reason,
+        });
+      }
+      default:
+        this.emit('unhandledmessage', message);
+        return Promise.reject(new Error('Unrecognized session command'));
+    }
   }
 
   _dispatchConvMessage(message) {
@@ -193,7 +235,7 @@ export default class IMClient extends Client {
     return this._connection.send(command, ...args);
   }
 
-  _open(appId, isReconnect = false) {
+  _open(appId, tag, deviceId, isReconnect = false) {
     this._debug('open session');
     return Promise
       .resolve(new GenericCommand({
@@ -203,6 +245,8 @@ export default class IMClient extends Client {
         sessionMessage: new SessionCommand({
           ua: `js/${VERSION}`,
           r: isReconnect,
+          tag,
+          deviceId,
         }),
       }))
       .then(cmd => {
@@ -248,6 +292,10 @@ export default class IMClient extends Client {
       });
   }
 
+  /**
+   * 关闭客户端
+   * @return {Promise}
+   */
   close() {
     this._debug('close session');
     const command = new GenericCommand({
@@ -262,23 +310,32 @@ export default class IMClient extends Client {
       }
     );
   }
-
-  ping(ids) {
+  /**
+   * 获取 client 列表中在线的 client，每次查询最多 20 个 clientId，超出部分会被忽略
+   * @param  {String[]} clientIds 要查询的 client ids
+   * @return {Primse.<String[]>} 在线的 client ids
+   */
+  ping(clientIds) {
     this._debug('ping');
-    if (!(ids instanceof Array)) {
-      throw new TypeError(`ids ${ids} is not an Array`);
+    if (!(clientIds instanceof Array)) {
+      throw new TypeError(`clientIds ${clientIds} is not an Array`);
     }
     const command = new GenericCommand({
       cmd: 'session',
       op: 'query',
       sessionMessage: new SessionCommand({
-        sessionPeerIds: ids,
+        sessionPeerIds: clientIds,
       }),
     });
     return this._send(command)
       .then(resCommand => resCommand.sessionMessage.onlineSessionPeerIds);
   }
 
+  /**
+   * 获取某个特定的 conversation
+   * @param  {String} id 对话 id，对应 _Conversation 表中的 objectId
+   * @return {Promise.<Conversation>}
+   */
   getConversation(id) {
     if (typeof id !== 'string') {
       throw new TypeError(`${id} is not a String`);
@@ -294,6 +351,10 @@ export default class IMClient extends Client {
       .then(conversations => conversations[0] || null);
   }
 
+  /**
+   * 构造一个 ConversationQuery 来查询对话
+   * @return {ConversationQuery}
+   */
   getQuery() {
     return new ConversationQuery(this);
   }
@@ -367,6 +428,16 @@ export default class IMClient extends Client {
     return new Conversation(data, this);
   }
 
+  /**
+   * 创建一个 conversation
+   * @param {Object} options
+   * @param {String[]} options.members 对话的初始成员列表，默认包含当前 client
+   * @param {String} [options.name] 对话的名字
+   * @param {Object} [options.attributes] 额外属性
+   * @param {Boolean} [options.transient=false] 暂态会话
+   * @param {Boolean} [options.unique=false] 唯一对话，当其为 true 时，如果当前已经有相同成员的对话存在则返回该对话，否则会创建新的对话
+   * @return {Promise.<Conversation>}
+   */
   createConversation(options = {}) {
     let attr = {};
     const {
@@ -374,7 +445,7 @@ export default class IMClient extends Client {
       attributes,
       members,
       transient,
-      isUnique,
+      unique,
     } = options;
     if (!Array.isArray(members)) {
       throw new TypeError(`conversation members ${members} is not an array`);
@@ -396,7 +467,7 @@ export default class IMClient extends Client {
       m: members,
       attr,
       transient,
-      unique: isUnique,
+      unique,
     };
 
     const command = new GenericCommand({

@@ -18,20 +18,66 @@ import { default as d } from 'debug';
 const debug = d('LC:Conversation');
 
 export default class Conversation extends EventEmitter {
+  /**
+   * 无法直接实例化，请使用 {@link IMClient#createConversation} 创建新的对话
+   */
   constructor(data, client) {
     super();
     Object.assign(this, {
+      /**
+       * @var id {String} 对话 id，对应 _Conversation 表中的 objectId
+       * @memberof Conversation#
+       */
       // id,
-      // name,
+      /**
+       * @var creator {String} 对话创建者
+       * @memberof Conversation#
+       */
       // creator,
+      /**
+       * @var createdAt {Date} 对话创建时间
+       * @memberof Conversation#
+       */
       // createdAt,
+      /**
+       * @var updatedAt {Date} 对话更新时间
+       * @memberof Conversation#
+       */
       // updatedAt,
+      /**
+       * @var lastMessageAt {Date} 最后一条消息时间
+       * @memberof Conversation#
+       */
       // lastMessageAt,
+      /**
+       * @var lastMessage {?Message} 最后一条消息
+       * @memberof Conversation#
+       */
       // lastMessage,
+      /**
+       * 对该对话设置了静音的用户列表
+       * @memberof Conversation#
+       * @type {?String[]}
+       */
       mutedMembers: [],
+      /**
+       * 参与该对话的用户列表
+       * @memberof Conversation#
+       * @type {String[]}
+       */
       members: [],
       _attributes: {},
+      /**
+       * 暂态对话标记
+       * @memberof Conversation#
+       * @type {Boolean}
+       */
       transient: false,
+      /**
+       * 当前用户静音该对话标记
+       * @memberof Conversation#
+       * @type {Boolean}
+       */
       muted: false,
     }, keyRemap({
       attributes: '_attributes',
@@ -73,6 +119,10 @@ export default class Conversation extends EventEmitter {
     return this._lastMessageAt;
   }
 
+  /**
+   * 对话额外属性
+   * @type {Object}
+   */
   get attributes() {
     if (typeof this._pendingAttributes !== 'undefined') {
       return this._pendingAttributes;
@@ -82,6 +132,12 @@ export default class Conversation extends EventEmitter {
   set attributes(value) {
     this.setAttributes(value);
   }
+  /**
+   * 设置对话额外属性
+   * @param {Object} map    key-value 对
+   * @param {assign} [assign=false] 使用 Object.assign 更新属性，而不是替换整个 attributes
+   * @return {Conversation} self
+   */
   setAttributes(map, assign = false) {
     this._debug(`set attributes: value=${JSON.stringify(map)}, assign=${assign}`);
     if (!isPlainObject(map)) {
@@ -92,14 +148,25 @@ export default class Conversation extends EventEmitter {
     } else {
       this._pendingAttributes = Object.assign({}, this.attributes, map);
     }
+    return this;
   }
+  /**
+   * 设置对话额外属性
+   * @param {String} key
+   * @param {*} value
+   * @return {Conversation} self
+   */
   setAttribute(key, value) {
     if (typeof this._pendingAttributes === 'undefined') {
       this._pendingAttributes = {};
     }
     this._pendingAttributes[key] = value;
+    return this;
   }
-
+  /**
+   * 对话名字
+   * @type {String}
+   */
   get name() {
     if (typeof this._pendingName !== 'undefined') {
       return this._pendingName;
@@ -109,9 +176,15 @@ export default class Conversation extends EventEmitter {
   set name(value) {
     this.setName(value);
   }
+  /**
+   * 设置对话名字
+   * @param {String} value
+   * @return {Conversation} self
+   */
   setName(value) {
     this._debug(`set name: ${value}`);
     this._pendingName = value;
+    return this;
   }
 
   _debug(...params) {
@@ -132,7 +205,10 @@ export default class Conversation extends EventEmitter {
     /* eslint-enable no-param-reassign */
     return this._client._send(command);
   }
-
+  /**
+   * 保存当前对话的属性至服务器
+   * @return {Promise.<Conversation>} self
+   */
   save() {
     this._debug('save');
     const attr = {};
@@ -171,6 +247,10 @@ export default class Conversation extends EventEmitter {
       });
   }
 
+  /**
+   * 从服务器更新对话的属性
+   * @return {Promise.<Conversation>} self
+   */
   fetch() {
     return this
       ._client
@@ -180,6 +260,10 @@ export default class Conversation extends EventEmitter {
       .then(() => this);
   }
 
+  /**
+   * 静音，客户端拒绝收到服务器端的离线推送通知
+   * @return {Promise.<Conversation>} self
+   */
   mute() {
     this._debug('mute');
     return this._send(new GenericCommand({
@@ -193,6 +277,10 @@ export default class Conversation extends EventEmitter {
     });
   }
 
+  /**
+   * 取消静音
+   * @return {Promise.<Conversation>} self
+   */
   unmute() {
     this._debug('unmute');
     return this._send(new GenericCommand({
@@ -206,6 +294,10 @@ export default class Conversation extends EventEmitter {
     });
   }
 
+  /**
+   * 获取对话人数，或暂态对话的在线人数
+   * @return {Promise.<Number>}
+   */
   count() {
     this._debug('unmute');
     return this._send(new GenericCommand({
@@ -213,6 +305,11 @@ export default class Conversation extends EventEmitter {
     })).then(resCommand => resCommand.convMessage.count);
   }
 
+  /**
+   * 增加成员
+   * @param {String|String[]} clientIds 新增成员 client id
+   * @return {Promise.<Conversation>} self
+   */
   add(clientIds) {
     this._debug('add', clientIds);
     if (typeof clientIds === 'string') {
@@ -231,6 +328,12 @@ export default class Conversation extends EventEmitter {
       return this;
     });
   }
+
+  /**
+   * 剔除成员
+   * @param {String|String[]} clientIds 成员 client id
+   * @return {Promise.<Conversation>} self
+   */
   remove(clientIds) {
     this._debug('remove', clientIds);
     if (typeof clientIds === 'string') {
@@ -249,15 +352,30 @@ export default class Conversation extends EventEmitter {
       return this;
     });
   }
+
+  /**
+   * （当前用户）加入该对话
+   * @return {Promise.<Conversation>} self
+   */
   join() {
     this._debug('join');
     return this.add(this._client.id);
   }
+
+  /**
+   * （当前用户）退出该对话
+   * @return {Promise.<Conversation>} self
+   */
   quit() {
     this._debug('quit');
     return this.remove(this._client.id);
   }
 
+  /**
+   * 发送消息
+   * @param  {Message} message 消息，Message 及其子类的实例
+   * @return {Promise.<Message>} 发送的消息
+   */
   send(message) {
     this._debug(message, 'send');
     if (!(message instanceof Message)) {
@@ -305,6 +423,17 @@ export default class Conversation extends EventEmitter {
     });
   }
 
+  /**
+   * 查询消息记录
+   * 如果仅需实现消息记录翻页查询需求，建议使用 {@link Conversation#getMessagesIterator}
+   * @param  {Object} [options]
+   * @param  {Date}   [options.beforeTime] 限制查询结果为小于这个该时间之前的消息，不传则为当前时间
+   * @param  {String} [options.beforeMessageId] 限制查询结果为该消息之前的消息，需要与 beforeTime 同时使用，为防止某时刻有重复消息
+   * @param  {Date}   [options.afterTime] 限制查询结果为大于这个该时间之前的消息
+   * @param  {String} [options.afterMessageId] 限制查询结果为该消息之后的消息，需要与 afterTime 同时使用，为防止某时刻有重复消息
+   * @param  {Number} [options.limit] 限制查询结果的数量，目前服务端默认为 20
+   * @return {Promise.<Message[]>} 消息列表
+   */
   queryMessages(options = {}) {
     this._debug('query messages', options);
     if (options.beforeMessageId && !options.beforeTime) {
@@ -348,6 +477,26 @@ export default class Conversation extends EventEmitter {
     );
   }
 
+  /**
+   * 获取消息翻页迭代器
+   * @param  {Object} [options]
+   * @param  {Date}   [options.beforeTime] 限制起始查询结果为小于这个该时间之前的消息，不传则为当前时间
+   * @param  {String} [options.beforeMessageId] 限制起始查询结果为该消息之前的消息，需要与 beforeTime 同时使用，为防止某时刻有重复消息
+   * @param  {Number} [options.limit] 限制每页查询结果的数量，目前服务端默认为 20
+   * @return {Iterater.<Promise.<Message[]>>} infinite [iterator]{@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Iteration_protocols#iterator}，调用其 next 方法返回获取下一页消息的 Promise
+   * @example
+   * var iterator = conversation.getMessagesIterator({ limit: 10 });
+   * iterator.next().value.then(function(messages) {
+   *   // messages: [message1, ..., message10]
+   * });
+   * iterator.next().value.then(function(messages) {
+   *   // messages: [message11, ..., message20]
+   * });
+   * iterator.next().value.then(function(messages) {
+   *   // No more messages
+   *   // messages: []
+   * });
+   */
   getMessagesIterator({ beforeTime, beforeMessageId, limit } = {}) {
     let promise;
     return {

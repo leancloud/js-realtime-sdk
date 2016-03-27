@@ -13,6 +13,9 @@ export default class Client extends EventEmitter {
     }, props);
   }
 
+  /**
+   * @abstract
+   */
   _dispatchMessage(message) {
     this.emit('message', message);
   }

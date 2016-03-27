@@ -105,6 +105,22 @@ describe('IMClient', () => {
           .should.be.rejectedWith('signatureFactory error: error message')
       );
     });
+
+    it('with tag', done => {
+      const ID = 'conflict-test-client';
+      realtime.createIMClient(ID, undefined, 'TEST')
+        .then(client1 => {
+          client1.on('conflict', () => done());
+          return new Realtime({
+            appId: APP_ID,
+            appKey: APP_KEY,
+            region: REGION,
+            pushUnread: false,
+          })
+          .createIMClient(ID, undefined, 'TEST')
+          .then(client2 => client2.close());
+        }).catch(done);
+    });
   });
 
   describe('ping', () => {
@@ -175,7 +191,7 @@ describe('IMClient', () => {
       Promise.all([0, 0].map(() => client.createConversation({
         name: 'unique room',
         members: ['hjiang', 'jfeng'],
-        isUnique: true,
+        unique: true,
       }))).then(conversations => {
         conversations[0].id.should.be.exactly(conversations[1].id);
       })

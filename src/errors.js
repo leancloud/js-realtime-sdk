@@ -29,6 +29,9 @@ export const INVALID_ORIGIN = {
   code: 4110,
   message: 'Access denied by domain whitelist.',
 };
+export const SESSION_CONFLICT = {
+  code: 4111,
+};
 export const INTERNAL_ERROR = {
   code: 4200,
   message: 'Internal error, please contact LeanCloud for support.',
