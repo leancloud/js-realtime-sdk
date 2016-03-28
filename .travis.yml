@@ -17,18 +17,5 @@ script:
   - npm run doc
 after_success:
   - if [[ "$TRAVIS_BRANCH" == "master" ]] && [[ "${TRAVIS_PULL_REQUEST}" = "false" ]]; then
-      echo "Deploy demos to github pages.";
-      mkdir target;
-      cp -r demo target/;
-      cp -r dist target/;
-      cp -r plugin target/;
-      cp -r test target/;
-      cp -r docs target/;
-      cp -r bower_components target/;
-      cd target && git init;
-      git config user.name "leancloud";
-      git config user.email "ci@leancloud.rocks";
-      git add .;
-      git commit -m "Deploy demos to Github Pages [skip ci]";
-      git push -qf https://${TOKEN}@github.com/${TRAVIS_REPO_SLUG}.git master:gh-pages;
+      ./deploy.sh
     fi

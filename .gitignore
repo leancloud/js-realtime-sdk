@@ -5,4 +5,5 @@ test/browser/index.*
 test/index.bundle.*
 coverage
 docs
+gh_pages
 .idea
