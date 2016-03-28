@@ -1,5 +1,6 @@
 bower_components
 node_modules
+dist
 test/browser/index.*
 !test/browser/index.html
 test/index.bundle.*
