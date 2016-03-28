@@ -35,4 +35,8 @@ export default class TextMessage extends TypedMessage {
     return json._lctype === -1;
   }
 
+  // https://phabricator.babeljs.io/T116
+  static parse(...args) {
+    return super.parse(...args);
+  }
 }
