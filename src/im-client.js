@@ -179,10 +179,7 @@ export default class IMClient extends Client {
       Object.assign(message, messageProps);
       conversation.lastMessage = message; // eslint-disable-line no-param-reassign
       conversation.lastMessageAt = message.timestamp; // eslint-disable-line no-param-reassign
-      this.emit('message', {
-        conversation,
-        message,
-      });
+      this.emit('message', message, conversation);
       conversation.emit('message', message);
       if (!(transient || conversation.transient)) {
         this._sendAck(message);

@@ -95,14 +95,24 @@ describe('Messages', () => {
       const receivePromise = new Promise((resolve) => {
         conversationZwang.on('message', resolve);
       });
-      const sendPromise = conversationWchen.send(new Message('hello'));
-      return Promise.all([receivePromise, sendPromise]).then(messages => {
-        const [receivedMessage, sentMessage] = messages;
-        receivedMessage.id.should.eql(sentMessage.id);
-        receivedMessage.content.should.eql(sentMessage.content);
-        conversationZwang.lastMessage.content.should.eql(sentMessage.content);
-        conversationWchen.lastMessage.content.should.eql(sentMessage.content);
+      const clientMessageEventPromise = new Promise((resolve) => {
+        zwang.on('message', (...args) => resolve(args));
       });
+      const sendPromise = conversationWchen.send(new Message('hello'));
+      return Promise.all([receivePromise, clientMessageEventPromise, sendPromise])
+        .then(messages => {
+          const [
+            receivedMessage,
+            [clientReceivedMessage, clientReceivedConversation],
+            sentMessage,
+          ] = messages;
+          receivedMessage.id.should.eql(sentMessage.id);
+          receivedMessage.content.should.eql(sentMessage.content);
+          clientReceivedMessage.id.should.eql(sentMessage.id);
+          clientReceivedConversation.id.should.eql(conversationWchen.id);
+          conversationZwang.lastMessage.content.should.eql(sentMessage.content);
+          conversationWchen.lastMessage.content.should.eql(sentMessage.content);
+        });
     });
     it('sending typed message', () => {
       const receivePromise = new Promise((resolve) => {
