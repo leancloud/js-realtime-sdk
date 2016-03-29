@@ -17,8 +17,8 @@ script:
   - npm run doc
 after_success:
   - if [[ "$TRAVIS_BRANCH" == "master" ]] && [[ "${TRAVIS_PULL_REQUEST}" = "false" ]]; then
-      ./deploy.sh
+      ./deploy.sh;
     fi
   - if [[ "$TRAVIS_BRANCH" == "next" ]] && [[ "${TRAVIS_PULL_REQUEST}" = "false" ]]; then
-      ./release.sh
+      ./release.sh;
     fi
