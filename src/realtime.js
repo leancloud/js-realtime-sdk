@@ -20,7 +20,6 @@ export default class Realtime extends EventEmitter {
   /**
    * @param  {Object} options
    * @param  {String} options.appId
-   * @param  {String} options.appKey
    * @param  {String} [options.region='cn'] 节点 id
    * @param  {Boolean} [options.pushOfflineMessages=false] 启用推送离线消息模式（默认为发送未读消息通知模式）
    * @param  {Boolean} [options.ssl=true] 使用 wss 进行连接
@@ -31,12 +30,8 @@ export default class Realtime extends EventEmitter {
     if (typeof options.appId !== 'string') {
       throw new TypeError(`appId [${options.appId}] is not a string`);
     }
-    if (typeof options.appKey !== 'string') {
-      throw new TypeError('appKey is not a string');
-    }
     this._options = Object.assign({
       appId: undefined,
-      appKey: undefined,
       region: 'cn',
       pushOfflineMessages: false,
       ssl: true,

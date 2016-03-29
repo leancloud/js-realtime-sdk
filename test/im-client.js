@@ -10,7 +10,6 @@ const sinon = (typeof window !== 'undefined' && window.sinon) || require('sinon'
 
 import {
   APP_ID,
-  APP_KEY,
   REGION,
   EXISTING_ROOM_ID,
   NON_EXISTING_ROOM_ID,
@@ -23,7 +22,6 @@ describe('IMClient', () => {
   before(() => {
     realtime = new Realtime({
       appId: APP_ID,
-      appKey: APP_KEY,
       region: REGION,
       pushUnread: false,
     });
@@ -38,7 +36,6 @@ describe('IMClient', () => {
     it('normal create and close', () => {
       const rt = new Realtime({
         appId: APP_ID,
-        appKey: APP_KEY,
         region: REGION,
         pushUnread: false,
       });
@@ -113,7 +110,6 @@ describe('IMClient', () => {
           client1.on('conflict', () => done());
           return new Realtime({
             appId: APP_ID,
-            appKey: APP_KEY,
             region: REGION,
             pushUnread: false,
           })

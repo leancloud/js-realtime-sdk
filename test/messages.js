@@ -9,7 +9,6 @@ import TextMessage from '../src/messages/text-message';
 
 import {
   APP_ID,
-  APP_KEY,
   REGION,
 } from './configs';
 
@@ -67,7 +66,6 @@ describe('Messages', () => {
     before(() => {
       const realtime = new Realtime({
         appId: APP_ID,
-        appKey: APP_KEY,
         region: REGION,
         pushUnread: false,
       });

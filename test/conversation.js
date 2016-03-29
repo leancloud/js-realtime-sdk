@@ -9,7 +9,6 @@ import Message from '../src/messages/message';
 
 import {
   APP_ID,
-  APP_KEY,
   REGION,
   EXISTING_ROOM_ID,
   CLIENT_ID,
@@ -24,7 +23,6 @@ describe('Conversation', () => {
   before(() => {
     realtime = new Realtime({
       appId: APP_ID,
-      appKey: APP_KEY,
       region: REGION,
       pushUnread: false,
     });

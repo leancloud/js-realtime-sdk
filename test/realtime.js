@@ -11,29 +11,23 @@ const sinon = (typeof window !== 'undefined' && window.sinon) || require('sinon'
 
 import {
   APP_ID,
-  APP_KEY,
   REGION,
 } from './configs';
 
 const createRealtime = (options) => new Realtime(Object.assign({
   appId: APP_ID,
-  appKey: APP_KEY,
   region: REGION,
   pushUnread: false,
 }, options));
 
 describe('Realtime', () => {
   describe('constructor', () => {
-    it('appKey required', () =>
-      (() => new Realtime({ appId: APP_ID })).should.throw()
-    );
     it('appId required', () =>
-      (() => new Realtime({ appKey: APP_KEY })).should.throw()
+      (() => new Realtime()).should.throw()
     );
     it('normal', () =>
       (() => new Realtime({
         appId: APP_ID,
-        appKey: APP_KEY,
       })).should.not.throw
     );
   });
