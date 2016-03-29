@@ -130,5 +130,12 @@ describe('Messages', () => {
         receivedMessage.getAttributes().should.eql(sentMessage.getAttributes());
       });
     });
+    it('sending transient message', () => {
+      const message = new TextMessage('transient message');
+      message.setTransient(true);
+      // transient message 不返回 ack
+      // 这里确保成功 resolve
+      return conversationZwang.send(message);
+    });
   });
 });

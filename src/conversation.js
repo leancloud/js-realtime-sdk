@@ -191,7 +191,7 @@ export default class Conversation extends EventEmitter {
     debug(...params, `[${this.id}]`);
   }
 
-  _send(command) {
+  _send(command, ...args) {
     /* eslint-disable no-param-reassign */
     if (command.cmd === null) {
       command.cmd = 'conv';
@@ -203,7 +203,7 @@ export default class Conversation extends EventEmitter {
       command.convMessage.cid = this.id;
     }
     /* eslint-enable no-param-reassign */
-    return this._client._send(command);
+    return this._client._send(command, ...args);
   }
   /**
    * 保存当前对话的属性至服务器
@@ -389,7 +389,7 @@ export default class Conversation extends EventEmitter {
     if (typeof msg !== 'string') {
       msg = JSON.stringify(msg);
     }
-    return this._send(new GenericCommand({
+    let sendPromise = this._send(new GenericCommand({
       cmd: 'direct',
       directMessage: new DirectCommand({
         msg,
@@ -398,29 +398,33 @@ export default class Conversation extends EventEmitter {
         transient: message.transient,
         dt: message.id,
       }),
-    })).then(resCommand => {
-      const {
-        ackMessage: {
-          uid,
-          t,
-          code,
-          reason,
-          appCode,
-        },
-      } = resCommand;
-      if (code !== null) {
-        throw createError({
-          code, reason, appCode,
+    }), !message.transient);
+    if (!message.transient) {
+      sendPromise = sendPromise.then(resCommand => {
+        const {
+          ackMessage: {
+            uid,
+            t,
+            code,
+            reason,
+            appCode,
+            },
+          } = resCommand;
+        if (code !== null) {
+          throw createError({
+            code, reason, appCode,
+          });
+        }
+        Object.assign(message, {
+          id: uid,
+          timestamp: new Date(t.toNumber()),
         });
-      }
-      Object.assign(message, {
-        id: uid,
-        timestamp: new Date(t.toNumber()),
+        this.lastMessage = message;
+        this.lastMessageAt = message.timestamp;
+        return message;
       });
-      this.lastMessage = message;
-      this.lastMessageAt = message.timestamp;
-      return message;
-    });
+    }
+    return sendPromise;
   }
 
   /**
