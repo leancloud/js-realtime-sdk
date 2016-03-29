@@ -1,3 +1,4 @@
+#!/bin/sh
 echo "Deploy demos to github pages.";
 mkdir gh_pages;
 cp -r demo gh_pages/;
