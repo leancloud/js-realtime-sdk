@@ -37,9 +37,6 @@ var require = require || function(id) {throw new Error('Unexpected required ' + 
     browserName: 'iPhone',
     version: '8.0'
   }, {
-    browserName: 'android',
-    version: '5.0'
-  }, {
     browserName: 'chrome'
   }, {
     browserName: 'chrome',
