@@ -3,14 +3,15 @@
   "version": "2.3.5",
   "description": "LeanCloud Realtime Message JavaScript SDK",
   "main": "dist/bundle.js",
-  "jsnext:main": "src/realtime.js",
+  "jsnext:main": "src/index.js",
   "directories": {
     "test": "test"
   },
   "scripts": {
+    "dev": "grunt dev",
     "test": "grunt test --stack && npm run report",
     "report": "istanbul report --include coverage/coverage.json --print text lcovonly",
-    "doc": "jsdoc src -r -d docs -t node_modules/docdash",
+    "doc": "jsdoc src README.md -r -d docs -t node_modules/docdash",
     "build": "grunt release --stack",
     "convert-pb": "pbjs proto/message.proto -t commonjs > proto/message-compiled.js && sed -i '' 's/protobufjs/protobufjs\\/dist\\/protobuf-light/g' ./proto/message-compiled.js"
   },
