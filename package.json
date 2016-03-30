@@ -37,6 +37,7 @@
     "docdash": "^0.1.0",
     "eslint-config-airbnb": "^6.0.0",
     "eslint-plugin-react": "^4.0.0",
+    "ghooks": "^1.1.0",
     "grunt": "^0.4.5",
     "grunt-contrib-connect": "^1.0.0",
     "grunt-contrib-uglify": "^1.0.0",
@@ -61,7 +62,8 @@
     "rollup-plugin-node-resolve": "^1.4.0",
     "should": "^8.2.2",
     "should-sinon": "0.0.5",
-    "sinon": "2.0.0-pre"
+    "sinon": "2.0.0-pre",
+    "validate-commit-msg": "^2.5.0"
   },
   "dependencies": {
     "babel-runtime": "^6.6.1",
@@ -79,5 +81,10 @@
   "browser": {
     "ws": false,
     "sinon": false
+  },
+  "config": {
+    "ghooks": {
+      "commit-msg": "validate-commit-msg"
+    }
   }
 }
