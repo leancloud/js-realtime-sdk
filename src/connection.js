@@ -1,7 +1,6 @@
 import WebSocketPlus from './websocket-plus';
 import { createError } from './errors';
 import { GenericCommand, CommandType } from '../proto/message';
-import { Promise } from 'rsvp';
 import { default as d } from 'debug';
 import { trim } from './utils';
 

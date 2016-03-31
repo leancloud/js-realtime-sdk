@@ -1,7 +1,6 @@
 import 'should';
 import 'should-sinon';
 import WebsocketPlus from '../src/websocket-plus';
-import { Promise } from 'rsvp';
 import { testAsync } from './test-utils';
 
 const sinon = (typeof window !== 'undefined' && window.sinon) || require('sinon');

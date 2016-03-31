@@ -1,4 +1,3 @@
-import { Promise } from 'rsvp';
 import isPlainObject from 'lodash/isPlainObject';
 import { default as d } from 'debug';
 

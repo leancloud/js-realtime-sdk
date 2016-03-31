@@ -1,7 +1,6 @@
 import ConversationQuery from '../src/conversation-query';
 import Realtime from '../src/realtime';
 import Message from '../src/messages/message';
-import { Promise } from 'rsvp';
 
 import {
   APP_ID,

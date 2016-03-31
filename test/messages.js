@@ -1,6 +1,5 @@
 import 'should';
 import 'should-sinon';
-import { Promise } from 'rsvp';
 import uuid from 'uuid';
 import Realtime from '../src/realtime';
 import Message from '../src/messages/message';

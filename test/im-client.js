@@ -1,7 +1,6 @@
 import 'should';
 import 'should-sinon';
 import should from 'should/as-function';
-import { Promise } from 'rsvp';
 import Realtime from '../src/realtime';
 import IMClient from '../src/im-client';
 import Conversation from '../src/conversation';

@@ -1,5 +1,4 @@
 import EventEmitter from 'eventemitter3';
-import { Promise } from 'rsvp';
 import { decodeDate, keyRemap, union, difference } from './utils';
 import IMClient from './im-client';
 import {

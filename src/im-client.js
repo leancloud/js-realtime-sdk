@@ -11,7 +11,6 @@ import {
   OpType,
 } from '../proto/message';
 import * as Errors from './errors';
-import { Promise } from 'rsvp';
 import throttle from 'lodash/throttle';
 import { tap, Cache, keyRemap, union, difference, trim } from './utils';
 import { default as d } from 'debug';

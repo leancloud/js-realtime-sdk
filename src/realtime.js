@@ -1,6 +1,5 @@
 import Connection from './connection';
 import * as Errors from './errors';
-import { Promise } from 'rsvp';
 import { default as d } from 'debug';
 import EventEmitter from 'eventemitter3';
 import { default as superagentPromise } from 'superagent-promise';

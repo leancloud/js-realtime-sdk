@@ -1,6 +1,5 @@
 // WebSocket with auto reconnecting feature, backup endpoint and EventEmitter interface.
 
-import { Promise } from 'rsvp';
 import { tryAll } from './utils';
 
 import { default as d } from 'debug';

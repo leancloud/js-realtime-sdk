@@ -1,6 +1,5 @@
 import Realtime from '../src/realtime';
 import { tap } from '../src/utils';
-import { Promise } from 'rsvp';
 import {
   GenericCommand,
   ConvCommand,
