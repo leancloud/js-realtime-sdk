@@ -16,9 +16,7 @@ script:
   - npm test && codecov
   - npm run doc
 after_success:
-  - if [[ "$TRAVIS_BRANCH" == "master" ]] && [[ "${TRAVIS_PULL_REQUEST}" = "false" ]]; then
-      ./deploy.sh;
-    fi
   - if [[ "$TRAVIS_BRANCH" == "next" ]] && [[ "${TRAVIS_PULL_REQUEST}" = "false" ]]; then
+      ./deploy.sh;
       ./release.sh;
     fi
