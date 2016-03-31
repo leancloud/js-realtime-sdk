@@ -65,11 +65,24 @@ export default class Realtime extends EventEmitter {
       connection.on('open', () => resolve(connection));
       connection.on('error', reject);
       connection.on('message', this._dispatchMessage.bind(this));
+      /**
+       * 网络连接断开
+       * @event Realtime#disconnect
+       */
+      /**
+       * 网络连接恢复正常
+       * @event Realtime#reconnect
+       */
+      /**
+       * 尝试重新连接
+       * @event Realtime#retry
+       * @param {Number} retryCount 尝试重连的次数
+       */
       // event proxy
       ['disconnect', 'reconnect', 'retry'].forEach(
-        event => connection.on(event, payload => {
-          debug(`${event} event emitted.`, payload);
-          this.emit(event, payload);
+        event => connection.on(event, (...payload) => {
+          debug(`${event} event emitted.`, ...payload);
+          this.emit(event, ...payload);
         })
       );
       // override handleClose

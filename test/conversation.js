@@ -168,7 +168,7 @@ describe('Conversation', () => {
     );
     after(() => client2.close());
 
-    it('invited/kicked/membersjoined/membersleft', () => {
+    it('invited', () => {
       const callback = sinon.spy();
       client2.on('invited', callback);
       return client2._dispatchMessage(new GenericCommand({
@@ -183,8 +183,8 @@ describe('Conversation', () => {
         callback.should.be.calledOnce();
         callback.getCall(0).args[0].should.be.eql({
           invitedBy: CLIENT_ID,
-          conversation: conversation2,
         });
+        callback.getCall(0).args[1].should.be.exactly(conversation2);
       });
     });
     it('membersjoined', () => {
@@ -206,8 +206,8 @@ describe('Conversation', () => {
         clientCallback.getCall(0).args[0].should.be.containEql({
           invitedBy: CLIENT_ID,
           members: ['lan'],
-          conversation: conversation2,
         });
+        clientCallback.getCall(0).args[1].should.be.exactly(conversation2);
         conversationCallback.should.be.calledOnce();
         conversationCallback.getCall(0).args[0].should.be.containEql({
           invitedBy: CLIENT_ID,
@@ -235,8 +235,8 @@ describe('Conversation', () => {
         clientCallback.getCall(0).args[0].should.be.containEql({
           kickedBy: CLIENT_ID,
           members: ['lan'],
-          conversation: conversation2,
         });
+        clientCallback.getCall(0).args[1].should.be.exactly(conversation2);
         conversationCallback.should.be.calledOnce();
         conversationCallback.getCall(0).args[0].should.be.containEql({
           kickedBy: CLIENT_ID,
@@ -262,8 +262,8 @@ describe('Conversation', () => {
         clientCallback.should.be.calledOnce();
         clientCallback.getCall(0).args[0].should.be.eql({
           kickedBy: CLIENT_ID,
-          conversation: conversation2,
         });
+        clientCallback.getCall(0).args[1].should.be.exactly(conversation2);
         conversationCallback.should.be.calledOnce();
         conversationCallback.getCall(0).args[0].should.be.eql({
           kickedBy: CLIENT_ID,

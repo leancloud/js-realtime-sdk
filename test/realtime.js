@@ -108,15 +108,16 @@ describe('Realtime', () => {
         .then(connection => {
           const callbackPromise = Promise.all(['retry', 'disconnect', 'reconnect'].map(
             event => new Promise((resolve) => {
-              realtime.on(event, resolve);
+              realtime.on(event, (...payloads) => resolve([...payloads]));
             })
           ));
           connection.emit('disconnect');
-          connection.emit('retry', 2);
+          connection.emit('retry', 1, 2);
           connection.emit('reconnect');
           callbackPromise.then(() => connection.close());
-          return callbackPromise.then(([retryPayload]) => {
-            retryPayload.should.equal(2);
+          return callbackPromise.then(([[retryPayload1, retryPayload2]]) => {
+            retryPayload1.should.equal(1);
+            retryPayload2.should.equal(2);
           });
         });
     });

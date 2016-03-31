@@ -82,10 +82,21 @@ export default class IMClient extends Client {
     switch (message.op) {
       case OpType.closed: {
         if (code === Errors.SESSION_CONFLICT.code) {
-          this.emit('conflict', {
-            code, reason,
+          /**
+           * 用户在其他客户端登录，当前客户端被服务端强行下线。详见文档「单点登录」章节。
+           * @event IMClient#conflict
+           */
+          return this.emit('conflict', {
+            reason,
           });
         }
+        /**
+         * 当前客户端被服务端强行下线
+         * @event IMClient#close
+         * @param {Object} payload
+         * @param {Number} payload.code 错误码
+         * @param {String} payload.reason 原因
+         */
         return this.emit('close', {
           code, reason,
         });
@@ -105,12 +116,19 @@ export default class IMClient extends Client {
     } = message;
     switch (message.op) {
       case OpType.joined: {
-        return this.getConversation(convMessage.cid).then(
-          conversation => this.emit('invited', {
-            conversation,
+        return this.getConversation(convMessage.cid).then(conversation => {
+          const payload = {
             invitedBy: initBy,
-          })
-        );
+          };
+          /**
+           * 当前用户被添加至某个对话
+           * @event IMClient#invited
+           * @param {Object} payload
+           * @param {String} payload.invitedBy 邀请者 id
+           * @param {Conversation} conversation
+           */
+          this.emit('invited', payload, conversation);
+        });
       }
       case OpType.left: {
         return this.getConversation(convMessage.cid).then(conversation => {
@@ -119,9 +137,20 @@ export default class IMClient extends Client {
           const payload = {
             kickedBy: initBy,
           };
-          this.emit('kicked', Object.assign({
-            conversation,
-          }, payload));
+          /**
+           * 当前用户被从某个对话中移除
+           * @event IMClient#invited
+           * @param {Object} payload
+           * @param {String} payload.invitedBy 该移除操作的发起者 id
+           * @param {Conversation} conversation
+           */
+          this.emit('kicked', payload, conversation);
+          /**
+           * 当前用户被从当前对话中移除
+           * @event IMClient#invited
+           * @param {Object} payload
+           * @param {String} payload.invitedBy 该移除操作的发起者 id
+           */
           conversation.emit('kicked', payload);
         });
       }
@@ -133,9 +162,22 @@ export default class IMClient extends Client {
             invitedBy: initBy,
             members: m,
           };
-          this.emit('membersjoined', Object.assign({
-            conversation,
-          }, payload));
+          /**
+           * 有用户被添加至某个对话
+           * @event IMClient#memberjoined
+           * @param {Object} payload
+           * @param {String[]} payload.members 被添加的用户 id 列表
+           * @param {String} payload.invitedBy 邀请者 id
+           * @param {Conversation} conversation
+           */
+          this.emit('membersjoined', payload, conversation);
+          /**
+           * 有成员被添加至当前对话
+           * @event Conversation#memberjoined
+           * @param {Object} payload
+           * @param {String[]} payload.members 被添加的成员 id 列表
+           * @param {String} payload.invitedBy 邀请者 id
+           */
           conversation.emit('membersjoined', payload);
         });
       }
@@ -147,9 +189,22 @@ export default class IMClient extends Client {
             kickedBy: initBy,
             members: m,
           };
-          this.emit('membersleft', Object.assign({
-            conversation,
-          }, payload));
+          /**
+           * 有成员被从某个对话中移除
+           * @event IMClient#memberleft
+           * @param {Object} payload
+           * @param {String[]} payload.members 被移除的成员 id 列表
+           * @param {String} payload.kickedBy 该移除操作的发起者 id
+           * @param {Conversation} conversation
+           */
+          this.emit('membersleft', payload, conversation);
+          /**
+           * 有成员被从当前对话中移除
+           * @event Conversation#memberleft
+           * @param {Object} payload
+           * @param {String[]} payload.members 被移除的成员 id 列表
+           * @param {String} payload.kickedBy 该移除操作的发起者 id
+           */
           conversation.emit('membersleft', payload);
         });
       }
@@ -178,7 +233,18 @@ export default class IMClient extends Client {
       Object.assign(message, messageProps);
       conversation.lastMessage = message; // eslint-disable-line no-param-reassign
       conversation.lastMessageAt = message.timestamp; // eslint-disable-line no-param-reassign
+      /**
+       * 当前用户收到消息
+       * @event IMClient#message
+       * @param {Message} message
+       * @param {Conversation} conversation 收到消息的对话
+       */
       this.emit('message', message, conversation);
+      /**
+       * 当前对话收到消息
+       * @event Conversation#message
+       * @param {Message} message
+       */
       conversation.emit('message', message);
       if (!(transient || conversation.transient)) {
         this._sendAck(message);
