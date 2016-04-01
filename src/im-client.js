@@ -396,15 +396,18 @@ export default class IMClient extends Client {
   /**
    * 获取某个特定的 conversation
    * @param  {String} id 对话 id，对应 _Conversation 表中的 objectId
+   * @param  {Boolean} [noCache=false] 强制不从缓存中获取
    * @return {Promise.<Conversation>}
    */
-  getConversation(id) {
+  getConversation(id, noCache = false) {
     if (typeof id !== 'string') {
       throw new TypeError(`${id} is not a String`);
     }
-    const cachedConversation = this._conversationCache.get(id);
-    if (cachedConversation) {
-      return Promise.resolve(cachedConversation);
+    if (!noCache) {
+      const cachedConversation = this._conversationCache.get(id);
+      if (cachedConversation) {
+        return Promise.resolve(cachedConversation);
+      }
     }
     return this
       .getQuery()
@@ -451,7 +454,7 @@ export default class IMClient extends Client {
         } else {
           this._debug('update cached conversation');
           [
-            'name',
+            '_name',
             'creator',
             'createdAt',
             'updatedAt',

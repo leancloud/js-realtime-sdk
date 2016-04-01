@@ -214,7 +214,7 @@ export default class Conversation extends EventEmitter {
     if (typeof this._pendingAttributes !== 'undefined') {
       attr.attr = this._pendingAttributes;
     }
-    if (typeof this._pendingNamed !== 'undefined') {
+    if (typeof this._pendingName !== 'undefined') {
       attr.name = this._pendingName;
     }
     if (isEmpty(attr)) {
@@ -238,7 +238,7 @@ export default class Conversation extends EventEmitter {
           this._attributes = this._pendingAttributes;
           delete this._pendingAttributes;
         }
-        if (typeof this._pendingNamed !== 'undefined') {
+        if (typeof this._pendingName !== 'undefined') {
           this._name = this._pendingName;
           delete this._pendingName;
         }
