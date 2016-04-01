@@ -9,9 +9,11 @@ const debug = d('LC:Connection');
 const COMMAND_TIMEOUT = 20000;
 
 export default class Connection extends WebSocketPlus {
-  constructor(...args) {
+  constructor(getUrl, { format, version }) {
     debug('initializing Connection');
-    super(...args);
+    const protocolString = `lc.${format}.${version}`;
+    super(getUrl, protocolString);
+    this._protocalFormat = format;
     this._commands = {};
     this._serialId = 0;
   }
@@ -22,11 +24,16 @@ export default class Connection extends WebSocketPlus {
     debug('↑', trim(command), 'sent');
 
     let message;
-    if (command.toBuffer) {
-      message = command.toBuffer();
-    } else if (command.toArrayBuffer) {
-      message = command.toArrayBuffer();
+    if (this._protocalFormat === 'protobase64') {
+      message = command.toBase64();
     } else {
+      if (command.toBuffer) {
+        message = command.toBuffer();
+      } else if (command.toArrayBuffer) {
+        message = command.toArrayBuffer();
+      }
+    }
+    if (!message) {
       throw new TypeError(`${command} is not a GenericCommand`);
     }
 

@@ -21,6 +21,8 @@ export default class Realtime extends EventEmitter {
    * @param  {String} options.appId
    * @param  {String} [options.region='cn'] 节点 id
    * @param  {Boolean} [options.pushOfflineMessages=false] 启用推送离线消息模式（默认为发送未读消息通知模式）
+   * @param  {Boolean} [options.noBinary=false] 设置 WebSocket 使用字符串格式收发消息（默认为二进制格式）。
+   *                                            适用于 WebSocket 实现不支持二进制数据格式的情况（如 React Native）
    * @param  {Boolean} [options.ssl=true] 使用 wss 进行连接
    */
   constructor(options) {
@@ -48,13 +50,20 @@ export default class Realtime extends EventEmitter {
   _open() {
     if (this._openPromise) return this._openPromise;
 
-    let protocolsVersion = 3;
+    let format = 'protobuf';
+    if (this._options.noBinary) {
+      // 不发送 binary data，fallback to base64 string
+      format = 'protobase64';
+    }
+    let version = 3;
     if (this._options.pushOfflineMessages) {
       // 不推送离线消息，而是发送对话的未读通知
-      protocolsVersion = 1;
+      version = 1;
     }
-    const protocol = `lc.protobuf.${protocolsVersion}`;
-
+    const protocol = {
+      format,
+      version,
+    };
     this._openPromise = new Promise((resolve, reject) => {
       debug('No connection established, create a new one.');
       const connection = new Connection(

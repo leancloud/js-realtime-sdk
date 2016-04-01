@@ -61,6 +61,13 @@ describe('Realtime', () => {
           connection.current.should.be.equal('closed');
         });
     });
+    it.skip('noBinary mode fallback', () =>
+      createRealtime({
+        noBinary: true,
+      })
+      .createIMClient()
+      .then(client => client.close())
+    );
   });
   describe('endpoints cache', () => {
     it('_getEndpoints should use cache', () => {
