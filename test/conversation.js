@@ -1,5 +1,6 @@
 import Realtime from '../src/realtime';
 import { tap } from '../src/utils';
+import uuid from 'uuid';
 import {
   GenericCommand,
   ConvCommand,
@@ -271,5 +272,54 @@ describe('Conversation', () => {
         conversation2.members.should.not.containEql(CLIENT_ID_2);
       });
     });
+  });
+
+  it.skip('unreadmessages event and markAsRead', () => {
+    const bwangId = uuid.v4();
+    let bwang0;
+    let conversationId;
+    return realtime.createIMClient()
+      .then(jwu =>
+        jwu.createConversation({
+          members: [bwangId],
+        }).then(conv => {
+          conversationId = conv.id;
+          return conv.send(new Message({}));
+        }).then(tap(() => jwu.close()))
+      ).then(() =>
+        new Realtime({
+          appId: APP_ID,
+          region: REGION,
+        }).createIMClient(bwangId)
+      ).then(c => {
+        bwang0 = c;
+        return new Promise(
+          resolve => bwang0.once('unreadmessages', (...args) => resolve([...args]))
+        ).then(([payload, conv]) => {
+          payload.count.should.be.eql(1);
+          conv.unreadMessagesCount.should.eql(1);
+          conv.id.should.be.eql(conversationId);
+        });
+      })
+      .then(() => realtime.createIMClient(bwangId))
+      .then(bwang1 => new Promise(
+          resolve => bwang1.once('unreadmessages', (...args) => resolve([...args]))
+        ).then(([payload, conv]) => {
+          payload.count.should.be.eql(1);
+          conv.id.should.be.eql(conversationId);
+          return conv.markAsRead().then(conv1 => {
+            conv1.unreadMessagesCount.should.be.eql(0);
+            bwang1.close();
+          });
+        })
+      ).then(() => new Promise(
+          resolve => bwang0.once('unreadmessages', (...args) => resolve([...args]))
+        ).then(([payload, conv]) => {
+          payload.count.should.be.eql(0);
+          conv.id.should.be.eql(conversationId);
+        })
+      ).then(() => {
+        bwang0.close();
+      });
   });
 });

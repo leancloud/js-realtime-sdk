@@ -7,6 +7,8 @@ import {
   JsonObjectMessage,
   DirectCommand,
   LogsCommand,
+  ReadCommand,
+  ReadTuple,
 } from '../proto/message';
 import { createError } from './errors';
 import Message from './messages/message';
@@ -78,6 +80,12 @@ export default class Conversation extends EventEmitter {
        * @type {Boolean}
        */
       muted: false,
+      /**
+       * 当前用户在该对话的未读消息数
+       * @memberof Conversation#
+       * @type {Number}
+       */
+      unreadMessagesCount: 0,
     }, keyRemap({
       attributes: '_attributes',
       name: '_name',
@@ -530,5 +538,25 @@ export default class Conversation extends EventEmitter {
         };
       },
     };
+  }
+
+  /**
+   * 将该会话标记为已读
+   * @return {Promise.<Conversation>} self
+   */
+  markAsRead() {
+    this._debug('mark as read');
+    return this._send(new GenericCommand({
+      cmd: 'read',
+      readMessage: new ReadCommand({
+        convs: [new ReadTuple({
+          cid: this.id,
+          timestamp: (this.lastMessageAt || new Date()).getTime(),
+        })],
+      }),
+    }), false).then(() => {
+      this.unreadMessagesCount = 0;
+      return this;
+    });
   }
 }

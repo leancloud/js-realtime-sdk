@@ -60,17 +60,19 @@ export default class IMClient extends Client {
    */
   _dispatchMessage(message) {
     this._debug(trim(message), 'received');
-    if (message.cmd === CommandType.conv) {
-      return this._dispatchConvMessage(message);
+    switch (message.cmd) {
+      case CommandType.conv:
+        return this._dispatchConvMessage(message);
+      case CommandType.direct:
+        return this._dispatchDirectMessage(message);
+      case CommandType.session:
+        return this._dispatchSessionMessage(message);
+      case CommandType.unread:
+        return this._dispatchUnreadMessage(message);
+      default:
+        this.emit('unhandledmessage', message);
+        return Promise.resolve();
     }
-    if (message.cmd === CommandType.direct) {
-      return this._dispatchDirectMessage(message);
-    }
-    if (message.cmd === CommandType.session) {
-      return this._dispatchSessionMessage(message);
-    }
-    this.emit('unhandledmessage', message);
-    return Promise.resolve();
   }
 
   _dispatchSessionMessage(message) {
@@ -105,6 +107,31 @@ export default class IMClient extends Client {
         this.emit('unhandledmessage', message);
         return Promise.reject(new Error('Unrecognized session command'));
     }
+  }
+
+  _dispatchUnreadMessage(message) {
+    const convs = message.unreadMessage.convs;
+    convs.forEach(conv => this.getConversation(conv.cid).then(conversation => {
+      let timestamp;
+      if (conv.timestamp) {
+        timestamp = new Date(conv.timestamp.toNumber());
+      }
+      conversation.unreadMessagesCount = conv.unread; // eslint-disable-line no-param-reassign
+      /**
+       * 未读消息数目更新
+       * @event IMClient#unreadmessages
+       * @param {Object} payload
+       * @param {Number} payload.count 未读消息数
+       * @param {String} [payload.lastMessageId] 最新一条未读消息 id
+       * @param {String} [payload.lastMessageTimestamp] 最新一条未读消息时间戳
+       * @param {Conversation} conversation 未读消息数目有更新的对话
+       */
+      this.emit('unreadmessages', {
+        count: conv.unread,
+        lastMessageId: conv.mid,
+        lastMessageTimestamp: timestamp,
+      }, conversation);
+    }));
   }
 
   _dispatchConvMessage(message) {
@@ -233,6 +260,7 @@ export default class IMClient extends Client {
       Object.assign(message, messageProps);
       conversation.lastMessage = message; // eslint-disable-line no-param-reassign
       conversation.lastMessageAt = message.timestamp; // eslint-disable-line no-param-reassign
+      conversation.unreadMessagesCount++; // eslint-disable-line no-param-reassign
       /**
        * 当前用户收到消息
        * @event IMClient#message

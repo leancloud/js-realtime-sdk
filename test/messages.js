@@ -1,6 +1,5 @@
 import 'should';
 import 'should-sinon';
-import uuid from 'uuid';
 import Realtime from '../src/realtime';
 import Message from '../src/messages/message';
 import TypedMessage from '../src/messages/typed-message';
@@ -58,8 +57,6 @@ describe('Messages', () => {
     // let realtime;
     let wchen;
     let zwang;
-    const wchenId = uuid.v4();
-    const zwangId = uuid.v4();
     let conversationWchen;
     let conversationZwang;
     before(() => {
@@ -69,12 +66,12 @@ describe('Messages', () => {
         pushUnread: false,
       });
       return Promise.all([
-        realtime.createIMClient(wchenId),
-        realtime.createIMClient(zwangId),
+        realtime.createIMClient(),
+        realtime.createIMClient(),
       ]).then(clients => {
         [wchen, zwang] = clients;
         return wchen.createConversation({
-          members: [zwangId],
+          members: [zwang.id],
           name: 'message test conversation',
         });
       }).then(conversation => {
@@ -111,6 +108,7 @@ describe('Messages', () => {
           clientReceivedConversation.id.should.eql(conversationWchen.id);
           conversationZwang.lastMessage.content.should.eql(sentMessage.content);
           conversationWchen.lastMessage.content.should.eql(sentMessage.content);
+          conversationZwang.unreadMessagesCount.should.eql(1);
         });
     });
     it('sending typed message', () => {
