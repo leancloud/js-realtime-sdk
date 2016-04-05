@@ -410,6 +410,9 @@ export default class IMClient extends Client {
     if (!(clientIds instanceof Array)) {
       throw new TypeError(`clientIds ${clientIds} is not an Array`);
     }
+    if (!clientIds.length) {
+      return Promise.resolve([]);
+    }
     const command = new GenericCommand({
       cmd: 'session',
       op: 'query',

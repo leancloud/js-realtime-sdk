@@ -119,16 +119,26 @@ describe('IMClient', () => {
   });
 
   describe('ping', () => {
-    it('type check', () => {
+    it('should throw if type check failed', () => {
       (() => client.ping('1')).should.throw();
     });
 
-    it('ping result', () =>
+    it('should only return online clients', () =>
       client.ping(['non-exists-client-id', CLIENT_ID])
         .then(ids => {
           ids.should.eql([CLIENT_ID]);
         })
     );
+
+    it('should not request if get an empty ids list', () => {
+      const send = sinon.spy(IMClient.prototype, '_send');
+      return client.ping([])
+        .then(ids => {
+          ids.should.eql([]);
+          send.should.not.be.called();
+          send.restore();
+        });
+    });
   });
 
   describe('getConversation', () => {
