@@ -80,8 +80,9 @@
     "ws": "^1.0.1"
   },
   "browser": {
-    "ws": false,
-    "sinon": false
+    "ws": "./src/browser/ws.js",
+    "sinon": false,
+    "dist/bundle.js": "dist/bundle.browser.js"
   },
   "config": {
     "ghooks": {

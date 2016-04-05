@@ -6,9 +6,10 @@ import { default as d } from 'debug';
 import EventEmitter from 'eventemitter3';
 import StateMachine from 'javascript-state-machine';
 
+import WebSocket from 'ws';
+
 const debug = d('LC:WebSocketPlus');
 
-const WebSocket = global.WebSocket || global.MozWebSocket || require('ws');
 const HEARTBEAT_TIME = 60000;
 const TIMEOUT_TIME = 180000;
 
