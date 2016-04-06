@@ -13,6 +13,7 @@ import {
 import * as Errors from './errors';
 import throttle from 'lodash/throttle';
 import { tap, Cache, keyRemap, union, difference, trim } from './utils';
+import { run as runSignatureFactory } from './signature-factory-runner';
 import { default as d } from 'debug';
 import { version as VERSION } from '../package.json';
 
@@ -339,34 +340,16 @@ export default class IMClient extends Client {
           deviceId,
         }),
       }))
-      .then(cmd => {
-        const command = cmd;
+      .then(command => {
         if (this.options.signatureFactory) {
-          this._debug(`call signatureFactory with [${this.id}]`);
-          return Promise
-            .resolve()
-            .then(() => this.options.signatureFactory(this.id))
-            .then(tap(signatureResult => this._debug('signatureResult', signatureResult)))
-            .then((signatureResult = {}) => {
-              const {
-                signature,
-                timestamp,
-                nonce,
-              } = signatureResult;
-              if (typeof signature !== 'string'
-                  || typeof timestamp !== 'number'
-                  || typeof nonce !== 'string') {
-                throw new Error('malformed signature');
-              }
-              Object.assign(command.sessionMessage, {
-                s: signature,
-                t: timestamp,
-                n: nonce,
-              });
+          return runSignatureFactory(this.options.signatureFactory, [this.id])
+            .then(signatureResult => {
+              Object.assign(command.sessionMessage, keyRemap({
+                signature: 's',
+                timestamp: 't',
+                nonce: 'n',
+              }, signatureResult));
               return command;
-            }, error => {
-              this._debug(error);
-              throw new Error(`signatureFactory error: ${error.message}`);
             });
         }
         return command;

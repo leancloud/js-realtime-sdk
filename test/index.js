@@ -1,4 +1,5 @@
 import './utils';
+import './signature-factory-runner';
 import './realtime';
 import './im-client';
 import './conversation';

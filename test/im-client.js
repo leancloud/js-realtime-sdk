@@ -79,27 +79,10 @@ describe('IMClient', () => {
           .createIMClient('ycui', {
             signatureFactory,
           })
-          .should.be.fulfilled()
           .then(() => {
             signatureFactory.should.be.calledWith('ycui');
           });
       });
-      it('malformed signature', () =>
-        realtime
-          .createIMClient(undefined, {
-            signatureFactory: () => undefined,
-          })
-          .should.be.rejectedWith('malformed signature')
-      );
-      it('signatureFactory throws', () =>
-        realtime
-          .createIMClient(undefined, {
-            signatureFactory: () => {
-              throw new Error('error message');
-            },
-          })
-          .should.be.rejectedWith('signatureFactory error: error message')
-      );
     });
 
     it('with tag', done => {
