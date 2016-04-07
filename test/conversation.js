@@ -24,7 +24,6 @@ describe('Conversation', () => {
     realtime = new Realtime({
       appId: APP_ID,
       region: REGION,
-      pushUnread: false,
     });
     return realtime.createIMClient(CLIENT_ID)
       .then(c => {
@@ -109,6 +108,43 @@ describe('Conversation', () => {
         conv.members.should.containEql(CLIENT_ID);
       })
   );
+
+  describe('converastion signature', () => {
+    beforeEach(function setupConversation() {
+      this.conversationSignatureFactory = sinon.stub().returns({
+        signature: 'signature',
+        timestamp: Date.now(),
+        nonce: 'nonce',
+      });
+      return realtime.createIMClient('ycui', {
+        conversationSignatureFactory: this.conversationSignatureFactory,
+      }).then(c => {
+        this.ycui = c;
+        return c.createConversation({
+          members: ['dli'],
+        });
+      }).then(conv => (this.conversation = conv));
+    });
+    afterEach(function cleanup() {
+      return this.ycui.close();
+    });
+    it('create', function createAsserts() {
+      this.conversationSignatureFactory.should.be.calledWith(null, 'ycui', ['dli'], 'create');
+    });
+    it('add', function addAsserts() {
+      return this.conversation.add(['wduan', 'jwu']).then(() => {
+        this.conversationSignatureFactory.getCall(1).args
+          .should.be.eql([this.conversation.id, 'ycui', ['jwu', 'wduan'], 'add']);
+      });
+    });
+    it('remove', function removeAsserts() {
+      return this.conversation.quit().then(() => {
+        this.conversationSignatureFactory.getCall(1).args
+          .should.be.eql([this.conversation.id, 'ycui', ['ycui'], 'remove']);
+      });
+    });
+  });
+
   describe('Message Query', () => {
     it('queryMessages', () =>
       conversation.queryMessages().then(messages => {

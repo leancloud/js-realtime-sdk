@@ -10,6 +10,7 @@ import {
   ReadCommand,
   ReadTuple,
 } from '../proto/message';
+import { run as runSignatureFactory } from './signature-factory-runner';
 import { createError } from './errors';
 import Message from './messages/message';
 import isEmpty from 'lodash/isEmpty';
@@ -325,10 +326,29 @@ export default class Conversation extends EventEmitter {
     const convMessage = new ConvCommand({
       m: clientIds,
     });
-    return this._send(new GenericCommand({
-      op: 'add',
-      convMessage,
-    })).then(() => {
+    return Promise.resolve(
+      new GenericCommand({
+        op: 'add',
+        convMessage,
+      })
+    )
+    .then(command => {
+      if (this._client.options.conversationSignatureFactory) {
+        const params = [this.id, this._client.id, clientIds.sort(), 'add'];
+        return runSignatureFactory(this._client.options.conversationSignatureFactory, params)
+          .then(signatureResult => {
+            Object.assign(command.convMessage, keyRemap({
+              signature: 's',
+              timestamp: 't',
+              nonce: 'n',
+            }, signatureResult));
+            return command;
+          });
+      }
+      return command;
+    })
+    .then(this._send.bind(this))
+    .then(() => {
       if (!this.transient) {
         this.members = union(this.members, clientIds);
       }
@@ -349,10 +369,29 @@ export default class Conversation extends EventEmitter {
     const convMessage = new ConvCommand({
       m: clientIds,
     });
-    return this._send(new GenericCommand({
-      op: 'remove',
-      convMessage,
-    })).then(() => {
+    return Promise.resolve(
+      new GenericCommand({
+        op: 'remove',
+        convMessage,
+      })
+    )
+    .then(command => {
+      if (this._client.options.conversationSignatureFactory) {
+        const params = [this.id, this._client.id, clientIds.sort(), 'remove'];
+        return runSignatureFactory(this._client.options.conversationSignatureFactory, params)
+          .then(signatureResult => {
+            Object.assign(command.convMessage, keyRemap({
+              signature: 's',
+              timestamp: 't',
+              nonce: 'n',
+            }, signatureResult));
+            return command;
+          });
+      }
+      return command;
+    })
+    .then(this._send.bind(this))
+    .then(() => {
       if (!this.transient) {
         this.members = difference(this.members, clientIds);
       }

@@ -26,6 +26,7 @@ export default class IMClient extends Client {
    * @param  {String} [id] 客户端 id
    * @param  {Object} [options]
    * @param  {Function} [options.signatureFactory] open session 时的签名方法 // TODO need details
+   * @param  {Function} [options.conversationSignatureFactory] 对话创建、增减成员操作时的签名方法
    */
   constructor(...args) {
     /**
@@ -549,14 +550,29 @@ export default class IMClient extends Client {
       unique,
     };
 
-    const command = new GenericCommand({
-      cmd: 'conv',
-      op: 'start',
-      convMessage: new ConvCommand(startCommandJson),
-    });
-
-    return this
-      ._send(command)
+    return Promise.resolve(
+        new GenericCommand({
+          cmd: 'conv',
+          op: 'start',
+          convMessage: new ConvCommand(startCommandJson),
+        })
+      )
+      .then(command => {
+        if (this.options.conversationSignatureFactory) {
+          const params = [null, this.id, members.sort(), 'create'];
+          return runSignatureFactory(this.options.conversationSignatureFactory, params)
+            .then(signatureResult => {
+              Object.assign(command.convMessage, keyRemap({
+                signature: 's',
+                timestamp: 't',
+                nonce: 'n',
+              }, signatureResult));
+              return command;
+            });
+        }
+        return command;
+      })
+      .then(this._send.bind(this))
       .then(resCommand => new Conversation(Object.assign({}, options, {
         id: resCommand.convMessage.cid,
         createdAt: resCommand.convMessage.cdate,
