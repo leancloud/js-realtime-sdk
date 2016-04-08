@@ -94,6 +94,7 @@ class WebSocketPlus extends EventEmitter {
     this.emit('reconnect');
   }
   onretry() {
+    this._retryCount++;
     setTimeout(() => {
       if (this.is('offline')) {
         this._createWs(this._getUrls, this._protocol).then(
@@ -104,7 +105,6 @@ class WebSocketPlus extends EventEmitter {
         this.emit('retry', this._retryCount);
       }
     }, this._retryCount * 3000);
-    this._retryCount++;
   }
   onclose() {
     debug('close');
