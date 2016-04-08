@@ -61,7 +61,7 @@ describe('Realtime', () => {
           connection.current.should.be.equal('closed');
         });
     });
-    it.skip('noBinary mode fallback', () =>
+    it('noBinary mode fallback', () =>
       createRealtime({
         noBinary: true,
       })

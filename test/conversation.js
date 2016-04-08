@@ -310,7 +310,7 @@ describe('Conversation', () => {
     });
   });
 
-  it.skip('unreadmessages event and markAsRead', () => {
+  it('unreadmessages event and markAsRead', () => {
     const bwangId = uuid.v4();
     let bwang0;
     let conversationId;
