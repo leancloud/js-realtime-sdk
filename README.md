@@ -28,9 +28,11 @@ npm install leancloud-realtime@next
   - iOS 8.0+
   - Android 4.4+
 - Node.js 0.12+
-- React Native (tested with 0.22)
+- React Native 0.22+
 
 其中在 React Native 中运行需要在初始化 [Realtime](https://leeyeh.github.io/js-realtime-sdk/docs/Realtime.html#Realtime) 时设置 `options.noBinary` 为 `true`。
+
+暂时无法运行在 React Native for Android，直到 [facebook/react-native#6223](https://github.com/facebook/react-native/pull/6223) shipped。
 
 文档
 ----
