@@ -101,6 +101,6 @@ export default class Connection extends WebSocketPlus {
   ping() {
     return this.send(new GenericCommand({
       cmd: 'echo',
-    }));
+    })).catch(error => console.warn('ping failed:', error));
   }
 }

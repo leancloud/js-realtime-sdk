@@ -315,7 +315,9 @@ export default class IMClient extends Client {
           tots: Math.max.apply(null, timestamps),
         }),
       });
-      return this._send(command, false).then(() => delete this._ackMessageBuffer[cid]);
+      return this._send(command, false)
+        .then(() => delete this._ackMessageBuffer[cid])
+        .catch(error => console.warn('send ack failed:', error));
     }));
   }
 
