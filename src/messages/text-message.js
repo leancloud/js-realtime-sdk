@@ -1,4 +1,5 @@
 import TypedMessage from './typed-message';
+import { messageType } from './helpers';
 
 export default class TextMessage extends TypedMessage {
   /**
@@ -15,28 +16,9 @@ export default class TextMessage extends TypedMessage {
     this.setText(text);
   }
 
-  /**
-   * 向输出的 json 中添加标记类型的 _lctype 字段
-   * @override
-   * @inner
-   */
-  _getExtras() {
-    return {
-      _lctype: -1,
-    };
-  }
-
-  /**
-   * 判断给定的内容是否是有效的 TextMessage
-   * @returns {Boolean}
-   * @implements AVMessage.validate
-   */
-  static validate(json) {
-    return json._lctype === -1;
-  }
-
-  // https://phabricator.babeljs.io/T116
+  // IE10- hack: https://phabricator.babeljs.io/T116
   static parse(...args) {
     return super.parse(...args);
   }
 }
+messageType(-1)(TextMessage);

@@ -85,23 +85,23 @@ npm install leancloud-realtime@next
 SDK 分为连接层与应用层两部分，只存在应用层对连接层公开 API 的调用，连接层对开发者不可见。
 
 #### 连接层
-* `WebSocketPlus`：封装了 WebSocket。相比 w3 WebSocket，增加了一下特性：
+* `WebSocketPlus`：封装了 WebSocket。相比 w3 WebSocket，增加了以下特性：
   * 是一个有限状态机
   * 实现了 [Node.js EventEmitter 接口](https://nodejs.org/api/events.html)
   * 超时与自动重连机制
   * url 参数支持 Promise 及备用地址
 * `Connection`：继承自 `WebSocketPlus`，增加了与业务相关的功能：
-  * 根据 subprotocol 自动处理发送与接收的消息，应用层发送接收的均是 Protobuf Message 类
+  * 根据 subprotocol 自动处理发送与接收的消息，应用层发送接收的均是 ProtoBuf Message 类
   * `send` 接口返回 Promise，在 server 回复后才算 send 成功
   * 实现了应用层 ping/pong
 
 #### 应用层
-* `Realtime`：开发者使用 SDK 的入口，负责访问 router、创建 connection、创建与管理 clients、创建 messageParser（管理消息类型）、监听 connection 的消息 dispatch 并给对应 client
+* `Realtime`：开发者使用 SDK 的入口，负责访问 router、创建 connection、创建与管理 clients、创建 messageParser（管理消息类型）、监听 connection 的消息并 dispatch 给对应的 client
 * `Client`：所有的 clients 共享一个 connection
   * `IMClient`：对应即时通讯中的「用户」，持有 connection 与 conversations，负责创建管理将收到的消息处理后在对应 conversation 上派发，所有的 IMClients 共享一个 messageParser
   * `PushClient`：not implemented yet
-* `MessageParser` 消息解析器，负责将一个 json 格式的消息 parse 为对应的 Message 类
-* `Converastion`：实现对话相关的操作
+* `MessageParser` 消息解析器，负责将一个 JSON 格式的消息 parse 为对应的 Message 类
+* `Conversation`：实现对话相关的操作
   * `ConversationQuery`：对话查询器
 * `Messages`
   * `AVMessage`：接口描述，生成文档用

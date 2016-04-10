@@ -4,6 +4,7 @@ import Realtime from '../src/realtime';
 import Message from '../src/messages/message';
 import TypedMessage from '../src/messages/typed-message';
 import TextMessage from '../src/messages/text-message';
+import { messageType, messageField } from '../src/messages/helpers';
 
 import { listen } from './test-utils';
 
@@ -12,24 +13,38 @@ import {
   REGION,
 } from './configs';
 
+@messageType(1)
+@messageField('foo')
+class CustomMessage extends TypedMessage {
+  constructor(foo) {
+    super();
+    this.foo = foo;
+  }
+  // IE10- hack: https://phabricator.babeljs.io/T116
+  static parse(...args) {
+    return super.parse(...args);
+  }
+}
+
 // const sinon = (typeof window !== 'undefined' && window.sinon) || require('sinon');
 
 describe('Messages', () => {
-  describe('TypedMessage', () => {
-    it('toJSON', () => {
-      new TypedMessage()
-        .setAttributes({
-          lean: 'cloud',
-        })
-        .setText('rocks')
-        .toJSON()
-        .should.eql({
-          _lctext: 'rocks',
-          _lcattrs: {
-            lean: 'cloud',
-          },
-          _lctype: 0,
-        });
+  describe('helpers', () => {
+    describe('messageType', () => {
+      it('param type check', () => {
+        (() => messageType()).should.throw();
+        (() => messageType('1')).should.throw();
+        (() => messageType(1)).should.not.throw();
+      });
+    });
+    describe('messageField', () => {
+      it('param type check', () => {
+        (() => messageField()).should.throw();
+        (() => messageField(1)).should.throw();
+        (() => messageField('1')).should.not.throw();
+        (() => messageField([1])).should.throw();
+        (() => messageField(['1'])).should.not.throw();
+      });
     });
   });
   describe('TextMessage', () => {
@@ -51,6 +66,29 @@ describe('Messages', () => {
       parsedMessage.should.be.instanceof(TextMessage);
       parsedMessage.getText().should.eql(json._lctext);
       parsedMessage.getAttributes().should.eql(json._lcattrs);
+      parsedMessage.toJSON().should.eql(json);
+    });
+  });
+
+  describe('CustomMessage', () => {
+    it('parse and toJSON', () => {
+      const json = {
+        _lctext: 'leancloud',
+        _lcattrs: {
+          lean: 'cloud',
+        },
+        _lctype: 1,
+        foo: 'bar',
+      };
+      const message = new CustomMessage(json.foo)
+        .setText('leancloud')
+        .setAttributes(json._lcattrs);
+      message.toJSON().should.eql(json);
+      const parsedMessage = CustomMessage.parse(json);
+      parsedMessage.should.be.instanceof(CustomMessage);
+      parsedMessage.getText().should.eql(json._lctext);
+      parsedMessage.getAttributes().should.eql(json._lcattrs);
+      parsedMessage.foo.should.eql(json.foo);
       parsedMessage.toJSON().should.eql(json);
     });
   });

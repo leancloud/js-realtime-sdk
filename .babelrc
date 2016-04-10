@@ -1,7 +1,9 @@
 {
   "presets": ["es2015-rollup"],
   "plugins": [
-    "transform-runtime", ["transform-es2015-classes", {
+    "transform-runtime",
+    "transform-decorators-legacy",
+    ["transform-es2015-classes", {
       "loose": true
     }]
   ]

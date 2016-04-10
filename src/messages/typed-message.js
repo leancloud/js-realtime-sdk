@@ -1,4 +1,5 @@
 import Message from './message';
+import { messageField } from './helpers';
 
 export default class TypedMessage extends Message {
   /**
@@ -6,7 +7,8 @@ export default class TypedMessage extends Message {
    * @extends Message
    */
   constructor() {
-    super({});
+    super();
+    this._ = {};
   }
 
   /** @type {String} */
@@ -30,14 +32,14 @@ export default class TypedMessage extends Message {
    * @return {TypedMessage} self
    */
   setText(text) {
-    this.content.text = text;
+    this._lctext = text;
     return this;
   }
   /**
    * @return {String}
    */
   getText() {
-    return this.content.text;
+    return this._lctext;
   }
 
   /**
@@ -45,46 +47,35 @@ export default class TypedMessage extends Message {
    * @return {TypedMessage} self
    */
   setAttributes(attributes) {
-    this.content.attrs = attributes;
+    this._lcattrs = attributes;
     return this;
   }
   /**
    * @return {Object}
    */
   getAttributes() {
-    return this.content.attrs;
+    return this._lcattrs;
   }
 
-  /**
-   * 获得额外信息，向输出的 json 中添加字段。
-   *
-   * @abstract
-   * @return {Object} key-value
-   * @example
-   * export default class CustomMessage extends TypedMessage {
-   *   // 子类无须重载 {@link TypedMessage#toJSON} 即可向输出的 json 中添加标记类型的字段
-   *   _getExtras() {
-   *     return {
-   *       _lctype: 1,
-   *       customField: this.customField,
-   *     };
-   *   }
-   *   static validate(json) {
-   *     return json._lctype === 1;
-   *   }
-   * }
-   */
-  _getExtras() {
-    return {
-      _lctype: 0,
-    };
+  _getCustomFields() {
+    const fields = Array.isArray(this.constructor._customFields)
+      ? this.constructor._customFields : [];
+    return fields.reduce((result, field) => {
+      if (typeof field !== 'string') return result;
+      result[field] = this[field]; // eslint-disable-line no-param-reassign
+      return result;
+    }, {});
+  }
+
+  _getType() {
+    throw new Error('not implemented');
   }
 
   toJSON() {
     return Object.assign({
       _lctext: this.getText(),
       _lcattrs: this.getAttributes(),
-    }, this._getExtras());
+    }, this._getCustomFields(), this._getType());
   }
 
   /**
@@ -98,9 +89,17 @@ export default class TypedMessage extends Message {
    * @implements AVMessage.parse
    */
   static parse(json, message = new this()) {
-    message
-      .setText(json._lctext)
-      .setAttributes(json._lcattrs);
+    message.content = json; // eslint-disable-line no-param-reassign
+    let fields = Array.isArray(message.constructor._customFields)
+      ? message.constructor._customFields : [];
+    fields = fields.reduce((result, field) => {
+      if (typeof field !== 'string') return result;
+      result[field] = json[field]; // eslint-disable-line no-param-reassign
+      return result;
+    }, {});
+    Object.assign(message, fields);
     return super.parse(json, message);
   }
 }
+
+messageField(['_lctext', '_lcattrs'])(TypedMessage);
