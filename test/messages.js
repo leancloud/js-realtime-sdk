@@ -5,6 +5,8 @@ import Message from '../src/messages/message';
 import TypedMessage from '../src/messages/typed-message';
 import TextMessage from '../src/messages/text-message';
 
+import { listen } from './test-utils';
+
 import {
   APP_ID,
   REGION,
@@ -87,41 +89,35 @@ describe('Messages', () => {
       zwang.close(),
     ]));
 
-    it('sending message', () => {
-      const receivePromise = new Promise((resolve) => {
-        conversationZwang.on('message', resolve);
-      });
-      const clientMessageEventPromise = new Promise((resolve) => {
-        zwang.on('message', (...args) => resolve(args));
-      });
-      const sendPromise = conversationWchen.send(new Message('hello'));
-      return Promise.all([receivePromise, clientMessageEventPromise, sendPromise])
-        .then(messages => {
-          const [
-            receivedMessage,
-            [clientReceivedMessage, clientReceivedConversation],
-            sentMessage,
-          ] = messages;
-          receivedMessage.id.should.eql(sentMessage.id);
-          receivedMessage.content.should.eql(sentMessage.content);
-          clientReceivedMessage.id.should.eql(sentMessage.id);
-          clientReceivedConversation.id.should.eql(conversationWchen.id);
-          conversationZwang.lastMessage.content.should.eql(sentMessage.content);
-          conversationWchen.lastMessage.content.should.eql(sentMessage.content);
-          conversationZwang.unreadMessagesCount.should.eql(1);
-        });
-    });
+    it('sending message', () =>
+      Promise.all([
+        listen(conversationZwang, 'message'),
+        listen(zwang, 'message'),
+        conversationWchen.send(new Message('hello')),
+      ]).then(messages => {
+        const [
+          [receivedMessage],
+          [clientReceivedMessage, clientReceivedConversation],
+          sentMessage,
+        ] = messages;
+        receivedMessage.id.should.eql(sentMessage.id);
+        receivedMessage.content.should.eql(sentMessage.content);
+        clientReceivedMessage.id.should.eql(sentMessage.id);
+        clientReceivedConversation.id.should.eql(conversationWchen.id);
+        conversationZwang.lastMessage.content.should.eql(sentMessage.content);
+        conversationWchen.lastMessage.content.should.eql(sentMessage.content);
+        conversationZwang.unreadMessagesCount.should.eql(1);
+      })
+    );
     it('sending typed message', () => {
-      const receivePromise = new Promise((resolve) => {
-        conversationZwang.on('message', resolve);
-      });
+      const receivePromise = listen(conversationZwang, 'message');
       const sendPromise = conversationWchen.send(
         new TextMessage('hello').setAttributes({
           leancloud: 'rocks',
         })
       );
       return Promise.all([receivePromise, sendPromise]).then(messages => {
-        const [receivedMessage, sentMessage] = messages;
+        const [[receivedMessage], sentMessage] = messages;
         receivedMessage.id.should.be.equal(sentMessage.id);
         receivedMessage.getText().should.eql(sentMessage.getText());
         receivedMessage.getAttributes().should.eql(sentMessage.getAttributes());

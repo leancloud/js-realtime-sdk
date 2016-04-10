@@ -1,8 +1,7 @@
-export const testAsync = (asserts, done) => () => {
-  try {
-    asserts();
-  } catch (e) {
-    return done(e);
-  }
-  return true;
-};
+export const listen = (target, eventName) => new Promise(
+  resolve => target.once(eventName, (...args) => resolve(args)
+));
+
+export const wait = time => new Promise(resolve => setTimeout(resolve, time));
+
+export const hold = time => result => wait(time).then(() => result);

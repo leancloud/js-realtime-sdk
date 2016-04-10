@@ -16,6 +16,8 @@ import {
 
 const sinon = (typeof window !== 'undefined' && window.sinon) || require('sinon');
 
+import { listen } from './test-utils';
+
 describe('Conversation', () => {
   let realtime;
   let client;
@@ -329,18 +331,15 @@ describe('Conversation', () => {
         }).createIMClient(bwangId)
       ).then(c => {
         bwang0 = c;
-        return new Promise(
-          resolve => bwang0.once('unreadmessages', (...args) => resolve([...args]))
-        ).then(([payload, conv]) => {
+        return listen(bwang0, 'unreadmessages').then(([payload, conv]) => {
           payload.count.should.be.eql(1);
           conv.unreadMessagesCount.should.eql(1);
           conv.id.should.be.eql(conversationId);
         });
       })
       .then(() => realtime.createIMClient(bwangId))
-      .then(bwang1 => new Promise(
-          resolve => bwang1.once('unreadmessages', (...args) => resolve([...args]))
-        ).then(([payload, conv]) => {
+      .then(bwang1 => listen(bwang1, 'unreadmessages')
+        .then(([payload, conv]) => {
           payload.count.should.be.eql(1);
           conv.id.should.be.eql(conversationId);
           return conv.markAsRead().then(conv1 => {
@@ -348,9 +347,8 @@ describe('Conversation', () => {
             bwang1.close();
           });
         })
-      ).then(() => new Promise(
-          resolve => bwang0.once('unreadmessages', (...args) => resolve([...args]))
-        ).then(([payload, conv]) => {
+      ).then(() => listen(bwang0, 'unreadmessages')
+        .then(([payload, conv]) => {
           payload.count.should.be.eql(0);
           conv.id.should.be.eql(conversationId);
         })

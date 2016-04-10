@@ -8,6 +8,8 @@ import { GenericCommand, CommandType } from '../proto/message';
 
 const sinon = (typeof window !== 'undefined' && window.sinon) || require('sinon');
 
+import { listen } from './test-utils';
+
 import {
   APP_ID,
   REGION,
@@ -114,9 +116,7 @@ describe('Realtime', () => {
       return realtime._open()
         .then(connection => {
           const callbackPromise = Promise.all(['retry', 'disconnect', 'reconnect'].map(
-            event => new Promise((resolve) => {
-              realtime.on(event, (...payloads) => resolve([...payloads]));
-            })
+            event => listen(realtime, event)
           ));
           connection.emit('disconnect');
           connection.emit('retry', 1, 2);

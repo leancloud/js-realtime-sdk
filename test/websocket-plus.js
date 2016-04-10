@@ -1,21 +1,20 @@
 import 'should';
 import 'should-sinon';
 import WebsocketPlus from '../src/websocket-plus';
-import { testAsync } from './test-utils';
+import { listen, wait } from './test-utils';
 
 const sinon = (typeof window !== 'undefined' && window.sinon) || require('sinon');
 
 describe('WebsocketPlus', () => {
   describe('open/close', () => {
-    it('basic', (done) => {
+    it('basic', () => {
       const ws = new WebsocketPlus('wss://echo.websocket.org');
-      ws.on('open', testAsync(() => {
+      return listen(ws, 'open').then(() => {
         ws.is('connected').should.be.true();
-        done();
         ws.close();
         ws.is('closed').should.be.true();
         (() => ws.open()).should.throw();
-      }, done));
+      });
     });
     it('error', (done) => {
       const ws = new WebsocketPlus('ws://404.websocket.org');
@@ -54,25 +53,23 @@ describe('WebsocketPlus', () => {
     after(() => {
       if (!ws.is('closed')) ws.close();
     });
-    it('should reconnect when closed', (done) => {
+    it('should reconnect when closed', () => {
       const disconnectCallback = sinon.spy();
       ws.on('disconnect', disconnectCallback);
-      ws.on('reconnect', testAsync(() => {
+      ws._ws.close();
+      return listen(ws, 'reconnect').then(() => {
         disconnectCallback.should.be.calledOnce();
         ws.is('connected').should.be.true();
-        done();
-      }, done));
-      ws._ws.close();
+      });
     });
-    it('should not reconnect when closed manually', (done) => {
+    it('should not reconnect when closed manually', () => {
       const disconnectCallback = sinon.spy();
       ws.on('disconnect', disconnectCallback);
       ws.close();
-      setTimeout(testAsync(() => {
+      return wait(500).then(() => {
         disconnectCallback.should.have.callCount(0);
         ws.is('closed').should.be.true();
-        done();
-      }, done), 500);
+      });
     });
   });
 });

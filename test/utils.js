@@ -2,7 +2,7 @@ import 'should';
 import 'should-sinon';
 import should from 'should/as-function';
 import { tap, tryAll, Cache, keyRemap, union, difference } from '../src/utils';
-import { testAsync } from './test-utils';
+import { wait } from './test-utils';
 
 const sinon = (typeof window !== 'undefined' && window.sinon) || require('sinon');
 
@@ -48,17 +48,14 @@ describe('Utils', () => {
   });
 
   describe('Cache', () => {
-    it('get/set', (done) => {
+    it('get/set', () => {
       const cache = new Cache();
       should(cache.get('__test')).be.null();
       cache.set('__test', 1);
       cache.get('__test').should.equal(1);
       cache.set('__test', '1', 100);
       cache.get('__test').should.equal('1');
-      setTimeout(testAsync(() => {
-        should(cache.get('__test')).be.null();
-        done();
-      }, done), 110);
+      return wait(110).then(() => should(cache.get('__test')).be.null());
     });
   });
 
