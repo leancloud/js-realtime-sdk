@@ -1,15 +1,15 @@
 import 'should';
 import 'should-sinon';
-import WebsocketPlus from '../src/websocket-plus';
+import WebSocketPlus from '../src/websocket-plus';
 import { listen, wait } from './test-utils';
 
 const sinon = (typeof window !== 'undefined' && window.sinon) || require('sinon');
 
-describe('WebsocketPlus', () => {
+describe('WebSocketPlus', () => {
   describe('open/close', () => {
     it('basic', () => {
-      const ws = new WebsocketPlus('wss://echo.websocket.org');
-      return listen(ws, 'open').then(() => {
+      const ws = new WebSocketPlus('wss://echo.websocket.org');
+      return listen(ws, 'open', 'error').then(() => {
         ws.is('connected').should.be.true();
         ws.close();
         ws.is('closed').should.be.true();
@@ -17,38 +17,32 @@ describe('WebsocketPlus', () => {
       });
     });
     it('error', (done) => {
-      const ws = new WebsocketPlus('ws://404.websocket.org');
+      const ws = new WebSocketPlus('ws://404.websocket.org');
       ws.on('error', error => {
         error.should.be.instanceof(Error);
         done();
       });
     });
-    it('backup endpoint', (done) => {
-      const ws = new WebsocketPlus([
+    it('backup endpoint', () => {
+      const ws = new WebSocketPlus([
         'ws://404.websocket.org',
         'ws://echo.websocket.org',
       ]);
-      ws.on('open', () => {
-        done();
-        ws.close();
-      });
+      return listen(ws, 'open', 'error').then(() => ws.close());
     });
-    it('promised endpoints', (done) => {
-      const ws = new WebsocketPlus(Promise.resolve([
+    it('promised endpoints', () => {
+      const ws = new WebSocketPlus(Promise.resolve([
         'wss://echo.websocket.org',
       ]));
-      ws.on('open', () => {
-        done();
-        ws.close();
-      });
+      return listen(ws, 'open', 'error').then(() => ws.close());
     });
   });
 
   describe('Auto reconnecting', () => {
     let ws;
-    before(done => {
-      ws = new WebsocketPlus('ws://echo.websocket.org');
-      ws.on('open', () => done());
+    before(() => {
+      ws = new WebSocketPlus('ws://echo.websocket.org');
+      return listen(ws, 'open', 'error');
     });
     after(() => {
       if (!ws.is('closed')) ws.close();

@@ -30,7 +30,7 @@ class WebSocketPlus extends EventEmitter {
     this._createWs(this._getUrls, this._protocol).then(
       () => this.open(),
       error => this.throw(error)
-    );
+    ).catch(this.throw.bind(this));
     this.__postponeTimers = this._postponeTimers.bind(this);
   }
 
@@ -46,7 +46,7 @@ class WebSocketPlus extends EventEmitter {
           const ws = protocol ? new WebSocket(
             url, protocol
           ) : new WebSocket(url);
-          ws.binaryType = this.binaryType || 'blob';
+          ws.binaryType = this.binaryType || 'arraybuffer';
           ws.onopen = () => resolve(ws);
           ws.onerror = error => {
             if (error instanceof Error) {
