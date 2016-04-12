@@ -102,11 +102,19 @@ var require = require || function(id) {throw new Error('Unexpected required ' + 
       },
       test: {
         dest: 'test/index.bundle.js',
-        src: 'test/index.js',
+        src: 'test/index-with-typed-messages.js',
         options: {
           plugins: [
             istanbul({
-              exclude: ['test/*.js', 'proto/*.js', '*.json'],
+              exclude: [
+                'test/*.js',
+                'proto/*.js',
+                'typed-messages/test/*.js',
+                'typed-messages/src/index.js',
+                'typed-messages/src/file.js',
+                'typed-messages/src/realtime.js',
+                '*.json',
+              ],
               instrumenter: require('istanbul'),
               instrumenterConfig: {
                 esModules: true,
@@ -139,6 +147,23 @@ var require = require || function(id) {throw new Error('Unexpected required ' + 
               include: ['node_modules/**', 'proto/**'],
             }),
             env()
+          ],
+          format: 'umd',
+          moduleName: 'AV'
+        }
+      },
+      'messages': {
+        dest: 'typed-messages/dist/bundle.js',
+        src: 'typed-messages/src/index.js',
+        options: {
+          plugins: [
+            // babel({ runtimeHelpers: true , exclude: 'node_modules/**' }),
+            nodeResolve({
+              main: true,
+            }),
+            commonjs({
+              include: ['node_modules/**', 'typed-messages'],
+            }),
           ],
           format: 'umd',
           moduleName: 'AV'
@@ -208,9 +233,9 @@ var require = require || function(id) {throw new Error('Unexpected required ' + 
   });
   grunt.registerTask('default', []);
   grunt.registerTask('lint', ['eslint']);
-  grunt.registerTask('build-test', ['rollup:test', 'rollup:test-browser', 'envify:test-browser']);
+  grunt.registerTask('build-test', ['build', 'rollup:test', 'rollup:test-browser', 'envify:test-browser']);
   grunt.registerTask('test', '', function() {
-    var tasks = ['lint', 'build-test', /*'mocha_phantomjs',*/ 'mochaTest', 'storeCoverage'];
+    var tasks = ['build-test', /*'mocha_phantomjs',*/ 'mochaTest', 'storeCoverage'];
     if (process.env.SAUCE_USERNAME && process.env.SAUCE_ACCESS_KEY) {
       tasks = tasks.concat(['connect', 'saucelabs-mocha']);
     } else {
@@ -218,7 +243,7 @@ var require = require || function(id) {throw new Error('Unexpected required ' + 
     }
     grunt.task.run(tasks);
   });
-  grunt.registerTask('release', ['rollup:dist-browser', 'rollup:dist', 'uglify:browser']);
+  grunt.registerTask('build', ['rollup:dist-browser', 'rollup:dist', 'uglify:browser', 'rollup:messages']);
   grunt.registerTask('dev', ['build-test', 'release', 'connect', 'watch']);
   grunt.registerTask('cdn', 'Upload dist to CDN.', function() {
 

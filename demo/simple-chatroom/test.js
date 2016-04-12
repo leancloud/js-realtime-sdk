@@ -2,12 +2,15 @@
 var appId = '9p6hyhh60av3ukkni3i9z53q1l8yy3cijj6sie3cewft18vm';
 var appKey = 'nhqqc1x7r7r89kp8pggrme57i374h3vyd0ukr2z3ayojpvf4';
 
+AV.initialize(appId, appKey);
+
 // 请换成你自己的一个房间的 conversation id（这是服务器端生成的）
 var roomId = '551a2847e4b04d688d73dc54';
 
 // 每个客户端自定义的 id
 var clientId = 'LeanCloud';
 
+var realtime;
 var client;
 var messageIterator;
 
@@ -21,6 +24,7 @@ var firstFlag = true;
 var logFlag = false;
 
 var openBtn = document.getElementById('open-btn');
+var sendBtnAsFile = document.getElementById('send-btn-as-file');
 var sendBtn = document.getElementById('send-btn');
 var inputName = document.getElementById('input-name');
 var inputSend = document.getElementById('input-send');
@@ -32,6 +36,7 @@ var msgTime;
 
 bindEvent(openBtn, 'click', main);
 bindEvent(sendBtn, 'click', sendMsg);
+bindEvent(sendBtnAsFile, 'click', sendMsgAsFile);
 
 bindEvent(document.body, 'keydown', function(e) {
   if (e.keyCode === 13) {
@@ -54,13 +59,15 @@ function main() {
   }
 
   // 创建实时通信实例
-  var realtime = new AV.Realtime({
+  realtime = new AV.Realtime({
     appId: appId,
     appKey: appKey,
   });
+  realtime.register(AV.FileMessage);
   realtime.createIMClient(clientId)
   .then(function(c) {
     showLog('服务器连接成功！');
+    firstFlag = false;
     client = c;
     client.on('disconnect', function() {
       showLog('服务器正在重连，请耐心等待。。。');
@@ -94,11 +101,15 @@ function main() {
   })
   .then(function(conversation) {
     showLog('当前 Conversation 的成员列表：', conversation.members);
-    if (conversation.length > 490) {
-      conversation.remove(data[30]).then(function() {
-        showLog('人数过多，踢掉： ', data[30]);
+    if (conversation.members.length > 490) {
+      return conversation.remove(conversation.members[30]).then(function(conversation) {
+        showLog('人数过多，踢掉： ', conversation.members[30]);
+        return conversation;
       });
     }
+    return conversation;
+  })
+  .then(function(conversation) {
     return conversation.join();
   })
   .then(function(conversation) {
@@ -136,31 +147,38 @@ function sendMsg() {
   room.send(new AV.TextMessage(val)).then(function(message) {
     // 发送成功之后的回调
     inputSend.value = '';
-    showLog('（' + formatTime(message.timestamp) + '）  自己： ', message.text);
+    showLog('（' + formatTime(message.timestamp) + '）  自己： ', encodeHTML(message.text));
     printWall.scrollTop = printWall.scrollHeight;
   });
 
-  // 发送多媒体消息，如果想测试图片发送，可以打开注释
-  // room.send({
-  //     text: '图片测试',
-  //     // 自定义的属性
-  //     attr: {
-  //         a:123
-  //     },
-  //     url: 'https://leancloud.cn/images/static/press/Logo%20-%20Blue%20Padding.png',
-  //     metaData: {
-  //         name:'logo',
-  //         format:'png',
-  //         height: 123,
-  //         width: 123,
-  //         size: 888
-  //     }
-  // }, {
-  //    type: 'image'
-  // }, function(data) {
-  //     console.log('图片数据发送成功！');
-  // });
 }
+
+// 发送多媒体消息示例
+function sendMsgAsFile() {
+
+  var val = inputSend.value;
+
+  // 不让发送空字符
+  if (!String(val).replace(/^\s+/, '').replace(/\s+$/, '')) {
+    alert('请输入点文字！');
+  }
+  new AV.File('message.txt', {
+    base64: b64EncodeUnicode(val),
+  }).save().then(file => room.send(new AV.FileMessage(file))).then(function(message) {
+    // 发送成功之后的回调
+    inputSend.value = '';
+    showLog('（' + formatTime(message.timestamp) + '）  自己： ', createLink(message.getFile().url()));
+    printWall.scrollTop = printWall.scrollHeight;
+  }).catch(console.warn);
+
+}
+
+function b64EncodeUnicode(str) {
+    return btoa(encodeURIComponent(str).replace(/%([0-9A-F]{2})/g, function(match, p1) {
+        return String.fromCharCode('0x' + p1);
+    }));
+}
+
 
 // 显示接收到的信息
 function showMsg(message, isBefore) {
@@ -169,8 +187,12 @@ function showMsg(message, isBefore) {
   if (message.from === clientId) {
     from = '自己';
   }
-  if (String(text).replace(/^\s+/, '').replace(/\s+$/, '')) {
-    showLog('（' + formatTime(message.timestamp) + '）  ' + encodeHTML(from) + '： ', message.text, isBefore);
+  if (message instanceof AV.TextMessage) {
+    if (String(text).replace(/^\s+/, '').replace(/\s+$/, '')) {
+      showLog('（' + formatTime(message.timestamp) + '）  ' + encodeHTML(from) + '： ', encodeHTML(message.text), isBefore);
+    }
+  } else if (message instanceof AV.FileMessage) {
+    showLog('（' + formatTime(message.timestamp) + '）  ' + encodeHTML(from) + '： ', createLink(message.getFile().url()), isBefore);
   }
 }
 
@@ -215,7 +237,7 @@ function getLog(callback) {
 function showLog(msg, data, isBefore) {
   if (data) {
     // console.log(msg, data);
-    msg = msg + '<span class="strong">' + encodeHTML(JSON.stringify(data)) + '</span>';
+    msg = msg + '<span class="strong">' + data + '</span>';
   }
   var p = document.createElement('p');
   p.innerHTML = msg;
@@ -230,10 +252,10 @@ function encodeHTML(source) {
   return String(source)
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;');
-  // .replace(/\\/g,'&#92;')
-  // .replace(/"/g,'&quot;')
-  // .replace(/'/g,'&#39;');
+    .replace(/>/g, '&gt;')
+    .replace(/\\/g,'&#92;')
+    .replace(/"/g,'&quot;')
+    .replace(/'/g,'&#39;');
 }
 
 function formatTime(time) {
@@ -244,6 +266,10 @@ function formatTime(time) {
   var mm = date.getMinutes() < 10 ? '0' + date.getMinutes() : date.getMinutes();
   var ss = date.getSeconds() < 10 ? '0' + date.getSeconds() : date.getSeconds();
   return date.getFullYear() + '-' + month + '-' + currentDate + ' ' + hh + ':' + mm + ':' + ss;
+}
+
+function createLink(url) {
+  return '<a target="_blank" href="' + encodeHTML(url) + '">' + encodeHTML(url) + '</a>';
 }
 
 function bindEvent(dom, eventName, fun) {

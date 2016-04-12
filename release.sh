@@ -6,8 +6,8 @@ test "$(git config user.name)" = '' && (
   git config user.name "leancloud-bot";
   git config user.email "ci@leancloud.cn";
 )
-npm run build;
 git add dist -f;
+git add typed-messages/dist -f;
 git commit -m "chore(build): build ${REV} [skip ci]";
 git push -qf https://${TOKEN}@github.com/${TRAVIS_REPO_SLUG}.git ${BRANCH}:dist;
 git reset HEAD~1;

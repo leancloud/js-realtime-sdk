@@ -9,10 +9,10 @@
   },
   "scripts": {
     "dev": "grunt dev",
-    "test": "grunt test --stack && npm run report",
+    "test": "grunt lint test --stack && npm run report",
     "report": "istanbul report --include coverage/coverage.json --print text lcovonly",
     "doc": "jsdoc src README.md -r -d docs -t node_modules/docdash",
-    "build": "grunt release --stack",
+    "build": "grunt build --stack",
     "changelog": "conventional-changelog -p angular -i CHANGELOG.md -s",
     "convert-pb": "pbjs proto/message.proto -t commonjs > proto/message-compiled.js && sed -i '' 's/protobufjs/protobufjs\\/dist\\/protobuf-light/g' ./proto/message-compiled.js"
   },
@@ -31,6 +31,7 @@
   },
   "homepage": "https://leancloud.cn/",
   "devDependencies": {
+    "avoscloud-sdk": "1.0.0-rc8",
     "babel-eslint": "^6.0.0",
     "babel-plugin-transform-decorators-legacy": "^1.3.4",
     "babel-plugin-transform-es2015-classes": "^6.5.2",
@@ -52,6 +53,7 @@
     "grunt-mocha-test": "^0.12.7",
     "grunt-rollup": "^0.7.0",
     "grunt-saucelabs": "^8.6.1",
+    "inherit": "^2.2.3",
     "istanbul": "git+https://github.com/Victorystick/istanbul.git#es-modules-support",
     "jsdoc": "^3.4.0",
     "load-grunt-tasks": "^3.4.1",

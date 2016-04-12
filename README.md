@@ -76,9 +76,10 @@ npm install leancloud-realtime@next
 ├── release.sh                // 部署 dist 分支
 ├── src                       // 源码
 │   └── index.js                // 打包入口
-└── test                      // 测试用例
-    ├── browser                 // 浏览器测试入口
-    └── index.js                // 测试入口
+├── test                      // 测试用例
+│   ├── browser                 // 浏览器测试入口
+│   └── index.js                // 测试入口
+└── typed-messages            // leancloud-realtime-typed-messages package
 ```
 
 ### Architecture
@@ -108,8 +109,7 @@ SDK 分为连接层与应用层两部分，只存在应用层对连接层公开 
   * `Message`：消息基类
   * `TypedMessage`：类型消息基类，继承自 `Message`
   * `TextMessage`：文本消息，继承自 `TypedMessage`
-  * `FileMessage` 及其他富媒体消息类：由于依赖 AVFile，在另一个 package 中提供
-
+  * TypedMessages：其他富媒体消息类由于依赖 avoscloud-sdk，作为另一个独立 package 发布
 
 ### 开启调试模式
 
