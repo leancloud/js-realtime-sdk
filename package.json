@@ -11,7 +11,7 @@
     "dev": "grunt dev",
     "test": "grunt lint test --stack && npm run report",
     "report": "istanbul report --include coverage/coverage.json --print text lcovonly",
-    "doc": "jsdoc src README.md -r -d docs -t node_modules/docdash",
+    "doc": "jsdoc src typed-messages/src README.md -r -d docs -t node_modules/docdash",
     "build": "grunt build --stack",
     "changelog": "conventional-changelog -p angular -i CHANGELOG.md -s",
     "convert-pb": "pbjs proto/message.proto -t commonjs > proto/message-compiled.js && sed -i '' 's/protobufjs/protobufjs\\/dist\\/protobuf-light/g' ./proto/message-compiled.js"

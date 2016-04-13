@@ -83,9 +83,10 @@ export default class TypedMessage extends Message {
    * <pre>
    * 为给定的 message 设置 text 与 attributes 属性，返回该 message
    * 如果子类没有提供 message，new this()
+   * @protected
    * @param  {Object}  json    json 格式的消息内容
-   * @param  {Message} message 子类提供的 message
-   * @return {Message}
+   * @param  {TypedMessage} message 子类提供的 message
+   * @return {TypedMessage}
    * @implements AVMessage.parse
    */
   static parse(json, message = new this()) {

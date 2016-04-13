@@ -67,6 +67,7 @@ export default class Message {
 
   /**
    * 将当前消息序列化为 JSON 对象
+   * @protected
    * @return {Object}
    */
   toJSON() {
@@ -76,6 +77,7 @@ export default class Message {
   /**
    * 判断给定的内容是否是有效的 Message，
    * 该方法始终返回 true
+   * @protected
    * @returns {Boolean}
    * @implements AVMessage.validate
    */
@@ -88,6 +90,7 @@ export default class Message {
    * <pre>
    * 如果子类提供了 message，返回该 message
    * 如果没有提供，将 json 作为 content 实例化一个 Message
+   * @protected
    * @param  {Object}  json    json 格式的消息内容
    * @param  {Message} message 子类提供的 message
    * @return {Message}

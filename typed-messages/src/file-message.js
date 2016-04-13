@@ -6,7 +6,13 @@ import {
 } from './realtime';
 import inherit from 'inherit';
 
-export const FileMessage = inherit(TypedMessage, {
+export const FileMessage = inherit(TypedMessage, /** @lends FileMessage.prototype */ {
+  /**
+   * @constructs
+   * @extends TypedMessage
+   * @param  {AV.File} file LeanCloud 存储 SDK 中的 AV.File 实例，且必须是已经保存到服务端上的 File 实例
+   * （如果是刚刚创建的，必须 save 后才能用于创建 FileMessage）
+   */
   __constructor(file) {
     if (!(file instanceof File)) {
       throw new TypeError('file must be an AV.File');
@@ -24,6 +30,10 @@ export const FileMessage = inherit(TypedMessage, {
       }),
     };
   },
+  /**
+   * 获得 file 对象
+   * @return {AV.File}
+   */
   getFile() {
     return this._file;
   },
