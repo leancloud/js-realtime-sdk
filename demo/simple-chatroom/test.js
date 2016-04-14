@@ -212,7 +212,8 @@ function getLog(callback) {
     // 标记正在拉取
     logFlag = true;
   }
-  messageIterator.next().value.then(function(data) {
+  messageIterator.next().then(function(result) {
+    var data = result.value;
     logFlag = false;
     // 存储下最早一条的消息时间戳
     var l = data.length;

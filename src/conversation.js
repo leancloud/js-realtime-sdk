@@ -533,18 +533,24 @@ export default class Conversation extends EventEmitter {
    * @param  {Date}   [options.beforeTime] 限制起始查询结果为小于这个该时间之前的消息，不传则为当前时间
    * @param  {String} [options.beforeMessageId] 限制起始查询结果为该消息之前的消息，需要与 beforeTime 同时使用，为防止某时刻有重复消息
    * @param  {Number} [options.limit] 限制每页查询结果的数量，目前服务端默认为 20
-   * @return {Iterater.<Promise.<Message[]>>} infinite [iterator]{@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Iteration_protocols#iterator}，调用其 next 方法返回获取下一页消息的 Promise
+   * @return {AsyncIterater.<Promise.<IteratorResult<Message[]>>>} [AsyncIterator]{@link https://github.com/tc39/proposal-async-iteration}，调用其 next 方法返回获取下一页消息的 Promise
    * @example
-   * var iterator = conversation.getMessagesIterator({ limit: 10 });
-   * iterator.next().value.then(function(messages) {
-   *   // messages: [message1, ..., message10]
+   * var messageIterator = conversation.getMessagesIterator({ limit: 10 });
+   * messageIterator.next().then(function(result) {
+   *   // result: {
+   *   //   value: [message1, ..., message10],
+   *   //   done: false,
+   *   // }
    * });
-   * iterator.next().value.then(function(messages) {
-   *   // messages: [message11, ..., message20]
+   * messageIterator.next().then(function(result) {
+   *   // result: {
+   *   //   value: [message11, ..., message20],
+   *   //   done: false,
+   *   // }
    * });
-   * iterator.next().value.then(function(messages) {
+   * messageIterator.next().then(function(result) {
    *   // No more messages
-   *   // messages: []
+   *   // result: { value: [], done: true }
    * });
    */
   getMessagesIterator({ beforeTime, beforeMessageId, limit } = {}) {
@@ -571,10 +577,10 @@ export default class Conversation extends EventEmitter {
             });
           });
         }
-        return {
-          value: promise,
-          done: false,
-        };
+        return promise.then(value => ({
+          value,
+          done: value.length === 0 || value.length < limit,
+        }));
       },
     };
   }

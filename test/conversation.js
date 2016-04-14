@@ -179,10 +179,11 @@ describe('Conversation', () => {
       const iterator = conversation.getMessagesIterator({
         limit: 2,
       });
-      return Promise.all([iterator.next().value, iterator.next().value])
+      return Promise.all([iterator.next(), iterator.next()])
         .then(([page1, page2]) => {
-          page1.should.be.an.Array();
-          page2.should.be.an.Array();
+          page1.value.should.be.an.Array();
+          page1.done.should.eql(false);
+          page2.value.should.be.an.Array();
           if (page2[0]) {
             page2[0].timestamp.should.lessThan(page1[0].timestamp);
             page2[0].timestamp.should.lessThan(page1[1].timestamp);
