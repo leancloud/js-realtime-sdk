@@ -69,7 +69,7 @@ export const messageField = fields => {
     if (!Array.isArray(fields)) {
       throw new TypeError(`${fields} is not an Array`);
     } else {
-      if (fields.find(value => typeof value !== 'string')) {
+      if (fields.some(value => typeof value !== 'string')) {
         throw new TypeError('fields contains non-string typed member');
       }
     }

@@ -96,6 +96,7 @@ export default class Realtime extends EventEmitter {
       );
       // override handleClose
       connection.handleClose = function handleClose(event) {
+        // CAUTION: non-standard API, provided by core-js
         const fatalError = Array.find([
           Errors.APP_NOT_AVAILABLE,
           Errors.INVALID_LOGIN,
