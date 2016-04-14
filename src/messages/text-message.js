@@ -15,10 +15,5 @@ export default class TextMessage extends TypedMessage {
     super();
     this.setText(text);
   }
-
-  // IE10- hack: https://phabricator.babeljs.io/T116
-  static parse(...args) {
-    return super.parse(...args);
-  }
 }
 messageType(-1)(TextMessage);

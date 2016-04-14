@@ -20,10 +20,6 @@ class CustomMessage extends TypedMessage {
     super();
     this.foo = foo;
   }
-  // IE10- hack: https://phabricator.babeljs.io/T116
-  static parse(...args) {
-    return super.parse(...args);
-  }
 }
 
 // const sinon = (typeof window !== 'undefined' && window.sinon) || require('sinon');
