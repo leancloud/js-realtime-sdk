@@ -1,4 +1,4 @@
-import File from './file';
+import { File } from './storage';
 import {
   TypedMessage,
   messageType,

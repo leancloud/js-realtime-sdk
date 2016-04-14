@@ -43,7 +43,13 @@ var require = require || function(id) {throw new Error('Unexpected required ' + 
     version: '31'
   }];
 
-  var HINT_SRCS = ['src/**/*.js', 'test/**/*.js', /* 'demo/**\/*.js', */ '!**/browser/**/*.js', '!**/*.browser.js', '!**/*.bundle.js'];
+  var HINT_SRCS = [
+    '**/src/**/*.js',
+    '**/test/**/*.js',
+    '!**/browser/**/*.js',
+    '!**/*.browser.js',
+    '!**/*.bundle.js',
+  ];
 
   grunt.initConfig({
     watch: {

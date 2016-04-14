@@ -1,15 +1,16 @@
 /* global AV */
-let File;
+let Storage;
 if (typeof AV === 'object' && AV.File) {
-  File = AV.File;
+  Storage = AV;
 } else if (typeof require === 'function') {
   try {
-    File = require('avoscloud-sdk').File;
+    Storage = require('avoscloud-sdk');
   } catch (e) {
     throw new Error('peerDependency \'avoscloud-sdk\' not found, install it first');
   }
 } else {
-  throw new Error('detect AV.File failed, import LeanCloud Storage SDK first');
+  throw new Error('detect AV failed, import LeanCloud Storage SDK first');
 }
 
-export default File;
+export const File = Storage.File;
+export const GeoPoint = Storage.GeoPoint;

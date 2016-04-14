@@ -109,7 +109,7 @@ SDK 分为连接层与应用层两部分，只存在应用层对连接层公开 
   * `Message`：消息基类
   * `TypedMessage`：类型消息基类，继承自 `Message`
   * `TextMessage`：文本消息，继承自 `TypedMessage`
-  * TypedMessages：其他富媒体消息类由于依赖 avoscloud-sdk，作为另一个独立 package 发布
+  * 其他富媒体消息类（`FileMessage` 及其子类、`LocationMessage`）由于依赖 avoscloud-sdk，作为另一个独立 package 发布
 
 ### 开启调试模式
 

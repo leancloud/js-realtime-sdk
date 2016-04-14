@@ -1,7 +1,8 @@
 import { APP_ID, APP_KEY, REGION } from '../../test/configs';
 import AV from 'avoscloud-sdk';
 
-import './file-message';
+import './file-message-and-subclasses';
+import './location-message';
 
 AV.init({
   appId: APP_ID,
