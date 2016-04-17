@@ -1,7 +1,7 @@
 export const listen = (target, resolveEvent, rejectEvent) => new Promise(
   (resolve, reject) => {
     if (resolveEvent) target.once(resolveEvent, (...args) => resolve(args));
-    if (rejectEvent) target.once(rejectEvent, (...args) => reject(args));
+    if (rejectEvent) target.once(rejectEvent, error => reject(error));
   }
 );
 
