@@ -475,7 +475,7 @@ export default class Conversation extends EventEmitter {
 
   /**
    * 查询消息记录
-   * 如果仅需实现消息记录翻页查询需求，建议使用 {@link Conversation#getMessagesIterator}
+   * 如果仅需实现消息记录翻页查询需求，建议使用 {@link Conversation#createMessagesIterator}
    * @param  {Object} [options]
    * @param  {Date}   [options.beforeTime] 限制查询结果为小于这个该时间之前的消息，不传则为当前时间
    * @param  {String} [options.beforeMessageId] 限制查询结果为该消息之前的消息，需要与 beforeTime 同时使用，为防止某时刻有重复消息
@@ -535,7 +535,7 @@ export default class Conversation extends EventEmitter {
    * @param  {Number} [options.limit] 限制每页查询结果的数量，目前服务端默认为 20
    * @return {AsyncIterater.<Promise.<IteratorResult<Message[]>>>} [AsyncIterator]{@link https://github.com/tc39/proposal-async-iteration}，调用其 next 方法返回获取下一页消息的 Promise
    * @example
-   * var messageIterator = conversation.getMessagesIterator({ limit: 10 });
+   * var messageIterator = conversation.createMessagesIterator({ limit: 10 });
    * messageIterator.next().then(function(result) {
    *   // result: {
    *   //   value: [message1, ..., message10],
@@ -553,7 +553,7 @@ export default class Conversation extends EventEmitter {
    *   // result: { value: [], done: true }
    * });
    */
-  getMessagesIterator({ beforeTime, beforeMessageId, limit } = {}) {
+  createMessagesIterator({ beforeTime, beforeMessageId, limit } = {}) {
     let promise;
     return {
       next: () => {

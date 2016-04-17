@@ -176,7 +176,7 @@ describe('Conversation', () => {
       })
     );
     it('MessageIterator', () => {
-      const iterator = conversation.getMessagesIterator({
+      const iterator = conversation.createMessagesIterator({
         limit: 2,
       });
       return Promise.all([iterator.next(), iterator.next()])
