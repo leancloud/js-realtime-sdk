@@ -207,20 +207,17 @@ export default class Realtime extends EventEmitter {
   }
 
   /**
-   * 创建一个即时通讯客户端
+   * 创建一个即时通讯客户端，多次创建相同 id 的客户端会返回同一个实例
    * @param  {String} [id] 客户端 id，如果不指定，服务端会随机生成一个
    * @param  {Object} [clientOptions] 详细参数 @see {@link IMClient}
    * @param  {String} [tag] 客户端类型标记，以支持单点登录功能
    * @return {Promise.<IMClient>}
    */
   createIMClient(id, clientOptions, tag) {
-    if (id) {
-      if (this._clients[id] !== undefined) {
-        return Promise.reject(new Error(`IMClient[${id}] is already created`));
-      }
-      this._clients[id] = null;
+    if (id && this._clients[id] !== undefined) {
+      return Promise.resolve(this._clients[id]);
     }
-    return this._open().then(connection => {
+    this._clients[id] = this._open().then(connection => {
       const client = new IMClient(id, clientOptions, connection, {
         _messageParser: this._messageParser,
       });
@@ -232,6 +229,7 @@ export default class Realtime extends EventEmitter {
           return client;
         });
     });
+    return this._clients[id];
   }
 
   createPushClient() {

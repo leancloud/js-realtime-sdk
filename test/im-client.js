@@ -63,9 +63,10 @@ describe('IMClient', () => {
       ]);
     });
 
-    it(
-      'create one client twice should throw',
-      () => realtime.createIMClient(CLIENT_ID).should.be.rejectedWith(/already created/)
+    it('should be singleton', () =>
+      realtime.createIMClient(CLIENT_ID).then(
+        client1 => client1.should.be.exactly(client)
+      )
     );
 
     describe('with signatureFactory', () => {
