@@ -5,6 +5,7 @@ import Realtime from '../src/realtime';
 import Connection from '../src/connection';
 import Client from '../src/client';
 import { GenericCommand, CommandType } from '../proto/message';
+import TextMessage from '../src/messages/text-message';
 
 const sinon = (typeof window !== 'undefined' && window.sinon) || require('sinon');
 
@@ -89,7 +90,7 @@ describe('Realtime', () => {
         });
     });
   });
-  it('_register/_deregister', () => {
+  it('_register/_deregister clients', () => {
     const realtime = createRealtime();
     const _disconnect = sinon.spy(realtime, '_close');
     return realtime._open()
@@ -127,6 +128,18 @@ describe('Realtime', () => {
             retryPayload2.should.equal(2);
           });
         });
+    });
+  });
+  describe('register Message classes', () => {
+    const realtime = createRealtime();
+    it('should except a Message Class', () => {
+      realtime.register(TextMessage);
+    });
+    it('should except an Array of Message Classes', () => {
+      realtime.register([TextMessage]);
+    });
+    it('should not except a Message Class', () => {
+      (() => realtime.register({})).should.throw();
     });
   });
 });

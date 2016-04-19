@@ -41,10 +41,10 @@ export default class Realtime extends EventEmitter {
     this._cache = new Cache('endpoints');
     this._clients = {};
     this._messageParser = new MessageParser();
-    [
+    this.register([
       Message,
       TextMessage,
-    ].forEach(this._messageParser.register.bind(this._messageParser));
+    ]);
   }
 
   _open() {
@@ -241,10 +241,12 @@ export default class Realtime extends EventEmitter {
    *
    * 在接收消息、查询消息时，会按照消息类注册顺序的逆序依次尝试解析消息内容
    *
-   * @param  {Function} messageClass 消息类，需要实现 {@link AVMessage} 接口，建议继承自 {@link Message}
+   * @param  {Function | Function[]} messageClass 消息类，需要实现 {@link AVMessage} 接口，
+   *                     													建议继承自 {@link TypedMessage}
    * @throws {TypeError} 如果 messageClass 没有实现 {@link AVMessage} 接口则抛出异常
    */
-  register(...params) {
-    return this._messageParser.register(...params);
+  register(messageClass) {
+    const messageClasses = [].concat(messageClass);
+    return messageClasses.map(this._messageParser.register.bind(this._messageParser));
   }
 }
