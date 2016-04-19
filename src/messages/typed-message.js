@@ -11,6 +11,14 @@ export default class TypedMessage extends Message {
     this._ = {};
   }
 
+  /**
+   * @type {Number}
+   * @readonly
+   */
+  get type() {
+    return this.constructor.TYPE;
+  }
+
   /** @type {String} */
   set text(text) {
     return this.setText(text);
@@ -104,3 +112,10 @@ export default class TypedMessage extends Message {
 }
 
 messageField(['_lctext', '_lcattrs'])(TypedMessage);
+/**
+ * @name TYPE
+ * @memberof TypedMessage
+ * @type Number
+ * @static
+ * @const
+ */

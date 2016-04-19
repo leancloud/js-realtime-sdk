@@ -56,5 +56,13 @@ export const FileMessage = inherit(TypedMessage, /** @lends FileMessage.prototyp
   },
 });
 
+
+/**
+ * @name TYPE
+ * @memberof FileMessage
+ * @type Number
+ * @static
+ * @const
+ */
 messageType(-6)(FileMessage);
 messageField('_lcfile')(FileMessage);

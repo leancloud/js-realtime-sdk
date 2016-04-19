@@ -16,4 +16,12 @@ export default class TextMessage extends TypedMessage {
     this.setText(text);
   }
 }
+
+/**
+ * @name TYPE
+ * @memberof TextMessage
+ * @type Number
+ * @static
+ * @const
+ */
 messageType(-1)(TextMessage);

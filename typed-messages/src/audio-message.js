@@ -9,4 +9,11 @@ import inherit from 'inherit';
  */
 export const AudioMessage = inherit(FileMessage);
 
+/**
+ * @name TYPE
+ * @memberof AudioMessage
+ * @type Number
+ * @static
+ * @const
+ */
 messageType(-3)(AudioMessage);

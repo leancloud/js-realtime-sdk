@@ -9,4 +9,11 @@ import inherit from 'inherit';
  */
 export const VideoMessage = inherit(FileMessage);
 
+/**
+ * @name TYPE
+ * @memberof VideoMessage
+ * @type Number
+ * @static
+ * @const
+ */
 messageType(-4)(VideoMessage);

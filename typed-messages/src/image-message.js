@@ -9,4 +9,11 @@ import inherit from 'inherit';
  */
 export const ImageMessage = inherit(FileMessage);
 
+/**
+ * @name TYPE
+ * @memberof ImageMessage
+ * @type Number
+ * @static
+ * @const
+ */
 messageType(-2)(ImageMessage);

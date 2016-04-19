@@ -36,5 +36,12 @@ export const LocationMessage = inherit(TypedMessage, /** @lends LocationMessage.
   },
 });
 
+/**
+ * @name TYPE
+ * @memberof LocationMessage
+ * @type Number
+ * @static
+ * @const
+ */
 messageType(-5)(LocationMessage);
 messageField('_lcloc')(LocationMessage);
