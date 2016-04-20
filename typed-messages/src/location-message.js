@@ -8,6 +8,7 @@ import inherit from 'inherit';
 
 export const LocationMessage = inherit(TypedMessage, /** @lends LocationMessage.prototype */ {
   /**
+   * 需要安装 [leancloud-realtime-typed-messages]{@link https://www.npmjs.com/package/leancloud-realtime-typed-messages} package
    * @constructs
    * @extends TypedMessage
    * @param  {AV.GeoPoint} geoPoint LeanCloud 存储 SDK 中的 AV.GeoPoint 实例
