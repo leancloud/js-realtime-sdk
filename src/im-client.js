@@ -45,6 +45,9 @@ export default class IMClient extends Client {
       'membersjoined',
       'membersleft',
       'message',
+      'unreadmessages',
+      'close',
+      'conflict',
       'unhandledmessage',
     ].forEach(event => this.on(
       event,
@@ -168,17 +171,17 @@ export default class IMClient extends Client {
           };
           /**
            * 当前用户被从某个对话中移除
-           * @event IMClient#invited
+           * @event IMClient#kicked
            * @param {Object} payload
-           * @param {String} payload.invitedBy 该移除操作的发起者 id
+           * @param {String} payload.kickedBy 该移除操作的发起者 id
            * @param {Conversation} conversation
            */
           this.emit('kicked', payload, conversation);
           /**
            * 当前用户被从当前对话中移除
-           * @event IMClient#invited
+           * @event Conversation#kicked
            * @param {Object} payload
-           * @param {String} payload.invitedBy 该移除操作的发起者 id
+           * @param {String} payload.kickedBy 该移除操作的发起者 id
            */
           conversation.emit('kicked', payload);
         });
