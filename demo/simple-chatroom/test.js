@@ -63,7 +63,9 @@ function main() {
     appId: appId,
     appKey: appKey,
   });
+  // 注册文件类型消息  
   realtime.register(AV.FileMessage);
+  // 创建聊天客户端  
   realtime.createIMClient(clientId)
   .then(function(c) {
     showLog('服务器连接成功！');
@@ -72,6 +74,7 @@ function main() {
     client.on('disconnect', function() {
       showLog('服务器正在重连，请耐心等待。。。');
     });
+    // 获取对话
     return c.getConversation(roomId);
   })
   .then(function(conversation) {
@@ -115,7 +118,7 @@ function main() {
   .then(function(conversation) {
     // 获取聊天历史
     room = conversation;
-    messageIterator = conversation.getMessagesIterator();
+    messageIterator = conversation.createMessagesIterator();
     getLog(function() {
       printWall.scrollTop = printWall.scrollHeight;
       showLog('已经加入，可以开始聊天。');
@@ -164,7 +167,9 @@ function sendMsgAsFile() {
   }
   new AV.File('message.txt', {
     base64: b64EncodeUnicode(val),
-  }).save().then(file => room.send(new AV.FileMessage(file))).then(function(message) {
+  }).save().then(function(file) {
+    return room.send(new AV.FileMessage(file));
+  }).then(function(message) {
     // 发送成功之后的回调
     inputSend.value = '';
     showLog('（' + formatTime(message.timestamp) + '）  自己： ', createLink(message.getFile().url()));
