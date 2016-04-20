@@ -29,7 +29,7 @@ describe('LocationMessage', () => {
     const locationCopy = parsedMessage.getLocation();
     locationCopy.should.be.instanceof(GeoPoint);
     locationCopy.should.not.be.exactly(location);
-    location.latitude.should.eql(LATITUDE);
-    location.longitude.should.be.eql(LONGITUDE);
+    locationCopy.latitude.should.eql(LATITUDE);
+    locationCopy.longitude.should.be.eql(LONGITUDE);
   });
 });

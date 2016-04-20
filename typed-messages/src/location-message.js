@@ -30,7 +30,7 @@ export const LocationMessage = inherit(TypedMessage, /** @lends LocationMessage.
   },
 }, {
   parse(json, message) {
-    const { latitude, longitude } = json;
+    const { latitude, longitude } = json._lcloc;
     const geoPoint = new GeoPoint({ latitude, longitude });
     return this.__base(json, message || new this(geoPoint));
   },
