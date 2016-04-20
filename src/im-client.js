@@ -525,16 +525,21 @@ export default class IMClient extends Client {
    */
   createConversation(options = {}) {
     let attr = {};
+    let {
+      members,
+    } = options;
     const {
       name,
       attributes,
-      members,
       transient,
       unique,
     } = options;
     if (!Array.isArray(members)) {
       throw new TypeError(`conversation members ${members} is not an array`);
     }
+    members = new Set(members);
+    members.add(this.id);
+    members = Array.from(members).sort();
     if (name) {
       if (typeof name !== 'string') {
         throw new TypeError(`conversation name ${name} is not a string`);
@@ -564,7 +569,7 @@ export default class IMClient extends Client {
       )
       .then(command => {
         if (this.options.conversationSignatureFactory) {
-          const params = [null, this.id, members.sort(), 'create'];
+          const params = [null, this.id, members, 'create'];
           return runSignatureFactory(this.options.conversationSignatureFactory, params)
             .then(signatureResult => {
               Object.assign(command.convMessage, keyRemap({

@@ -123,7 +123,7 @@ describe('Conversation', () => {
       }).then(c => {
         this.ycui = c;
         return c.createConversation({
-          members: ['dli'],
+          members: ['zwang', 'dli', 'zwang'], // duplicated id should be ignored
         });
       }).then(conv => (this.conversation = conv));
     });
@@ -131,7 +131,8 @@ describe('Conversation', () => {
       return this.ycui.close();
     });
     it('create', function createAsserts() {
-      this.conversationSignatureFactory.should.be.calledWith(null, 'ycui', ['dli'], 'create');
+      this.conversationSignatureFactory
+        .should.be.calledWith(null, 'ycui', ['dli', 'ycui', 'zwang'], 'create');
     });
     it('add', function addAsserts() {
       return this.conversation.add(['wduan', 'jwu']).then(() => {
