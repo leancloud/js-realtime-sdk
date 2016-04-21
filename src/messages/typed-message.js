@@ -112,10 +112,3 @@ export default class TypedMessage extends Message {
 }
 
 messageField(['_lctext', '_lcattrs'])(TypedMessage);
-/**
- * @name TYPE
- * @memberof TypedMessage
- * @type Number
- * @static
- * @const
- */

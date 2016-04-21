@@ -208,26 +208,6 @@ describe('Conversation', () => {
         .then(c => (conversation2 = c))
     );
     after(() => client2.close());
-
-    it('invited', () => {
-      const callback = sinon.spy();
-      client2.on('invited', callback);
-      return client2._dispatchMessage(new GenericCommand({
-        cmd: 'conv',
-        op: 'joined',
-        peerId: CLIENT_ID_2,
-        convMessage: new ConvCommand({
-          cid: conversation2.id,
-          initBy: CLIENT_ID,
-        }),
-      })).then(() => {
-        callback.should.be.calledOnce();
-        callback.getCall(0).args[0].should.be.eql({
-          invitedBy: CLIENT_ID,
-        });
-        callback.getCall(0).args[1].should.be.exactly(conversation2);
-      });
-    });
     it('membersjoined', () => {
       const clientCallback = sinon.spy();
       client2.on('membersjoined', clientCallback);
@@ -310,6 +290,32 @@ describe('Conversation', () => {
           kickedBy: CLIENT_ID,
         });
         conversation2.members.should.not.containEql(CLIENT_ID_2);
+      });
+    });
+    it('invited', () => {
+      const callback = sinon.spy();
+      client2.on('invited', callback);
+      const conversationCallback = sinon.spy();
+      conversation2.on('invited', conversationCallback);
+      return client2._dispatchMessage(new GenericCommand({
+        cmd: 'conv',
+        op: 'joined',
+        peerId: CLIENT_ID_2,
+        convMessage: new ConvCommand({
+          cid: conversation2.id,
+          initBy: CLIENT_ID,
+        }),
+      })).then(() => {
+        callback.should.be.calledOnce();
+        callback.getCall(0).args[0].should.be.eql({
+          invitedBy: CLIENT_ID,
+        });
+        callback.getCall(0).args[1].should.be.exactly(conversation2);
+        conversationCallback.should.be.calledOnce();
+        conversationCallback.getCall(0).args[0].should.be.containEql({
+          invitedBy: CLIENT_ID,
+        });
+        conversation2.members.should.containEql(CLIENT_ID_2);
       });
     });
   });

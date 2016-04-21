@@ -149,6 +149,8 @@ export default class IMClient extends Client {
     switch (message.op) {
       case OpType.joined: {
         return this.getConversation(convMessage.cid).then(conversation => {
+          // eslint-disable-next-line no-param-reassign
+          conversation.members = union(conversation.members, [this.id]);
           const payload = {
             invitedBy: initBy,
           };
@@ -160,6 +162,13 @@ export default class IMClient extends Client {
            * @param {Conversation} conversation
            */
           this.emit('invited', payload, conversation);
+          /**
+           * 当前用户被添加至当前对话
+           * @event Conversation#invited
+           * @param {Object} payload
+           * @param {String} payload.invitedBy 该移除操作的发起者 id
+           */
+          conversation.emit('invited', payload);
         });
       }
       case OpType.left: {
