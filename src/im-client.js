@@ -149,8 +149,10 @@ export default class IMClient extends Client {
     switch (message.op) {
       case OpType.joined: {
         return this.getConversation(convMessage.cid).then(conversation => {
-          // eslint-disable-next-line no-param-reassign
-          conversation.members = union(conversation.members, [this.id]);
+          if (!conversation.transient) {
+            // eslint-disable-next-line no-param-reassign
+            conversation.members = union(conversation.members, [this.id]);
+          }
           const payload = {
             invitedBy: initBy,
           };
@@ -173,8 +175,10 @@ export default class IMClient extends Client {
       }
       case OpType.left: {
         return this.getConversation(convMessage.cid).then(conversation => {
-          // eslint-disable-next-line no-param-reassign
-          conversation.members = difference(conversation.members, [this.id]);
+          if (!conversation.transient) {
+            // eslint-disable-next-line no-param-reassign
+            conversation.members = difference(conversation.members, [this.id]);
+          }
           const payload = {
             kickedBy: initBy,
           };
@@ -197,8 +201,10 @@ export default class IMClient extends Client {
       }
       case OpType.members_joined: {
         return this.getConversation(convMessage.cid).then(conversation => {
-          // eslint-disable-next-line no-param-reassign
-          conversation.members = union(conversation.members, convMessage.m);
+          if (!conversation.transient) {
+            // eslint-disable-next-line no-param-reassign
+            conversation.members = union(conversation.members, convMessage.m);
+          }
           const payload = {
             invitedBy: initBy,
             members: m,
@@ -224,8 +230,10 @@ export default class IMClient extends Client {
       }
       case OpType.members_left: {
         return this.getConversation(convMessage.cid).then(conversation => {
-          // eslint-disable-next-line no-param-reassign
-          conversation.members = difference(conversation.members, convMessage.m);
+          if (!conversation.transient) {
+            // eslint-disable-next-line no-param-reassign
+            conversation.members = difference(conversation.members, convMessage.m);
+          }
           const payload = {
             kickedBy: initBy,
             members: m,
@@ -598,7 +606,7 @@ export default class IMClient extends Client {
         updatedAt: resCommand.convMessage.cdate,
         lastMessageAt: null,
         creator: this.id,
-        members: members.concat([this.id]),
+        members: transient ? [] : members,
       }), this))
       .then(tap(conversation =>
         this._conversationCache.set(conversation.id, conversation)

@@ -209,5 +209,14 @@ describe('IMClient', () => {
         conversations[0].id.should.be.exactly(conversations[1].id);
       })
     );
+    it('transient', () =>
+      client.createConversation({
+        name: 'transient room',
+        members: ['hjiang', 'jfeng'],
+        transient: true,
+      }).then(conversation => {
+        conversation.members.should.be.empty();
+      })
+    );
   });
 });
