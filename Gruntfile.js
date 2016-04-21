@@ -66,7 +66,7 @@ var require = require || function(id) {throw new Error('Unexpected required ' + 
         // sourceMap: true
       },
       dist: {
-        dest: 'dist/bundle.js',
+        dest: 'dist/realtime.js',
         src: 'src/index.js',
         options: {
           plugins: [
@@ -86,7 +86,7 @@ var require = require || function(id) {throw new Error('Unexpected required ' + 
         }
       },
       'dist-browser': {
-        dest: 'dist/bundle.browser.js',
+        dest: 'dist/realtime.browser.js',
         src: 'src/index.js',
         options: {
           plugins: [
@@ -159,7 +159,7 @@ var require = require || function(id) {throw new Error('Unexpected required ' + 
         }
       },
       'messages': {
-        dest: 'typed-messages/dist/bundle.js',
+        dest: 'typed-messages/dist/typed-messages.js',
         src: 'typed-messages/src/index.js',
         options: {
           plugins: [
@@ -187,10 +187,10 @@ var require = require || function(id) {throw new Error('Unexpected required ' + 
       browser: {
         options: {
           sourceMap: false,
-          sourceMapIn: 'dist/bundle.browser.js.map'
+          sourceMapIn: 'dist/realtime.browser.js.map'
         },
         files: {
-          'dist/bundle.browser.min.js': ['dist/bundle.browser.js']
+          'dist/realtime.browser.min.js': ['dist/realtime.browser.js']
         }
       }
     },

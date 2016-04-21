@@ -66,9 +66,9 @@ npm install leancloud-realtime@next
 ├── demo
 ├── deploy.sh               // 部署 gh-pages 分支
 ├── dist                    // 打包产出
-│   ├── bundle.browser.js     // 浏览器用
-│   ├── bundle.browser.min.js // 浏览器用(uglified)
-│   └── bundle.js             // node 用
+│   ├── realtime.browser.js     // 浏览器用
+│   ├── realtime.browser.min.js // 浏览器用(uglified)
+│   └── realtime.js             // node 用
 ├── proto
 │   ├── message-compiled.js     // 使用 pbjs 生成的 message 类
 │   ├── message.js              // ES6 wrapper
@@ -136,7 +136,7 @@ npm run convert-pb
 ```
 npm test
 ```
-生成 dist/bundle.*
+生成 dist/realtime.*
 ```
 npm run build
 ```

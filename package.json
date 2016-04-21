@@ -2,7 +2,7 @@
   "name": "leancloud-realtime",
   "version": "3.0.0-alpha.1",
   "description": "LeanCloud Realtime Message JavaScript SDK",
-  "main": "dist/bundle.js",
+  "main": "dist/realtime.js",
   "jsnext:main": "src/index.js",
   "directories": {
     "test": "test"
@@ -84,7 +84,7 @@
   "browser": {
     "ws": "./src/browser/ws.js",
     "sinon": false,
-    "dist/bundle.js": "dist/bundle.browser.js"
+    "dist/realtime.js": "dist/realtime.browser.js"
   },
   "config": {
     "ghooks": {

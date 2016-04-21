@@ -3,7 +3,7 @@
   "version": "3.0.0-alpha.1",
   "homepage": "https://github.com/leancloud/js-realtime-sdk/",
   "description": "LeanCloud JavaScript Realtime SDK",
-  "main": "dist/bundle.browser.min.js",
+  "main": "dist/realtime.browser.min.js",
   "ignore": [
     "**/.*",
     "*.sh",
