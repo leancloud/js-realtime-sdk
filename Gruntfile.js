@@ -63,7 +63,7 @@ var require = require || function(id) {throw new Error('Unexpected required ' + 
     },
     rollup: {
       options: {
-        sourceMap: true
+        // sourceMap: true
       },
       dist: {
         dest: 'dist/bundle.js',
@@ -186,7 +186,7 @@ var require = require || function(id) {throw new Error('Unexpected required ' + 
     uglify: {
       browser: {
         options: {
-          sourceMap: true,
+          sourceMap: false,
           sourceMapIn: 'dist/bundle.browser.js.map'
         },
         files: {
