@@ -4,7 +4,7 @@ if (typeof AV === 'object' && AV.File) {
   Storage = AV;
 } else if (typeof require === 'function') {
   try {
-    Storage = require('avoscloud-sdk');
+    Storage = require('avoscloud-sdk'); // eslint-disable-line
   } catch (e) {
     throw new Error('peerDependency \'avoscloud-sdk\' not found, install it first');
   }

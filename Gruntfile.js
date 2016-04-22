@@ -46,6 +46,7 @@ var require = require || function(id) {throw new Error('Unexpected required ' + 
   var HINT_SRCS = [
     '**/src/**/*.js',
     '**/test/**/*.js',
+    '!gh_pages/**/*',
     '!**/browser/**/*.js',
     '!**/*.browser.js',
     '!**/*.bundle.js',

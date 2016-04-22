@@ -71,6 +71,7 @@ export const difference = (a, b) => Array.from(
 const removeNull = obj => {
   if (!isPlainObject(obj)) return obj;
   const object = Object.assign({}, obj);
+  // eslint-disable-next-line no-restricted-syntax
   for (const prop in object) {
     if (object.hasOwnProperty(prop)) {
       const value = object[prop];

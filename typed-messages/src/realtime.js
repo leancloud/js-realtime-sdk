@@ -4,7 +4,7 @@ if (typeof AV === 'object' && AV.TypedMessage) {
   Realtime = AV;
 } else if (typeof require === 'function') {
   try {
-    Realtime = require('leancloud-realtime');
+    Realtime = require('leancloud-realtime'); // eslint-disable-line
   } catch (e) {
     throw new Error('peerDependency \'leancloud-realtime\' not found, install it first');
   }
