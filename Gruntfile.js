@@ -64,7 +64,7 @@ var require = require || function(id) {throw new Error('Unexpected required ' + 
     },
     rollup: {
       options: {
-        // sourceMap: true
+        sourceMap: true
       },
       dist: {
         dest: 'dist/realtime.js',
@@ -187,7 +187,7 @@ var require = require || function(id) {throw new Error('Unexpected required ' + 
     uglify: {
       browser: {
         options: {
-          sourceMap: false,
+          sourceMap: true,
           sourceMapIn: 'dist/realtime.browser.js.map'
         },
         files: {
