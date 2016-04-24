@@ -14,7 +14,7 @@ master 分支上为 2.x 版本，将仅得到安全更新，相关文档参见 [
 
 3.x 与 2.x 的 API 不兼容，以下说明与文档均指 3.x 版本。
 
-试用 3.x alpha 版本：
+试用 3.x beta 版本：
 ```
 npm install leancloud-realtime@next
 ```
@@ -28,17 +28,17 @@ npm install leancloud-realtime@next
   - iOS 8.0+
   - Android 4.4+
 - Node.js 0.12+
-- React Native 0.22+
+- React Native 
+  - iOS 0.22+
+  - Android 0.25+
 
-其中在 React Native 中运行需要在初始化 [Realtime](https://leeyeh.github.io/js-realtime-sdk/docs/Realtime.html#Realtime) 时设置 `options.noBinary` 为 `true`。
-
-暂时无法运行在 React Native for Android，直到 [facebook/react-native#6223](https://github.com/facebook/react-native/pull/6223) shipped。
+其中在 React Native 中运行需要在初始化 [Realtime](https://leancloud.github.io/js-realtime-sdk/docs/Realtime.html#Realtime) 时设置 `options.noBinary` 为 `true`。
 
 文档
 ----
-- [安装文档]
-- [使用文档]
-- [API 文档]
+- [安装文档](https://leancloud.cn/docs/realtime_guide-js.html#安装和初始化)
+- [使用文档](https://leancloud.cn/docs/realtime_guide-js.html)
+- [API 文档](https://leancloud.github.io/js-realtime-sdk/docs/)
 
 支持
 ----
