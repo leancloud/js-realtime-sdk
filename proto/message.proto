@@ -1,0 +1,268 @@
+syntax = "proto2";
+
+package push_server.messages;
+
+// note that this line will be removed by out build script until we
+// finally upgraded to protobuffer 3
+option objc_class_prefix = "AVIM";
+
+enum CommandType {
+  session = 0;
+  conv = 1;
+  direct = 2;
+  ack = 3;
+  rcp = 4;
+  unread = 5;
+  logs = 6;
+  error = 7;
+  login = 8;
+  data = 9;
+  room = 10;
+  read = 11;
+  presence = 12;
+  report = 13;
+  echo = 14;
+}
+
+enum OpType {
+  // session
+  open = 1;
+  add = 2;
+  remove = 3;
+  close = 4;
+  opened = 5;
+  closed = 6;
+  query = 7;
+  query_result = 8;
+  conflict = 9;
+  added = 10;
+  removed = 11;
+
+  // conv
+  start = 30;
+  started = 31;
+  joined = 32;
+  members_joined = 33;
+  // add = 34; reuse session.add
+  // added = 35; reuse session.added
+  // remove = 37; reuse session.remove
+  // removed = 38; reuse session.removed
+  left = 39;
+  members_left = 40;
+  //  query = 41; reuse session.query
+  results = 42;
+  count = 43;
+  result = 44;
+  update = 45;
+  updated = 46;
+  mute = 47;
+  unmute = 48;
+
+  // room
+  join = 80;
+  invite = 81;
+  leave = 82;
+  kick = 83;
+  reject = 84;
+  invited = 85;
+  //  joined = 32; reuse the value in conv section
+  //  left = 39; reuse the value in conv section
+  kicked = 86;
+  //  members-joined = 33; reuse the value in conv section
+  //  members-left = 40; reuse the value in conv section
+
+  // report
+  upload = 100;
+  uploaded = 101;
+}
+
+enum StatusType {
+  on = 1;
+  off = 2;
+}
+
+message JsonObjectMessage {
+  required string data = 1;
+}
+
+message UnreadTuple {
+  required string cid = 1;
+  required int32 unread = 2;
+  optional string mid = 3;
+  optional int64 timestamp = 4;
+}
+
+message LogItem {
+  optional string from = 1;
+  optional string data = 2;
+  optional int64 timestamp = 3;
+  optional string msgId = 4;
+  optional int64 ackAt = 5;
+}
+
+message LoginCommand {
+}
+
+message DataCommand {
+  repeated string ids = 1;
+  repeated JsonObjectMessage msg = 2;
+}
+
+message SessionCommand {
+  optional int64 t = 1;
+  optional string n = 2;
+  optional string s = 3;
+  optional string ua = 4;
+  optional bool r = 5;
+  optional string tag = 6;
+  optional string deviceId = 7;
+  repeated string sessionPeerIds = 8;
+  repeated string onlineSessionPeerIds = 9;
+  optional string st = 10;
+  optional int32 stTtl = 11;
+  optional int32 code = 12;
+  optional string reason = 13;
+  optional string deviceToken = 14;
+  optional bool sp = 15;
+}
+
+message ErrorCommand {
+  required int32 code = 1;
+  required string reason = 2;
+  optional int32 appCode = 3;
+  optional string detail = 4;
+}
+
+message DirectCommand {
+  optional string msg = 1;
+  optional string uid = 2;
+  optional string fromPeerId = 3;
+  optional int64 timestamp = 4;
+  optional bool offline = 5;
+  optional bool hasMore = 6;
+  repeated string toPeerIds = 7;
+  optional bool r = 10;
+  optional string cid = 11;
+  optional string id = 12;
+  optional bool transient = 13;
+  optional string dt = 14;
+  optional string roomId = 15;
+}
+
+message AckCommand {
+  optional int32 code = 1;
+  optional string reason = 2;
+  optional string mid = 3;
+  optional string cid = 4;
+  optional int64 t = 5;
+  optional string uid = 6;
+  optional int64 fromts = 7;
+  optional int64 tots = 8;
+  optional string type = 9;
+  repeated string ids = 10;
+  optional int32 appCode = 11;
+}
+
+message UnreadCommand {
+  repeated UnreadTuple convs = 1;
+}
+
+message ConvCommand {
+  repeated string m = 1;
+  optional bool transient = 2;
+  optional bool unique = 3;
+  optional string cid = 4;
+  optional string cdate = 5;
+  optional string initBy = 6;
+  optional string sort = 7;
+  optional int32 limit = 8;
+  optional int32 skip = 9;
+  optional int32 flag = 10;
+  optional int32 count = 11;
+  optional string udate = 12;
+  optional int64 t = 13;
+  optional string n = 14;
+  optional string s = 15;
+
+  optional JsonObjectMessage results = 100;
+  optional JsonObjectMessage where = 101;
+  optional JsonObjectMessage attr = 103;
+}
+
+message RoomCommand {
+  optional string roomId = 1;
+  optional string s = 2;
+  optional int64 t = 3;
+  optional string n = 4;
+  optional bool transient = 5;
+  repeated string roomPeerIds = 6;
+  optional string byPeerId = 7;
+}
+
+message LogsCommand {
+  optional string cid = 1;
+  optional int32 l = 2;
+  optional int32 limit = 3;
+  optional int64 t = 4;
+  optional int64 tt = 5;
+  optional string tmid = 6;
+  optional string mid = 7;
+  optional string checksum = 8;
+  optional bool stored = 9;
+
+  repeated LogItem logs = 105;
+}
+
+message RcpCommand {
+  optional string id = 1;
+  optional string cid = 2;
+  optional int64 t = 3;
+}
+
+message ReadTuple {
+  required string cid = 1;
+  optional int64 timestamp = 2;
+  optional string mid = 3;
+}
+
+message ReadCommand {
+  optional string cid = 1;
+  repeated string cids = 2;
+  repeated ReadTuple convs = 3;
+}
+
+message PresenceCommand {
+  optional StatusType status = 1;
+  repeated string sessionPeerIds = 2;
+}
+
+message ReportCommand {
+  optional bool initiative = 1;
+  optional string type = 2;
+  optional string data = 3;
+}
+
+message GenericCommand {
+  required CommandType cmd = 1;
+  optional OpType op = 2;
+
+  optional string appId = 3;
+  optional string peerId = 4;
+  optional int32 i = 5;
+  optional string installationId = 6;
+
+  optional LoginCommand loginMessage = 100;
+  optional DataCommand dataMessage = 101;
+  optional SessionCommand sessionMessage = 102;
+  optional ErrorCommand errorMessage = 103;
+  optional DirectCommand directMessage = 104;
+  optional AckCommand ackMessage = 105;
+  optional UnreadCommand unreadMessage = 106;
+  optional ReadCommand readMessage = 107;
+  optional RcpCommand rcpMessage = 108;
+  optional LogsCommand logsMessage = 109;
+  optional ConvCommand convMessage = 110;
+  optional RoomCommand roomMessage = 111;
+  optional PresenceCommand presenceMessage = 112;
+  optional ReportCommand reportMessage = 113;
+}

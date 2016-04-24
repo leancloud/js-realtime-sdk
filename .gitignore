@@ -1,3 +1,10 @@
 bower_components
 node_modules
-test/browser/specs.browser.js
+dist
+test/browser/index.*
+!test/browser/index.html
+test/index.bundle.*
+coverage
+docs
+gh_pages
+.idea

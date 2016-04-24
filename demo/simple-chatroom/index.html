@@ -1,0 +1,47 @@
+<!doctype html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <title>LeanCloud Realtime JavaScript SDK</title>
+  <meta name="description" content="">
+  <meta name="viewport" content="width=device-width">
+  <meta name="viewport" content="user-scalable=no">
+  <meta name="viewport" content="initial-scale=1,maximum-scale=1">
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+  <h1>欢迎使用 LeanCloud 实时通信 SDK</h1>
+  <div class="item">
+    <p>SDK 详细使用方法，请看官方文档</p>
+    <p>
+      <a target="_blank" href="https://leancloud.cn/docs/js_realtime.html">https://leancloud.cn/docs/js_realtime.html</a>
+    </p>
+  </div>
+  <div class="item">
+    <label>您的昵称：</label>
+    <input autofocus id="input-name" type="text">
+    <div id="open-btn" class="btn">连接服务器</div>
+  </div>
+  <div class="item">
+    <div id="print-wall" class="print-wall"></div>
+  </div>
+  <div class="item">
+    <label>输入信息：</label>
+    <input id="input-send" class="input-send" type="text">
+    <div id="send-btn" class="btn">发送</div>
+    <div id="send-btn-as-file" class="btn">作为文件发送</div>
+  </div>
+
+  <!-- 引入 LeanCloud 实时通信 SDK -->
+  <script src="../../dist/realtime.browser.js"></script>
+  <!-- 引入 LeanCloud 存储 SDK -->
+  <script src="https://cdn1.lncld.net/static/js/av-mini-1.0.0-rc5.js"></script>
+  <!-- 引入 LeanCloud 实时通讯 TypedMessages -->
+  <script src="../../typed-messages/dist/typed-messages.js"></script>
+  <!-- Demo 逻辑文件 -->
+  <script src="test.js"></script>
+</body>
+
+</html>

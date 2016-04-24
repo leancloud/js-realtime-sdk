@@ -1,52 +1,209 @@
+/* eslint-disable */
 module.exports = function(grunt) {
   require('load-grunt-tasks')(grunt);
+  var nodeResolve = require('rollup-plugin-node-resolve');
+  var json = require('rollup-plugin-json');
+  var babel = require('rollup-plugin-babel');
+  var commonjs = require('rollup-plugin-commonjs');
+  var istanbul = require('rollup-plugin-istanbul');
+
+  var env = function () {
+    var envString = JSON.stringify(process.env);
+    return {
+      intro() {
+        return `
+window.process = window.process || {};
+process.env = process.env || {};`;
+      }
+    };
+  };
+  var commonjsGlobal = function () {
+    return {
+      intro() {
+        return `
+var global = typeof window !== 'undefined' ? window :
+             typeof global !== 'undefined' ? global :
+             this;
+var require = require || function(id) {throw new Error('Unexpected required ' + id)};
+`;
+      }
+    };
+  };
 
   var SAUCE_BROWSERS = [{
+  //  browserName: 'firefox',
+  //  version: 'beta'
+  //}, {
+    browserName: 'iPhone',
+    version: '8.0'
+  }, {
     browserName: 'chrome'
   }, {
-    browserName: 'internet explorer',
-    version: '10.0'
+    browserName: 'chrome',
+    version: '31'
   }];
 
-  var HINT_SRCS = ['src/**/*.js', 'test/**/*.js', 'demo/**/*.js', '*.js', '!**/*.browser.js'];
+  var HINT_SRCS = [
+    '**/src/**/*.js',
+    '**/test/**/*.js',
+    '!gh_pages/**/*',
+    '!**/browser/**/*.js',
+    '!**/*.browser.js',
+    '!**/*.bundle.js',
+  ];
 
   grunt.initConfig({
     watch: {
       scripts: {
         files: HINT_SRCS,
-        tasks: ['hint', 'release']
+        tasks: ['build-test', 'release']
       },
     },
-    babel: {
-      dist: {
-        files: [{
-          expand: true,
-          cwd: 'src/',
-          src: '**/*.js',
-          dest: 'lib/'
-        }]
-      }
+    eslint: {
+      target: HINT_SRCS
     },
-    browserify: {
+    rollup: {
+      options: {
+        sourceMap: true
+      },
       dist: {
-        files: {
-          'dist/AV.realtime.js': ['lib/AV.realtime.js']
+        dest: 'dist/realtime.js',
+        src: 'src/index.js',
+        options: {
+          plugins: [
+            json(),
+            babel({ runtimeHelpers: true , exclude: 'node_modules/**' }),
+            //nodeResolve({
+            //  jsnext: true,
+            //  main: true,
+            //  skip: ['memcpy'],
+            //}),
+            commonjs({
+              //include: ['node_modules/**', 'proto/**'],
+              include: ['proto/**'],
+            })
+          ],
+          format: 'cjs'
+        }
+      },
+      'dist-browser': {
+        dest: 'dist/realtime.browser.js',
+        src: 'src/index.js',
+        options: {
+          plugins: [
+            json(),
+            babel({ runtimeHelpers: true , exclude: 'node_modules/**' }),
+            nodeResolve({
+              jsnext: true,
+              main: true,
+              browser: true
+            }),
+            commonjsGlobal(),
+            commonjs({
+              include: ['node_modules/**', 'proto/**'],
+            })
+          ],
+          format: 'umd',
+          moduleName: 'AV'
         }
       },
       test: {
-        files: {
-          'test/browser/specs.browser.js': 'test/specs.js'
-        },
+        dest: 'test/index.bundle.js',
+        src: 'test/index-with-typed-messages.js',
         options: {
-          transform: ['envify']
+          plugins: [
+            istanbul({
+              exclude: [
+                'test/*.js',
+                'proto/*.js',
+                'typed-messages/test/*.js',
+                'typed-messages/src/index.js',
+                'typed-messages/src/file.js',
+                'typed-messages/src/realtime.js',
+                '*.json',
+              ],
+              instrumenter: require('istanbul'),
+              instrumenterConfig: {
+                esModules: true,
+                noCompact: true,
+              }
+            }),
+            json(),
+            babel({ runtimeHelpers: true , exclude: 'node_modules/**' }),
+            commonjs({
+              include: ['proto/**'],
+            }),
+          ],
+          format: 'cjs'
+        }
+      },
+      'test-browser': {
+        dest: 'test/browser/index.js',
+        src: 'test/index.js',
+        options: {
+          plugins: [
+            json(),
+            babel({ runtimeHelpers: true , exclude: 'node_modules/**' }),
+            nodeResolve({
+              jsnext: true,
+              main: true,
+              browser: true
+            }),
+            commonjsGlobal(),
+            commonjs({
+              include: ['node_modules/**', 'proto/**'],
+            }),
+            env()
+          ],
+          format: 'umd',
+          moduleName: 'AV'
+        }
+      },
+      'messages': {
+        dest: 'typed-messages/dist/typed-messages.js',
+        src: 'typed-messages/src/index.js',
+        options: {
+          plugins: [
+            // babel({ runtimeHelpers: true , exclude: 'node_modules/**' }),
+            nodeResolve({
+              main: true,
+            }),
+            commonjs({
+              include: ['node_modules/**', 'typed-messages'],
+            }),
+          ],
+          format: 'umd',
+          moduleName: 'AV'
+        }
+      }
+    },
+    envify: {
+      'test-browser': {
+        files: {
+          'test/browser/index.env.js': ['test/browser/index.js']
         }
       }
     },
     uglify: {
-      dist: {
+      browser: {
+        options: {
+          sourceMap: true,
+          sourceMapIn: 'dist/realtime.browser.js.map'
+        },
         files: {
-          'dist/AV.realtime.min.js': ['dist/AV.realtime.js']
+          'dist/realtime.browser.min.js': ['dist/realtime.browser.js']
         }
+      }
+    },
+    mochaTest: {
+      options: {
+        timeout: 30000,
+      },
+      src: ['test/index.bundle.js']
+    },
+    storeCoverage: {
+      options: {
+        dir: 'coverage'
       }
     },
     connect: {
@@ -55,15 +212,6 @@ module.exports = function(grunt) {
           port: 8000,
           base: ''
         }
-      }
-    },
-    simplemocha: {
-      options: {
-        timeout: 20000,
-        ui: 'bdd'
-      },
-      all: {
-        src: ['test/specs.js']
       }
     },
     'mocha_phantomjs': {
@@ -79,40 +227,31 @@ module.exports = function(grunt) {
       all: {
         options: {
           urls: ['http://localhost:8000/test/browser/'],
-          build: process.env.CI_BUILD_NUMBER,
-          testname: 'Sauce Test for LeanCloud realtime SDK',
+          build: process.env.TRAVIS_JOB_NUMBER,
+          testname: 'LeanCloud Realtime SDK Test #' + (process.env.TRAVIS_COMMIT || '').slice(0, 7),
           browsers: SAUCE_BROWSERS,
-          throttled: 3,
+          throttled: 2,
+          pollInterval: 3000,
+          statusCheckAttempts: 200,
           tunnelArgs: ['--vm-version', 'dev-varnish']
         }
       }
-    },
-    jshint: {
-      all: {
-        src: HINT_SRCS,
-        options: {
-          jshintrc: true
-        }
-      }
-    },
-    jscs: {
-      src: HINT_SRCS
     }
   });
   grunt.registerTask('default', []);
-  grunt.registerTask('hint', ['jshint', 'jscs']);
-  grunt.registerTask('sauce', ['babel', 'browserify:test', 'connect', 'saucelabs-mocha']);
+  grunt.registerTask('lint', ['eslint']);
+  grunt.registerTask('build-test', ['build', 'rollup:test', 'rollup:test-browser', 'envify:test-browser']);
   grunt.registerTask('test', '', function() {
-    var tasks = ['hint', 'babel', 'browserify:test', 'connect', /*'mocha_phantomjs',*/ 'simplemocha'];
+    var tasks = ['build-test', /*'mocha_phantomjs',*/ 'mochaTest', 'storeCoverage'];
     if (process.env.SAUCE_USERNAME && process.env.SAUCE_ACCESS_KEY) {
-      tasks.push('saucelabs-mocha');
+      tasks = tasks.concat(['connect', 'saucelabs-mocha']);
     } else {
       grunt.log.writeln('Skip saucelabs test, set SAUCE_USERNAME and SAUCE_ACCESS_KEY to start it.');
     }
     grunt.task.run(tasks);
   });
-  grunt.registerTask('release', ['babel', 'browserify:dist', 'uglify:dist']);
-  grunt.registerTask('dev', ['hint', 'release', 'connect', 'watch']);
+  grunt.registerTask('build', ['rollup:dist-browser', 'rollup:dist', 'uglify:browser', 'rollup:messages']);
+  grunt.registerTask('dev', ['build-test', 'release', 'connect', 'watch']);
   grunt.registerTask('cdn', 'Upload dist to CDN.', function() {
 
     grunt.task.requires('release');

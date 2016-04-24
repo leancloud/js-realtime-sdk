@@ -1,0 +1,7 @@
+{
+  "rules": {
+    "global-require": 0,
+    "newline-per-chained-call": 0,
+    "no-param-reassign": 0
+  }
+}

@@ -1,28 +1,24 @@
 language: node_js
 node_js:
-  - "4"
+  - "4.2"
 sudo: false
 env:
   global:
     - REGION=us
     - APP_ID=Ol0Cw6zL1xP9IIqJpiSv9uYC
+    - APP_KEY=WWVkTzf8xlUTPS2dIKwuCkIz
     - EXSITING_ROOM_ID=5638313660b28815a724df31
 before_install:
-  - npm install bower grunt-cli -g
+  - if [[ `npm -v` != 3* ]]; then npm i -g npm; fi
+install:
+  - npm install bower grunt-cli codecov -g
   - bower install
+  - npm install
+script:
+  - npm test && codecov
+  - npm run doc
 after_success:
-  - if [[ "$TRAVIS_BRANCH" == "master" ]] && [[ "${TRAVIS_PULL_REQUEST}" = "false" ]]; then
-      echo "Deploy demos to github pages.";
-      mkdir target;
-      cp -r demo target/;
-      cp -r dist target/;
-      cp -r plugin target/;
-      cp -r test target/;
-      cp -r bower_components target/;
-      cd target && git init;
-      git config user.name "leancloud";
-      git config user.email "ci@leancloud.rocks";
-      git add .;
-      git commit -m "Deploy demos to Github Pages [skip ci]";
-      git push -qf https://${TOKEN}@github.com/${TRAVIS_REPO_SLUG}.git master:gh-pages;
+  - if [[ "$TRAVIS_BRANCH" == "next" ]] && [[ "${TRAVIS_PULL_REQUEST}" = "false" ]]; then
+      ./deploy.sh;
+      ./release.sh;
     fi
