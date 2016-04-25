@@ -28,7 +28,7 @@ npm install leancloud-realtime@next
   - iOS 8.0+
   - Android 4.4+
 - Node.js 0.12+
-- React Native 
+- React Native
   - iOS 0.22+
   - Android 0.25+
 
@@ -154,3 +154,4 @@ Release Process Workflow
 0. Fetch and checkout remote `dist` branch 并确认该提交的内容是即将发布的版本
 0. npm publish with `next` tag（`npm publish --tag=next`，需 npm 协作者身份）
 0. `grunt upload` 上传到 CDN
+0. 发布 leancloud-realtime-typed-messages（`cd typed-messages && npm publish`）

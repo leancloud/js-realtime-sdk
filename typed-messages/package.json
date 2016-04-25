@@ -1,6 +1,6 @@
 {
   "name": "leancloud-realtime-typed-messages",
-  "version": "1.0.0-alpha.1",
+  "version": "1.0.0-beta.1",
   "description": "TypedMessages for LeanCloud Realtime",
   "main": "dist/realtime.js",
   "directories": {
@@ -24,6 +24,6 @@
   "homepage": "https://github.com/leancloud/js-realtime-sdk#readme",
   "peerDependencies": {
     "avoscloud-sdk": "^0.6.0 || ^1.0.0",
-    "leancloud-realtime": "^3.0.0"
+    "leancloud-realtime": "^3.0.0-beta.1"
   }
 }
