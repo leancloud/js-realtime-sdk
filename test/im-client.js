@@ -219,4 +219,20 @@ describe('IMClient', () => {
       })
     );
   });
+
+  describe('markAllAsRead', () => {
+    let conversation;
+    before(() =>
+      client.getConversation(EXISTING_ROOM_ID)
+        .then(conv => (conversation = conv))
+    );
+    it('params check', () => {
+      (() => client.markAllAsRead(conversation)).should.throw();
+      (() => client.markAllAsRead([EXISTING_ROOM_ID])).should.throw();
+      return client.markAllAsRead([]).should.be.fulfilledWith([]);
+    });
+    it('normal case', () =>
+      client.markAllAsRead([conversation]).should.be.fulfilledWith([conversation])
+    );
+  });
 });
