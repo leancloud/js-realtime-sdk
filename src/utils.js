@@ -67,6 +67,16 @@ export const difference = (a, b) => Array.from(
   (bSet => new Set(a.filter(x => !bSet.has(x))))(new Set(b))
 );
 
+const map = new WeakMap();
+
+// protected property helper
+export const internal = (object) => {
+  if (!map.has(object)) {
+    map.set(object, {});
+  }
+  return map.get(object);
+};
+
 // debug utility
 const removeNull = obj => {
   if (!isPlainObject(obj)) return obj;

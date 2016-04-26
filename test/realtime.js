@@ -116,11 +116,12 @@ describe('Realtime', () => {
       const realtime = createRealtime();
       return realtime._open()
         .then(connection => {
-          const callbackPromise = Promise.all(['retry', 'disconnect', 'reconnect'].map(
+          const callbackPromise = Promise.all(['retry', 'schedule', 'disconnect', 'reconnect'].map(
             event => listen(realtime, event)
           ));
           connection.emit('disconnect');
           connection.emit('retry', 1, 2);
+          connection.emit('schedule');
           connection.emit('reconnect');
           callbackPromise.then(() => connection.close());
           return callbackPromise.then(([[retryPayload1, retryPayload2]]) => {
@@ -141,6 +142,28 @@ describe('Realtime', () => {
     it('should not except a Message Class', () => {
       (() => realtime.register({})).should.throw();
     });
+  });
+  describe('retry', () => {
+    let realtime;
+    before(() => {
+      realtime = createRealtime();
+      return realtime._open();
+    });
+    after(() => realtime._close());
+    it('should throw when not offline', () => {
+      (() => createRealtime().retry()).should.throw();
+      (() => realtime.retry()).should.throw();
+    });
+    it('should retry when offline', () =>
+      realtime._open().then(connection => {
+        const promise = listen(realtime, 'disconnect', 'eroor');
+        connection.disconnect();
+        return promise;
+      }).then(() => {
+        realtime.retry();
+        return listen(realtime, 'reconnect', 'eroor');
+      })
+    );
   });
 });
 

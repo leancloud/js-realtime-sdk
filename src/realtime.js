@@ -5,7 +5,7 @@ import EventEmitter from 'eventemitter3';
 import { default as superagentPromise } from 'superagent-promise';
 import superagent from 'superagent';
 import uuid from 'uuid';
-import { tap, Cache, trim } from './utils';
+import { tap, Cache, trim, internal } from './utils';
 import Client from './client';
 import IMClient from './im-client';
 import MessageParser from './message-parser';
@@ -79,16 +79,22 @@ export default class Realtime extends EventEmitter {
        * @event Realtime#disconnect
        */
       /**
+       * 计划在一段时间后尝试重新连接
+       * @event Realtime#retry
+       * @param {Number} attempt 尝试重连的次数
+       * @param {Number} delay 延迟的毫秒数
+       */
+      /**
+       * 正在尝试重新连接
+       * @event Realtime#retry
+       * @param {Number} attempt 尝试重连的次数
+       */
+      /**
        * 网络连接恢复正常
        * @event Realtime#reconnect
        */
-      /**
-       * 尝试重新连接
-       * @event Realtime#retry
-       * @param {Number} retryCount 尝试重连的次数
-       */
       // event proxy
-      ['disconnect', 'reconnect', 'retry'].forEach(
+      ['disconnect', 'reconnect', 'retry', 'schedule'].forEach(
         event => connection.on(event, (...payload) => {
           debug(`${event} event emitted.`, ...payload);
           this.emit(event, ...payload);
@@ -112,6 +118,7 @@ export default class Realtime extends EventEmitter {
           this.disconnect();
         }
       };
+      internal(this).connection = connection;
     });
 
     return this._openPromise;
@@ -124,7 +131,7 @@ export default class Realtime extends EventEmitter {
         .constructor
         ._fetchEndpointsInfo(options)
         .then(
-          tap(info => this._cache.set('endpoints', info, info.ttl))
+          tap(info => this._cache.set('endpoints', info, info.ttl * 1000))
         )
     )
     .then(info => {
@@ -167,6 +174,24 @@ export default class Realtime extends EventEmitter {
       this._openPromise.then(connection => connection.close());
     }
     delete this._openPromise;
+  }
+
+  /**
+   * 手动进行重连。
+   * SDK 在网络出现异常时会自动按照一定的时间间隔尝试重连，调用该方法会立即尝试重连并重置重连尝试计数器。
+   * 只能在 `schedule` 事件之后，`retry` 事件之前调用，如果当前网络正常或者正在进行重连，调用该方法会抛异常。
+   */
+  retry() {
+    const connection = internal(this).connection;
+    if (!connection) {
+      throw new Error('no connection established');
+    }
+    if (connection.cannot('retry')) {
+      throw new Error(
+        `retrying not allowed when not offline. the connection is now ${connection.current}`
+      );
+    }
+    return connection.retry();
   }
 
   _register(client) {

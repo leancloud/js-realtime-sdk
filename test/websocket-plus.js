@@ -50,9 +50,13 @@ describe('WebSocketPlus', () => {
     it('should reconnect when closed', () => {
       const disconnectCallback = sinon.spy();
       ws.on('disconnect', disconnectCallback);
+      const retryCallback = sinon.spy();
+      ws.on('retry', retryCallback);
       ws._ws.close();
       return listen(ws, 'reconnect').then(() => {
         disconnectCallback.should.be.calledOnce();
+        retryCallback.should.be.calledOnce();
+        retryCallback.should.be.calledWith(0);
         ws.is('connected').should.be.true();
       });
     });
