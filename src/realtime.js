@@ -239,10 +239,11 @@ export default class Realtime extends EventEmitter {
    * @return {Promise.<IMClient>}
    */
   createIMClient(id, clientOptions, tag) {
-    if (id && this._clients[id] !== undefined) {
+    const idIsString = typeof id === 'string';
+    if (idIsString && this._clients[id] !== undefined) {
       return Promise.resolve(this._clients[id]);
     }
-    this._clients[id] = this._open().then(connection => {
+    const promise = this._open().then(connection => {
       const client = new IMClient(id, clientOptions, connection, {
         _messageParser: this._messageParser,
       });
@@ -254,7 +255,10 @@ export default class Realtime extends EventEmitter {
           return client;
         });
     });
-    return this._clients[id];
+    if (idIsString) {
+      this._clients[id] = promise;
+    }
+    return promise;
   }
 
   createPushClient() {
