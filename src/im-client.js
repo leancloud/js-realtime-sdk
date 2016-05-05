@@ -551,7 +551,7 @@ export default class IMClient extends Client {
       transient,
       unique,
     } = options;
-    if (!Array.isArray(members)) {
+    if (!(transient || Array.isArray(members))) {
       throw new TypeError(`conversation members ${members} is not an array`);
     }
     members = new Set(members);
