@@ -13,6 +13,8 @@ const debug = d('LC:WebSocketPlus');
 const HEARTBEAT_TIME = 60000;
 const TIMEOUT_TIME = 180000;
 
+const DEFAULT_RETRY_STRATEGY = attempt => Math.min(1000 << attempt, 300000);
+
 class WebSocketPlus extends EventEmitter {
   constructor(getUrls, protocol) {
     debug('initializing WebSocketPlus');
@@ -82,29 +84,37 @@ class WebSocketPlus extends EventEmitter {
   onleaveconnected() {
     this._stopConnectionKeeper();
   }
-  ondisconnect() {
+  onbeforedisconnect() {
     debug('disconnect');
-    this._destroyWs();
-    this._retryCount = 0;
     this.emit('disconnect');
-    this.retry();
+  }
+  ondisconnect() {
+    this._destroyWs();
   }
   onreconnect() {
     debug('reconnect');
     this.emit('reconnect');
   }
-  onretry() {
-    this._retryCount++;
-    setTimeout(() => {
+  onoffline(event, from, to, attempt = 0) {
+    const delay = DEFAULT_RETRY_STRATEGY.call(null, attempt);
+    debug(`schedule attempt=${attempt} delay=${delay}`);
+    this.emit('schedule', attempt, delay);
+    if (this.__scheduledRetry) {
+      clearTimeout(this.__scheduledRetry);
+    }
+    this.__scheduledRetry = setTimeout(() => {
       if (this.is('offline')) {
-        this._createWs(this._getUrls, this._protocol).then(
-          () => this.reconnect(),
-          () => this.retry()
-        );
-        debug(`retry [${this._retryCount}]`);
-        this.emit('retry', this._retryCount);
+        this.retry(attempt);
       }
-    }, this._retryCount * 3000);
+    }, delay);
+  }
+  onretry(event, from, to, attempt = 0) {
+    debug(`retry attempt=${attempt}`);
+    this.emit('retry', attempt);
+    this._createWs(this._getUrls, this._protocol).then(
+      () => this.reconnect(),
+      () => this.fail(attempt + 1)
+    );
   }
   onclose() {
     debug('close');
@@ -202,14 +212,18 @@ StateMachine.create({
   }, {
     name: 'retry',
     from: 'offline',
+    to: 'reconnecting',
+  }, {
+    name: 'fail',
+    from: 'reconnecting',
     to: 'offline',
   }, {
     name: 'reconnect',
-    from: 'offline',
+    from: 'reconnecting',
     to: 'connected',
   }, {
     name: 'close',
-    from: ['connected', 'offline'],
+    from: ['connected', 'offline', 'reconnecting'],
     to: 'closed',
   }, {
     name: 'throw',
