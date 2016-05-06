@@ -218,6 +218,12 @@ describe('IMClient', () => {
         conversation.members.should.be.empty();
       })
     );
+    it('members optional if transient', () =>
+      client.createConversation({
+        name: 'transient room',
+        transient: true,
+      })
+    );
   });
 
   describe('markAllAsRead', () => {
