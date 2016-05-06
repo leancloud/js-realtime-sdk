@@ -7,6 +7,8 @@ import {
   ConvCommand,
   AckCommand,
   JsonObjectMessage,
+  ReadCommand,
+  ReadTuple,
   CommandType,
   OpType,
 } from '../proto/message';
@@ -611,5 +613,40 @@ export default class IMClient extends Client {
       .then(tap(conversation =>
         this._conversationCache.set(conversation.id, conversation)
       ));
+  }
+
+  /**
+   * 将指定的所有会话标记为已读
+   *
+   * @param {Conversation[]} conversations 指定的会话列表
+   * @return {Promise.<Conversation[]>} conversations 返回输入的会话列表
+   */
+  markAllAsRead(conversations) {
+    if (!Array.isArray(conversations)) {
+      throw new TypeError(`${conversations} is not an Array`);
+    }
+    const ids = conversations.map(conversation => {
+      if (!(conversation instanceof Conversation)) {
+        throw new TypeError(`${conversation} is not a Conversation`);
+      }
+      return conversation.id;
+    });
+    this._debug(`mark [${ids}] as read`);
+    if (!conversations.length) {
+      return Promise.resolve([]);
+    }
+    return this._send(new GenericCommand({
+      cmd: 'read',
+      readMessage: new ReadCommand({
+        convs: conversations.map(conversation => new ReadTuple({
+          cid: conversation.id,
+          timestamp: (conversation.lastMessageAt || new Date()).getTime(),
+        })),
+      }),
+    }), false).then(() => {
+      // eslint-disable-next-line no-param-reassign
+      conversations.forEach(conversation => (conversation.unreadMessagesCount = 0));
+      return conversations;
+    });
   }
 }

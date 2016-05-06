@@ -7,8 +7,6 @@ import {
   JsonObjectMessage,
   DirectCommand,
   LogsCommand,
-  ReadCommand,
-  ReadTuple,
 } from '../proto/message';
 import { run as runSignatureFactory } from './signature-factory-runner';
 import { createError } from './errors';
@@ -590,18 +588,6 @@ export default class Conversation extends EventEmitter {
    * @return {Promise.<Conversation>} self
    */
   markAsRead() {
-    this._debug('mark as read');
-    return this._send(new GenericCommand({
-      cmd: 'read',
-      readMessage: new ReadCommand({
-        convs: [new ReadTuple({
-          cid: this.id,
-          timestamp: (this.lastMessageAt || new Date()).getTime(),
-        })],
-      }),
-    }), false).then(() => {
-      this.unreadMessagesCount = 0;
-      return this;
-    });
+    return this._client.markAllAsRead([this]).then(() => this);
   }
 }
