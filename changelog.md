@@ -1,3 +1,18 @@
+<a name="3.0.0-beta.2"></a>
+# [3.0.0-beta.2](https://github.com/leancloud/js-realtime-sdk/compare/v3.0.0-beta.1...v3.0.0-beta.2) (2016-05-07)
+
+
+### Bug Fixes
+
+* **Conversation:** 创建暂态对话时不再必须传入 members 参数 ([1bb7cc2](https://github.com/leancloud/js-realtime-sdk/commit/1bb7cc2))
+* **Realtime:** 修正创建匿名客户端会导致连接不会自动关闭的问题 ([7675b2a](https://github.com/leancloud/js-realtime-sdk/commit/7675b2a))
+
+### Features
+
+* **IMClient:** 新增 IMClient#markAllAsRead() 方法 ([288623c](https://github.com/leancloud/js-realtime-sdk/commit/288623c))
+* **Realtime:** 新增 schedule 事件，实现新的断线重连事件机制 ([#208](https://github.com/leancloud/js-realtime-sdk/issues/208Â))([bd8cdc7](https://github.com/leancloud/js-realtime-sdk/commit/bd8cdc7))
+
+<a name="3.0.0-beta.1"></a>
 # 3.0.0-beta.1 (2016-04-24)
 * **(BREAKING)** 重新设计了 API，主要改进有：
   * 提供了面向对象的，与其他平台 SDK 统一的 API
