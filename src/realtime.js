@@ -15,6 +15,8 @@ import TextMessage from './messages/text-message';
 const agent = superagentPromise(superagent, Promise);
 const debug = d('LC:Realtime');
 
+const pushRouterCache = new Cache('push-router');
+
 export default class Realtime extends EventEmitter {
   /**
    * @param  {Object} options
@@ -140,33 +142,58 @@ export default class Realtime extends EventEmitter {
     });
   }
 
-  static _fetchEndpointsInfo({ appId, region, ssl, _debug }) {
-    debug('fetch endpoint info');
-    let router;
+  static _fetchPushRouter({ appId, region }) {
+    debug('fetch router');
     switch (region) {
-      case 'cn':
-        router = 'router-g0-push.leancloud.cn/v1/route';
-        break;
+      case 'cn': {
+        const cachedPushRouter = pushRouterCache.get(appId);
+        if (cachedPushRouter) {
+          return Promise.resolve(cachedPushRouter);
+        }
+        return agent.get('https://app-router.leancloud.cn/1/route')
+          .query({
+            appId,
+          })
+          .timeout(20000)
+          .then(
+            res => {
+              const pushRouter = res.body.push_router_server;
+              if (!pushRouter) {
+                throw new Error('push router not exists');
+              }
+              let ttl = res.body.ttl;
+              if (typeof ttl !== 'number') {
+                ttl = 3600;
+              }
+              pushRouterCache.set(appId, pushRouter, ttl * 1000);
+              return pushRouter;
+            }
+          )
+          .catch(() => 'router-g0-push.leancloud.cn');
+      }
       case 'us':
-        router = 'router-a0-push.leancloud.cn/v1/route';
-        break;
+        return Promise.resolve('router-a0-push.leancloud.cn');
       default:
         throw new Error(`Region [${region}] is not supported.`);
     }
-    const protocol = global.location ? '//' : 'https://';
+  }
 
-    return agent
-      .get(`${protocol}${router}`)
-      .query({
-        appId,
-        secure: ssl,
-        debug: _debug,
-        _t: Date.now(),
-      })
-      .timeout(20000)
-      .then(
-        res => res.body
-      );
+  static _fetchEndpointsInfo({ appId, region, ssl, _debug }) {
+    debug('fetch endpoint info');
+    return this._fetchPushRouter({ appId, region }).then(tap(debug)).then(router =>
+      agent.get(`https://${router}/v1/route`)
+        .query({
+          appId,
+          secure: ssl,
+          debug: _debug,
+          _t: Date.now(),
+        })
+        .timeout(20000)
+        .then(
+          res => res.body
+        )
+        .then(tap(debug))
+    );
   }
 
   _close() {
