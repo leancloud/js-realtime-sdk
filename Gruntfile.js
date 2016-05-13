@@ -165,7 +165,7 @@ var require = require || function(id) {throw new Error('Unexpected required ' + 
         src: 'typed-messages/src/index.js',
         options: {
           plugins: [
-            // babel({ runtimeHelpers: true , exclude: 'node_modules/**' }),
+            babel({ exclude: 'node_modules/**' }),
             nodeResolve({
               main: true,
             }),
@@ -290,4 +290,11 @@ var require = require || function(id) {throw new Error('Unexpected required ' + 
     });
   }
 
+  var espree = require('espree');
+  grunt.registerTask('validate-es5', 'validate es5', function() {
+    var code = fs.readFileSync('./typed-messages/dist/typed-messages.js');
+    espree.parse(code, {
+      ecmaVersion: 5,
+    });
+  });
 };
