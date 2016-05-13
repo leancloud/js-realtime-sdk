@@ -24,6 +24,7 @@ process.env = process.env || {};`;
 var global = typeof window !== 'undefined' ? window :
              typeof global !== 'undefined' ? global :
              this;
+var define = undefined;
 var require = require || function(id) {throw new Error('Unexpected required ' + id)};
 `;
       }
