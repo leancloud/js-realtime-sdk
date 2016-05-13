@@ -27,6 +27,7 @@ export class Cache {
         return cache.value;
       }
       debug(`[${this.name}] expired: ${key}`);
+      delete this._map[key];
     }
     debug(`[${this.name}] missed: ${key}`);
     return null;
