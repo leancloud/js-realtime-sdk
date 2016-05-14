@@ -44,25 +44,7 @@ var require = require || function(id) {throw new Error('Unexpected required ' + 
     version: '31'
   }];
 
-  var HINT_SRCS = [
-    '**/src/**/*.js',
-    '**/test/**/*.js',
-    '!gh_pages/**/*',
-    '!**/browser/**/*.js',
-    '!**/*.browser.js',
-    '!**/*.bundle.js',
-  ];
-
   grunt.initConfig({
-    watch: {
-      scripts: {
-        files: HINT_SRCS,
-        tasks: ['build-test', 'release']
-      },
-    },
-    eslint: {
-      target: HINT_SRCS
-    },
     rollup: {
       options: {
         sourceMap: true
@@ -119,8 +101,6 @@ var require = require || function(id) {throw new Error('Unexpected required ' + 
                 'proto/*.js',
                 'typed-messages/test/*.js',
                 'typed-messages/src/index.js',
-                'typed-messages/src/file.js',
-                'typed-messages/src/realtime.js',
                 '*.json',
               ],
               instrumenter: require('istanbul'),
@@ -240,10 +220,9 @@ var require = require || function(id) {throw new Error('Unexpected required ' + 
     }
   });
   grunt.registerTask('default', []);
-  grunt.registerTask('lint', ['eslint']);
   grunt.registerTask('build-test', ['build', 'rollup:test', 'rollup:test-browser', 'envify:test-browser']);
   grunt.registerTask('test', '', function() {
-    var tasks = ['build-test', /*'mocha_phantomjs',*/ 'mochaTest', 'storeCoverage'];
+    var tasks = ['build-test', 'validate-es5', /*'mocha_phantomjs',*/ 'mochaTest', 'storeCoverage'];
     if (process.env.SAUCE_USERNAME && process.env.SAUCE_ACCESS_KEY) {
       tasks = tasks.concat(['connect', 'saucelabs-mocha']);
     } else {
@@ -252,7 +231,6 @@ var require = require || function(id) {throw new Error('Unexpected required ' + 
     grunt.task.run(tasks);
   });
   grunt.registerTask('build', ['rollup:dist-browser', 'rollup:dist', 'uglify:browser', 'rollup:messages']);
-  grunt.registerTask('dev', ['build-test', 'release', 'connect', 'watch']);
   grunt.registerTask('cdn', 'Upload dist to CDN.', function() {
 
     grunt.task.requires('release');
@@ -292,9 +270,16 @@ var require = require || function(id) {throw new Error('Unexpected required ' + 
 
   var espree = require('espree');
   grunt.registerTask('validate-es5', 'validate es5', function() {
-    var code = fs.readFileSync('./typed-messages/dist/typed-messages.js');
-    espree.parse(code, {
-      ecmaVersion: 5,
-    });
+    [
+      './typed-messages/dist/typed-messages.js',
+      './dist/realtime.browser.js'
+    ].forEach(file => {
+      grunt.log.write('validate ' + file + ' ');
+      var code = fs.readFileSync(file);
+      espree.parse(code, {
+        ecmaVersion: 5,
+      });
+      grunt.log.ok();
+    })
   });
 };

@@ -9,7 +9,7 @@ export const tryAll = promiseConstructors => {
   return promise.catch(() => tryAll(promiseConstructors.slice(1)));
 };
 
-export const tap = interceptor => value => (interceptor(value), value);
+export const tap = interceptor => value => ((interceptor(value), value));
 
 const debug = d('LC:Cache');
 export class Cache {
