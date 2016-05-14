@@ -94,6 +94,10 @@ describe('FileMessage and subclasses', () => {
         fileCopy.metaData().should.eql(file.metaData());
       })
     );
+    it('parser should be loose', () => {
+      FileMessage.parse({ _lcfile: { url: FILE_URL } })
+        .should.be.instanceof(FileMessage);
+    });
   });
 
   describe('ImageMessage', () => {
