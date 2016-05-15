@@ -77,7 +77,7 @@
     "javascript-state-machine": "^2.3.5",
     "lodash": "^4.6.0",
     "protobufjs": "^5.0.1",
-    "superagent": "~1.7",
+    "superagent": "~1.8.3",
     "superagent-promise": "^1.1.0",
     "uuid": "^2.0.1",
     "ws": "^1.1.0"
