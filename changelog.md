@@ -1,3 +1,23 @@
+<a name="3.0.0-beta.3"></a>
+# 3.0.0-beta.3 (2016-05-16)
+同时发布
+- leancloud-realtime-typed-messages 1.0.0-beta.2
+
+
+### Bug Fixes
+
+* **Bundle:** 修复与 AMD loaders (require.js) 一起使用报错的问题 ([8ae8093](https://github.com/leancloud/js-realtime-sdk/commit/8ae8093))
+* **Realtime:** 修复了误报跨域的问题 ([#225](https://github.com/leancloud/js-realtime-sdk/issues/225)) ([1e7d0ef](https://github.com/leancloud/js-realtime-sdk/commit/1e7d0ef))
+* **FileMessage:** 增强了 FileMessage 对非标准消息的兼容 ([e86d4c4](https://github.com/leancloud/js-realtime-sdk/commit/e86d4c4))
+* **TypedMessages:** 修复 leancloud-realtime-typed-messages 在不支持 ES6 语法的浏览器上报错的问题 ([abcfbd7](https://github.com/leancloud/js-realtime-sdk/commit/abcfbd7))
+
+
+### Features
+
+* **Realtime:** 支持动态路由 ([9b753c6](https://github.com/leancloud/js-realtime-sdk/commit/9b753c6))
+
+
+
 <a name="3.0.0-beta.2"></a>
 # [3.0.0-beta.2](https://github.com/leancloud/js-realtime-sdk/compare/v3.0.0-beta.1...v3.0.0-beta.2) (2016-05-07)
 

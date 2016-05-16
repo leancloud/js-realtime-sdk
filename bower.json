@@ -1,6 +1,6 @@
 {
   "name": "leancloud-realtime",
-  "version": "3.0.0-beta.2",
+  "version": "3.0.0-beta.3",
   "homepage": "https://github.com/leancloud/js-realtime-sdk/",
   "description": "LeanCloud JavaScript Realtime SDK",
   "main": "dist/realtime.browser.min.js",
