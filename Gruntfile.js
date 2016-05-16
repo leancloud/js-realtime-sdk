@@ -75,7 +75,6 @@ var require = require || function(id) {throw new Error('Unexpected required ' + 
         options: {
           plugins: [
             json(),
-            babel({ runtimeHelpers: true , exclude: 'node_modules/**' }),
             nodeResolve({
               jsnext: true,
               main: true,
@@ -84,7 +83,8 @@ var require = require || function(id) {throw new Error('Unexpected required ' + 
             commonjsGlobal(),
             commonjs({
               include: ['node_modules/**', 'proto/**'],
-            })
+            }),
+            babel({ runtimeHelpers: true , exclude: ['node_modules/!(axios)/**'] }),            
           ],
           format: 'umd',
           moduleName: 'AV'
@@ -124,7 +124,6 @@ var require = require || function(id) {throw new Error('Unexpected required ' + 
         options: {
           plugins: [
             json(),
-            babel({ runtimeHelpers: true , exclude: 'node_modules/**' }),
             nodeResolve({
               jsnext: true,
               main: true,
@@ -134,6 +133,7 @@ var require = require || function(id) {throw new Error('Unexpected required ' + 
             commonjs({
               include: ['node_modules/**', 'proto/**'],
             }),
+            babel({ runtimeHelpers: true , exclude: ['node_modules/!(axios)/**'] }),                        
             env()
           ],
           format: 'umd',

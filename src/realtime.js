@@ -2,8 +2,7 @@ import Connection from './connection';
 import * as Errors from './errors';
 import { default as d } from 'debug';
 import EventEmitter from 'eventemitter3';
-import { default as superagentPromise } from 'superagent-promise';
-import superagent from 'superagent';
+import axios from 'axios';
 import uuid from 'uuid';
 import { tap, Cache, trim, internal } from './utils';
 import Client from './client';
@@ -12,7 +11,6 @@ import MessageParser from './message-parser';
 import Message from './messages/message';
 import TextMessage from './messages/text-message';
 
-const agent = superagentPromise(superagent, Promise);
 const debug = d('LC:Realtime');
 
 const pushRouterCache = new Cache('push-router');
@@ -150,18 +148,24 @@ export default class Realtime extends EventEmitter {
         if (cachedPushRouter) {
           return Promise.resolve(cachedPushRouter);
         }
-        return agent.get('https://app-router.leancloud.cn/1/route')
-          .query({
-            appId,
+        return axios
+          .get('https://app-router.leancloud.cn/1/route', {
+            params: {
+              appId,
+            },
+            timeout: 20000,
           })
-          .timeout(20000)
           .then(
-            res => {
-              const pushRouter = res.body.push_router_server;
+            res => res.data
+          )
+          .then(tap(debug))
+          .then(
+            route => {
+              const pushRouter = route.push_router_server;
               if (!pushRouter) {
                 throw new Error('push router not exists');
               }
-              let ttl = res.body.ttl;
+              let ttl = route.ttl;
               if (typeof ttl !== 'number') {
                 ttl = 3600;
               }
@@ -180,17 +184,20 @@ export default class Realtime extends EventEmitter {
 
   static _fetchEndpointsInfo({ appId, region, ssl, _debug }) {
     debug('fetch endpoint info');
-    return this._fetchPushRouter({ appId, region }).then(tap(debug)).then(router =>
-      agent.get(`https://${router}/v1/route`)
-        .query({
-          appId,
-          secure: ssl,
-          debug: _debug,
-          _t: Date.now(),
+    return this._fetchPushRouter({ appId, region })
+      .then(tap(debug))
+      .then(router =>
+        axios.get(`https://${router}/v1/route`, {
+          params: {
+            appId,
+            secure: ssl,
+            debug: _debug,
+            _t: Date.now(),
+          },
+          timeout: 20000,
         })
-        .timeout(20000)
         .then(
-          res => res.body
+          res => res.data
         )
         .then(tap(debug))
     );
