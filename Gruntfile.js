@@ -12,7 +12,7 @@ module.exports = function(grunt) {
     return {
       intro() {
         return `
-window.process = window.process || {};
+var process = window.process || {};
 process.env = process.env || {};`;
       }
     };
@@ -85,6 +85,7 @@ var require = require || function(id) {throw new Error('Unexpected required ' + 
               include: ['node_modules/**', 'proto/**'],
             }),
             babel({ runtimeHelpers: true , include: ['src/**', 'test/**', 'proto/**', 'node_modules/axios/**'] }),
+            env(),
           ],
           format: 'umd',
           moduleName: 'AV'
