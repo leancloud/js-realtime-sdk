@@ -84,7 +84,7 @@ var require = require || function(id) {throw new Error('Unexpected required ' + 
             commonjs({
               include: ['node_modules/**', 'proto/**'],
             }),
-            babel({ runtimeHelpers: true , exclude: ['node_modules/!(axios)/**'] }),            
+            babel({ runtimeHelpers: true , include: ['src/**', 'test/**', 'proto/**', 'node_modules/axios/**'] }),
           ],
           format: 'umd',
           moduleName: 'AV'
@@ -133,7 +133,7 @@ var require = require || function(id) {throw new Error('Unexpected required ' + 
             commonjs({
               include: ['node_modules/**', 'proto/**'],
             }),
-            babel({ runtimeHelpers: true , exclude: ['node_modules/!(axios)/**'] }),                        
+            babel({ runtimeHelpers: true , include: ['src/**', 'test/**', 'proto/**', 'node_modules/axios/**'] }),
             env()
           ],
           format: 'umd',
