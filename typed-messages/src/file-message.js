@@ -18,7 +18,7 @@ export const FileMessage = inherit(TypedMessage, /** @lends FileMessage.prototyp
     if (!(file instanceof File)) {
       throw new TypeError('file must be an AV.File');
     }
-    if (!file.id) {
+    if (typeof file.id !== 'string') {
       throw new Error('file must be saved before used to create a Message');
     }
     this.__base();
@@ -26,7 +26,7 @@ export const FileMessage = inherit(TypedMessage, /** @lends FileMessage.prototyp
     this._lcfile = {
       objId: file.id,
       url: file._url,
-      metaData: Object.assign(file._metaData, {
+      metaData: Object.assign(file._metaData || {}, {
         name: file.name(),
       }),
     };
@@ -43,7 +43,11 @@ export const FileMessage = inherit(TypedMessage, /** @lends FileMessage.prototyp
     if (!(data && data._lcfile)) {
       throw new Error('malformed FileMessage content');
     }
-    const file = File.createWithoutData(data._lcfile.objId);
+    let id = data._lcfile.objId;
+    if (typeof id !== 'string') {
+      id = '';
+    }
+    const file = File.createWithoutData(id);
     file._url = data._lcfile.url;
     file._metaData = data._lcfile.metaData;
     if (data._lcfile.metaData) {
