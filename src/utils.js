@@ -9,7 +9,7 @@ export const tryAll = promiseConstructors => {
   return promise.catch(() => tryAll(promiseConstructors.slice(1)));
 };
 
-export const tap = interceptor => value => (interceptor(value), value);
+export const tap = interceptor => value => ((interceptor(value), value));
 
 const debug = d('LC:Cache');
 export class Cache {
@@ -27,6 +27,7 @@ export class Cache {
         return cache.value;
       }
       debug(`[${this.name}] expired: ${key}`);
+      delete this._map[key];
     }
     debug(`[${this.name}] missed: ${key}`);
     return null;

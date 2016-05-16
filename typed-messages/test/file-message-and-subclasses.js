@@ -29,37 +29,40 @@ describe('FileMessage and subclasses', () => {
       });
       file1.metaData('foo', 'bar');
       (() => new FileMessage(file1)).should.throw();
-      return file1.save().then(() => new FileMessage(file1)).then(message => {
-        message.setText('chrome');
-        message.setAttributes({ version: 31 });
-        message.getFile().should.be.exactly(file1);
-        const json = message.toJSON();
-        json.should.containDeep({
-          _lctype: -6,
-          _lctext: 'chrome',
-          _lcattrs: { version: 31 },
-          _lcfile: {
-            url: file1.url(),
-            objId: file1.id,
-            metaData: {
-              name: FILE_NAME_1,
-              foo: 'bar',
+      return file1.save()
+        .then(() => new FileMessage(file1))
+        .then(message => {
+          message.setText('chrome');
+          message.setAttributes({ version: 31 });
+          message.getFile().should.be.exactly(file1);
+          const json = message.toJSON();
+          json.should.containDeep({
+            _lctype: -6,
+            _lctext: 'chrome',
+            _lcattrs: { version: 31 },
+            _lcfile: {
+              url: file1.url(),
+              objId: file1.id,
+              metaData: {
+                name: FILE_NAME_1,
+                foo: 'bar',
+              },
             },
-          },
+          });
+          return FileMessage.parse(json);
+        })
+        .then(message => {
+          message.should.be.instanceof(FileMessage);
+          message.text.should.eql('chrome');
+          message.attributes.should.eql({ version: 31 });
+          const fileCopy = message.getFile();
+          fileCopy.should.not.be.exactly(file1);
+          fileCopy.should.be.instanceof(File);
+          fileCopy.name().should.eql(FILE_NAME_1);
+          fileCopy.id.should.eql(file1.id);
+          fileCopy.url().should.eql(file1.url());
+          fileCopy.metaData().should.eql(file1.metaData());
         });
-        return FileMessage.parse(json);
-      }).then(message => {
-        message.should.be.instanceof(FileMessage);
-        message.text.should.eql('chrome');
-        message.attributes.should.eql({ version: 31 });
-        const fileCopy = message.getFile();
-        fileCopy.should.not.be.exactly(file1);
-        fileCopy.should.be.instanceof(File);
-        fileCopy.name().should.eql(FILE_NAME_1);
-        fileCopy.id.should.eql(file1.id);
-        fileCopy.url().should.eql(file1.url());
-        fileCopy.metaData().should.eql(file1.metaData());
-      });
     });
     it('file created from url', () =>
       Promise.resolve(new FileMessage(file)).then(message => {

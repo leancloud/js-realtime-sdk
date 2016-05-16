@@ -125,16 +125,20 @@ localStorage.setItem('debug', 'LC*');
 Develop Workflow
 ----
 ### 本地开发
-```
-grunt dev
-```
 更新 .proto 后请运行
 ```
 npm run convert-pb
 ```
-### 测试
+测试
 ```
 npm test
+```
+浏览器测试
+```
+# 在当前目录启动一个静态 server
+# static . -p 8000
+grunt build-test
+# open http://localhost:8000/test/browser/
 ```
 生成 dist/realtime.*
 ```
