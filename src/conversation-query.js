@@ -18,7 +18,7 @@ export default class ConversationQuery {
 
   static _calculateFlag(options) {
     return [
-      'withLastMessages',
+      'withLastMessagesRefreshed',
       'compact',
     ].reduce(
       (prev, key) => (prev << 1) + (Boolean)(options[key]),
@@ -323,21 +323,33 @@ export default class ConversationQuery {
   }
 
   /**
-   * 设置返回的 conversations 带上最后一条消息
-   * @param  {Boolean} enabled
+   * 设置返回的 conversations 刷新最后一条消息
+   * @param  {Boolean} [enabled=true]
    * @return {ConversationQuery} self
    */
-  withLastMessages(enabled) {
-    this._extraOptions.withLastMessages = enabled;
+  withLastMessagesRefreshed(enabled = true) {
+    this._extraOptions.withLastMessagesRefreshed = enabled;
     return this;
   }
 
   /**
-   * 设置返回的 conversations 为精简模式，即不含成员列表
-   * @param  {Boolean} enabled
+   * 请替换为 {@link ConversationQuery#withLastMessagesRefreshed}。
+   * @deprecated
+   * @param  {Boolean} [enabled=true]
    * @return {ConversationQuery} self
    */
-  compact(enabled) {
+  withLastMessages(enabled) {
+    console.warn('ConversationQuery#withLastMessages is deprecated, ' +
+      'use ConversationQuery#withLastMessagesRefreshed instead.');
+    return this.withLastMessagesRefreshed(enabled);
+  }
+
+  /**
+   * 设置返回的 conversations 为精简模式，即不含成员列表
+   * @param  {Boolean} [enabled=true]
+   * @return {ConversationQuery} self
+   */
+  compact(enabled = true) {
     this._extraOptions.compact = enabled;
     return this;
   }
