@@ -14,9 +14,7 @@ import {
   CLIENT_ID,
 } from './configs';
 
-const sinon = (typeof window !== 'undefined' && window.sinon) || require('sinon');
-
-import { listen } from './test-utils';
+import { listen, sinon } from './test-utils';
 
 describe('Conversation', () => {
   let realtime;

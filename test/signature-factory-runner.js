@@ -2,7 +2,7 @@ import 'should';
 import 'should-sinon';
 import { run as runSignatureFactory } from '../src/signature-factory-runner';
 
-const sinon = (typeof window !== 'undefined' && window.sinon) || require('sinon');
+import { sinon } from './test-utils';
 
 describe('with signatureFactory', () => {
   it('normal case', () => {

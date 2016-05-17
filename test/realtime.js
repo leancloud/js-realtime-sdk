@@ -7,9 +7,7 @@ import Client from '../src/client';
 import { GenericCommand, CommandType } from '../proto/message';
 import TextMessage from '../src/messages/text-message';
 
-const sinon = (typeof window !== 'undefined' && window.sinon) || require('sinon');
-
-import { listen } from './test-utils';
+import { listen, sinon } from './test-utils';
 
 import {
   APP_ID,

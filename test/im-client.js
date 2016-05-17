@@ -5,7 +5,7 @@ import Realtime from '../src/realtime';
 import IMClient from '../src/im-client';
 import Conversation from '../src/conversation';
 
-const sinon = (typeof window !== 'undefined' && window.sinon) || require('sinon');
+import { sinon } from './test-utils';
 
 import {
   APP_ID,

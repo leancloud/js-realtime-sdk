@@ -1,9 +1,7 @@
 import 'should';
 import 'should-sinon';
 import WebSocketPlus from '../src/websocket-plus';
-import { listen, wait } from './test-utils';
-
-const sinon = (typeof window !== 'undefined' && window.sinon) || require('sinon');
+import { listen, wait, sinon } from './test-utils';
 
 describe('WebSocketPlus', () => {
   describe('open/close', () => {

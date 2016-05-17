@@ -2,9 +2,7 @@ import 'should';
 import 'should-sinon';
 import should from 'should/as-function';
 import { tap, tryAll, Cache, keyRemap, union, difference } from '../src/utils';
-import { wait } from './test-utils';
-
-const sinon = (typeof window !== 'undefined' && window.sinon) || require('sinon');
+import { wait, sinon } from './test-utils';
 
 describe('Utils', () => {
   describe('tap', () => {
