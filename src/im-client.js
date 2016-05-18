@@ -118,27 +118,31 @@ export default class IMClient extends Client {
 
   _dispatchUnreadMessage(message) {
     const convs = message.unreadMessage.convs;
-    convs.forEach(conv => this.getConversation(conv.cid).then(conversation => {
-      let timestamp;
-      if (conv.timestamp) {
-        timestamp = new Date(conv.timestamp.toNumber());
-      }
-      conversation.unreadMessagesCount = conv.unread; // eslint-disable-line no-param-reassign
-      /**
-       * 未读消息数目更新
-       * @event IMClient#unreadmessages
-       * @param {Object} payload
-       * @param {Number} payload.count 未读消息数
-       * @param {String} [payload.lastMessageId] 最新一条未读消息 id
-       * @param {String} [payload.lastMessageTimestamp] 最新一条未读消息时间戳
-       * @param {Conversation} conversation 未读消息数目有更新的对话
-       */
-      this.emit('unreadmessages', {
-        count: conv.unread,
-        lastMessageId: conv.mid,
-        lastMessageTimestamp: timestamp,
-      }, conversation);
-    }));
+    return Promise.all(convs.map(
+      conv => this
+        .getConversation(conv.cid)
+        .then(conversation => {
+          let timestamp;
+          if (conv.timestamp) {
+            timestamp = new Date(conv.timestamp.toNumber());
+          }
+          conversation.unreadMessagesCount = conv.unread; // eslint-disable-line no-param-reassign
+          /**
+           * 未读消息数目更新
+           * @event IMClient#unreadmessages
+           * @param {Object} payload
+           * @param {Number} payload.count 未读消息数
+           * @param {String} [payload.lastMessageId] 最新一条未读消息 id
+           * @param {String} [payload.lastMessageTimestamp] 最新一条未读消息时间戳
+           * @param {Conversation} conversation 未读消息数目有更新的对话
+           */
+          this.emit('unreadmessages', {
+            count: conv.unread,
+            lastMessageId: conv.mid,
+            lastMessageTimestamp: timestamp,
+          }, conversation);
+        })
+    ));
   }
 
   _dispatchConvMessage(message) {
