@@ -8,6 +8,8 @@ import {
   EXISTING_ROOM_ID,
 } from './configs';
 
+import { sinon } from './test-utils';
+
 describe('ConversationQuery', () => {
   let client;
   before(() =>
@@ -26,7 +28,7 @@ describe('ConversationQuery', () => {
     calculate({}).should.be.equal(0);
     calculate({
       compact: true,
-      withLastMessages: true,
+      withLastMessagesRefreshed: true,
     }).should.be.equal(3);
   });
   it('should be a ConversationQuery', () => {
@@ -253,15 +255,24 @@ describe('ConversationQuery', () => {
         conversations[0].members.length.should.be.equal(0);
       })
   );
-  it('withLastMessages', () =>
+  it('withLastMessagesRefreshed', () =>
     client.getQuery().equalTo('objectId', EXISTING_ROOM_ID)
-      .withLastMessages(true)
+      .withLastMessagesRefreshed()
       .find()
       .then(conversations => {
         conversations.length.should.be.equal(1);
         conversations[0].lastMessage.should.be.instanceof(Message);
       })
   );
+  it('withLastMessages should be proxied', () => {
+    const spy = sinon.spy(
+      ConversationQuery.prototype,
+      'withLastMessagesRefreshed'
+    );
+    client.getQuery().withLastMessages(true);
+    spy.should.be.calledWith(true);
+    spy.restore();
+  });
   it('should use cache', () =>
     Promise.all([
       client.getQuery().equalTo('objectId', EXISTING_ROOM_ID)

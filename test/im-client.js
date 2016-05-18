@@ -4,8 +4,9 @@ import should from 'should/as-function';
 import Realtime from '../src/realtime';
 import IMClient from '../src/im-client';
 import Conversation from '../src/conversation';
+import Message from '../src/messages/message';
 
-const sinon = (typeof window !== 'undefined' && window.sinon) || require('sinon');
+import { sinon } from './test-utils';
 
 import {
   APP_ID,
@@ -176,6 +177,22 @@ describe('IMClient', () => {
           originConversation.name.should.be.eql('leancloud');
         });
     });
+    // https://github.com/leancloud/js-realtime-sdk/issues/229
+    it('should update properties', () =>
+      client.getQuery()
+        .equalTo('objectId', EXISTING_ROOM_ID)
+        .withLastMessagesRefreshed(true)
+        .find()
+        .then(conversations => {
+          conversations[0].lastMessage.should.be.instanceof(Message);
+          return client.getQuery()
+            .equalTo('objectId', EXISTING_ROOM_ID)
+            .withLastMessagesRefreshed(false)
+            .find();
+        }).then(conversations => {
+          conversations[0].lastMessage.should.be.instanceof(Message);
+        })
+    );
   });
 
   describe('createConversation', () => {

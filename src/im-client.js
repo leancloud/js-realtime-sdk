@@ -506,7 +506,7 @@ export default class IMClient extends Client {
             'muted',
           ].forEach(key => {
             const value = fetchedConversation[key];
-            if (value !== null) conversation[key] = value;
+            if (value !== undefined) conversation[key] = value;
           });
           delete conversation._pendingAttributes;
           delete conversation._pendingName;
