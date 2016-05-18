@@ -31,7 +31,7 @@
   },
   "homepage": "https://leancloud.cn/",
   "devDependencies": {
-    "avoscloud-sdk": "1.0.0-rc8",
+    "avoscloud-sdk": "1.0.0-rc9",
     "babel-eslint": "^6.0.0",
     "babel-plugin-transform-decorators-legacy": "^1.3.4",
     "babel-plugin-transform-es2015-classes": "^6.5.2",

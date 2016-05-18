@@ -25,8 +25,8 @@ export const FileMessage = inherit(TypedMessage, /** @lends FileMessage.prototyp
     this._file = file;
     this._lcfile = {
       objId: file.id,
-      url: file._url,
-      metaData: Object.assign(file._metaData || {}, {
+      url: file.url(),
+      metaData: Object.assign(file.metaData() || {}, {
         name: file.name(),
       }),
     };
@@ -48,10 +48,11 @@ export const FileMessage = inherit(TypedMessage, /** @lends FileMessage.prototyp
       id = '';
     }
     const file = File.createWithoutData(id);
-    file._url = data._lcfile.url;
-    file._metaData = data._lcfile.metaData;
+    file.attributes = file.attributes || {};
+    file._url = file.attributes.url = data._lcfile.url;
+    file._metaData = file.attributes.metaData = data._lcfile.metaData || {};
     if (data._lcfile.metaData) {
-      file._name = data._lcfile.metaData.name;
+      file._name = file.attributes.name = data._lcfile.metaData.name;
     }
     return file;
   },

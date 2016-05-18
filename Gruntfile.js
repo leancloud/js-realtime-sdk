@@ -88,7 +88,8 @@ var require = require || function(id) {throw new Error('Unexpected required ' + 
             env(),
           ],
           format: 'umd',
-          moduleName: 'AV'
+          moduleName: 'AV',
+          moduleId: 'leancloud-realtime',
         }
       },
       test: {
@@ -102,6 +103,8 @@ var require = require || function(id) {throw new Error('Unexpected required ' + 
                 'proto/*.js',
                 'typed-messages/test/*.js',
                 'typed-messages/src/index.js',
+                'typed-messages/src/storage.js',
+                'typed-messages/src/realtime.js',
                 '*.json',
               ],
               instrumenter: require('istanbul'),
@@ -155,7 +158,13 @@ var require = require || function(id) {throw new Error('Unexpected required ' + 
             }),
           ],
           format: 'umd',
-          moduleName: 'AV'
+          moduleName: 'AV',
+          moduleId: 'typed-messages',
+          external: ['leancloud-realtime', 'avoscloud-sdk'],
+          globals: {
+            'leancloud-realtime': 'AV',
+            'avoscloud-sdk': 'AV',
+          },
         }
       }
     },
