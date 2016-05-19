@@ -1,6 +1,9 @@
 import TypedMessage from './typed-message';
 import { messageType } from './helpers';
 
+// jsdoc-ignore-start
+@messageType(-1)
+// jsdoc-ignore-end
 export default class TextMessage extends TypedMessage {
   /**
    * 文类类型消息
@@ -24,4 +27,3 @@ export default class TextMessage extends TypedMessage {
  * @static
  * @const
  */
-messageType(-1)(TextMessage);

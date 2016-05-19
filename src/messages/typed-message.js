@@ -1,6 +1,9 @@
 import Message from './message';
 import { messageField } from './helpers';
 
+// jsdoc-ignore-start
+@messageField(['_lctext', '_lcattrs'])
+// jsdoc-ignore-end
 export default class TypedMessage extends Message {
   /**
    * 所有内置的富媒体消息均继承自本类
@@ -110,5 +113,3 @@ export default class TypedMessage extends Message {
     return super.parse(json, message);
   }
 }
-
-messageField(['_lctext', '_lcattrs'])(TypedMessage);

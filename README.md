@@ -131,13 +131,13 @@ npm run convert-pb
 ```
 测试
 ```
-npm test
+npm run test:node
 ```
 浏览器测试
 ```
 # 在当前目录启动一个静态 server
 # static . -p 8000
-grunt build-test
+npm run test:browser
 # open http://localhost:8000/test/browser/
 ```
 生成 dist/realtime.*

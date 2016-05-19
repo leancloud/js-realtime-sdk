@@ -333,14 +333,13 @@ export default class ConversationQuery {
   }
 
   /**
-   * 请替换为 {@link ConversationQuery#withLastMessagesRefreshed}。
-   * @deprecated
+   * @deprecated 请替换为 {@link ConversationQuery#withLastMessagesRefreshed}
    * @param  {Boolean} [enabled=true]
    * @return {ConversationQuery} self
    */
   withLastMessages(enabled) {
-    console.warn('ConversationQuery#withLastMessages is deprecated, ' +
-      'use ConversationQuery#withLastMessagesRefreshed instead.');
+    console.warn('DEPRECATION ConversationQuery#withLastMessages: ' +
+      'Use ConversationQuery#withLastMessagesRefreshed instead.');
     return this.withLastMessagesRefreshed(enabled);
   }
 
