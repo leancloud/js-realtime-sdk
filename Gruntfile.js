@@ -198,7 +198,7 @@ var require = require || function(id) {throw new Error('Unexpected required ' + 
       tasks = tasks.concat(['connect', 'saucelabs-mocha']);
     } else {
       grunt.log.writeln('Saucelabs test skipped, set SAUCE_USERNAME and SAUCE_ACCESS_KEY to start it.');
-      grunt.log.writeln('If you want to run browser tests locally, start a static server then run ./test/browser/');
+      grunt.log.writeln('To run browser tests locally, start a static server then run ./test/browser/');
     }
     grunt.task.run(tasks);
   });

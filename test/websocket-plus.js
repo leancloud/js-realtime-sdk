@@ -5,7 +5,7 @@ import { listen, wait, sinon } from './test-utils';
 
 describe('WebSocketPlus', () => {
   describe('open/close', () => {
-    it('basic', () => {
+    it('basic open and close', () => {
       const ws = new WebSocketPlus('wss://echo.websocket.org');
       return listen(ws, 'open', 'error').then(() => {
         ws.is('connected').should.be.true();
@@ -14,25 +14,34 @@ describe('WebSocketPlus', () => {
         (() => ws.open()).should.throw();
       });
     });
-    it('error', (done) => {
+    it('error event should be emitted when got 404 error', (done) => {
       const ws = new WebSocketPlus('ws://404.websocket.org');
       ws.on('error', error => {
         error.should.be.instanceof(Error);
         done();
       });
     });
-    it('backup endpoint', () => {
+    it('backup endpoint should be used when the primary one fails', () => {
       const ws = new WebSocketPlus([
         'ws://404.websocket.org',
         'ws://echo.websocket.org',
       ]);
       return listen(ws, 'open', 'error').then(() => ws.close());
     });
-    it('promised endpoints', () => {
+    it('should support promised endpoints', () => {
       const ws = new WebSocketPlus(Promise.resolve([
         'wss://echo.websocket.org',
       ]));
       return listen(ws, 'open', 'error').then(() => ws.close());
+    });
+  });
+
+  describe('send', () => {
+    it('should throw if not connected', () => {
+      const ws = new WebSocketPlus('ws://echo.websocket.org');
+      (() => ws.send()).should.throw(/Connection unavailable/);
+      (() => ws._ping()).should.throw(/Connection unavailable/);
+      ws.on('open', () => ws.close());
     });
   });
 

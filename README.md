@@ -131,7 +131,7 @@ npm run convert-pb
 ```
 测试
 ```
-npm run test:node
+npm run test:node -- --grep KEYWORDS
 ```
 浏览器测试
 ```
