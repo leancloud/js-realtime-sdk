@@ -1,11 +1,13 @@
 /* eslint-disable */
+var path = require('path');
+var fs = require('fs');
+
 module.exports = function(grunt) {
   require('load-grunt-tasks')(grunt);
   var nodeResolve = require('rollup-plugin-node-resolve');
   var json = require('rollup-plugin-json');
   var babel = require('rollup-plugin-babel');
   var commonjs = require('rollup-plugin-commonjs');
-  var istanbul = require('rollup-plugin-istanbul');
 
   var env = function () {
     var envString = JSON.stringify(process.env);
@@ -33,8 +35,7 @@ var require = require || function(id) {throw new Error('Unexpected required ' + 
 
   var SAUCE_BROWSERS = [{
   //  browserName: 'firefox',
-  //  version: 'beta'
-  //}, {
+  // }, {
     browserName: 'iPhone',
     version: '8.0'
   }, {
@@ -43,6 +44,14 @@ var require = require || function(id) {throw new Error('Unexpected required ' + 
     browserName: 'chrome',
     version: '31'
   }];
+
+  var babelrc = JSON.parse(fs.readFileSync('./.babelrc'));
+  var babelConfigs = Object.assign(babelrc, {
+    plugins: babelrc.plugins,
+    presets: [ 'es2015-rollup' ],
+    babelrc: false,
+    runtimeHelpers: true,
+  });
 
   grunt.initConfig({
     rollup: {
@@ -55,14 +64,10 @@ var require = require || function(id) {throw new Error('Unexpected required ' + 
         options: {
           plugins: [
             json(),
-            babel({ runtimeHelpers: true , exclude: 'node_modules/**' }),
-            //nodeResolve({
-            //  jsnext: true,
-            //  main: true,
-            //  skip: ['memcpy'],
-            //}),
+            babel(Object.assign({}, babelConfigs, {
+              exclude: 'node_modules/**',
+            })),
             commonjs({
-              //include: ['node_modules/**', 'proto/**'],
               include: ['proto/**'],
             })
           ],
@@ -76,7 +81,6 @@ var require = require || function(id) {throw new Error('Unexpected required ' + 
           plugins: [
             json(),
             nodeResolve({
-              jsnext: true,
               main: true,
               browser: true
             }),
@@ -84,42 +88,14 @@ var require = require || function(id) {throw new Error('Unexpected required ' + 
             commonjs({
               include: ['node_modules/**', 'proto/**'],
             }),
-            babel({ runtimeHelpers: true , include: ['src/**', 'test/**', 'proto/**', 'node_modules/axios/**'] }),
+            babel(Object.assign({}, babelConfigs, {
+              include: ['src/**', 'test/**', 'proto/**', 'node_modules/axios/**'],
+            })),
             env(),
           ],
           format: 'umd',
           moduleName: 'AV',
           moduleId: 'leancloud-realtime',
-        }
-      },
-      test: {
-        dest: 'test/index.bundle.js',
-        src: 'test/index-with-typed-messages.js',
-        options: {
-          plugins: [
-            istanbul({
-              exclude: [
-                'test/*.js',
-                'proto/*.js',
-                'typed-messages/test/*.js',
-                'typed-messages/src/index.js',
-                'typed-messages/src/storage.js',
-                'typed-messages/src/realtime.js',
-                '*.json',
-              ],
-              instrumenter: require('istanbul'),
-              instrumenterConfig: {
-                esModules: true,
-                noCompact: true,
-              }
-            }),
-            json(),
-            babel({ runtimeHelpers: true , exclude: 'node_modules/**' }),
-            commonjs({
-              include: ['proto/**'],
-            }),
-          ],
-          format: 'cjs'
         }
       },
       'test-browser': {
@@ -129,7 +105,6 @@ var require = require || function(id) {throw new Error('Unexpected required ' + 
           plugins: [
             json(),
             nodeResolve({
-              jsnext: true,
               main: true,
               browser: true
             }),
@@ -137,7 +112,9 @@ var require = require || function(id) {throw new Error('Unexpected required ' + 
             commonjs({
               include: ['node_modules/**', 'proto/**'],
             }),
-            babel({ runtimeHelpers: true , include: ['src/**', 'test/**', 'proto/**', 'node_modules/axios/**'] }),
+            babel(Object.assign({}, babelConfigs, {
+              include: ['src/**', 'test/**', 'proto/**', 'node_modules/axios/**'],
+            })),
             env()
           ],
           format: 'umd',
@@ -149,7 +126,11 @@ var require = require || function(id) {throw new Error('Unexpected required ' + 
         src: 'typed-messages/src/index.js',
         options: {
           plugins: [
-            babel({ exclude: 'node_modules/**' }),
+            babel({
+              presets: [ 'es2015-rollup' ],
+              babelrc: false,
+              exclude: 'node_modules/**',
+            }),
             nodeResolve({
               main: true,
             }),
@@ -186,31 +167,11 @@ var require = require || function(id) {throw new Error('Unexpected required ' + 
         }
       }
     },
-    mochaTest: {
-      options: {
-        timeout: 30000,
-      },
-      src: ['test/index.bundle.js']
-    },
-    storeCoverage: {
-      options: {
-        dir: 'coverage'
-      }
-    },
     connect: {
       server: {
         options: {
           port: 8000,
           base: ''
-        }
-      }
-    },
-    'mocha_phantomjs': {
-      all: {
-        options: {
-          urls: [
-            'http://localhost:8000/test/browser/'
-          ]
         }
       }
     },
@@ -230,17 +191,18 @@ var require = require || function(id) {throw new Error('Unexpected required ' + 
     }
   });
   grunt.registerTask('default', []);
-  grunt.registerTask('build-test', ['build', 'rollup:test', 'rollup:test-browser', 'envify:test-browser']);
-  grunt.registerTask('test', '', function() {
-    var tasks = ['build-test', 'validate-es5', /*'mocha_phantomjs',*/ 'mochaTest', 'storeCoverage'];
+  grunt.registerTask('build-test', ['rollup:test-browser', 'envify:test-browser']);
+  grunt.registerTask('test-browser', '', function() {
+    var tasks = ['build-test'];
     if (process.env.SAUCE_USERNAME && process.env.SAUCE_ACCESS_KEY) {
       tasks = tasks.concat(['connect', 'saucelabs-mocha']);
     } else {
-      grunt.log.writeln('Skip saucelabs test, set SAUCE_USERNAME and SAUCE_ACCESS_KEY to start it.');
+      grunt.log.writeln('Saucelabs test skipped, set SAUCE_USERNAME and SAUCE_ACCESS_KEY to start it.');
+      grunt.log.writeln('If you want to run browser tests locally, start a static server then run ./test/browser/');
     }
     grunt.task.run(tasks);
   });
-  grunt.registerTask('build', ['rollup:dist-browser', 'rollup:dist', 'uglify:browser', 'rollup:messages']);
+  grunt.registerTask('build', ['rollup:dist-browser', 'rollup:dist', 'uglify:browser', 'rollup:messages', 'validate-es5']);
   grunt.registerTask('cdn', 'Upload dist to CDN.', function() {
 
     grunt.task.requires('release');
@@ -253,8 +215,6 @@ var require = require || function(id) {throw new Error('Unexpected required ' + 
   grunt.registerTask('upload', ['release', 'cdn']);
 
   var qiniu = require('qiniu');
-  var path = require('path');
-  var fs = require('fs');
 
   qiniu.conf.ACCESS_KEY = process.env.CDN_QINIU_KEY;
   qiniu.conf.SECRET_KEY = process.env.CDN_QINIU_SECRET;
