@@ -1,5 +1,5 @@
 {
-  "options": {
+  "opts": {
     "template": "node_modules/docdash"
   },
   "plugins": ["node_modules/jsdoc-ignore-future"],
