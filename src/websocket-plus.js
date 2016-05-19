@@ -15,6 +15,21 @@ const TIMEOUT_TIME = 180000;
 
 const DEFAULT_RETRY_STRATEGY = attempt => Math.min(1000 << attempt, 300000);
 
+const requireConnected = (target, name, descriptor) =>
+  Object.assign({}, descriptor, {
+    value: function requireConnectedWrapper(...args) {
+      if (!this.is('connected')) {
+        const currentState = this.current;
+        console.warn(`${name} should not be called when the connection is ${currentState}`);
+        if (this.is('offline') || this.is('reconnecting')) {
+          console.warn('disconnect and reconnect event should be handled to avoid such calls.');
+        }
+        throw new Error('Connection unavailable');
+      }
+      return descriptor.value.call(this, ...args);
+    },
+  });
+
 class WebSocketPlus extends EventEmitter {
   constructor(getUrls, protocol) {
     debug('initializing WebSocketPlus');
@@ -118,13 +133,26 @@ class WebSocketPlus extends EventEmitter {
   }
   onclose() {
     debug('close');
-    this._ws.close();
+    if (this._ws) {
+      this._ws.close();
+    }
   }
   onerror(event, from, to, error) {
     debug('error', error);
     this.emit('error', error);
   }
 
+  // jsdoc-ignore-start
+  @requireConnected
+  // jsdoc-ignore-end
+  _ping() {
+    debug('ping');
+    try {
+      this.ping();
+    } catch (error) {
+      console.warn(`websocket ping error: ${error.message}`);
+    }
+  }
   ping() {
     if (this._ws.ping) {
       this._ws.ping();
@@ -137,10 +165,7 @@ class WebSocketPlus extends EventEmitter {
   _postponeTimers() {
     debug('_postponeTimers');
     this._clearTimers();
-    this._heartbeatTimer = setInterval(() => {
-      debug('ping');
-      this.ping();
-    }, HEARTBEAT_TIME);
+    this._heartbeatTimer = setInterval(this._ping.bind(this), HEARTBEAT_TIME);
     this._timeoutTimer = setTimeout(() => {
       debug('timeout');
       this.disconnect();
@@ -179,6 +204,9 @@ class WebSocketPlus extends EventEmitter {
     this.disconnect();
   }
 
+  // jsdoc-ignore-start
+  @requireConnected
+  // jsdoc-ignore-end
   send(data) {
     debug('send', data);
     this._ws.send(data);
