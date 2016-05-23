@@ -576,7 +576,7 @@ export default class Conversation extends EventEmitter {
           });
         }
         return promise.then(value => ({
-          value,
+          value: Array.from(value),
           done: value.length === 0 || value.length < limit,
         }));
       },
