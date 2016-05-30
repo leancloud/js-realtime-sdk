@@ -1,3 +1,21 @@
+<a name="3.0.0-beta.4"></a>
+# 3.0.0-beta.4 (2016-05-30)
+同时发布
+- leancloud-realtime-typed-messages 1.0.0-beta.3
+
+
+### Bug Fixes
+
+* **Conversation:** 修复缓存中的 `Conversation` 有时被错误地更新为 `undefined` 的问题 ([91ae143](https://github.com/leancloud/js-realtime-sdk/commit/91ae143))，感谢 [@dangyuluo](https://github.com/dangyuluo)
+* **ConversationQuery:** 废弃 `withLastMessages` 方法，请使用 `withLastMassagesRefreshed` 代替，两个 API 没有区别，重命名是为了避免误解 ([6afbd43](https://github.com/leancloud/js-realtime-sdk/commit/6afbd43))
+* **FileMessage:** 修复 FileMessage 使用 avoscloud-sdk@^1.0.0-rc9 时的兼容性问题([6a2fd12](https://github.com/leancloud/js-realtime-sdk/commit/6a2fd12))
+* **MessageIterator:** 修复对某次查询结果数据进行操作会影响下次查询结果的问题 ([ff899e0](https://github.com/leancloud/js-realtime-sdk/commit/ff899e0))，感谢 [@dangyuluo](https://github.com/dangyuluo)
+* **Realtime:** 修复了在收到某些消息时抛出 `unhandled promise rejection` 异常的问题 ([e68e87d](https://github.com/leancloud/js-realtime-sdk/commit/e68e87d))，感谢 [@han4wluc](https://github.com/han4wluc)
+* **TypedMessages:** 修复了 leancloud-realtime-typed-messages 不支持 AMD loaders 的问题 ([dd82fb8](https://github.com/leancloud/js-realtime-sdk/commit/dd82fb8))
+* **WebSocketPlus:** 当连接不可用时，调用部分 API 抛出更加有指导意义的异常与提示 ([4b3c841](https://github.com/leancloud/js-realtime-sdk/commit/4b3c841))，感谢 [@han4wluc](https://github.com/han4wluc)
+
+
+
 <a name="3.0.0-beta.3"></a>
 # 3.0.0-beta.3 (2016-05-16)
 同时发布
