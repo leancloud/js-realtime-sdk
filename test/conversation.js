@@ -174,20 +174,37 @@ describe('Conversation', () => {
         messages.should.be.an.empty();
       })
     );
-    it('MessageIterator', () => {
-      const iterator = conversation.createMessagesIterator({
-        limit: 2,
-      });
-      return Promise.all([iterator.next(), iterator.next()])
-        .then(([page1, page2]) => {
-          page1.value.should.be.an.Array();
-          page1.done.should.eql(false);
-          page2.value.should.be.an.Array();
-          if (page2[0]) {
-            page2[0].timestamp.should.lessThan(page1[0].timestamp);
-            page2[0].timestamp.should.lessThan(page1[1].timestamp);
-          }
+    describe('MessageIterator', () => {
+      it('normal case', () => {
+        const iterator = conversation.createMessagesIterator({
+          limit: 2,
         });
+        return Promise.all([iterator.next(), iterator.next()])
+          .then(([page1, page2]) => {
+            page1.value.should.be.an.Array();
+            page1.value.length.should.eql(2);
+            page1.done.should.eql(false);
+            page2.value.should.be.an.Array();
+            const minMessageTimestamp =
+              Math.min(page1.value[0].timestamp, page1.value[1].timestamp);
+            page2.value[0].timestamp.should.lessThan(minMessageTimestamp);
+          });
+      });
+      // https://github.com/leancloud/js-realtime-sdk/issues/240
+      it('result should be a copy', () => {
+        const iterator = conversation.createMessagesIterator({
+          limit: 2,
+        });
+        let minMessageTimestamp;
+        return iterator.next()
+          .then(page1 => {
+            minMessageTimestamp = Math.min(page1.value[0].timestamp, page1.value[1].timestamp);
+            page1.value.splice(0);
+            return iterator.next();
+          }).then(page2 => {
+            page2.value[0].timestamp.should.lessThan(minMessageTimestamp);
+          });
+      });
     });
   });
 
