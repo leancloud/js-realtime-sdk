@@ -34,12 +34,16 @@ var require = require || function(id) {throw new Error('Unexpected required ' + 
   };
 
   var SAUCE_BROWSERS = [{
-  //  browserName: 'firefox',
-  // }, {
+   browserName: 'firefox',
+    version: 'latest',
+    platform: 'Windows 7'
+  }, {
     browserName: 'iPhone',
     version: '8.0'
   }, {
-    browserName: 'chrome'
+    browserName: 'chrome',
+    version: 'latest',
+    platform: 'Windows 7'
   }, {
     browserName: 'chrome',
     version: '31'
