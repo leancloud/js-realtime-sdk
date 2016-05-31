@@ -65,7 +65,7 @@
     "rollup-plugin-commonjs": "^2.2.1",
     "rollup-plugin-json": "^2.0.0",
     "rollup-plugin-node-resolve": "^1.4.0",
-    "should": "^8.2.2",
+    "should": "^9.0.0",
     "should-sinon": "0.0.5",
     "sinon": "2.0.0-pre",
     "validate-commit-msg": "^2.5.0"
