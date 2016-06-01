@@ -4,7 +4,7 @@ import should from 'should/as-function';
 import Realtime from '../src/realtime';
 import Connection from '../src/connection';
 import Client from '../src/client';
-import { GenericCommand, CommandType } from '../proto/message';
+import { GenericCommand, CommandType, ConvCommand } from '../proto/message';
 import TextMessage from '../src/messages/text-message';
 
 import { listen, sinon } from './test-utils';
@@ -12,6 +12,7 @@ import { listen, sinon } from './test-utils';
 import {
   APP_ID,
   REGION,
+  NON_EXISTING_ROOM_ID,
 } from './configs';
 
 const createRealtime = (options) => new Realtime(Object.assign({
@@ -189,6 +190,9 @@ describe('Connection', () => {
       cmd: 'conv',
       op: 'update',
       peerId: client.id,
+      convMessage: new ConvCommand({
+        cid: NON_EXISTING_ROOM_ID,
+      }),
     })).should.be.rejectedWith('CONVERSATION_UPDATE_REJECTED')
   );
   it('message dispatch', () => {
