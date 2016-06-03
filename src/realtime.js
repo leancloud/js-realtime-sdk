@@ -253,9 +253,11 @@ export default class Realtime extends EventEmitter {
 
   _dispatchMessage(message) {
     if (message.peerId !== null) {
-      const client = this._clients[message.peerId];
-      if (client) {
-        return Promise.resolve(client._dispatchMessage(message)).catch(debug);
+      const targetClient = this._clients[message.peerId];
+      if (targetClient) {
+        return Promise.resolve(targetClient)
+          .then(client => client._dispatchMessage(message))
+          .catch(debug);
       }
       return debug(
         '[WARN] Unexpected message received without any live client match',

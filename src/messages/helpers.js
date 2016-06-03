@@ -1,4 +1,5 @@
 /* eslint-disable no-param-reassign */
+import { getStaticProperty, isIE10 } from '../utils';
 
 /**
  * @namespace MessageHelper
@@ -13,12 +14,7 @@ import { messageType } from 'leancloud-realtime';
  * @memberof MessageHelper
  * @param {Number} type 自定义类型请使用正整数
  * @example @messageType(1)
- * class CustomMessage extends TypedMessage {
- *   // IE10- hack: https://phabricator.babeljs.io/T116
- *   static parse(...args) {
- *     return super.parse(...args);
- *   }
- * }
+ * class CustomMessage extends TypedMessage {}
  *
  * // 不支持 decorator 的情况下可以这样使用
  * class CustomMessage extends TypedMessage {
@@ -48,10 +44,6 @@ export const messageType = type => {
  *     super();
  *     this.foo = foo;
  *   }
- *   // IE10- hack: https://phabricator.babeljs.io/T116
- *   static parse(...args) {
- *     return super.parse(...args);
- *   }
  * }
  *
  * // 不支持 decorator 的情况下可以这样使用
@@ -75,8 +67,24 @@ export const messageField = fields => {
     }
   }
   return target => {
-    const originalCustomFields = Array.isArray(target._customFields)
-      ? target._customFields : [];
+    // IE10 Hack:
+    // static properties in IE10 will not be inherited from super
+    // search for parse method and assign it manually
+    let originalCustomFields = isIE10
+      ? getStaticProperty(target, '_customFields')
+      : target._customFields;
+    originalCustomFields = Array.isArray(originalCustomFields)
+      ? originalCustomFields : [];
     target._customFields = originalCustomFields.concat(fields);
   };
+};
+
+// IE10 Hack:
+// static properties in IE10 will not be inherited from super
+// search for parse method and assign it manually
+
+export const IE10Compatible = target => {
+  if (isIE10) {
+    target.parse = getStaticProperty(target, 'parse');
+  }
 };

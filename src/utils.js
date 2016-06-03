@@ -63,6 +63,17 @@ export const keyRemap = (keymap, obj) =>
     });
   }, {});
 
+export const isIE10 = (
+  global.navigator &&
+  global.navigator.userAgent &&
+  global.navigator.userAgent.indexOf('MSIE 10.') !== -1
+);
+
+/* eslint-disable no-proto */
+export const getStaticProperty = (klass, property) =>
+  (klass[property] || (klass.__proto__ ? getStaticProperty(klass.__proto__, property) : undefined));
+/* eslint-enable no-proto */
+
 export const union = (a, b) => Array.from(new Set([...a, ...b]));
 export const difference = (a, b) => Array.from(
   (bSet => new Set(a.filter(x => !bSet.has(x))))(new Set(b))

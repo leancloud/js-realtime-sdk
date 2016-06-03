@@ -1,5 +1,6 @@
 import Message from './message';
 import { messageField } from './helpers';
+import { getStaticProperty, isIE10 } from '../utils';
 
 // jsdoc-ignore-start
 @messageField(['_lctext', '_lcattrs'])
@@ -102,8 +103,10 @@ export default class TypedMessage extends Message {
    */
   static parse(json, message = new this()) {
     message.content = json; // eslint-disable-line no-param-reassign
-    let fields = Array.isArray(message.constructor._customFields)
-      ? message.constructor._customFields : [];
+    const customFields = isIE10
+      ? getStaticProperty(message.constructor, '_customFields')
+      : message.constructor._customFields;
+    let fields = Array.isArray(customFields) ? customFields : [];
     fields = fields.reduce((result, field) => {
       if (typeof field !== 'string') return result;
       result[field] = json[field]; // eslint-disable-line no-param-reassign
