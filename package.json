@@ -60,7 +60,7 @@
     "load-grunt-tasks": "^3.4.1",
     "mocha": "^2.3.4",
     "qiniu": "^6.1.9",
-    "rollup": "^0.26.0",
+    "rollup": "^0.26.5",
     "rollup-plugin-babel": "^2.4.0",
     "rollup-plugin-commonjs": "^2.2.1",
     "rollup-plugin-json": "^2.0.0",
