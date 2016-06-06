@@ -145,10 +145,10 @@ var require = require || function(id) {throw new Error('Unexpected required ' + 
           format: 'umd',
           moduleName: 'AV',
           moduleId: 'typed-messages',
-          external: ['leancloud-realtime', 'avoscloud-sdk'],
+          external: ['leancloud-realtime', 'leancloud-storage'],
           globals: {
             'leancloud-realtime': 'AV',
-            'avoscloud-sdk': 'AV',
+            'leancloud-storage': 'AV',
           },
         }
       }
