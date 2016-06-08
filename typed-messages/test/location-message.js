@@ -1,7 +1,7 @@
 import 'should';
 import 'should-sinon';
 import { LocationMessage } from '../src/';
-import { GeoPoint } from 'avoscloud-sdk';
+import { GeoPoint } from 'leancloud-storage';
 
 describe('LocationMessage', () => {
   it('param check', () => {

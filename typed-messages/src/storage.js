@@ -1,5 +1,5 @@
 /* eslint-disable import/no-unresolved */
-import { File } from 'avoscloud-sdk';
+import { File } from 'leancloud-storage';
 
 if (!File) {
   throw new Error('LeanCloud Storage SDK not installed');
@@ -8,4 +8,4 @@ if (!File) {
 export {
   File,
   GeoPoint,
-} from 'avoscloud-sdk';
+} from 'leancloud-storage';

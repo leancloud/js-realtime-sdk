@@ -6,7 +6,7 @@ import {
   AudioMessage,
   VideoMessage,
 } from '../src/';
-import { File } from 'avoscloud-sdk';
+import { File } from 'leancloud-storage';
 
 describe('FileMessage and subclasses', () => {
   let file;
