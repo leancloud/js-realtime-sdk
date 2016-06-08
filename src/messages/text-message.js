@@ -1,8 +1,9 @@
 import TypedMessage from './typed-message';
-import { messageType } from './helpers';
+import { messageType, IE10Compatible } from './helpers';
 
 // jsdoc-ignore-start
 @messageType(-1)
+@IE10Compatible
 // jsdoc-ignore-end
 export default class TextMessage extends TypedMessage {
   /**

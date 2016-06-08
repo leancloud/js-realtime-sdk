@@ -210,8 +210,10 @@ describe('Connection', () => {
       peerId: client.id,
     });
     connection.emit('message', validMessage);
-    clientMessageEventCallback.should.be.calledOnce();
-    clientMessageEventCallback.should.be.calledWith(validMessage);
-    clientMessageEventCallback.restore();
+    return Promise.resolve().then(() => {
+      clientMessageEventCallback.should.be.calledOnce();
+      clientMessageEventCallback.should.be.calledWith(validMessage);
+      clientMessageEventCallback.restore();
+    });
   });
 });

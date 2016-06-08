@@ -125,16 +125,14 @@ var require = require || function(id) {throw new Error('Unexpected required ' + 
           moduleName: 'AV'
         }
       },
-      'messages': {
+      'typed-messages': {
         dest: 'typed-messages/dist/typed-messages.js',
         src: 'typed-messages/src/index.js',
         options: {
           plugins: [
-            babel({
-              presets: [ 'es2015-rollup' ],
-              babelrc: false,
+            babel(Object.assign({}, babelConfigs, {
               exclude: 'node_modules/**',
-            }),
+            })),
             nodeResolve({
               main: true,
             }),
@@ -168,6 +166,15 @@ var require = require || function(id) {throw new Error('Unexpected required ' + 
         },
         files: {
           'dist/realtime.browser.min.js': ['dist/realtime.browser.js']
+        }
+      },
+      'typed-messages': {
+        options: {
+          sourceMap: true,
+          sourceMapIn: 'typed-messages/dist/typed-messages.js.map'
+        },
+        files: {
+          'typed-messages/dist/typed-messages.min.js': ['typed-messages/dist/typed-messages.js']
         }
       }
     },
@@ -206,7 +213,7 @@ var require = require || function(id) {throw new Error('Unexpected required ' + 
     }
     grunt.task.run(tasks);
   });
-  grunt.registerTask('build', ['rollup:dist-browser', 'rollup:dist', 'uglify:browser', 'rollup:messages', 'validate-es5']);
+  grunt.registerTask('build', ['rollup:dist-browser', 'rollup:dist', 'uglify:browser', 'rollup:typed-messages', 'uglify:typed-messages', 'validate-es5']);
   grunt.registerTask('cdn', 'Upload dist to CDN.', function() {
 
     grunt.task.requires('release');

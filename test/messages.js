@@ -4,7 +4,7 @@ import Realtime from '../src/realtime';
 import Message from '../src/messages/message';
 import TypedMessage from '../src/messages/typed-message';
 import TextMessage from '../src/messages/text-message';
-import { messageType, messageField } from '../src/messages/helpers';
+import { messageType, messageField, IE10Compatible } from '../src/messages/helpers';
 
 import { listen } from './test-utils';
 
@@ -15,14 +15,13 @@ import {
 
 @messageType(1)
 @messageField('foo')
+@IE10Compatible
 class CustomMessage extends TypedMessage {
   constructor(foo) {
     super();
     this.foo = foo;
   }
 }
-
-// const sinon = (typeof window !== 'undefined' && window.sinon) || require('sinon');
 
 describe('Messages', () => {
   describe('helpers', () => {

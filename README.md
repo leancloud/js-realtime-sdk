@@ -22,7 +22,7 @@ npm install leancloud-realtime@next
 支持的运行环境
 ----
 - 浏览器 / WebView
-  - IE 11 / Edge
+  - IE 10+ / Edge
   - Chrome 31+
   - Firefox latest
   - iOS 8.0+
