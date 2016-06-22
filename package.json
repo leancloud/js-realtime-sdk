@@ -8,7 +8,7 @@
     "test": "test"
   },
   "scripts": {
-    "lint": "eslint --ignore-path .gitignore src test typed-messages",
+    "lint": "eslint --ignore-path .gitignore src test typed-messages plugins",
     "test": "npm run lint && npm run build && npm run doc && npm run test:node && npm run test:browser",
     "test:node": "babel-node ./node_modules/isparta/bin/isparta cover --include 'src/**' --include 'typed-messages/src/**' --report text ./node_modules/mocha/bin/_mocha -- test/index.js typed-messages/test/index.js --timeout 30000",
     "test:browser": "grunt test-browser --stack",

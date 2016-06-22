@@ -317,10 +317,6 @@ export default class Realtime extends EventEmitter {
     return promise;
   }
 
-  createPushClient() {
-    return this._open();
-  }
-
   /**
    * 注册消息类
    *

@@ -149,7 +149,31 @@ var require = require || function(id) {throw new Error('Unexpected required ' + 
             'leancloud-storage': 'AV',
           },
         }
-      }
+      },
+      'webrtc': {
+        dest: 'plugins/webrtc/dist/webrtc.js',
+        src: 'plugins/webrtc/src/index.js',
+        options: {
+          plugins: [
+            babel(Object.assign({}, babelConfigs, {
+              exclude: 'node_modules/**',
+            })),
+            nodeResolve({
+              main: true,
+            }),
+            commonjs({
+              include: ['node_modules/**'],
+            }),
+          ],
+          format: 'umd',
+          moduleName: 'AV',
+          moduleId: 'webrtc',
+          external: ['leancloud-realtime'],
+          globals: {
+            'leancloud-realtime': 'AV',
+          },
+        }
+      },
     },
     envify: {
       'test-browser': {
@@ -176,7 +200,16 @@ var require = require || function(id) {throw new Error('Unexpected required ' + 
         files: {
           'typed-messages/dist/typed-messages.min.js': ['typed-messages/dist/typed-messages.js']
         }
-      }
+      },
+      webrtc: {
+        options: {
+          sourceMap: true,
+          sourceMapIn: 'plugins/webrtc/dist/webrtc.js.map'
+        },
+        files: {
+          'plugins/webrtc/dist/webrtc.min.js': ['plugins/webrtc/dist/webrtc.js']
+        }
+      },
     },
     connect: {
       server: {
@@ -213,7 +246,16 @@ var require = require || function(id) {throw new Error('Unexpected required ' + 
     }
     grunt.task.run(tasks);
   });
-  grunt.registerTask('build', ['rollup:dist-browser', 'rollup:dist', 'uglify:browser', 'rollup:typed-messages', 'uglify:typed-messages', 'validate-es5']);
+  grunt.registerTask('build', [
+    'rollup:dist-browser',
+    'rollup:dist',
+    'uglify:browser',
+    'rollup:typed-messages',
+    'uglify:typed-messages',
+    'rollup:webrtc',
+    'uglify:webrtc',
+    'validate-es5'
+  ]);
   grunt.registerTask('cdn', 'Upload dist to CDN.', function() {
 
     grunt.task.requires('release');
@@ -253,6 +295,7 @@ var require = require || function(id) {throw new Error('Unexpected required ' + 
   grunt.registerTask('validate-es5', 'validate es5', function() {
     [
       './typed-messages/dist/typed-messages.js',
+      './plugins/webrtc/dist/webrtc.js',
       './dist/realtime.browser.js'
     ].forEach(file => {
       grunt.log.write('validate ' + file + ' ');

@@ -3,6 +3,8 @@ echo "Deploy demos to github pages.";
 mkdir gh_pages;
 cp -r demo gh_pages/;
 cp -r dist gh_pages/;
+mkdir -p gh_pages/plugins/webrtc/dist;
+cp -r plugins/webrtc/dist gh_pages/plugins/webrtc/;
 cp -r typed-messages gh_pages/;
 cp -r test gh_pages/;
 cp -r docs gh_pages/;

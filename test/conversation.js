@@ -6,6 +6,7 @@ import {
   ConvCommand,
 } from '../proto/message';
 import Message from '../src/messages/message';
+import TextMessage from '../src/messages/text-message';
 
 import {
   APP_ID,
@@ -30,7 +31,10 @@ describe('Conversation', () => {
         client = c;
         return client.getConversation(EXISTING_ROOM_ID);
       })
-      .then(conv => (conversation = conv));
+      .then(conv => {
+        conversation = conv;
+        return conv.send(new TextMessage('42'));
+      });
   });
   after(() => client.close());
 
