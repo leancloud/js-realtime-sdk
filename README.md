@@ -1,7 +1,7 @@
 LeanCloud JavaScript Realtime SDK
 ====
-[![Build Status](https://img.shields.io/travis/leancloud/js-realtime-sdk/next.svg?style=flat-square)](https://travis-ci.org/leancloud/js-realtime-sdk/branches)
-[![Codecov](https://img.shields.io/codecov/c/github/leancloud/js-realtime-sdk/next.svg?style=flat-square)](https://codecov.io/github/leancloud/js-realtime-sdk?branch=next)
+[![Build Status](https://img.shields.io/travis/leancloud/js-realtime-sdk.svg?style=flat-square)](https://travis-ci.org/leancloud/js-realtime-sdk)
+[![Codecov](https://img.shields.io/codecov/c/github/leancloud/js-realtime-sdk.svg?style=flat-square)](https://codecov.io/github/leancloud/js-realtime-sdk)
 [![David](https://img.shields.io/david/leancloud/js-realtime-sdk.svg?style=flat-square)](https://david-dm.org/leancloud/js-realtime-sdk)
 [![npm](https://img.shields.io/npm/v/leancloud-realtime.svg?style=flat-square)](https://www.npmjs.com/package/leancloud-realtime)
 
@@ -9,14 +9,19 @@ LeanCloud JavaScript Realtime SDK
 
 版本说明
 ----
-next 分支上为 3.x 版本。
-master 分支上为 2.x 版本，将仅得到安全更新，相关文档参见 [2.x 文档](https://leancloud.cn/docs/js_realtime.html)。
+master 分支为开发版本。
+v2 分支上为 2.x 版本，将仅得到安全更新，相关文档参见 [2.x 文档](https://leancloud.cn/docs/js_realtime.html)。
 
-3.x 与 2.x 的 API 不兼容，以下说明与文档均指 3.x 版本。
+自 v3 起遵循 [语义化版本](http://semver.org/lang/zh-CN/)。
 
-试用 3.x beta 版本：
+安装稳定版本：
 ```
-npm install leancloud-realtime@next
+npm install leancloud-realtime
+```
+
+安装 v2 版本：
+```
+npm install leancloud-realtime@2
 ```
 
 支持的运行环境
@@ -58,7 +63,7 @@ npm install leancloud-realtime@next
 0. 编码，更新测试用例
 0. 运行 `npm test` 确保测试全部 pass
 0. 提交改动，请遵循 [conversational commit message 风格](http://www.ruanyifeng.com/blog/2016/01/commit_message_change_log.html)
-0. 发起 Pull Request 至 **next 分支**
+0. 发起 Pull Request 至 master 分支
 
 ### 项目的目录结构
 ```
@@ -100,7 +105,6 @@ SDK 分为连接层与应用层两部分，只存在应用层对连接层公开 
 * `Realtime`：开发者使用 SDK 的入口，负责访问 router、创建 connection、创建与管理 clients、创建 messageParser（管理消息类型）、监听 connection 的消息并 dispatch 给对应的 client
 * `Client`：所有的 clients 共享一个 connection
   * `IMClient`：对应即时通讯中的「用户」，持有 connection 与 conversations，负责创建管理将收到的消息处理后在对应 conversation 上派发，所有的 IMClients 共享一个 messageParser
-  * `PushClient`：not implemented yet
 * `MessageParser` 消息解析器，负责将一个 JSON 格式的消息 parse 为对应的 Message 类
 * `Conversation`：实现对话相关的操作
   * `ConversationQuery`：对话查询器
@@ -145,17 +149,17 @@ npm run test:browser
 npm run build
 ```
 ### 持续集成
-合并 PR 到 next 分支后持续集成会自动运行 `npm build` 与 `npm run doc`，然后将 dist 目录推送到 dist 分支，将文档与 demo 推送到 gh-pages。
+合并 PR 到 master 分支后持续集成会自动运行 `npm build` 与 `npm run doc`，然后将 dist 目录推送到 dist 分支，将文档与 demo 推送到 gh-pages。
 
 Release Process Workflow
 ----
 0. 遵循 semver 提升 `package.json` 与 `bower.json` 中的版本号
 0. `npm run changelog` 生成新的 `changelog.md`，润色之
 0. Commit `package.json`，`bower.json`，`changelog.md`
-0. Push to remote `next` branch
+0. Push to remote `master` branch
 0. 等待持续集成 pass
 0. 使用 GitHub 基于 dist 分支生成 pre-release 包（for bower）
 0. Fetch and checkout remote `dist` branch 并确认该提交的内容是即将发布的版本
-0. npm publish with `next` tag（`npm publish --tag=next`，需 npm 协作者身份）
+0. npm publish（`npm publish`，需 npm 协作者身份），如果是 pre-release 版本需要带 next tag
 0. `grunt upload` 上传到 CDN
 0. 发布 leancloud-realtime-typed-messages（`cd typed-messages && npm publish`）

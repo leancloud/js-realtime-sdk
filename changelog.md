@@ -1,3 +1,19 @@
+<a name="3.0.0"></a>
+# 3.0.0 (2016-06-22)
+同时发布
+- leancloud-realtime-typed-messages 1.0.0
+
+### Bug Fixes
+
+* **TypedMessages:** 修复在部分浏览器中抛出 `Object.assign` 未定义的异常 ([a0fa8ca](https://github.com/leancloud/js-realtime-sdk/commit/a0fa8ca))
+
+
+### Features
+
+* 兼容 IE10 ([75d325d](https://github.com/leancloud/js-realtime-sdk/commit/75d325d))
+
+
+
 <a name="3.0.0-beta.4"></a>
 # 3.0.0-beta.4 (2016-05-30)
 同时发布
