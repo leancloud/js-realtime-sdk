@@ -1,2 +1,2 @@
-// eslint-disable-next-line no-native-reassign
-export default WebSocket = global.WebSocket || global.MozWebSocket;
+const WebSocket = global.WebSocket || global.MozWebSocket;
+export default WebSocket;
