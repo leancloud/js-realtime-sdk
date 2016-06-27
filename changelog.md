@@ -1,3 +1,13 @@
+<a name="3.0.1"></a>
+## 3.0.1 (2016-06-27)
+
+
+### Bug Fixes
+
+* 修复了在 React Native for Android 中抛 `Attempted to assign to readonly property` 异常的问题 ([ac02fa3](https://github.com/leancloud/js-realtime-sdk/commit/ac02fa3)), closes [#281](https://github.com/leancloud/js-realtime-sdk/issues/281)
+
+
+
 <a name="3.0.0"></a>
 # 3.0.0 (2016-06-22)
 同时发布
