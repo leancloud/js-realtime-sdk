@@ -524,6 +524,9 @@ export default class IMClient extends Client {
       objectId: 'id',
       lm: 'lastMessageAt',
       msg: 'lastMessage',
+      msg_from: 'lastMessageFrom',
+      msg_mid: 'lastMessageId',
+      msg_timestamp: 'lastMessageTimestamp',
       m: 'members',
       attr: 'attributes',
       tr: 'transient',
@@ -532,6 +535,12 @@ export default class IMClient extends Client {
     }, rawData);
     if (data.lastMessage) {
       data.lastMessage = this._messageParser.parse(data.lastMessage);
+      data.lastMessage.from = data.lastMessageFrom;
+      data.lastMessage.id = data.lastMessageId;
+      data.lastMessage.timestamp = new Date(data.lastMessageTimestamp);
+      delete data.lastMessageFrom;
+      delete data.lastMessageId;
+      delete data.lastMessageTimestamp;
     }
     return new Conversation(data, this);
   }
