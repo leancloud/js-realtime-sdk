@@ -261,7 +261,11 @@ describe('ConversationQuery', () => {
       .find()
       .then(conversations => {
         conversations.length.should.be.equal(1);
-        conversations[0].lastMessage.should.be.instanceof(Message);
+        const message = conversations[0].lastMessage;
+        message.should.be.instanceof(Message);
+        message.from.should.be.ok();
+        message.id.should.be.ok();
+        message.timestamp.should.be.ok();
       })
   );
   it('withLastMessages should be proxied', () => {
