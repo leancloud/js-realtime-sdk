@@ -107,3 +107,13 @@ const removeNull = obj => {
   return object;
 };
 export const trim = message => removeNull(JSON.parse(JSON.stringify(message)));
+
+export const ensureArray = target => {
+  if (Array.isArray(target)) {
+    return target;
+  }
+  if (target === undefined || target === null) {
+    return [];
+  }
+  return [target];
+};

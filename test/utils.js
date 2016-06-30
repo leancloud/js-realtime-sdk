@@ -1,7 +1,7 @@
 import 'should';
 import 'should-sinon';
 import should from 'should/as-function';
-import { tap, tryAll, Cache, keyRemap, union, difference } from '../src/utils';
+import { tap, tryAll, Cache, keyRemap, union, difference, ensureArray } from '../src/utils';
 import { wait, sinon } from './test-utils';
 
 describe('Utils', () => {
@@ -77,5 +77,14 @@ describe('Utils', () => {
     const b = [2, 3, 4, 2];
     it('union', () => union(a, b).should.be.eql([1, 2, 3, 4]));
     it('difference', () => difference(a, b).should.be.eql([1]));
+  });
+
+  it('ensureArray', () => {
+    ensureArray().should.eql([]);
+    ensureArray(null).should.eql([]);
+    ensureArray([]).should.eql([]);
+    ensureArray(0).should.eql([0]);
+    ensureArray([0]).should.eql([0]);
+    ensureArray([[0]]).should.eql([[0]]);
   });
 });

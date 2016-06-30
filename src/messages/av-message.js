@@ -16,12 +16,12 @@
 
 /**
  * 解析处理消息内容 （JSON -> AVMessage）
- * <pre>
- * 如果子类没有提供 message，直接使用该 message
- * 如果没有提供，实例化一个当前类型的 message
- * 将 JSON 格式的消息内容中相关的信息设置给该消息
+ * <p>
+ * 如果子类没有提供 message，直接使用该 message，
+ * 如果没有提供，实例化一个当前类型的 message，
+ * 将 JSON 格式的消息内容中相关的信息设置给该消息，
  * 然后将其传递给父类的 parse 方法
- * （当然，你也可以不管父类直接返回 message）
+ * （当然，你也可以不管父类直接返回 message）。
  *
  * @function
  * @static
@@ -33,10 +33,10 @@
 
 /**
  * 将当前消息序列化为 JSON 对象 （AVMessage -> JSON)
- * <pre>
- * 在这个方法中，应该先调用父类的 toJSON 方法，得到 json 对象
- * 然后，将当前消息实例的信息修改 json 对象后返回
- * （当然，你也可以不管父类返回的 json）
+ * <p>
+ * 在这个方法中，应该先调用父类的 toJSON 方法，得到 JSON 对象，
+ * 然后，将当前消息实例的信息修改 JSON 对象后返回
+ * （当然，你也可以不管父类返回的 JSON）。
  *
  * @function
  * @name AVMessage#toJSON
