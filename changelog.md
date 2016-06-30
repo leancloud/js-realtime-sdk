@@ -1,3 +1,13 @@
+<a name="3.0.2"></a>
+## 3.0.2 (2016-06-30)
+
+
+### Bug Fixes
+
+* **ConversationQuery:** 指定 `withLastMessagesRefreshed` 时，查询结果的 lastMessage 现在包含了完整的信息（`from`、`id`） ([#285](https://github.com/leancloud/js-realtime-sdk/issues/285)) ([51bda7e](https://github.com/leancloud/js-realtime-sdk/commit/51bda7e))
+
+
+
 <a name="3.0.1"></a>
 ## 3.0.1 (2016-06-27)
 
