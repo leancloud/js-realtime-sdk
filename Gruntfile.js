@@ -35,7 +35,7 @@ var require = require || function(id) {throw new Error('Unexpected required ' + 
 
   var SAUCE_BROWSERS = [{
    browserName: 'firefox',
-    version: 'latest',
+    version: '46',
     platform: 'Windows 7'
   }, {
     browserName: 'iPhone',
