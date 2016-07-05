@@ -1,4 +1,4 @@
-import { APP_ID, APP_KEY, REGION } from '../../test/configs';
+import { APP_ID, APP_KEY, REGION } from '../../../test/configs';
 import AV from 'leancloud-storage';
 
 import './file-message-and-subclasses';

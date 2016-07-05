@@ -126,8 +126,8 @@ var require = require || function(id) {throw new Error('Unexpected required ' + 
         }
       },
       'typed-messages': {
-        dest: 'typed-messages/dist/typed-messages.js',
-        src: 'typed-messages/src/index.js',
+        dest: 'plugins/typed-messages/dist/typed-messages.js',
+        src: 'plugins/typed-messages/src/index.js',
         options: {
           plugins: [
             babel(Object.assign({}, babelConfigs, {
@@ -195,10 +195,10 @@ var require = require || function(id) {throw new Error('Unexpected required ' + 
       'typed-messages': {
         options: {
           sourceMap: true,
-          sourceMapIn: 'typed-messages/dist/typed-messages.js.map'
+          sourceMapIn: 'plugins/typed-messages/dist/typed-messages.js.map'
         },
         files: {
-          'typed-messages/dist/typed-messages.min.js': ['typed-messages/dist/typed-messages.js']
+          'plugins/typed-messages/dist/typed-messages.min.js': ['plugins/typed-messages/dist/typed-messages.js']
         }
       },
       webrtc: {
@@ -294,7 +294,7 @@ var require = require || function(id) {throw new Error('Unexpected required ' + 
   var espree = require('espree');
   grunt.registerTask('validate-es5', 'validate es5', function() {
     [
-      './typed-messages/dist/typed-messages.js',
+      './plugins/typed-messages/dist/typed-messages.js',
       './plugins/webrtc/dist/webrtc.js',
       './dist/realtime.browser.js'
     ].forEach(file => {
