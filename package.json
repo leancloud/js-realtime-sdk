@@ -51,7 +51,7 @@
     "grunt-contrib-uglify": "^1.0.0",
     "grunt-envify": "0.0.3",
     "grunt-rollup": "^0.7.0",
-    "grunt-saucelabs": "^8.6.1",
+    "grunt-saucelabs": "^9.0.0",
     "inherit": "^2.2.3",
     "isparta": "^4.0.0",
     "jsdoc": "^3.4.0",
