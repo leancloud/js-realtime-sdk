@@ -33,8 +33,9 @@ export default class Call extends EventEmitter {
   close() {
     return Promise.resolve().then(() => {
       this._call.close();
-      this._destoryPeerConnection();
+      this._destroyPeerConnection();
       this._peerConnection.close();
+      this.destroy();
     });
   }
 
@@ -46,10 +47,17 @@ export default class Call extends EventEmitter {
   }
 
   _setConversation(conversation) {
+    if (this._conversation) {
+      this._conversation.off('message');
+    }
     if (conversation) {
       this._conversation = conversation;
       conversation.on('message', this._handleMessage.bind(this));
     }
+  }
+
+  destroy() {
+    this._conversation.off('message');
   }
 
   _createPeerConnection(RTCConfiguration) {
@@ -62,7 +70,7 @@ export default class Call extends EventEmitter {
     return connection;
   }
 
-  _destoryPeerConnection() {
+  _destroyPeerConnection() {
     const connection = this._peerConnection;
     delete connection.onaddstream;
     delete connection.onremovestream;

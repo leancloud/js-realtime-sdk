@@ -14,14 +14,15 @@ export default class OutgoingCall extends Call {
   }
 
   _handleRefusal() {
-    this._destoryPeerConnection();
+    this._destroyPeerConnection();
     this._call.refuse();
     this.emit('refuse');
+    this.destroy();
   }
 
   cancel() {
     this._call.cancel();
-    return this._conversation.send(new Cancelation());
+    return this._conversation.send(new Cancelation()).then(() => this.destroy());
   }
 
   close() {

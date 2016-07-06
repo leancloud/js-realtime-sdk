@@ -90,7 +90,9 @@ var vm = new Vue({
       }).catch(console.error.bind(console));
     },
     decline: function decline() {
-      return this.incomingCall.refuse().catch(console.error.bind(console));
+      return this.incomingCall.refuse()
+        .then(() => (this.incomingCall = null))
+        .catch(console.error.bind(console));
     },
     hangup: function hungup() {
       this.currentCall.close();
@@ -109,6 +111,9 @@ var vm = new Vue({
       remoteVideo.src = '';
       localVideo.src = '';
       delete this.localStream;
+      this.localVideoEnabled = true;
+      this.localAudioEnabled = true;
+      this.remoteAudioEnabled = true;
     },
 
     toggleCamera() {

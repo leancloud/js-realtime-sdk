@@ -19,11 +19,15 @@ export default class IncomingCall extends Call {
       .then(() => this._promises.resolveAccept());
   }
   refuse() {
-    return this._conversation.send(new Refusal()).then(() => this._call.refuse());
+    return this._conversation.send(new Refusal()).then(() => {
+      this._call.refuse();
+      this.destroy();
+    });
   }
 
   _handleCancelation() {
     this._call.cancel();
     this.emit('cancel');
+    this.destroy();
   }
 }
