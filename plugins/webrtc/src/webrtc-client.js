@@ -59,8 +59,11 @@ export default class WebRTCClient extends EventEmitter {
 
 
   call(targetId, stream) {
-    if (targetId === '') {
+    if (typeof targetId !== 'string') {
       throw new TypeError('target id is not a string');
+    }
+    if (!stream) {
+      throw new TypeError('a MediaStream instance is required to make a call');
     }
     return this._imClient.ping([targetId])
       .then((onlineClients) => {
