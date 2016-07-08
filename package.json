@@ -12,7 +12,7 @@
     "test": "npm run lint && npm run build && npm run doc && npm run test:node && npm run test:browser",
     "test:node": "babel-node ./node_modules/isparta/bin/isparta cover --include 'src/**' --include 'plugins/typed-messages/src/**' --report text ./node_modules/mocha/bin/_mocha -- test/index.js plugins/typed-messages/test/index.js --timeout 30000",
     "test:browser": "grunt test-browser --stack",
-    "doc": "jsdoc src plugins/typed-messages/src README.md -r -d docs -c .jsdocrc.json",
+    "doc": "jsdoc src README.md -d docs -c .jsdocrc.json && jsdoc plugins/typed-messages/src -d plugins/typed-messages/docs src/messages/**message.js -c .jsdocrc.json && jsdoc plugins/webrtc/src -d plugins/webrtc/docs -c .jsdocrc.json ",
     "build": "grunt build --stack",
     "changelog": "conventional-changelog -p angular -i CHANGELOG.md -s",
     "convert-pb": "pbjs proto/message.proto -t commonjs > proto/message-compiled.js && sed -i '' 's/protobufjs/protobufjs\\/dist\\/protobuf-light/g' ./proto/message-compiled.js"

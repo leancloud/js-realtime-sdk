@@ -6,6 +6,10 @@ import { Refusal } from '../signalings/refusal';
 import { Cancelation } from '../signalings/cancelation';
 
 export default class Call extends EventEmitter {
+  /**
+   * {@link IncomingCall} 与 {@link OutgoingCall} 的基类
+   * @abstract
+   */
   constructor(conversation, RTCConfiguration) {
     super();
     this._setConversation(conversation);
@@ -21,27 +25,47 @@ export default class Call extends EventEmitter {
     Promise.all([streamReady, accept]).then(([stream]) => {
       if (this._call.can('connect')) {
         this._call.connect();
+        /**
+         * 通话连接成功
+         * @event Call#connect
+         * @param {MediaStream} stram 对方的媒体流
+         */
         this.emit('connect', stream);
       }
     });
   }
 
+  /**
+   * 当前通话状态
+   * （<code>calling</code>, <code>connected</code>, <code>closed</code>,
+   * <code>refused</code>, <code>canceled</code>）
+   * @type {string}
+   * @readonly
+   */
   get state() {
     return this._call.current;
   }
 
+  /**
+   * 结束通话
+   * @return {Promise}
+   */
   close() {
     return Promise.resolve().then(() => {
       this._call.close();
       this._destroyPeerConnection();
       this._peerConnection.close();
-      this.destroy();
+      this._destroy();
     });
   }
 
   _handleCloseEvent() {
     if (this._call.can('close')) {
       this.close();
+      /**
+       * 通话结束，可能是对方挂断或网络中断
+       * @event Call#close
+       */
       this.emit('close');
     }
   }
@@ -56,7 +80,7 @@ export default class Call extends EventEmitter {
     }
   }
 
-  destroy() {
+  _destroy() {
     this._conversation.off('message');
   }
 
@@ -137,5 +161,14 @@ export default class Call extends EventEmitter {
         break;
       default:
     }
+  }
+  _handleAnswer() {
+    throw new Error('not implemented');
+  }
+  _handleRefusal() {
+    throw new Error('not implemented');
+  }
+  _handleCancelation() {
+    throw new Error('not implemented');
   }
 }

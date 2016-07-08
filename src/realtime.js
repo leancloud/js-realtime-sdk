@@ -25,7 +25,7 @@ export default class Realtime extends EventEmitter {
    * @param  {Boolean} [options.noBinary=false] 设置 WebSocket 使用字符串格式收发消息（默认为二进制格式）。
    *                                            适用于 WebSocket 实现不支持二进制数据格式的情况（如 React Native）
    * @param  {Boolean} [options.ssl=true] 使用 wss 进行连接
-   * @param  {Plugin[]} [options.plugins] 加载插件
+   * @param  {Plugin[]} [options.plugins] 加载插件（since 3.1.0）
    */
   constructor(options) {
     debug('initializing Realtime');

@@ -13,6 +13,7 @@
  * 如果使用了多个插件，这些 hook 会按照插件数组的顺序依次执行。前一个 Middleware 的返回值会作为参数传给后一个 Middleware。
  *
  * @interface Plugin
+ * @since 3.1.0
  */
 
 /* eslint-enable max-len */

@@ -26,13 +26,16 @@ const DEFAULT_RTCCONF = {
   ],
 };
 
-
 export default class WebRTCClient extends EventEmitter {
+  /**
+   * 无法直接实例化，请使用 {@link createWebRTCClient Realtime#createWebRTCClient} 创建新的 WebRTCClient
+   */
   constructor(id, options) {
     if (typeof id !== 'string') {
       throw new TypeError('id is not a string');
     }
     super();
+    /** @type {string}*/
     this.id = id;
     this.options = Object.assign({
       RTCConfiguration: DEFAULT_RTCCONF,
@@ -48,16 +51,29 @@ export default class WebRTCClient extends EventEmitter {
         }
         return false;
       });
+      /**
+       * 用户在其他客户端登录，当前客户端被服务端强行下线。详见文档「单点登录」章节。
+       * @event WebRTCClient#conflict
+       */
       imClient.on('conflict', (...payload) => this.emit('conflict', ...payload));
       return this;
     });
   }
 
+  /**
+   * 关闭客户端
+   * @return {Promise}
+   */
   close() {
     return this._imClient.close();
   }
 
-
+  /**
+   * 呼叫另一个用户
+   * @param  {string} targetId 用户 ID
+   * @param  {MediaStream} stream 本地流媒体，参见 {@link https://developer.mozilla.org/en-US/docs/Web/API/Media_Streams_API MediaStream}
+   * @return {Promise.<OutgoingCall>} 呼出通话
+   */
   call(targetId, stream) {
     if (typeof targetId !== 'string') {
       throw new TypeError('target id is not a string');
@@ -97,6 +113,11 @@ export default class WebRTCClient extends EventEmitter {
 
   _handleOffer(offer, conversation) {
     const incomingCall = new IncomingCall(offer, conversation, this.options.RTCConfiguration);
+    /**
+     * 收到其他用户的呼叫
+     * @event WebRTCClient#call
+     * @param {incomingCall} incomingCall 呼入通话
+     */
     this.emit('call', incomingCall);
   }
 }
