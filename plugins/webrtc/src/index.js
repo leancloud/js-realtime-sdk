@@ -5,6 +5,7 @@ import { Answer } from './signalings/answer';
 import { ICECandidate } from './signalings/ice-candidate';
 import { Refusal } from './signalings/refusal';
 import { Cancelation } from './signalings/cancelation';
+import { name } from '../package.json';
 
 const messageClasses = [
   Offer,
@@ -41,6 +42,7 @@ const onRealtimeCreate = realtime => {
  * realtime.createWebRTCClient(id);
  */
 export const WebRTCPlugin = {
+  name,
   messageClasses,
   onRealtimeCreate,
 };

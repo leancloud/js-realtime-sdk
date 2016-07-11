@@ -130,6 +130,7 @@ var require = require || function(id) {throw new Error('Unexpected required ' + 
         src: 'plugins/typed-messages/src/index.js',
         options: {
           plugins: [
+            json(),
             babel(Object.assign({}, babelConfigs, {
               exclude: 'node_modules/**',
             })),
@@ -155,6 +156,7 @@ var require = require || function(id) {throw new Error('Unexpected required ' + 
         src: 'plugins/webrtc/src/index.js',
         options: {
           plugins: [
+            json(),
             babel(Object.assign({}, babelConfigs, {
               exclude: 'node_modules/**',
             })),

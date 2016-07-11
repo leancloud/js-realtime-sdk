@@ -121,11 +121,12 @@ describe('Plugin', () => {
         region: REGION,
         pushUnread: false,
         plugins: [{
+          name: 'ErrorPlugin',
           onRealtimeCreate: () => {
             throw new Error('test');
           },
         }],
-      })).should.throw('test');
+      })).should.throw('test[ErrorPlugin]');
     });
     it('create IMClient should be rejected', () =>
       new Realtime({
@@ -133,11 +134,12 @@ describe('Plugin', () => {
         region: REGION,
         pushUnread: false,
         plugins: [{
+          name: 'ErrorPlugin',
           onIMClientCreate: () => {
             throw new Error('test');
           },
         }],
-      }).createIMClient().should.be.rejectedWith('test')
+      }).createIMClient().should.be.rejectedWith('test[ErrorPlugin]')
     );
     it('middleware error should be reported', () =>
       new Realtime({
@@ -145,12 +147,13 @@ describe('Plugin', () => {
         region: REGION,
         pushUnread: false,
         plugins: [{
+          name: 'ErrorPlugin',
           beforeMessageParse: () => {
             throw new Error('test');
           },
         }],
       })._messageParser.parse(new TextMessage('1').toJSON())
-        .should.be.rejectedWith('test')
+        .should.be.rejectedWith('test[ErrorPlugin]')
     );
     it('middleware return type mismatch should trigger a warning', () => {
       const spy = sinon.spy(console, 'warn');
@@ -160,6 +163,7 @@ describe('Plugin', () => {
           region: REGION,
           pushUnread: false,
           plugins: [{
+            name: 'ErrorPlugin',
             beforeMessageParse: () => Promise.resolve(),
           }],
         })._messageParser.parse(new TextMessage('1').toJSON()),
@@ -168,6 +172,7 @@ describe('Plugin', () => {
           region: REGION,
           pushUnread: false,
           plugins: [{
+            name: 'ErrorPlugin',
             beforeMessageParse: () => 1,
           }],
         })._messageParser.parse(new TextMessage('1').toJSON()),

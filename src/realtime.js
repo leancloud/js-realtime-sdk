@@ -46,7 +46,13 @@ export default class Realtime extends EventEmitter {
       (result, plugin) => {
         // eslint-disable-next-line no-restricted-syntax
         for (const hook in plugin) {
-          if (plugin.hasOwnProperty(hook)) {
+          if (plugin.hasOwnProperty(hook) && hook !== 'name') {
+            if (plugin.name) {
+              ensureArray(plugin[hook]).forEach(value => {
+                // eslint-disable-next-line no-param-reassign
+                value._pluginName = plugin.name;
+              });
+            }
             // eslint-disable-next-line no-param-reassign
             result[hook] = ensureArray(result[hook]).concat(plugin[hook]);
           }

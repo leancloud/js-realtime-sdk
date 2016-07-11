@@ -5,6 +5,7 @@ import { ImageMessage } from './image-message';
 import { AudioMessage } from './audio-message';
 import { VideoMessage } from './video-message';
 import { LocationMessage } from './location-message';
+import { name } from '../package.json';
 
 /**
  * TypedMessages 插件，使用后可支持接收 LeanCloud 提供的富媒体类型的消息
@@ -15,6 +16,7 @@ import { LocationMessage } from './location-message';
  * });
  */
 export const TypedMessagesPlugin = {
+  name,
   messageClasses: [
     FileMessage,
     ImageMessage,

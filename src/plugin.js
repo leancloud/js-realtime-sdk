@@ -19,6 +19,13 @@
 /* eslint-enable max-len */
 
 /**
+ * 插件名称，用于在日志中显示异常的插件
+ *
+ * @name Plugin.name
+ * @type string
+ */
+
+/**
  * 插件注册的消息类型
  *
  * @name Plugin.messageClasses
@@ -81,11 +88,11 @@ const checkType = middleware => param => {
   return Promise.resolve(param).then(middleware).then(tap(result => {
     if (result === undefined || result === null) {
       // eslint-disable-next-line max-len
-      return console.warn(`Middleware[${middleware.name || 'anonymous'}] param/return types not match. It returns ${result} while a ${param.constructor.name} expected.`);
+      return console.warn(`Middleware[${middleware._pluginName || 'anonymous plugin'}:${middleware.name || 'anonymous middleware'}] param/return types not match. It returns ${result} while a ${param.constructor.name} expected.`);
     }
     if (!(result instanceof constructor)) {
       // eslint-disable-next-line max-len
-      return console.warn(`Middleware[${middleware.name || 'anonymous'}] param/return types not match. It returns a ${result.constructor.name} while a ${param.constructor.name} expected.`);
+      return console.warn(`Middleware[${middleware._pluginName || 'anonymous plugin'}:${middleware.name || 'anonymous middleware'}] param/return types not match. It returns a ${result.constructor.name} while a ${param.constructor.name} expected.`);
     }
     return 0;
   }));
@@ -94,13 +101,28 @@ const checkType = middleware => param => {
 export const applyDecorators = (decorators, target) => {
   if (decorators) {
     for (const decorator of decorators) {
-      decorator(target);
+      try {
+        decorator(target);
+      } catch (error) {
+        if (decorator._pluginName) {
+          error.message += `[${decorator._pluginName}]`;
+        }
+        throw error;
+      }
     }
   }
 };
 
 export const applyMiddlewares = middlewares => target =>
   ensureArray(middlewares).reduce(
-    (previousPromise, middleware) => previousPromise.then(checkType(middleware)),
+    (previousPromise, middleware) => previousPromise
+      .then(checkType(middleware))
+      .catch(error => {
+        if (middleware._pluginName) {
+          // eslint-disable-next-line no-param-reassign
+          error.message += `[${middleware._pluginName}]`;
+        }
+        throw error;
+      }),
     Promise.resolve(target)
   );

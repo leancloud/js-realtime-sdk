@@ -43,7 +43,15 @@ npm install leancloud-realtime@2
 ----
 - [安装文档](https://leancloud.cn/docs/realtime_guide-js.html#安装和初始化)
 - [使用文档](https://leancloud.cn/docs/realtime_guide-js.html)
-- [API 文档](https://leancloud.github.io/js-realtime-sdk/docs/)
+- API 文档
+  - [leancloud-realtime](https://leancloud.github.io/js-realtime-sdk/docs/)
+  - [leancloud-realtime-plugin-typed-messages](https://leancloud.github.io/js-realtime-sdk/plugins/typed-messages/docs/)
+  - [leancloud-realtime-plugin-webrtc](https://leancloud.github.io/js-realtime-sdk/plugins/webrtc/docs/)
+
+Demo
+----
+- [Simple Chatroom](https://leancloud.github.io/js-realtime-sdk/demo/simple-chatroom/) ([src](https://github.com/leancloud/js-realtime-sdk/tree/master/demo/simple-chatroom))
+- [WebRTC 视频通话](https://leancloud.github.io/js-realtime-sdk/demo/video-calling/) ([src](https://github.com/leancloud/js-realtime-sdk/tree/master/demo/video-calling))
 
 支持
 ----
