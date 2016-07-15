@@ -1,6 +1,10 @@
 {
   "opts": {
-    "template": "node_modules/docdash"
+    "template": "node_modules/docdash",
+    "recurse": true
+  },
+  "source": {
+    "exclude": ["plugins/webrtc/src/signalings"]
   },
   "plugins": ["node_modules/jsdoc-ignore-future"],
   "ignoreFuture": {

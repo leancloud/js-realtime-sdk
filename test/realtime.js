@@ -131,7 +131,10 @@ describe('Realtime', () => {
     });
   });
   describe('register Message classes', () => {
-    const realtime = createRealtime();
+    let realtime;
+    before(() => {
+      realtime = createRealtime();
+    });
     it('should except a Message Class', () => {
       realtime.register(TextMessage);
     });

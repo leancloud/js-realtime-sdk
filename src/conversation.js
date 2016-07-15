@@ -1,5 +1,6 @@
 import EventEmitter from 'eventemitter3';
 import { decodeDate, keyRemap, union, difference } from './utils';
+import { applyDecorators } from './plugin';
 import IMClient from './im-client';
 import {
   GenericCommand,
@@ -104,6 +105,8 @@ export default class Conversation extends EventEmitter {
       event,
       payload => this._debug(`${event} event emitted.`, payload)
     ));
+    // onConversationCreate hook
+    applyDecorators(this._client._plugins.onConversationCreate, this);
   }
 
   set createdAt(value) {
@@ -511,17 +514,18 @@ export default class Conversation extends EventEmitter {
         })
       ),
     })).then(resCommand =>
-      resCommand.logsMessage.logs.map(log => {
-        const messageProps = {
-          id: log.msgId,
-          cid: this.id,
-          timestamp: new Date(log.timestamp.toNumber()),
-          from: log.from,
-        };
-        const message = this._client._messageParser.parse(log.data);
-        Object.assign(message, messageProps);
-        return message;
-      })
+      Promise.all(resCommand.logsMessage.logs.map(log =>
+        this._client._messageParser.parse(log.data).then(message => {
+          const messageProps = {
+            id: log.msgId,
+            cid: this.id,
+            timestamp: new Date(log.timestamp.toNumber()),
+            from: log.from,
+          };
+          Object.assign(message, messageProps);
+          return message;
+        })
+      ))
     );
   }
 

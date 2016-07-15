@@ -62,10 +62,9 @@ function main() {
   realtime = new AV.Realtime({
     appId: appId,
     appKey: appKey,
+    plugins: AV.TypedMessagesPlugin,
   });
-  // 注册文件类型消息  
-  realtime.register(AV.FileMessage);
-  // 创建聊天客户端  
+  // 创建聊天客户端
   realtime.createIMClient(clientId)
   .then(function(c) {
     showLog('服务器连接成功！');

@@ -15,6 +15,7 @@ import {
 import * as Errors from './errors';
 import throttle from 'lodash/throttle';
 import { tap, Cache, keyRemap, union, difference, trim } from './utils';
+import { applyDecorators } from './plugin';
 import { run as runSignatureFactory } from './signature-factory-runner';
 import { default as d } from 'debug';
 import { version as VERSION } from '../package.json';
@@ -55,6 +56,8 @@ export default class IMClient extends Client {
       event,
       payload => this._debug(`${event} event emitted.`, payload)
     ));
+    // onIMClientCreate hook
+    applyDecorators(this._plugins.onIMClientCreate, this);
   }
 
   _debug(...params) {
@@ -276,7 +279,10 @@ export default class IMClient extends Client {
         id, cid, fromPeerId, timestamp, transient,
       },
     } = originalMessage;
-    return this.getConversation(directMessage.cid).then(conversation => {
+    return Promise.all([
+      this.getConversation(directMessage.cid),
+      this._messageParser.parse(directMessage.msg),
+    ]).then(([conversation, message]) => {
       const messageProps = {
         id,
         cid,
@@ -284,7 +290,6 @@ export default class IMClient extends Client {
         from: fromPeerId,
         transient,
       };
-      const message = this._messageParser.parse(directMessage.msg);
       Object.assign(message, messageProps);
       conversation.lastMessage = message; // eslint-disable-line no-param-reassign
       conversation.lastMessageAt = message.timestamp; // eslint-disable-line no-param-reassign
@@ -487,7 +492,9 @@ export default class IMClient extends Client {
           throw new Error(`Parse query result failed: ${error.message}. Command: ${commandString}`);
         }
       })
-      .then(conversations => conversations.map(this._parseConversationFromRawData.bind(this)))
+      .then(conversations => Promise.all(conversations.map(
+        this._parseConversationFromRawData.bind(this)
+      )))
       .then(conversations => conversations.map(fetchedConversation => {
         let conversation = this._conversationCache.get(fetchedConversation.id);
         if (!conversation) {
@@ -533,16 +540,22 @@ export default class IMClient extends Client {
       c: 'creator',
       mu: 'mutedMembers',
     }, rawData);
-    if (data.lastMessage) {
-      data.lastMessage = this._messageParser.parse(data.lastMessage);
-      data.lastMessage.from = data.lastMessageFrom;
-      data.lastMessage.id = data.lastMessageId;
-      data.lastMessage.timestamp = new Date(data.lastMessageTimestamp);
-      delete data.lastMessageFrom;
-      delete data.lastMessageId;
-      delete data.lastMessageTimestamp;
-    }
-    return new Conversation(data, this);
+    return Promise.resolve().then(() => {
+      if (data.lastMessage) {
+        return this._messageParser.parse(data.lastMessage).then(
+          message => {
+            data.lastMessage = message;
+            data.lastMessage.from = data.lastMessageFrom;
+            data.lastMessage.id = data.lastMessageId;
+            data.lastMessage.timestamp = new Date(data.lastMessageTimestamp);
+            delete data.lastMessageFrom;
+            delete data.lastMessageId;
+            delete data.lastMessageTimestamp;
+          }
+        );
+      }
+      return Promise.resolve();
+    }).then(() => new Conversation(data, this));
   }
 
   /**

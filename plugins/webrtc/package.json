@@ -1,0 +1,26 @@
+{
+  "name": "leancloud-realtime-plugin-webrtc",
+  "version": "1.0.0",
+  "description": "WebRTC for LeanCloud Realtime",
+  "main": "dist/webrtc.js",
+  "directories": {
+    "test": "test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/leancloud/js-realtime-sdk.git"
+  },
+  "keywords": [
+    "leancloud",
+    "realtime",
+    "webrtc"
+  ],
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/leancloud/js-realtime-sdk/issues"
+  },
+  "homepage": "https://github.com/leancloud/js-realtime-sdk#readme",
+  "peerDependencies": {
+    "leancloud-realtime": "^3.1.0"
+  }
+}

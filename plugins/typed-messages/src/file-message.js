@@ -8,7 +8,6 @@ import inherit from 'inherit';
 
 export const FileMessage = inherit(TypedMessage, /** @lends FileMessage.prototype */ {
   /**
-   * 需要安装 [leancloud-realtime-typed-messages]{@link https://www.npmjs.com/package/leancloud-realtime-typed-messages} package
    * @constructs
    * @extends TypedMessage
    * @param  {AV.File} file LeanCloud 存储 SDK 中的 AV.File 实例，且必须是已经保存到服务端上的 File 实例

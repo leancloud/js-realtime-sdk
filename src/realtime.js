@@ -4,7 +4,8 @@ import { default as d } from 'debug';
 import EventEmitter from 'eventemitter3';
 import axios from 'axios';
 import uuid from 'uuid';
-import { tap, Cache, trim, internal } from './utils';
+import { tap, Cache, trim, internal, ensureArray } from './utils';
+import { applyDecorators } from './plugin';
 import Client from './client';
 import IMClient from './im-client';
 import MessageParser from './message-parser';
@@ -24,6 +25,7 @@ export default class Realtime extends EventEmitter {
    * @param  {Boolean} [options.noBinary=false] 设置 WebSocket 使用字符串格式收发消息（默认为二进制格式）。
    *                                            适用于 WebSocket 实现不支持二进制数据格式的情况（如 React Native）
    * @param  {Boolean} [options.ssl=true] 使用 wss 进行连接
+   * @param  {Plugin[]} [options.plugins] 加载插件（since 3.1.0）
    */
   constructor(options) {
     debug('initializing Realtime');
@@ -40,11 +42,34 @@ export default class Realtime extends EventEmitter {
     this._id = uuid.v4();
     this._cache = new Cache('endpoints');
     this._clients = {};
-    this._messageParser = new MessageParser();
+    this._plugins = ensureArray(options.plugins).reduce(
+      (result, plugin) => {
+        // eslint-disable-next-line no-restricted-syntax
+        for (const hook in plugin) {
+          if (plugin.hasOwnProperty(hook) && hook !== 'name') {
+            if (plugin.name) {
+              ensureArray(plugin[hook]).forEach(value => {
+                // eslint-disable-next-line no-param-reassign
+                value._pluginName = plugin.name;
+              });
+            }
+            // eslint-disable-next-line no-param-reassign
+            result[hook] = ensureArray(result[hook]).concat(plugin[hook]);
+          }
+        }
+        return result;
+      },
+      {}
+    );
+    this._messageParser = new MessageParser(this._plugins);
     this.register([
       Message,
       TextMessage,
     ]);
+    // onRealtimeCreate hook
+    applyDecorators(this._plugins.onRealtimeCreate, this);
+    // messageClasses alias
+    this.register(ensureArray(this._plugins.messageClasses));
   }
 
   _open() {
@@ -282,6 +307,7 @@ export default class Realtime extends EventEmitter {
     const promise = this._open().then(connection => {
       const client = new IMClient(id, clientOptions, connection, {
         _messageParser: this._messageParser,
+        _plugins: this._plugins,
       });
       connection.on('reconnect', () => client._open(this._options.appId, tag, this._id, true));
       client.on('close', () => this._deregister(client), this);
@@ -297,10 +323,6 @@ export default class Realtime extends EventEmitter {
     return promise;
   }
 
-  createPushClient() {
-    return this._open();
-  }
-
   /**
    * 注册消息类
    *
@@ -311,7 +333,6 @@ export default class Realtime extends EventEmitter {
    * @throws {TypeError} 如果 messageClass 没有实现 {@link AVMessage} 接口则抛出异常
    */
   register(messageClass) {
-    const messageClasses = [].concat(messageClass);
-    return messageClasses.map(this._messageParser.register.bind(this._messageParser));
+    return ensureArray(messageClass).map(this._messageParser.register.bind(this._messageParser));
   }
 }

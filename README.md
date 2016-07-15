@@ -43,7 +43,15 @@ npm install leancloud-realtime@2
 ----
 - [安装文档](https://leancloud.cn/docs/realtime_guide-js.html#安装和初始化)
 - [使用文档](https://leancloud.cn/docs/realtime_guide-js.html)
-- [API 文档](https://leancloud.github.io/js-realtime-sdk/docs/)
+- API 文档
+  - [leancloud-realtime](https://leancloud.github.io/js-realtime-sdk/docs/)
+  - [leancloud-realtime-plugin-typed-messages](https://leancloud.github.io/js-realtime-sdk/plugins/typed-messages/docs/)
+  - [leancloud-realtime-plugin-webrtc](https://leancloud.github.io/js-realtime-sdk/plugins/webrtc/docs/)
+
+Demo
+----
+- [Simple Chatroom](https://leancloud.github.io/js-realtime-sdk/demo/simple-chatroom/) ([src](https://github.com/leancloud/js-realtime-sdk/tree/master/demo/simple-chatroom))
+- [WebRTC 视频通话](https://leancloud.github.io/js-realtime-sdk/demo/video-calling/) ([src](https://github.com/leancloud/js-realtime-sdk/tree/master/demo/video-calling))
 
 支持
 ----
@@ -69,8 +77,9 @@ npm install leancloud-realtime@2
 ```
 .
 ├── demo
-├── deploy.sh               // 部署 gh-pages 分支
-├── dist                    // 打包产出
+├── deploy.sh                 // 部署 gh-pages 分支
+├── release.sh                // 部署 dist 分支
+├── dist                      // 打包产出
 │   ├── realtime.browser.js     // 浏览器用
 │   ├── realtime.browser.min.js // 浏览器用(uglified)
 │   └── realtime.js             // node 用
@@ -78,13 +87,14 @@ npm install leancloud-realtime@2
 │   ├── message-compiled.js     // 使用 pbjs 生成的 message 类
 │   ├── message.js              // ES6 wrapper
 │   └── message.proto           // proto 原始文件
-├── release.sh                // 部署 dist 分支
 ├── src                       // 源码
 │   └── index.js                // 打包入口
 ├── test                      // 测试用例
 │   ├── browser                 // 浏览器测试入口
 │   └── index.js                // 测试入口
-└── typed-messages            // leancloud-realtime-typed-messages package
+└── plugins
+    ├── typed-messages          // leancloud-realtime-plugin-typed-messages package
+    └── webrtc                  // leancloud-realtime-plugin-webrtc package
 ```
 
 ### Architecture
@@ -161,5 +171,4 @@ Release Process Workflow
 0. 使用 GitHub 基于 dist 分支生成 pre-release 包（for bower）
 0. Fetch and checkout remote `dist` branch 并确认该提交的内容是即将发布的版本
 0. npm publish（`npm publish`，需 npm 协作者身份），如果是 pre-release 版本需要带 next tag
-0. `grunt upload` 上传到 CDN
-0. 发布 leancloud-realtime-typed-messages（`cd typed-messages && npm publish`）
+0. 如有更新，在 npm 上发布各个 plugin

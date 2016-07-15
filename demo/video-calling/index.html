@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>LeanCloud Video Calling App</title>
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <link rel="stylesheet" href="index.css"/>
+</head>
+<body id="app">
+  <form onsubmit="return false;">
+    <div v-if="!client">
+      <input type="text" v-model="id" placeholder="ID" required autofocus/>
+      <button type="submit" v-on:click="login" v-show="false">Login</button>
+    </div>
+    <template v-else>
+      <div id="client">{{ client.id }}</div>
+      <div id="call" v-if="state === 'ready'">
+        <input type="text" v-model="targetId" placeholder="Target ID" required autofocus/>
+        <br/>
+        <button type="submit" v-on:click="call"><i class="material-icons">call</i></button>
+      </div>
+      <template v-if="state === 'connected' || state === 'calling'">
+        <div id="controller">
+          {{ targetId }}
+          <button v-on:click="hangup" class="button-error"><i class="material-icons">call_end</i></button>
+          <div v-if="state === 'connected'">
+            <button v-on:click="toggleCamera" :class="{ 'button-active': !localVideoEnabled }"><i class="material-icons">videocam_off</i></button>
+            <button v-on:click="toggleMic" :class="{ 'button-active': !localAudioEnabled }"><i class="material-icons">mic_off</i></button>
+            <button v-on:click="toggleMuted" :class="{ 'button-active': !remoteAudioEnabled }"><i class="material-icons">volume_off</i></button>
+          </div>
+        </div>
+      </template>
+    </template>
+  </form>
+  <div id="incoming-call" v-if="incomingCall">
+    {{ incomingCall.from }}
+    <div>
+      <button v-on:click="accept" class="button-success"><i class="material-icons">call</i></button>
+      <button v-on:click="decline" class="button-error"><i class="material-icons">call_end</i></button>
+    </div>
+  </div>
+  <div id="camera-box" v-show="state === 'connected' || state === 'calling'">
+    <video id="remote_video" autoplay></video>
+    <video id="local_video" autoplay muted></video>
+  </div>
+  <script src="//cdn.jsdelivr.net/vue/1.0.24/vue.min.js"></script>
+  <script src="//webrtc.github.io/adapter/adapter-latest.js"></script>
+  <script src="../../dist/realtime.browser.min.js"></script>
+  <script src="../../plugins/webrtc/dist/webrtc.min.js"></script>
+  <script src="index.js"></script>
+</body>
+</html>

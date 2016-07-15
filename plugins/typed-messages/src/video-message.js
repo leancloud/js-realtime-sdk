@@ -3,18 +3,17 @@ import { messageType } from './realtime';
 import inherit from 'inherit';
 
 /**
- * 需要安装 [leancloud-realtime-typed-messages]{@link https://www.npmjs.com/package/leancloud-realtime-typed-messages} package
  * 构造方法参数同 {@link FileMessage}
  * @class
  * @extends FileMessage
  */
-export const AudioMessage = inherit(FileMessage);
+export const VideoMessage = inherit(FileMessage);
 
 /**
  * @name TYPE
- * @memberof AudioMessage
+ * @memberof VideoMessage
  * @type Number
  * @static
  * @const
  */
-messageType(-3)(AudioMessage);
+messageType(-4)(VideoMessage);
