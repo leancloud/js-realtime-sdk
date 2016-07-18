@@ -1,3 +1,39 @@
+<a name="3.1.0"></a>
+# 3.1.0 (2016-07-18)
+同时发布
+- leancloud-realtime-plugin-typed-messages 1.0.0
+- leancloud-realtime-plugin-webrtc 1.0.0-beta.1
+
+
+### Features
+
+* **Plugin:** 支持通过插件来对功能进行扩展，详细说明请参考 [《JavaScript 实时通信开发指南 - 插件》](https://leancloud.cn/docs/realtime_guide-js.html#插件)。
+* **Plugin/TypedMessage:** leancloud-realtime-typed-messages 包改名为 leancloud-realtime-plugin-typed-messages，新增 export `TypedMessagesPlugin`：
+
+  ```javascript
+  const { Realtime } = require('leancloud-realtime');
+
+  // before (use package leancloud-realtime-typed-messages)
+  const { AudioMessage, FileMessage, ImageMessage, LocationMessage, VideoMessage } = require('leancloud-realtime-typed-messages');
+  const realtime = new Realtime({
+    appId: 'APP_ID',
+  });
+  realtime.register([AudioMessage, FileMessage, ImageMessage, LocationMessage, VideoMessage]);
+
+  // after (use package leancloud-realtime-plugin-typed-messages)
+  const { TypedMessagesPlugin } = require('leancloud-realtime-plugin-typed-messages');
+  const realtime = new Realtime({
+    appId: 'APP_ID',
+    plugins: [TypedMessagesPlugin],
+  });
+
+  ```
+
+  详细的安装与初始化说明请参考 [《JavaScript 实时通信开发指南 - 富媒体消息插件》](https://leancloud.cn/docs/realtime_guide-js.html#富媒体消息插件)。
+* **Plugin/WebRTC:** 发布了 WebRTC 插件的 beta 版本。该插件能帮助你实现 Web 端点对点实时音视频通话功能。详细的文档请参考 [《JavaScript 实时通讯 WebRTC 插件使用指南》](https://leancloud.cn/docs/webrtc-js.html)。
+
+
+
 <a name="3.0.2"></a>
 ## 3.0.2 (2016-06-30)
 
