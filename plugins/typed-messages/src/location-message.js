@@ -1,12 +1,12 @@
+import inherit from 'inherit';
 import { GeoPoint } from './storage';
 import {
   TypedMessage,
   messageType,
   messageField,
 } from './realtime';
-import inherit from 'inherit';
 
-export const LocationMessage = inherit(TypedMessage, /** @lends LocationMessage.prototype */ {
+const LocationMessage = inherit(TypedMessage, /** @lends LocationMessage.prototype */ {
   /**
    * @constructs
    * @extends TypedMessage
@@ -45,3 +45,5 @@ export const LocationMessage = inherit(TypedMessage, /** @lends LocationMessage.
  */
 messageType(-5)(LocationMessage);
 messageField('_lcloc')(LocationMessage);
+
+export { LocationMessage as default };

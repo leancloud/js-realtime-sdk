@@ -1,12 +1,12 @@
+import inherit from 'inherit';
 import { File } from './storage';
 import {
   TypedMessage,
   messageType,
   messageField,
 } from './realtime';
-import inherit from 'inherit';
 
-export const FileMessage = inherit(TypedMessage, /** @lends FileMessage.prototype */ {
+const FileMessage = inherit(TypedMessage, /** @lends FileMessage.prototype */ {
   /**
    * @constructs
    * @extends TypedMessage
@@ -71,3 +71,5 @@ export const FileMessage = inherit(TypedMessage, /** @lends FileMessage.prototyp
  */
 messageType(-6)(FileMessage);
 messageField('_lcfile')(FileMessage);
+
+export { FileMessage as default };

@@ -1,10 +1,10 @@
 /** @module leancloud-realtime-plugin-typed-messages */
 
-import { FileMessage } from './file-message';
-import { ImageMessage } from './image-message';
-import { AudioMessage } from './audio-message';
-import { VideoMessage } from './video-message';
-import { LocationMessage } from './location-message';
+import FileMessage from './file-message';
+import ImageMessage from './image-message';
+import AudioMessage from './audio-message';
+import VideoMessage from './video-message';
+import LocationMessage from './location-message';
 import { name } from '../package.json';
 
 /**

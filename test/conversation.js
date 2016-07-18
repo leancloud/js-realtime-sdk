@@ -1,6 +1,6 @@
+import uuid from 'uuid';
 import Realtime from '../src/realtime';
 import { tap } from '../src/utils';
-import uuid from 'uuid';
 import {
   GenericCommand,
   ConvCommand,

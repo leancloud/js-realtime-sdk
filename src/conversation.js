@@ -1,4 +1,7 @@
 import EventEmitter from 'eventemitter3';
+import isEmpty from 'lodash/isEmpty';
+import isPlainObject from 'lodash/isPlainObject';
+import { default as d } from 'debug';
 import { decodeDate, keyRemap, union, difference } from './utils';
 import { applyDecorators } from './plugin';
 import IMClient from './im-client';
@@ -9,12 +12,9 @@ import {
   DirectCommand,
   LogsCommand,
 } from '../proto/message';
-import { run as runSignatureFactory } from './signature-factory-runner';
+import runSignatureFactory from './signature-factory-runner';
 import { createError } from './errors';
 import Message from './messages/message';
-import isEmpty from 'lodash/isEmpty';
-import isPlainObject from 'lodash/isPlainObject';
-import { default as d } from 'debug';
 
 const debug = d('LC:Conversation');
 

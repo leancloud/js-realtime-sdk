@@ -1,3 +1,5 @@
+import throttle from 'lodash/throttle';
+import { default as d } from 'debug';
 import Client from './client';
 import Conversation from './conversation';
 import ConversationQuery from './conversation-query';
@@ -13,11 +15,9 @@ import {
   OpType,
 } from '../proto/message';
 import * as Errors from './errors';
-import throttle from 'lodash/throttle';
 import { tap, Cache, keyRemap, union, difference, trim } from './utils';
 import { applyDecorators } from './plugin';
-import { run as runSignatureFactory } from './signature-factory-runner';
-import { default as d } from 'debug';
+import runSignatureFactory from './signature-factory-runner';
 import { version as VERSION } from '../package.json';
 
 const debug = d('LC:IMClient');

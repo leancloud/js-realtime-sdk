@@ -1,5 +1,5 @@
-import { tap } from './utils';
 import { default as d } from 'debug';
+import { tap } from './utils';
 
 const debug = d('LC:SignatureFactoryRunner');
 
@@ -21,7 +21,7 @@ function _validateSignature(signatureResult = {}) {
   };
 }
 
-export const run = (signatureFactory, params) =>
+export default (signatureFactory, params) =>
   Promise.resolve()
     .then(() => {
       debug(`call signatureFactory with ${params}`);

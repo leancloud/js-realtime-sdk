@@ -1,6 +1,6 @@
 import StateMachine from 'javascript-state-machine';
 
-export const createCallStateMachine = () => StateMachine.create({
+export default () => StateMachine.create({
   initial: 'calling',
   events: [{
     name: 'connect',

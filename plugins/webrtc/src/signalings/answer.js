@@ -1,5 +1,5 @@
-import { Signaling } from './signaling';
+import Signaling from './signaling';
 import { messageType } from '../realtime';
 
 @messageType(-102)
-export class Answer extends Signaling {}
+export default class Answer extends Signaling {}
