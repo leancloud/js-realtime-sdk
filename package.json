@@ -79,7 +79,7 @@
     "lodash": "^4.6.0",
     "protobufjs": "^5.0.1",
     "uuid": "^2.0.1",
-    "ws": "^1.1.0"
+    "ws": "^1.1.1"
   },
   "browser": {
     "ws": "./src/browser/ws.js",
