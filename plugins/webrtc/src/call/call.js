@@ -1,9 +1,9 @@
-import { createCallStateMachine } from './call-state-machine';
 import EventEmitter from 'eventemitter3';
-import { Answer } from '../signalings/answer';
-import { ICECandidate } from '../signalings/ice-candidate';
-import { Refusal } from '../signalings/refusal';
-import { Cancelation } from '../signalings/cancelation';
+import createCallStateMachine from './call-state-machine';
+import Answer from '../signalings/answer';
+import ICECandidate from '../signalings/ice-candidate';
+import Refusal from '../signalings/refusal';
+import Cancelation from '../signalings/cancelation';
 
 export default class Call extends EventEmitter {
   /**

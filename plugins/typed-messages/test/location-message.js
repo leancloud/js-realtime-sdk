@@ -1,7 +1,7 @@
 import 'should';
 import 'should-sinon';
-import { LocationMessage } from '../src/';
 import { GeoPoint } from 'leancloud-storage';
+import { LocationMessage } from '../src/';
 
 describe('LocationMessage', () => {
   it('param check', () => {

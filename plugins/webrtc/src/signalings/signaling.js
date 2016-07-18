@@ -1,9 +1,9 @@
-import { TypedMessage, messageField } from '../realtime';
 import inherit from 'inherit';
+import { TypedMessage, messageField } from '../realtime';
 
 // use dynamic class inherit helper instead of ES class syntex
 // to prevent TypedMessage from being included in the bundler
-export const Signaling = inherit(TypedMessage, {
+const Signaling = inherit(TypedMessage, {
   __constructor(payload) {
     this.__base();
     this.payload = payload;
@@ -12,3 +12,5 @@ export const Signaling = inherit(TypedMessage, {
 });
 
 messageField('payload')(Signaling);
+
+export { Signaling as default };

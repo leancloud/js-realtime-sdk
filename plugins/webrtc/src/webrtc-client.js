@@ -1,7 +1,7 @@
 import EventEmitter from 'eventemitter3';
 import OutgoingCall from './call/outgoing-call';
 import IncomingCall from './call/incoming-call';
-import { Offer } from './signalings/offer';
+import Offer from './signalings/offer';
 
 const DEFAULT_RTCCONF = {
   iceServers: [

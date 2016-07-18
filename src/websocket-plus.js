@@ -1,12 +1,12 @@
 // WebSocket with auto reconnecting feature, backup endpoint and EventEmitter interface.
 
-import { tryAll } from './utils';
-
 import { default as d } from 'debug';
 import EventEmitter from 'eventemitter3';
 import StateMachine from 'javascript-state-machine';
 
 import WebSocket from 'ws';
+
+import { tryAll } from './utils';
 
 const debug = d('LC:WebSocketPlus');
 

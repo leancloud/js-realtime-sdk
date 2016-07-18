@@ -1,7 +1,7 @@
+import { default as d } from 'debug';
 import WebSocketPlus from './websocket-plus';
 import { createError } from './errors';
 import { GenericCommand, CommandType } from '../proto/message';
-import { default as d } from 'debug';
 import { trim } from './utils';
 
 const debug = d('LC:Connection');

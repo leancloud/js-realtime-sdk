@@ -9,4 +9,5 @@ export const wait = time => new Promise(resolve => setTimeout(resolve, time));
 
 export const hold = time => result => wait(time).then(() => result);
 
+/* global window */
 export const sinon = (typeof window !== 'undefined' && window.sinon) || require('sinon');

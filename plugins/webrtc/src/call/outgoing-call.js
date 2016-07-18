@@ -1,5 +1,5 @@
 import Call from './call';
-import { Cancelation } from '../signalings/cancelation';
+import Cancelation from '../signalings/cancelation';
 
 export default class OutgoingCall extends Call {
   /**

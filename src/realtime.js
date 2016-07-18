@@ -1,9 +1,9 @@
-import Connection from './connection';
-import * as Errors from './errors';
 import { default as d } from 'debug';
 import EventEmitter from 'eventemitter3';
 import axios from 'axios';
 import uuid from 'uuid';
+import Connection from './connection';
+import * as Errors from './errors';
 import { tap, Cache, trim, internal, ensureArray } from './utils';
 import { applyDecorators } from './plugin';
 import Client from './client';
@@ -46,7 +46,7 @@ export default class Realtime extends EventEmitter {
       (result, plugin) => {
         // eslint-disable-next-line no-restricted-syntax
         for (const hook in plugin) {
-          if (plugin.hasOwnProperty(hook) && hook !== 'name') {
+          if ({}.hasOwnProperty.call(plugin, hook) && hook !== 'name') {
             if (plugin.name) {
               ensureArray(plugin[hook]).forEach(value => {
                 // eslint-disable-next-line no-param-reassign

@@ -1,12 +1,12 @@
 import 'should';
 import 'should-sinon';
+import { File } from 'leancloud-storage';
 import {
   FileMessage,
   ImageMessage,
   AudioMessage,
   VideoMessage,
 } from '../src/';
-import { File } from 'leancloud-storage';
 
 describe('FileMessage and subclasses', () => {
   let file;

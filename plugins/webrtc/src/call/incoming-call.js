@@ -1,6 +1,6 @@
 import Call from './call';
-import { Answer } from '../signalings/answer';
-import { Refusal } from '../signalings/refusal';
+import Answer from '../signalings/answer';
+import Refusal from '../signalings/refusal';
 
 export default class IncomingCall extends Call {
   /**

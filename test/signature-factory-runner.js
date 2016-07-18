@@ -1,10 +1,10 @@
 import 'should';
 import 'should-sinon';
-import { run as runSignatureFactory } from '../src/signature-factory-runner';
+import runSignatureFactory from '../src/signature-factory-runner';
 
 import { sinon } from './test-utils';
 
-describe('with signatureFactory', () => {
+describe('Run SignatureFactory', () => {
   it('normal case', () => {
     const signatureFactory = sinon.stub().returns({
       signature: 'signature',

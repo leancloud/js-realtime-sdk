@@ -95,7 +95,7 @@ const removeNull = obj => {
   const object = Object.assign({}, obj);
   // eslint-disable-next-line no-restricted-syntax
   for (const prop in object) {
-    if (object.hasOwnProperty(prop)) {
+    if ({}.hasOwnProperty.call(object, prop)) {
       const value = object[prop];
       if (value === null) {
         delete object[prop];
