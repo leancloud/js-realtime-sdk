@@ -100,16 +100,10 @@ var vm = new Vue({
     },
     reset() {
       this.state = 'ready';
-      var remoteVideo = document.getElementById('remote_video');
       var localVideo = document.getElementById('local_video');
-      if (remoteVideo.srcObject) {
-        remoteVideo.srcObject.getTracks().forEach(track => track.stop());
-      }
       if (localVideo.srcObject) {
         localVideo.srcObject.getTracks().forEach(track => track.stop());
       }
-      remoteVideo.src = '';
-      localVideo.src = '';
       delete this.localStream;
       this.localVideoEnabled = true;
       this.localAudioEnabled = true;
