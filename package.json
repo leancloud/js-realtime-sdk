@@ -84,7 +84,7 @@
   "browser": {
     "ws": "./src/browser/ws.js",
     "sinon": false,
-    "dist/realtime.js": "dist/realtime.browser.js"
+    "./dist/realtime.js": "./dist/realtime.browser.js"
   },
   "config": {
     "ghooks": {
