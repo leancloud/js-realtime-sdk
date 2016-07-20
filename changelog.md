@@ -1,3 +1,13 @@
+<a name="3.1.1"></a>
+## 3.1.1 (2016-07-20)
+
+
+### Bug Fixes
+
+* **package:** 修复使用 webpack 等 bundlers 无法加载 leancloud-realtime 的问题 ([a8abdec](https://github.com/leancloud/js-realtime-sdk/commit/a8abdec))
+
+
+
 <a name="3.1.0"></a>
 # 3.1.0 (2016-07-18)
 同时发布
