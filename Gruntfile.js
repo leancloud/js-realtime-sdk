@@ -39,7 +39,7 @@ var require = require || function(id) {throw new Error('Unexpected required ' + 
     platform: 'Windows 7'
   }, {
     browserName: 'iPhone',
-    version: '8.0'
+    version: '8.4'
   }, {
     browserName: 'chrome',
     version: 'latest',
