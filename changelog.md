@@ -1,3 +1,13 @@
+<a name="3.1.2"></a>
+## 3.1.2 (2016-07-26)
+
+
+### Bug Fixes
+
+* **ConversationQuery:** 修复会话查询排序相关方法（`ascending`, `addAscending`, `descending`, `addDescending`）没有生效的问题 ([#312](https://github.com/leancloud/js-realtime-sdk/issues/312)) ([cb86299](https://github.com/leancloud/js-realtime-sdk/commit/cb86299))
+
+
+
 <a name="3.1.1"></a>
 ## 3.1.1 (2016-07-20)
 
