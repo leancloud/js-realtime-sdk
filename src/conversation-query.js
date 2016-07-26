@@ -52,6 +52,7 @@ export default class ConversationQuery {
     };
     if (typeof this._skip !== 'undefined') json.skip = this._skip;
     if (typeof this._limit !== 'undefined') json.limit = this._limit;
+    if (typeof this._order !== 'undefined') json.sort = this._order;
     debug(json);
     return json;
   }
@@ -319,7 +320,7 @@ export default class ConversationQuery {
     } else {
       this._order = `-${key}`;
     }
-    return key;
+    return this;
   }
 
   /**
