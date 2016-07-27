@@ -18,6 +18,7 @@ import * as Errors from './errors';
 import { tap, Expirable, Cache, keyRemap, union, difference, trim, internal } from './utils';
 import { applyDecorators } from './plugin';
 import runSignatureFactory from './signature-factory-runner';
+import { MessageStatus } from './messages/message';
 import { version as VERSION } from '../package.json';
 
 const debug = d('LC:IMClient');
@@ -292,6 +293,7 @@ export default class IMClient extends Client {
         transient,
       };
       Object.assign(message, messageProps);
+      message._setStatus(MessageStatus.SENT);
       conversation.lastMessage = message; // eslint-disable-line no-param-reassign
       conversation.lastMessageAt = message.timestamp; // eslint-disable-line no-param-reassign
       conversation.unreadMessagesCount++; // eslint-disable-line no-param-reassign
@@ -582,6 +584,7 @@ export default class IMClient extends Client {
             data.lastMessage.from = data.lastMessageFrom;
             data.lastMessage.id = data.lastMessageId;
             data.lastMessage.timestamp = new Date(data.lastMessageTimestamp);
+            data.lastMessage._setStatus(MessageStatus.SENT);
             delete data.lastMessageFrom;
             delete data.lastMessageId;
             delete data.lastMessageTimestamp;

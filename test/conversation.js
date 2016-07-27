@@ -5,7 +5,7 @@ import {
   GenericCommand,
   ConvCommand,
 } from '../proto/message';
-import Message from '../src/messages/message';
+import Message, { MessageStatus } from '../src/messages/message';
 import TextMessage from '../src/messages/text-message';
 
 import {
@@ -170,6 +170,7 @@ describe('Conversation', () => {
       conversation.queryMessages().then(messages => {
         messages.should.be.an.Array();
         messages[0].should.be.instanceof(Message);
+        messages[0].status.should.be.eql(MessageStatus.SENT);
       })
     );
     it('with limit', () =>

@@ -1,7 +1,7 @@
 import 'should';
 import 'should-sinon';
 import Realtime from '../src/realtime';
-import Message from '../src/messages/message';
+import Message, { MessageStatus } from '../src/messages/message';
 import TypedMessage from '../src/messages/typed-message';
 import TextMessage from '../src/messages/text-message';
 import { messageType, messageField, IE10Compatible } from '../src/messages/helpers';
@@ -42,6 +42,28 @@ describe('Messages', () => {
       });
     });
   });
+
+  describe('message status', () => {
+    before(function () {
+      this.message = new Message();
+    });
+    it('should default to none', function () {
+      this.message.status.should.eql(MessageStatus.NONE);
+    });
+    it('should be readonly', function () {
+      (() => {
+        this.message.status = MessageStatus.SENT;
+      }).should.throw();
+    });
+    it('_setStatus should work', function () {
+      this.message._setStatus(MessageStatus.SENT);
+      this.message.status.should.eql(MessageStatus.SENT);
+    });
+    it('_setStatus should only accept MessageStatus', function () {
+      (() => this.message._setStatus(0)).should.throw(/Invalid/);
+    });
+  });
+
   describe('TextMessage', () => {
     it('param check', () => {
       (() => new TextMessage({})).should.throw(TypeError);
@@ -127,26 +149,31 @@ describe('Messages', () => {
       zwang.close(),
     ]));
 
-    it('sending message', () =>
-      Promise.all([
+    it('sending message', () => {
+      const message = new Message('hello');
+      const promise = Promise.all([
         listen(conversationZwang, 'message'),
         listen(zwang, 'message'),
-        conversationWchen.send(new Message('hello')),
+        conversationWchen.send(message),
       ]).then(messages => {
         const [
           [receivedMessage],
           [clientReceivedMessage, clientReceivedConversation],
           sentMessage,
         ] = messages;
+        sentMessage.status.should.eql(MessageStatus.SENT);
         receivedMessage.id.should.eql(sentMessage.id);
         receivedMessage.content.should.eql(sentMessage.content);
+        receivedMessage.status.should.eql(MessageStatus.SENT);
         clientReceivedMessage.id.should.eql(sentMessage.id);
         clientReceivedConversation.id.should.eql(conversationWchen.id);
         conversationZwang.lastMessage.content.should.eql(sentMessage.content);
         conversationWchen.lastMessage.content.should.eql(sentMessage.content);
         conversationZwang.unreadMessagesCount.should.eql(1);
-      })
-    );
+      });
+      message.status.should.eql(MessageStatus.SENDING);
+      return promise;
+    });
     it('sending typed message', () => {
       const receivePromise = listen(conversationZwang, 'message');
       const sendPromise = conversationWchen.send(
@@ -166,7 +193,10 @@ describe('Messages', () => {
       message.setTransient(true);
       // transient message 不返回 ack
       // 这里确保成功 resolve
-      return conversationZwang.send(message);
+      return conversationZwang.send(message).then(msg => {
+        msg.should.be.instanceof(Message);
+        msg.status.should.eql(MessageStatus.SENT);
+      });
     });
   });
 });

@@ -15,7 +15,7 @@ import {
 } from '../proto/message';
 import runSignatureFactory from './signature-factory-runner';
 import { createError } from './errors';
-import Message from './messages/message';
+import Message, { MessageStatus } from './messages/message';
 
 const debug = d('LC:Conversation');
 
@@ -468,6 +468,7 @@ export default class Conversation extends EventEmitter {
       cid: this.id,
       from: this._client.id,
     });
+    message._setStatus(MessageStatus.SENDING);
     let msg = message.toJSON();
     if (typeof msg !== 'string') {
       msg = JSON.stringify(msg);
@@ -504,10 +505,15 @@ export default class Conversation extends EventEmitter {
         });
         this.lastMessage = message;
         this.lastMessageAt = message.timestamp;
-        return message;
       });
     }
-    return sendPromise;
+    return sendPromise.then(() => {
+      message._setStatus(MessageStatus.SENT);
+      return message;
+    }, error => {
+      message._setStatus(MessageStatus.FAILED);
+      throw error;
+    });
   }
 
   /**
@@ -559,6 +565,7 @@ export default class Conversation extends EventEmitter {
             from: log.from,
           };
           Object.assign(message, messageProps);
+          message._setStatus(MessageStatus.SENT);
           return message;
         })
       ))

@@ -1,5 +1,34 @@
 import uuid from 'uuid';
 
+
+/**
+ * 消息状态枚举
+ * @enum {Symbol}
+ * @memberof module:leancloud-realtime
+ */
+const MessageStatus = {
+  /** 初始状态、未知状态 */
+  NONE: Symbol('none'),
+  /** 正在发送 */
+  SENDING: Symbol('sending'),
+  /** 已发送 */
+  SENT: Symbol('sent'),
+  /** 已送达 */
+  DELIVERED: Symbol('delivered'),
+  /** 发送失败 */
+  FAILED: Symbol('failed'),
+};
+Object.freeze(MessageStatus);
+
+const rMessageStatus = {
+  [MessageStatus.NONE]: true,
+  [MessageStatus.SENDING]: true,
+  [MessageStatus.SENT]: true,
+  [MessageStatus.DELIVERED]: true,
+  [MessageStatus.FAILED]: true,
+};
+
+export { MessageStatus };
 export default class Message {
   /**
    * @implements AVMessage
@@ -43,6 +72,7 @@ export default class Message {
        */
       transient: false,
     });
+    this._setStatus(MessageStatus.NONE);
   }
 
   /**
@@ -72,6 +102,22 @@ export default class Message {
    */
   toJSON() {
     return this.content;
+  }
+
+  /**
+   * 消息状态
+   * @type {}
+   * @readonly
+   */
+  get status() {
+    return this._status;
+  }
+
+  _setStatus(status) {
+    if (!rMessageStatus[status]) {
+      throw new Error('Invalid message status');
+    }
+    this._status = status;
   }
 
   /**
