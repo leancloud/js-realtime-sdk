@@ -71,12 +71,17 @@ export default class Message {
        * @type {Boolean}
        */
       transient: false,
+      /**
+       * @var deliveredAt {?Date} 消息送达时间
+       * @memberof Message#
+       */
+      // deliveredAt,
     });
     this._setStatus(MessageStatus.NONE);
   }
 
   /**
-   * 设置是否需要回执
+   * 设置是否需要送达回执
    * @param {Boolean} needReceipt
    * @return {Message} self
    */

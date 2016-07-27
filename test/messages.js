@@ -198,5 +198,16 @@ describe('Messages', () => {
         msg.status.should.eql(MessageStatus.SENT);
       });
     });
+    it('receipt', () => {
+      const message = new TextMessage('message needs receipt');
+      const receiptPromise = listen(conversationZwang, 'receipt');
+      message.setNeedReceipt(true);
+      return conversationZwang.send(message)
+        .then(() => receiptPromise)
+        .then(() => {
+          message.status.should.eql(MessageStatus.DELIVERED);
+          message.deliveredAt.should.be.Date();
+        });
+    });
   });
 });

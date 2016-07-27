@@ -81,6 +81,8 @@ export default class IMClient extends Client {
         return this._dispatchSessionMessage(message);
       case CommandType.unread:
         return this._dispatchUnreadMessage(message);
+      case CommandType.rcp:
+        return this._dispatchRcpMessage(message);
       default:
         this.emit('unhandledmessage', message);
         return Promise.resolve();
@@ -129,7 +131,7 @@ export default class IMClient extends Client {
         .then(conversation => {
           let timestamp;
           if (conv.timestamp) {
-            timestamp = new Date(conv.timestamp.toNumber());
+            timestamp = new Date(conv.timestamptoDate);
           }
           conversation.unreadMessagesCount = conv.unread; // eslint-disable-line no-param-reassign
           /**
@@ -148,6 +150,20 @@ export default class IMClient extends Client {
           }, conversation);
         })
     ));
+  }
+
+  _dispatchRcpMessage(message) {
+    const {
+      rcpMessage,
+    } = message;
+    const conversationId = rcpMessage.cid;
+    const messageId = rcpMessage.id;
+    const deliveredAt = new Date(rcpMessage.t.toNumber());
+    const conversation = this._conversationCache.get(conversationId);
+    // conversation not cached means the client does not send the message
+    // during this session
+    if (!conversation) return;
+    conversation._handleReceipt({ messageId, deliveredAt });
   }
 
   _dispatchConvMessage(message) {

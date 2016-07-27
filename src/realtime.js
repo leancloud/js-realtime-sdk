@@ -229,7 +229,7 @@ export default class Realtime extends EventEmitter {
     }
   }
 
-  static _fetchEndpointsInfo({ appId, region, ssl, _debug }) {
+  static _fetchEndpointsInfo({ appId, region, ssl, server }) {
     debug('fetch endpoint info');
     return this._fetchPushRouter({ appId, region })
       .then(tap(debug))
@@ -238,7 +238,7 @@ export default class Realtime extends EventEmitter {
           params: {
             appId,
             secure: ssl,
-            debug: _debug,
+            server,
             _t: Date.now(),
           },
           timeout: 20000,
