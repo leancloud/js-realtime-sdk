@@ -5,8 +5,9 @@ import Realtime from '../src/realtime';
 import IMClient from '../src/im-client';
 import Conversation from '../src/conversation';
 import Message from '../src/messages/message';
+import { internal } from '../src/utils';
 
-import { sinon } from './test-utils';
+import { sinon, listen } from './test-utils';
 
 import {
   APP_ID,
@@ -257,5 +258,28 @@ describe('IMClient', () => {
     it('normal case', () =>
       client.markAllAsRead([conversation]).should.be.fulfilledWith([conversation])
     );
+  });
+
+  describe('session token', () => {
+    beforeEach(function setupSpy() {
+      this.spy = sinon.spy(client, '_open');
+    });
+    afterEach(function setupSpy() {
+      this.spy.restore();
+    });
+    it('reconnect with session token', function () {
+      client._connection.disconnect();
+      return listen(client, 'reconnect').then(() => {
+        this.spy.should.be.calledOnce();
+      });
+    });
+    it('session token expiration', function () {
+      // Magic
+      internal(client).sessionToken._value = 'fake_session_token';
+      client._connection.disconnect();
+      return listen(client, 'reconnect').then(() => {
+        this.spy.should.be.calledTwice();
+      });
+    });
   });
 });
