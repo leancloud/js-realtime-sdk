@@ -332,8 +332,7 @@ export default class Conversation extends EventEmitter {
         op: 'add',
         convMessage,
       })
-    )
-    .then(command => {
+    ).then(command => {
       if (this._client.options.conversationSignatureFactory) {
         const params = [this.id, this._client.id, clientIds.sort(), 'add'];
         return runSignatureFactory(this._client.options.conversationSignatureFactory, params)
@@ -347,9 +346,9 @@ export default class Conversation extends EventEmitter {
           });
       }
       return command;
-    })
-    .then(this._send.bind(this))
-    .then(() => {
+    }).then(
+      this._send.bind(this)
+    ).then(() => {
       if (!this.transient) {
         this.members = union(this.members, clientIds);
       }
@@ -375,8 +374,7 @@ export default class Conversation extends EventEmitter {
         op: 'remove',
         convMessage,
       })
-    )
-    .then(command => {
+    ).then(command => {
       if (this._client.options.conversationSignatureFactory) {
         const params = [this.id, this._client.id, clientIds.sort(), 'remove'];
         return runSignatureFactory(this._client.options.conversationSignatureFactory, params)
@@ -390,9 +388,9 @@ export default class Conversation extends EventEmitter {
           });
       }
       return command;
-    })
-    .then(this._send.bind(this))
-    .then(() => {
+    }).then(
+      this._send.bind(this)
+    ).then(() => {
       if (!this.transient) {
         this.members = difference(this.members, clientIds);
       }

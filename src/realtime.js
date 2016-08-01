@@ -158,8 +158,7 @@ export default class Realtime extends EventEmitter {
         .then(
           tap(info => this._cache.set('endpoints', info, info.ttl * 1000))
         )
-    )
-    .then(info => {
+    ).then(info => {
       debug('endpoint info:', info);
       return [info.server, info.secondary];
     });
@@ -220,11 +219,9 @@ export default class Realtime extends EventEmitter {
             _t: Date.now(),
           },
           timeout: 20000,
-        })
-        .then(
+        }).then(
           res => res.data
-        )
-        .then(tap(debug))
+        ).then(tap(debug))
     );
   }
 
