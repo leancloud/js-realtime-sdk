@@ -96,9 +96,8 @@ describe('IMClient', () => {
             appId: APP_ID,
             region: REGION,
             pushUnread: false,
-          })
-          .createIMClient(ID, undefined, 'TEST')
-          .then(client2 => client2.close());
+          }).createIMClient(ID, undefined, 'TEST')
+            .then(client2 => client2.close());
         }).catch(done);
     });
   });

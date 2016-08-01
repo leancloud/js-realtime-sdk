@@ -66,9 +66,8 @@ describe('Realtime', () => {
     it('noBinary mode fallback', () =>
       createRealtime({
         noBinary: true,
-      })
-      .createIMClient()
-      .then(client => client.close())
+      }).createIMClient()
+        .then(client => client.close())
     );
   });
   describe('endpoints cache', () => {
