@@ -21,6 +21,7 @@ const debug = d('LC:Conversation');
 export default class Conversation extends EventEmitter {
   /**
    * 无法直接实例化，请使用 {@link IMClient#createConversation} 创建新的对话
+   * @extends EventEmitter
    */
   constructor(data, client) {
     super();

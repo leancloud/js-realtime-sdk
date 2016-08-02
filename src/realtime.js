@@ -18,6 +18,7 @@ const pushRouterCache = new Cache('push-router');
 
 export default class Realtime extends EventEmitter {
   /**
+   * @extends EventEmitter
    * @param  {Object} options
    * @param  {String} options.appId
    * @param  {String} [options.region='cn'] 节点 id
