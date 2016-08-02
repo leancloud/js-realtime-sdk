@@ -118,11 +118,33 @@ export default class Realtime extends EventEmitter {
        * 网络连接恢复正常
        * @event Realtime#reconnect
        */
+
+      /**
+       * 客户端连接断开
+       * @event IMClient#disconnect
+       */
+      /**
+       * 计划在一段时间后尝试重新连接
+       * @event IMClient#retry
+       * @param {Number} attempt 尝试重连的次数
+       * @param {Number} delay 延迟的毫秒数
+       */
+      /**
+       * 正在尝试重新连接
+       * @event IMClient#retry
+       * @param {Number} attempt 尝试重连的次数
+       */
+
       // event proxy
       ['disconnect', 'reconnect', 'retry', 'schedule'].forEach(
         event => connection.on(event, (...payload) => {
           debug(`${event} event emitted.`, ...payload);
           this.emit(event, ...payload);
+          if (event !== 'reconnect') {
+            Object.values(this._clients).forEach(client => {
+              client.emit(event, ...payload);
+            });
+          }
         })
       );
       // override handleClose
@@ -306,7 +328,21 @@ export default class Realtime extends EventEmitter {
         _messageParser: this._messageParser,
         _plugins: this._plugins,
       });
-      connection.on('reconnect', () => client._open(this._options.appId, tag, this._id, true));
+      connection.on('reconnect', () =>
+        client._open(this._options.appId, tag, this._id, true)
+          /**
+           * 客户端连接恢复正常，该事件通常在 {@link Realtime#reconnect} 之后发生
+           * @event IMClient#reconnect
+           */
+          /**
+           * 客户端重新登录发生错误（网络连接已恢复，但重新登录错误）
+           * @event IMClient#reconnecterror
+           */
+          .then(
+            () => client.emit('reconnect'),
+            error => client.emit('reconnecterror', error)
+          )
+      );
       client.on('close', () => this._deregister(client), this);
       return client._open(this._options.appId, tag, this._id)
         .then(() => {

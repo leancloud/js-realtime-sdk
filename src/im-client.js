@@ -15,7 +15,7 @@ import {
   OpType,
 } from '../proto/message';
 import * as Errors from './errors';
-import { tap, Cache, keyRemap, union, difference, trim } from './utils';
+import { tap, Expirable, Cache, keyRemap, union, difference, trim, internal } from './utils';
 import { applyDecorators } from './plugin';
 import runSignatureFactory from './signature-factory-runner';
 import { version as VERSION } from '../package.json';
@@ -370,11 +370,26 @@ export default class IMClient extends Client {
         sessionMessage: new SessionCommand({
           ua: `js/${VERSION}`,
           r: isReconnect,
-          tag,
-          deviceId,
         }),
       }))
       .then(command => {
+        if (isReconnect) {
+          // if sessionToken is not expired, skip signature/tag/deviceId
+          const sessionToken = internal(this).sessionToken;
+          if (sessionToken) {
+            const value = sessionToken.value;
+            if (value && value !== Expirable.EXPIRED) {
+              Object.assign(command.sessionMessage, {
+                st: value,
+              });
+              return command;
+            }
+          }
+        }
+        Object.assign(command.sessionMessage, trim({
+          tag,
+          deviceId,
+        }));
         if (this.options.signatureFactory) {
           return runSignatureFactory(this.options.signatureFactory, [this.id])
             .then(signatureResult => {
@@ -390,12 +405,33 @@ export default class IMClient extends Client {
       })
       .then(this._send.bind(this))
       .then(resCommand => {
-        const peerId = resCommand.peerId;
+        const {
+          peerId,
+          sessionMessage: {
+            st: token,
+            stTtl: tokenTTL,
+          },
+        } = resCommand;
         if (!peerId) {
           console.warn('Unexpected session opened without peerId.');
           return;
         }
         this.id = peerId;
+        if (token) {
+          internal(this).sessionToken = new Expirable(token, tokenTTL * 1000);
+        }
+      }, error => {
+        if (error.code === Errors.SESSION_TOKEN_EXPIRED.code) {
+          if (internal(this).sessionToken === undefined) {
+            // let it fail if sessoinToken not cached but command rejected as token expired
+            // to prevent session openning flood
+            throw new Error('Unexpected session expiration');
+          }
+          debug('Session token expired, reopening');
+          delete internal(this).sessionToken;
+          return this._open(appId, tag, deviceId, isReconnect);
+        }
+        throw error;
       });
   }
 

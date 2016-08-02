@@ -32,6 +32,9 @@ export const INVALID_ORIGIN = {
 export const SESSION_CONFLICT = {
   code: 4111,
 };
+export const SESSION_TOKEN_EXPIRED = {
+  code: 4112,
+};
 export const INTERNAL_ERROR = {
   code: 4200,
   message: 'Internal error, please contact LeanCloud for support.',
