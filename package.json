@@ -64,7 +64,7 @@
     "rollup-plugin-babel": "^2.4.0",
     "rollup-plugin-commonjs": "^3.0.0",
     "rollup-plugin-json": "^2.0.0",
-    "rollup-plugin-node-resolve": "^1.4.0",
+    "rollup-plugin-node-resolve": "^2.0.0",
     "should": "^10.0.0",
     "should-sinon": "0.0.5",
     "sinon": "2.0.0-pre",
