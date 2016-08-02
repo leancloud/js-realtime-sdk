@@ -26,6 +26,7 @@ export default class IMClient extends Client {
   /**
    * 无法直接实例化，请使用 {@link Realtime#createIMClient} 创建新的 IMClient。
    *
+   * @extends EventEmitter
    * @param  {String} [id] 客户端 id
    * @param  {Object} [options]
    * @param  {Function} [options.signatureFactory] open session 时的签名方法 // TODO need details
