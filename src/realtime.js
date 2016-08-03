@@ -344,7 +344,7 @@ export default class Realtime extends EventEmitter {
             error => client.emit('reconnecterror', error)
           )
       );
-      client.on('close', () => this._deregister(client), this);
+      internal(client)._eventemitter.on('close', () => this._deregister(client), this);
       return client._open(this._options.appId, tag, this._id)
         .then(() => {
           this._register(client);

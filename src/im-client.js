@@ -1,4 +1,5 @@
 import throttle from 'lodash/throttle';
+import EventEmitter from 'eventemitter3';
 import { default as d } from 'debug';
 import Client from './client';
 import Conversation from './conversation';
@@ -43,6 +44,7 @@ export default class IMClient extends Client {
     }
     this._conversationCache = new Cache(`client:${this.id}`);
     this._ackMessageBuffer = {};
+    internal(this)._eventemitter = new EventEmitter();
     [
       'invited',
       'kicked',
@@ -448,6 +450,9 @@ export default class IMClient extends Client {
     });
     return this._send(command).then(
       () => {
+        internal(this)._eventemitter.emit('close', {
+          code: 0,
+        });
         this.emit('close', {
           code: 0,
         });
