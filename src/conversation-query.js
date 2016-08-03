@@ -1,4 +1,5 @@
 import { default as d } from 'debug';
+
 const debug = d('LC:ConversationQuery');
 
 export default class ConversationQuery {

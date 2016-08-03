@@ -21,7 +21,7 @@ export default class Connection extends WebSocketPlus {
   send(command, waitingForRespond = true) {
     let serialId;
     if (waitingForRespond) {
-      serialId = ++ this._serialId;
+      serialId = ++this._serialId;
       command.i = serialId; // eslint-disable-line no-param-reassign
     }
     debug('↑', trim(command), 'sent');
@@ -29,12 +29,10 @@ export default class Connection extends WebSocketPlus {
     let message;
     if (this._protocalFormat === 'protobase64') {
       message = command.toBase64();
-    } else {
-      if (command.toBuffer) {
-        message = command.toBuffer();
-      } else if (command.toArrayBuffer) {
-        message = command.toArrayBuffer();
-      }
+    } else if (command.toBuffer) {
+      message = command.toBuffer();
+    } else if (command.toArrayBuffer) {
+      message = command.toArrayBuffer();
     }
     if (!message) {
       throw new TypeError(`${command} is not a GenericCommand`);
@@ -89,12 +87,10 @@ export default class Connection extends WebSocketPlus {
         console.warn(`Unexpected command received with serialId [${serialId}],
          which have timed out or never been requested.`);
       }
+    } else if (message.cmd === CommandType.error) {
+      this.emit('error', createError(message.errorMessage));
     } else {
-      if (message.cmd === CommandType.error) {
-        this.emit('error', createError(message.errorMessage));
-      } else {
-        this.emit('message', message);
-      }
+      this.emit('message', message);
     }
   }
 
