@@ -18,10 +18,8 @@ export const messageField = fields => {
   if (typeof fields !== 'string') {
     if (!Array.isArray(fields)) {
       throw new TypeError(`${fields} is not an Array`);
-    } else {
-      if (fields.some(value => typeof value !== 'string')) {
-        throw new TypeError('fields contains non-string typed member');
-      }
+    } else if (fields.some(value => typeof value !== 'string')) {
+      throw new TypeError('fields contains non-string typed member');
     }
   }
   return target => {

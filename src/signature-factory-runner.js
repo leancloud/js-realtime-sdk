@@ -25,7 +25,7 @@ export default (signatureFactory, params) =>
   Promise.resolve()
     .then(() => {
       debug(`call signatureFactory with ${params}`);
-      return signatureFactory.apply(null, params);
+      return signatureFactory(...params);
     })
     .then(
       tap(signatureResult => debug('sign result', signatureResult)),
