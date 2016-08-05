@@ -541,7 +541,6 @@ export default class IMClient extends Client {
         } else {
           this._debug('update cached conversation');
           [
-            '_name',
             'creator',
             'createdAt',
             'updatedAt',
@@ -556,8 +555,7 @@ export default class IMClient extends Client {
             const value = fetchedConversation[key];
             if (value !== undefined) conversation[key] = value;
           });
-          delete conversation._pendingAttributes;
-          delete conversation._pendingName;
+          conversation._reset();
         }
         return conversation;
       }));
@@ -572,7 +570,6 @@ export default class IMClient extends Client {
       msg_mid: 'lastMessageId',
       msg_timestamp: 'lastMessageTimestamp',
       m: 'members',
-      attr: 'attributes',
       tr: 'transient',
       c: 'creator',
       mu: 'mutedMembers',
@@ -665,7 +662,11 @@ export default class IMClient extends Client {
         return command;
       })
       .then(this._send.bind(this))
-      .then(resCommand => new Conversation(Object.assign({}, options, {
+      .then(resCommand => new Conversation(Object.assign({}, {
+        name,
+        attr: attributes,
+        transient,
+        unique,
         id: resCommand.convMessage.cid,
         createdAt: resCommand.convMessage.cdate,
         updatedAt: resCommand.convMessage.cdate,

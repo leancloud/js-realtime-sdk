@@ -1,8 +1,9 @@
 import EventEmitter from 'eventemitter3';
 import isEmpty from 'lodash/isEmpty';
 import isPlainObject from 'lodash/isPlainObject';
+import cloneDeep from 'lodash/cloneDeep';
 import { default as d } from 'debug';
-import { decodeDate, keyRemap, union, difference } from './utils';
+import { decodeDate, keyRemap, union, difference, internal, setValue } from './utils';
 import { applyDecorators } from './plugin';
 import IMClient from './im-client';
 import {
@@ -23,74 +24,92 @@ export default class Conversation extends EventEmitter {
    * 无法直接实例化，请使用 {@link IMClient#createConversation} 创建新的对话
    * @extends EventEmitter
    */
-  constructor(data, client) {
+  constructor({
+    id,
+    creator,
+    createdAt,
+    updatedAt,
+    lastMessageAt,
+    lastMessage,
+    mutedMembers = [],
+    members = [],
+    transient = false,
+    muted = false,
+    // jsdoc-ignore-start
+    ...attributes,
+    // jsdoc-ignore-end
+  }, client) {
     super();
     Object.assign(this, {
       /**
-       * @var id {String} 对话 id，对应 _Conversation 表中的 objectId
+       * 对话 id，对应 _Conversation 表中的 objectId
        * @memberof Conversation#
+       * @type {String}
        */
-      // id,
+      id,
       /**
-       * @var creator {String} 对话创建者
+       * 对话创建者
        * @memberof Conversation#
+       * @type {String}
        */
-      // creator,
+      creator,
       /**
-       * @var createdAt {Date} 对话创建时间
+       * 对话创建时间
        * @memberof Conversation#
+       * @type {Date}
        */
-      // createdAt,
+      createdAt,
       /**
-       * @var updatedAt {Date} 对话更新时间
+       * 对话更新时间
        * @memberof Conversation#
+       * @type {Date}
        */
-      // updatedAt,
+      updatedAt,
       /**
-       * @var lastMessageAt {Date} 最后一条消息时间
+       * 最后一条消息时间
        * @memberof Conversation#
+       * @type {Date}
        */
-      // lastMessageAt,
+      lastMessageAt,
       /**
-       * @var lastMessage {?Message} 最后一条消息
+       * 最后一条消息
        * @memberof Conversation#
+       * @type {?Message}
        */
-      // lastMessage,
+      lastMessage,
       /**
        * 对该对话设置了静音的用户列表
        * @memberof Conversation#
        * @type {?String[]}
        */
-      mutedMembers: [],
+      mutedMembers,
       /**
        * 参与该对话的用户列表
        * @memberof Conversation#
        * @type {String[]}
        */
-      members: [],
-      _attributes: {},
+      members,
       /**
        * 暂态对话标记
        * @memberof Conversation#
        * @type {Boolean}
        */
-      transient: false,
+      transient,
       /**
        * 当前用户静音该对话标记
        * @memberof Conversation#
        * @type {Boolean}
        */
-      muted: false,
-      /**
-       * 当前用户在该对话的未读消息数
-       * @memberof Conversation#
-       * @type {Number}
-       */
-      unreadMessagesCount: 0,
-    }, keyRemap({
-      attributes: '_attributes',
-      name: '_name',
-    }, data));
+      muted,
+    });
+    this._attributes = attributes;
+    this._reset();
+    /**
+     * 当前用户在该对话的未读消息数
+     * @memberof Conversation#
+     * @type {Number}
+     */
+    this.unreadMessagesCount = 0;
     this.members = Array.from(new Set(this.members));
     if (client instanceof IMClient) {
       this._client = client;
@@ -130,22 +149,19 @@ export default class Conversation extends EventEmitter {
   }
 
   /**
-   * 对话额外属性
+   * 对话额外属性，对应 _Conversation 表中的 attr
    * @type {Object}
    */
   get attributes() {
-    if (typeof this._pendingAttributes !== 'undefined') {
-      return this._pendingAttributes;
-    }
-    return this._attributes;
+    return this._get('attr');
   }
   set attributes(value) {
-    this.setAttributes(value);
+    this._set('attr', value);
   }
   /**
    * 设置对话额外属性
    * @param {Object} map    key-value 对
-   * @param {assign} [assign=false] 使用 Object.assign 更新属性，而不是替换整个 attributes
+   * @param {Boolean} [assign=false] 使用 Object.assign 更新属性，而不是替换整个 attributes
    * @return {Conversation} self
    */
   setAttributes(map, assign = false) {
@@ -154,37 +170,30 @@ export default class Conversation extends EventEmitter {
       throw new TypeError('attributes must be a plain object');
     }
     if (!assign) {
-      this._pendingAttributes = map;
+      this._set('attr', map);
     } else {
-      this._pendingAttributes = Object.assign({}, this.attributes, map);
+      Object.keys(map).forEach(key => this.setAttribute(key, map[key]));
     }
     return this;
   }
   /**
    * 设置对话额外属性
    * @param {String} key
-   * @param {*} value
+   * @param {Any} value
    * @return {Conversation} self
    */
   setAttribute(key, value) {
-    if (typeof this._pendingAttributes === 'undefined') {
-      this._pendingAttributes = {};
-    }
-    this._pendingAttributes[key] = value;
-    return this;
+    return this._set(`attr.${key}`, value);
   }
   /**
-   * 对话名字
+   * 对话名字，对应 _Conversation 表中的 name
    * @type {String}
    */
   get name() {
-    if (typeof this._pendingName !== 'undefined') {
-      return this._pendingName;
-    }
-    return this._name;
+    return this._get('name');
   }
   set name(value) {
-    this.setName(value);
+    this._set('name', value);
   }
   /**
    * 设置对话名字
@@ -192,9 +201,49 @@ export default class Conversation extends EventEmitter {
    * @return {Conversation} self
    */
   setName(value) {
-    this._debug(`set name: ${value}`);
-    this._pendingName = value;
+    return this._set('name', value);
+  }
+
+  _get(key) {
+    return internal(this).currentAttributes[key];
+  }
+
+  _set(key, value) {
+    this._debug(`set [${key}]: ${value}`);
+    const pendingAttributes = internal(this).pendingAttributes;
+    const pendingKeys = Object.keys(pendingAttributes);
+    // suppose pendingAttributes = { 'a.b': {} }
+    // set 'a' or 'a.b': delete 'a.b'
+    const re = new RegExp(`^${key}`);
+    const childKeys = pendingKeys.filter(re.test.bind(re));
+    childKeys.forEach(k => {
+      delete pendingAttributes[k];
+    });
+    if (childKeys.length) {
+      pendingAttributes[key] = value;
+    } else {
+      // set 'a.c': nothing to do
+      // set 'a.b.c.d': assign c: { d: {} } to 'a.b'
+      // CAUTION: non-standard API, provided by core-js
+      const parentKey = Array.find(pendingKeys, k => key.indexOf(k) === 0); // 'a.b'
+      if (parentKey) {
+        setValue(pendingAttributes[parentKey], key.slice(parentKey.length + 1), value);
+      } else {
+        pendingAttributes[key] = value;
+      }
+    }
+    // build currentAttributes
+    internal(this).currentAttributes = Object.keys(pendingAttributes)
+      .reduce(
+        (target, k) => setValue(target, k, pendingAttributes[k]),
+        cloneDeep(this._attributes)
+      );
     return this;
+  }
+
+  _reset() {
+    internal(this).pendingAttributes = {};
+    internal(this).currentAttributes = this._attributes;
   }
 
   _debug(...params) {
@@ -221,13 +270,7 @@ export default class Conversation extends EventEmitter {
    */
   save() {
     this._debug('save');
-    const attr = {};
-    if (typeof this._pendingAttributes !== 'undefined') {
-      attr.attr = this._pendingAttributes;
-    }
-    if (typeof this._pendingName !== 'undefined') {
-      attr.name = this._pendingName;
-    }
+    const attr = internal(this).pendingAttributes;
     if (isEmpty(attr)) {
       this._debug('nothing touched, resolve with self');
       return Promise.resolve(this);
@@ -245,14 +288,8 @@ export default class Conversation extends EventEmitter {
       }))
       .then(resCommand => {
         this.updatedAt = resCommand.convMessage.udate;
-        if (typeof this._pendingAttributes !== 'undefined') {
-          this._attributes = this._pendingAttributes;
-          delete this._pendingAttributes;
-        }
-        if (typeof this._pendingName !== 'undefined') {
-          this._name = this._pendingName;
-          delete this._pendingName;
-        }
+        this._attributes = internal(this).currentAttributes;
+        internal(this).pendingAttributes = {};
         return this;
       });
   }
