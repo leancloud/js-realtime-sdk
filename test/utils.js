@@ -1,7 +1,16 @@
 import 'should';
 import 'should-sinon';
 import should from 'should/as-function';
-import { tap, tryAll, Cache, keyRemap, union, difference, ensureArray } from '../src/utils';
+import {
+  tap,
+  tryAll,
+  Cache,
+  keyRemap,
+  union,
+  difference,
+  ensureArray,
+  setValue,
+} from '../src/utils';
 import { wait, sinon } from './test-utils';
 
 describe('Utils', () => {
@@ -86,5 +95,13 @@ describe('Utils', () => {
     ensureArray(0).should.eql([0]);
     ensureArray([0]).should.eql([0]);
     ensureArray([[0]]).should.eql([[0]]);
+  });
+
+  it('setValue', () => {
+    const target = { a: { b: { c: 1 }, d: 1 } };
+    setValue(target, 'a.b.c', {}).should.eql({ a: { b: { c: {} }, d: 1 } });
+    setValue(target, 'a.b.e.f', 1).should.eql({ a: { b: { c: {}, e: { f: 1 } }, d: 1 } });
+    setValue(target, 'a.b', 1).should.eql({ a: { b: 1, d: 1 } });
+    setValue(target, 'a', { b: 1 }).should.eql({ a: { b: 1 } });
   });
 });

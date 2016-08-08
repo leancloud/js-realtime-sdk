@@ -86,3 +86,16 @@ export const ensureArray = target => {
   }
   return [target];
 };
+
+export const setValue = (target, key, value) => {
+  // '.' is not allowed in Class keys, escaping is not in concern now.
+  const segs = key.split('.');
+  const lastSeg = segs.pop();
+  let currentTarget = target;
+  segs.forEach(seg => {
+    if (currentTarget[seg] === undefined) currentTarget[seg] = {};
+    currentTarget = currentTarget[seg];
+  });
+  currentTarget[lastSeg] = value;
+  return target;
+};

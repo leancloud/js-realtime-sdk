@@ -53,6 +53,14 @@ describe('Conversation', () => {
       conv.attributes.should.be.eql({ timestamp });
       return conv
         .setAttributes({ lean: 'cloud' }, true)
+        .save();
+    }).then(conv => {
+      conv.name.should.be.equal(name);
+      conv.attributes.should.be.eql({
+        timestamp,
+        lean: 'cloud',
+      });
+      return conv
         .setAttribute('lee', 'yeh')
         .save();
     }).then(conv => {
@@ -62,7 +70,14 @@ describe('Conversation', () => {
         lean: 'cloud',
         lee: 'yeh',
       });
-      return conv.save();
+      return conv.fetch();
+    }).then(conv => {
+      conv.name.should.be.equal(name);
+      conv.attributes.should.be.eql({
+        timestamp,
+        lean: 'cloud',
+        lee: 'yeh',
+      });
     });
   });
 
