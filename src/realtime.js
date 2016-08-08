@@ -106,7 +106,7 @@ export default class Realtime extends EventEmitter {
        */
       /**
        * 计划在一段时间后尝试重新连接
-       * @event Realtime#retry
+       * @event Realtime#schedule
        * @param {Number} attempt 尝试重连的次数
        * @param {Number} delay 延迟的毫秒数
        */
@@ -126,7 +126,7 @@ export default class Realtime extends EventEmitter {
        */
       /**
        * 计划在一段时间后尝试重新连接
-       * @event IMClient#retry
+       * @event IMClient#schedule
        * @param {Number} attempt 尝试重连的次数
        * @param {Number} delay 延迟的毫秒数
        */
