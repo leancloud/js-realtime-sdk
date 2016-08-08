@@ -11,6 +11,7 @@ import { listen } from './test-utils';
 import {
   APP_ID,
   REGION,
+  EXISTING_ROOM_ID,
 } from './configs';
 
 @messageType(1)
@@ -207,6 +208,17 @@ describe('Messages', () => {
         .then(() => {
           message.status.should.eql(MessageStatus.DELIVERED);
           message.deliveredAt.should.be.Date();
+        });
+    });
+    it('errors', () => {
+      (() => conversationWchen.send('1')).should.throw(/not a Message/);
+      const message = new Message('hello');
+      return wchen
+        .getConversation(EXISTING_ROOM_ID)
+        .then(conversation => conversation.send(message))
+        .should.be.rejected()
+        .then(() => {
+          message.status.should.eql(MessageStatus.FAILED);
         });
     });
   });
