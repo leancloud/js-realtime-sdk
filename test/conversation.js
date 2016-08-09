@@ -38,6 +38,15 @@ describe('Conversation', () => {
   });
   after(() => client.close());
 
+  it('defineConversationProperty', () => {
+    Realtime.defineConversationProperty('testProperty1');
+    conversation.set('testProperty1', 1);
+    conversation.testProperty1.should.eql(1);
+    Realtime.defineConversationProperty('testProperty2');
+    conversation.testProperty2 = 2;
+    conversation.get('testProperty2').should.eql(2);
+  });
+
   it('update', () => {
     const timestamp = Date.now();
     const name = conversation.name;

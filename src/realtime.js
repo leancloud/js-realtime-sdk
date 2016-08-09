@@ -6,6 +6,7 @@ import Connection from './connection';
 import * as Errors from './errors';
 import { tap, Cache, trim, internal, ensureArray } from './utils';
 import { applyDecorators } from './plugin';
+import Conversation from './conversation';
 import Client from './client';
 import IMClient from './im-client';
 import MessageParser from './message-parser';
@@ -368,5 +369,29 @@ export default class Realtime extends EventEmitter {
    */
   register(messageClass) {
     return ensureArray(messageClass).map(this._messageParser.register.bind(this._messageParser));
+  }
+
+  /**
+   * 为 Conversation 定义一个新属性
+   * @static
+   * @param {String} prop 属性名
+   * @param {Object} [descriptor] 属性的描述符，参见 {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/getOwnPropertyDescriptor#Description getOwnPropertyDescriptor#Description - MDN}，默认为该属性名对应的 Conversation 自定义属性的 getter/setter
+   * @returns void
+   * @example
+   *
+   * // previous
+   * conversation.get('admin');
+   * conversation.set('admin', 'Tom');
+   *
+   * // equals to
+   * Realtime.defineConversationProperty('admin');
+   * conversation.admin;
+   * conversation.admin = 'Tom';
+   */
+  static defineConversationProperty(prop, descriptor = {
+    get() { return this.get(prop); },
+    set(value) { this.set(prop, value); },
+  }) {
+    Object.defineProperty(Conversation.prototype, prop, descriptor);
   }
 }
