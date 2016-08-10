@@ -151,26 +151,32 @@ export default class Conversation extends EventEmitter {
   /**
    * 对话额外属性，对应 _Conversation 表中的 attr
    * @type {Object}
+   * @deprecated Use {@link Conversation#get conversation.get('attr')},
+   * {@link Conversation#set conversation.set('attr', value)} instead
    */
   get attributes() {
-    return this._get('attr');
+    console.warn('DEPRECATION Conversation.attributes: Use conversation.get(\'attr\') instead. See https://url.leanapp.cn/DeprecateAttributes for more details.');
+    return this.get('attr');
   }
   set attributes(value) {
-    this._set('attr', value);
+    console.warn('DEPRECATION Conversation.attributes: Use conversation.set(\'attr\', value) instead. See https://url.leanapp.cn/DeprecateAttributes for more details.');
+    this.set('attr', value);
   }
   /**
    * 设置对话额外属性
    * @param {Object} map    key-value 对
    * @param {Boolean} [assign=false] 使用 Object.assign 更新属性，而不是替换整个 attributes
    * @return {Conversation} self
+   * @deprecated Use {@link Conversation#set} instead. See {@link https://url.leanapp.cn/DeprecateAttributes} for more details.
    */
   setAttributes(map, assign = false) {
+    console.warn('DEPRECATION Conversation#setAttributes: Use conversation.set() instead. See https://url.leanapp.cn/DeprecateAttributes for more details.');
     this._debug(`set attributes: value=${JSON.stringify(map)}, assign=${assign}`);
     if (!isPlainObject(map)) {
       throw new TypeError('attributes must be a plain object');
     }
     if (!assign) {
-      this._set('attr', map);
+      this.set('attr', map);
     } else {
       Object.keys(map).forEach(key => this.setAttribute(key, map[key]));
     }
@@ -181,34 +187,60 @@ export default class Conversation extends EventEmitter {
    * @param {String} key
    * @param {Any} value
    * @return {Conversation} self
+   * @deprecated Use {@link Conversation#set conversation.set('attr.key', value)} instead
    */
   setAttribute(key, value) {
-    return this._set(`attr.${key}`, value);
+    console.warn('DEPRECATION Conversation#setAttribute: Use conversation.set(\'attr.key\', value) instead. See https://url.leanapp.cn/DeprecateAttributes for more details.');
+    return this.set(`attr.${key}`, value);
   }
   /**
    * 对话名字，对应 _Conversation 表中的 name
    * @type {String}
    */
   get name() {
-    return this._get('name');
+    return this.get('name');
   }
   set name(value) {
-    this._set('name', value);
+    this.set('name', value);
   }
   /**
    * 设置对话名字
    * @param {String} value
    * @return {Conversation} self
+   * @deprecated Use {@link Conversation#set conversation.set('name', value)} instead
    */
   setName(value) {
-    return this._set('name', value);
+    console.warn('DEPRECATION Conversation#setName: Use conversation.set(\'name\', value) instead. See https://url.leanapp.cn/DeprecateAttributes for more details.');
+    return this.set('name', value);
   }
 
-  _get(key) {
+  /**
+   * 获取对话的自定义属性
+   * @since 3.2.0
+   * @param  {String} key key 属性的键名，'x' 对应 Conversation 表中的 x 列
+   * @return {Any} 属性的值
+   */
+  get(key) {
     return internal(this).currentAttributes[key];
   }
 
-  _set(key, value) {
+  /**
+   * 设置对话的自定义属性
+   * @since 3.2.0
+   * @param {String} key 属性的键名，'x' 对应 Conversation 表中的 x 列，支持使用 'x.y.z' 来修改对象的部分字段。
+   * @param {Any} value 属性的值
+   * @return {Conversation} self
+   * @example
+   *
+   * // 设置对话的 color 属性
+   * conversation.set('color', {
+   *   text: '#000',
+   *   background: '#DDD',
+   * });
+   * // 设置对话的 color.text 属性
+   * conversation.set('color.text', '#333');
+   */
+  set(key, value) {
     this._debug(`set [${key}]: ${value}`);
     const pendingAttributes = internal(this).pendingAttributes;
     const pendingKeys = Object.keys(pendingAttributes);
