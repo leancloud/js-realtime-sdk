@@ -1,3 +1,27 @@
+<a name="3.2.0"></a>
+# 3.2.0 (2016-08-10)
+
+
+### Bug Fixes
+
+* **IMClient:** 修复了用户有可能移除内部事件导致 client 无法正常 close 的问题 ([#325](https://github.com/leancloud/js-realtime-sdk/issues/325)) ([4945c26](https://github.com/leancloud/js-realtime-sdk/commit/4945c26))
+
+
+### Features
+
+* **Conversation:** 新的自定义属性相关 API 变动：
+
+  * 增加了 `Conversation#get`，`Conversation#set` 方法
+  * 废弃了 `Conversation` 的 `attributes` 属性，以及 `setAttribute`、`setAttributes`、`setName` 方法
+  * 增加了 `Realtime.defineConversationProperty` 方法
+
+  详情说明与迁移指南请参考 [《新的 Conversation 自定义属性 API》](https://url.leanapp.cn/DeprecateAttributes)
+
+* **Message:** 实现了消息送达回执，为 `Message` 类增加了状态属性（`status`），详细说明请参考 [《JavaScript 实时通信开发指南 - 消息送达回执》](https://leancloud.cn/docs/realtime_guide-js.html#消息送达回执)([#326](https://github.com/leancloud/js-realtime-sdk/issues/326)) ([34c6d08](https://github.com/leancloud/js-realtime-sdk/commit/34c6d08))
+* **Realtime:** 减少了断线重连的开销，为 `IMClient` 增加了 `disconnect`，`schedule`，`retry`，`reconnect` 与 `reconnecterror` 事件 ([affbd5f](https://github.com/leancloud/js-realtime-sdk/commit/affbd5f))
+
+
+
 <a name="3.1.3"></a>
 ## 3.1.3 (2016-08-02)
 
