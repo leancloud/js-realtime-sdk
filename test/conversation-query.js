@@ -1,6 +1,6 @@
 import ConversationQuery from '../src/conversation-query';
 import Realtime from '../src/realtime';
-import Message from '../src/messages/message';
+import Message, { MessageStatus } from '../src/messages/message';
 
 import {
   APP_ID,
@@ -307,6 +307,7 @@ describe('ConversationQuery', () => {
           message.from.should.be.ok();
           message.id.should.be.ok();
           message.timestamp.should.be.ok();
+          message.status.should.be.eql(MessageStatus.SENT);
         })
     );
     it('withLastMessages should be proxied', () => {

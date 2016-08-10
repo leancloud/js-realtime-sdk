@@ -1,6 +1,6 @@
 /** @module leancloud-realtime */
 import { default as Realtime } from './realtime';
-import { default as Message } from './messages/message';
+import Message, { MessageStatus } from './messages/message';
 import { default as TypedMessage } from './messages/typed-message';
 import { default as TextMessage } from './messages/text-message';
 import {
@@ -64,4 +64,5 @@ export {
    */
   messageField,
   IE10Compatible,
+  MessageStatus,
 };

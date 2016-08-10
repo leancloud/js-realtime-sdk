@@ -15,7 +15,7 @@ import {
 } from '../proto/message';
 import runSignatureFactory from './signature-factory-runner';
 import { createError } from './errors';
-import Message from './messages/message';
+import Message, { MessageStatus } from './messages/message';
 
 const debug = d('LC:Conversation');
 
@@ -111,6 +111,7 @@ export default class Conversation extends EventEmitter {
      */
     this.unreadMessagesCount = 0;
     this.members = Array.from(new Set(this.members));
+    internal(this).messagesWaitingForReciept = {};
     if (client instanceof IMClient) {
       this._client = client;
     } else {
@@ -496,10 +497,20 @@ export default class Conversation extends EventEmitter {
     if (!(message instanceof Message)) {
       throw new TypeError(`${message} is not a Message`);
     }
+    if (message.needReceipt) {
+      if (this.transient) {
+        console.warn('message needReceipt option is ignored as the conversation is transient.');
+      } else if (message.transient) {
+        console.warn('message needReceipt option is ignored as the message is transient.');
+      } else if (this.members.length > 2) {
+        console.warn('message with needReceipt option is recommended to be sent in one-on-one conversation.'); // eslint-disable-line max-len
+      }
+    }
     Object.assign(message, {
       cid: this.id,
       from: this._client.id,
     });
+    message._setStatus(MessageStatus.SENDING);
     let msg = message.toJSON();
     if (typeof msg !== 'string') {
       msg = JSON.stringify(msg);
@@ -536,10 +547,18 @@ export default class Conversation extends EventEmitter {
         });
         this.lastMessage = message;
         this.lastMessageAt = message.timestamp;
-        return message;
       });
     }
-    return sendPromise;
+    return sendPromise.then(() => {
+      message._setStatus(MessageStatus.SENT);
+      if (message.needReceipt) {
+        internal(this).messagesWaitingForReciept[message.id] = message;
+      }
+      return message;
+    }, error => {
+      message._setStatus(MessageStatus.FAILED);
+      throw error;
+    });
   }
 
   /**
@@ -591,6 +610,7 @@ export default class Conversation extends EventEmitter {
             from: log.from,
           };
           Object.assign(message, messageProps);
+          message._setStatus(MessageStatus.SENT);
           return message;
         })
       ))
@@ -661,5 +681,21 @@ export default class Conversation extends EventEmitter {
    */
   markAsRead() {
     return this._client.markAllAsRead([this]).then(() => this);
+  }
+
+  _handleReceipt({ messageId, deliveredAt }) {
+    const { messagesWaitingForReciept } = internal(this);
+    const message = messagesWaitingForReciept[messageId];
+    delete messagesWaitingForReciept[messageId];
+    if (!message) return;
+    message._setStatus(MessageStatus.DELIVERED);
+    message.deliveredAt = deliveredAt;
+    /**
+     * 消息已送达。只有在发送时设置了需要回执的情况下才会收到送达回执，该回执并不代表用户已读。
+     * @event Conversation#receipt
+     * @param {Object} payload
+     * @param {Message} payload.message 送达的消息
+     */
+    this.emit('receipt', { message });
   }
 }

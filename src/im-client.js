@@ -19,6 +19,7 @@ import * as Errors from './errors';
 import { tap, Expirable, Cache, keyRemap, union, difference, trim, internal } from './utils';
 import { applyDecorators } from './plugin';
 import runSignatureFactory from './signature-factory-runner';
+import { MessageStatus } from './messages/message';
 import { version as VERSION } from '../package.json';
 
 const debug = d('LC:IMClient');
@@ -82,6 +83,8 @@ export default class IMClient extends Client {
         return this._dispatchSessionMessage(message);
       case CommandType.unread:
         return this._dispatchUnreadMessage(message);
+      case CommandType.rcp:
+        return this._dispatchRcpMessage(message);
       default:
         this.emit('unhandledmessage', message);
         return Promise.resolve();
@@ -130,7 +133,7 @@ export default class IMClient extends Client {
         .then(conversation => {
           let timestamp;
           if (conv.timestamp) {
-            timestamp = new Date(conv.timestamp.toNumber());
+            timestamp = new Date(conv.timestamptoDate);
           }
           conversation.unreadMessagesCount = conv.unread; // eslint-disable-line no-param-reassign
           /**
@@ -149,6 +152,20 @@ export default class IMClient extends Client {
           }, conversation);
         })
     ));
+  }
+
+  _dispatchRcpMessage(message) {
+    const {
+      rcpMessage,
+    } = message;
+    const conversationId = rcpMessage.cid;
+    const messageId = rcpMessage.id;
+    const deliveredAt = new Date(rcpMessage.t.toNumber());
+    const conversation = this._conversationCache.get(conversationId);
+    // conversation not cached means the client does not send the message
+    // during this session
+    if (!conversation) return;
+    conversation._handleReceipt({ messageId, deliveredAt });
   }
 
   _dispatchConvMessage(message) {
@@ -294,6 +311,7 @@ export default class IMClient extends Client {
         transient,
       };
       Object.assign(message, messageProps);
+      message._setStatus(MessageStatus.SENT);
       conversation.lastMessage = message; // eslint-disable-line no-param-reassign
       conversation.lastMessageAt = message.timestamp; // eslint-disable-line no-param-reassign
       conversation.unreadMessagesCount++; // eslint-disable-line no-param-reassign
@@ -587,6 +605,7 @@ export default class IMClient extends Client {
             data.lastMessage.from = data.lastMessageFrom;
             data.lastMessage.id = data.lastMessageId;
             data.lastMessage.timestamp = new Date(data.lastMessageTimestamp);
+            data.lastMessage._setStatus(MessageStatus.SENT);
             delete data.lastMessageFrom;
             delete data.lastMessageId;
             delete data.lastMessageTimestamp;
