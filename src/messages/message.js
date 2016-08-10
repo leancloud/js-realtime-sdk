@@ -4,6 +4,7 @@ import uuid from 'uuid';
 /**
  * 消息状态枚举
  * @enum {Symbol}
+ * @since 3.2.0
  * @memberof module:leancloud-realtime
  */
 const MessageStatus = {
@@ -110,9 +111,10 @@ export default class Message {
   }
 
   /**
-   * 消息状态
-   * @type {}
+   * 消息状态，值为 {@link module:leancloud-realtime.MessageStatus} 之一
+   * @type {Symbol}
    * @readonly
+   * @since 3.2.0
    */
   get status() {
     return this._status;

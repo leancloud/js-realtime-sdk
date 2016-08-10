@@ -693,6 +693,7 @@ export default class Conversation extends EventEmitter {
     /**
      * 消息已送达。只有在发送时设置了需要回执的情况下才会收到送达回执，该回执并不代表用户已读。
      * @event Conversation#receipt
+     * @since 3.2.0
      * @param {Object} payload
      * @param {Message} payload.message 送达的消息
      */

@@ -124,17 +124,20 @@ export default class Realtime extends EventEmitter {
       /**
        * 客户端连接断开
        * @event IMClient#disconnect
+       * @since 3.2.0
        */
       /**
        * 计划在一段时间后尝试重新连接
        * @event IMClient#schedule
        * @param {Number} attempt 尝试重连的次数
        * @param {Number} delay 延迟的毫秒数
+       * @since 3.2.0
        */
       /**
        * 正在尝试重新连接
        * @event IMClient#retry
        * @param {Number} attempt 尝试重连的次数
+       * @since 3.2.0
        */
 
       // event proxy
@@ -333,12 +336,14 @@ export default class Realtime extends EventEmitter {
       connection.on('reconnect', () =>
         client._open(this._options.appId, tag, this._id, true)
           /**
-           * 客户端连接恢复正常，该事件通常在 {@link Realtime#reconnect} 之后发生
+           * 客户端连接恢复正常，该事件通常在 {@link Realtime#event:reconnect} 之后发生
            * @event IMClient#reconnect
+           * @since 3.2.0
            */
           /**
            * 客户端重新登录发生错误（网络连接已恢复，但重新登录错误）
            * @event IMClient#reconnecterror
+           * @since 3.2.0
            */
           .then(
             () => client.emit('reconnect'),
@@ -373,20 +378,20 @@ export default class Realtime extends EventEmitter {
 
   /**
    * 为 Conversation 定义一个新属性
+   * @since 3.2.0
    * @static
    * @param {String} prop 属性名
    * @param {Object} [descriptor] 属性的描述符，参见 {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/getOwnPropertyDescriptor#Description getOwnPropertyDescriptor#Description - MDN}，默认为该属性名对应的 Conversation 自定义属性的 getter/setter
    * @returns void
    * @example
    *
-   * // previous
-   * conversation.get('admin');
-   * conversation.set('admin', 'Tom');
+   * conversation.get('type');
+   * conversation.set('type', 1);
    *
    * // equals to
-   * Realtime.defineConversationProperty('admin');
-   * conversation.admin;
-   * conversation.admin = 'Tom';
+   * Realtime.defineConversationProperty('type');
+   * conversation.type;
+   * conversation.type = 1;
    */
   static defineConversationProperty(prop, descriptor = {
     get() { return this.get(prop); },
