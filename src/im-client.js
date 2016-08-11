@@ -618,31 +618,30 @@ export default class IMClient extends Client {
 
   /**
    * 创建一个 conversation
-   * @param {Object} options
+   * @param {Object} options 除了下列字段外的其他字段将被视为对话的自定义属性
    * @param {String[]} options.members 对话的初始成员列表，默认包含当前 client
    * @param {String} [options.name] 对话的名字
-   * @param {Object} [options.attributes] 额外属性
+   * @param {Object} [options.attributes] DEPRECATED: 额外属性，对应 _Conversation 表的 attr 列
    * @param {Boolean} [options.transient=false] 暂态会话
    * @param {Boolean} [options.unique=false] 唯一对话，当其为 true 时，如果当前已经有相同成员的对话存在则返回该对话，否则会创建新的对话
    * @return {Promise.<Conversation>}
    */
   createConversation(options = {}) {
-    let attr = {};
-    let {
-      members,
-    } = options;
     const {
+      members: m,
       name,
       attributes,
       transient,
       unique,
+      ...properties,
     } = options;
-    if (!(transient || Array.isArray(members))) {
-      throw new TypeError(`conversation members ${members} is not an array`);
+    if (!(transient || Array.isArray(m))) {
+      throw new TypeError(`conversation members ${m} is not an array`);
     }
-    members = new Set(members);
+    let members = new Set(m);
     members.add(this.id);
     members = Array.from(members).sort();
+    let attr = properties || {};
     if (name) {
       if (typeof name !== 'string') {
         throw new TypeError(`conversation name ${name} is not a string`);
@@ -650,6 +649,7 @@ export default class IMClient extends Client {
       attr.name = name;
     }
     if (attributes) {
+      console.warn('DEPRECATION createConversation options.attributes param: Use options[propertyName] instead. See https://url.leanapp.cn/DeprecateAttributes for more details.');
       attr.attr = attributes;
     }
     attr = new JsonObjectMessage({
@@ -686,7 +686,7 @@ export default class IMClient extends Client {
         return command;
       })
       .then(this._send.bind(this))
-      .then(resCommand => new Conversation(Object.assign({}, {
+      .then(resCommand => new Conversation({
         name,
         attr: attributes,
         transient,
@@ -697,7 +697,8 @@ export default class IMClient extends Client {
         lastMessageAt: null,
         creator: this.id,
         members: transient ? [] : members,
-      }), this))
+        ...properties,
+      }, this))
       .then(tap(conversation =>
         this._conversationCache.set(conversation.id, conversation)
       ));

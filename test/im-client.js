@@ -203,6 +203,7 @@ describe('IMClient', () => {
         attributes: {
           foo: 'bar',
         },
+        baz: 'qux',
       }).then(conversation => {
         conversation.should.be.instanceof(Conversation);
         conversation.members.should.have.length(2);
@@ -211,7 +212,8 @@ describe('IMClient', () => {
         conversation.updatedAt.should.be.a.Date();
         should(conversation.lastMessageAt).be.null();
         conversation.name.should.be.equal('135');
-        conversation.attributes.should.be.eql({ foo: 'bar' });
+        conversation.attributes.should.eql({ foo: 'bar' });
+        conversation.get('baz').should.eql('qux');
       })
     );
     it('members required', () => {
