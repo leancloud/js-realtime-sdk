@@ -1,3 +1,13 @@
+<a name="3.2.1"></a>
+## 3.2.1 (2016-08-12)
+
+
+### Bug Fixes
+
+* **IMClient:** 3.2.0 中废弃 `Conversation` 的 `attributes` 属性时遗漏了 `IMClient#createIMClient` 的 `options.attributes` 参数。这个补丁废弃了这个参数，并支持直接使用 `options[propertyName]` 来定义 `Conversation` 的自定义属性 ([#343](https://github.com/leancloud/js-realtime-sdk/issues/343)) ([05ce2c5](https://github.com/leancloud/js-realtime-sdk/commit/05ce2c5))
+
+
+
 <a name="3.2.0"></a>
 # 3.2.0 (2016-08-10)
 
@@ -13,6 +23,7 @@
 
   * 增加了 `Conversation#get`，`Conversation#set` 方法
   * 废弃了 `Conversation` 的 `attributes` 属性，以及 `setAttribute`、`setAttributes`、`setName` 方法
+  * 修复了 `Conversation#setAttribute` 会删除 `attr` 列中其他字段的错误行为
   * 增加了 `Realtime.defineConversationProperty` 方法
 
   详情说明与迁移指南请参考 [《新的 Conversation 自定义属性 API》](https://url.leanapp.cn/DeprecateAttributes)
