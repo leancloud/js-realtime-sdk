@@ -47,3 +47,13 @@ export const WebRTCPlugin = {
   messageClasses,
   onRealtimeCreate,
 };
+
+/**
+ * 当前浏览器是否支持 WebRTC 的标记
+ * @type {Boolean}
+ */
+export const isWebRTCSupported = !!(
+  window.RTCPeerConnection
+  && window.RTCSessionDescription
+  && window.RTCIceCandidate
+);
