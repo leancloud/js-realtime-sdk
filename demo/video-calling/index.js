@@ -1,126 +1,167 @@
+'use strict';
+
 var APP_ID = 'nOmzEDu7NtMDBXUJJhIw9bNs-gzGzoHsz';
 var realtime = new AV.Realtime({
   appId: APP_ID,
-  plugins: AV.WebRTCPlugin,
+  plugins: AV.WebRTCPlugin
 });
 
 var mediaConstraints = {
   audio: true,
-  video: true,
+  video: true
 };
+
+var callParam = document.URL.match(/[\?&]call=([^&]*)/);
+var autoCall;
+if (callParam && callParam.length) {
+  autoCall = callParam[1];
+}
+var idParam = document.URL.match(/[\?&]id=([^&]*)/);
+var autoId;
+if (idParam && idParam.length) {
+  autoId = idParam[1];
+}
 
 var vm = new Vue({
   el: '#app',
   data: {
+    supported: AV.isWebRTCSupported,
     client: null,
     state: 0,
-    id: '',
-    targetId: '',
+    id: autoId || '',
+    autoCall: autoCall,
+    targetId: autoCall || '',
     incomingCall: null,
     currentCall: null,
     localVideoEnabled: true,
     localAudioEnabled: true,
-    remoteAudioEnabled: true,
+    remoteAudioEnabled: true
+  },
+  computed: {
+    callLink: function callLink() {
+      return document.URL.replace(/\?[\s\S]*/, '') + '?call=' + this.client.id;
+    }
+  },
+  created: function created() {
+    if (autoId) {
+      this.login();
+    }
   },
   methods: {
     login: function login() {
-      return realtime.createWebRTCClient(this.id).then(client => {
-        this.client = client;
-        client.on('call', call => {
-          this.incomingCall = call;
-          call.on('cancel', () => {
-            this.incomingCall = null;
+      var _this = this;
+
+      return realtime.createWebRTCClient(this.id).then(function (client) {
+        _this.client = client;
+        client.on('call', function (call) {
+          _this.incomingCall = call;
+          call.on('cancel', function () {
+            _this.incomingCall = null;
           });
         });
-        client.on('conflict', () => {
+        client.on('conflict', function () {
           alert(client.id + ' logged in another device');
-        })
-        this.state = 'ready';
+        });
+        _this.state = 'ready';
+        if (autoCall) {
+          _this.call();
+        }
       }).catch(console.error.bind(console));
     },
     getLocalStream: function getLocalStream() {
+      var _this = this;
+
       if (!this.localStream) {
         this.localStream = navigator.mediaDevices.getUserMedia(mediaConstraints);
-        this.localStream.then((localStream) => {
+        this.localStream.then(function (localStream) {
           document.getElementById('local_video').srcObject = localStream;
-          this.localAudio = localStream.getAudioTracks()[0];
-          this.localVideo = localStream.getVideoTracks()[0];
+          _this.localAudio = localStream.getAudioTracks()[0];
+          _this.localVideo = localStream.getVideoTracks()[0];
         });
       }
       return this.localStream;
     },
     call: function call() {
-      return this.getLocalStream().then(localStream => {
-        if (this.targetId === '') {
+      var _this = this;
+
+      return this.getLocalStream().then(function (localStream) {
+        if (_this.targetId === '') {
           throw new Error('target id required');
         }
-        if (!this.client) {
+        if (!_this.client) {
           throw new Error('not logged in');
         }
         document.getElementById('local_video').srcObject = localStream;
-        return this.client.call(this.targetId, localStream);
-      }).then(outgoingCall => {
-        this.currentCall = outgoingCall;
-        outgoingCall.on('connect', stream => {
+        return _this.client.call(_this.targetId, localStream);
+      }).then(function (outgoingCall) {
+        _this.currentCall = outgoingCall;
+        outgoingCall.on('connect', function (stream) {
           document.getElementById('remote_video').srcObject = stream;
-          this.remoteAudio = stream.getAudioTracks()[0];
-          this.state = 'connected';
+          _this.remoteAudio = stream.getAudioTracks()[0];
+          _this.state = 'connected';
         });
-        outgoingCall.on('refuse', () => {
-          alert(this.targetId + ' refused the call');
-          this.reset();
-        })
-        outgoingCall.on('close', this.reset.bind(this));
-        this.state = 'calling';
-      }).catch(error => alert(error.message));
+        outgoingCall.on('refuse', function () {
+          alert(_this.targetId + ' refused the call');
+          _this.reset();
+        });
+        outgoingCall.on('close', _this.reset.bind(_this));
+        _this.state = 'calling';
+      }).catch(function (error) {
+        return alert(error.message);
+      });
     },
     accept: function accept() {
-      return this.getLocalStream().then(localStream => {
-        var incomingCall = this.incomingCall;
-        this.incomingCall = null;
-        this.currentCall = incomingCall;
-        this.targetId = incomingCall.from;
-        this.state = 'connected';
-        incomingCall.on('connect', stream => {
+      var _this = this;
+
+      return this.getLocalStream().then(function (localStream) {
+        var incomingCall = _this.incomingCall;
+        _this.incomingCall = null;
+        _this.currentCall = incomingCall;
+        _this.targetId = incomingCall.from;
+        _this.state = 'connected';
+        incomingCall.on('connect', function (stream) {
           document.getElementById('remote_video').srcObject = stream;
-          this.remoteAudio = stream.getAudioTracks()[0];
+          _this.remoteAudio = stream.getAudioTracks()[0];
         });
-        incomingCall.on('close', this.reset.bind(this));
+        incomingCall.on('close', _this.reset.bind(_this));
         return incomingCall.accept(localStream);
       }).catch(console.error.bind(console));
     },
     decline: function decline() {
-      return this.incomingCall.refuse()
-        .then(() => (this.incomingCall = null))
-        .catch(console.error.bind(console));
+      var _this = this;
+
+      return this.incomingCall.refuse().then(function () {
+        return _this.incomingCall = null;
+      }).catch(console.error.bind(console));
     },
     hangup: function hungup() {
       this.currentCall.close();
       this.reset();
     },
-    reset() {
+    reset: function reset() {
       this.state = 'ready';
       var localVideo = document.getElementById('local_video');
       if (localVideo.srcObject) {
-        localVideo.srcObject.getTracks().forEach(track => track.stop());
+        localVideo.srcObject.getTracks().forEach(function (track) {
+          return track.stop();
+        });
       }
       delete this.localStream;
       this.localVideoEnabled = true;
       this.localAudioEnabled = true;
       this.remoteAudioEnabled = true;
     },
-
-    toggleCamera() {
+    toggleCamera: function toggleCamera() {
       this.localVideoEnabled = !this.localVideoEnabled;
       this.localVideo.enabled = this.localVideoEnabled;
     },
-    toggleMic() {
+    toggleMic: function toggleMic() {
       this.localAudioEnabled = !this.localAudioEnabled;
       this.localAudio.enabled = this.localAudioEnabled;
     },
-    toggleMuted() {
+    toggleMuted: function toggleMuted() {
       this.remoteAudioEnabled = !this.remoteAudioEnabled;
       this.remoteAudio.enabled = this.remoteAudioEnabled;
-    },
-  },
+    }
+  }
 });
