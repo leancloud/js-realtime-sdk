@@ -45,6 +45,7 @@ export default class WebRTCClient extends EventEmitter {
   _open(realtime, clientOptions) {
     return realtime.createIMClient(this.id, clientOptions, 'webrtc').then(imClient => {
       this._imClient = imClient;
+      this.id = imClient.id;
       imClient.on('message', (message, conversation) => {
         if (message instanceof Offer) {
           return this._handleOffer(message, conversation);
@@ -84,7 +85,7 @@ export default class WebRTCClient extends EventEmitter {
     return this._imClient.ping([targetId])
       .then((onlineClients) => {
         if (!onlineClients.length) {
-          throw new Error(`${targetId} is not online`);
+          throw new Error(`Call failed as ${targetId} is not online`);
         }
         const outgoingCall = new OutgoingCall(targetId, null, this.options.RTCConfiguration);
         const promise = new Promise((resolve) => {
