@@ -2,14 +2,14 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>LeanCloud Video Calling App</title>
+  <title>LeanVideoChat</title>
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
   <link href="https://leancloud.github.io/docs/styles/font.css" rel="stylesheet">
   <link rel="stylesheet" href="index.css"/>
 </head>
-<body id="app">
+<body id="app" v-cloak>
   <form onsubmit="return false;">
-    <p id="logo" v-if="!client || state === 'ready'">
+    <p id="logo" v-if="!client || state === 'ready' || state === 'calling'">
       <span class="title">LeanVideoChat</span><br/>
       <span class="hint">by LeanCloud Lab</span>
     </p>
@@ -20,28 +20,31 @@
         </p>
         <p>
           <input type="text" v-model="id" placeholder="ID" autofocus/>
-          <button type="submit" v-on:click="login">Login</button>
+          <button type="submit" v-on:click="login" v-show="state !== 'loggingin'">Login</button>
+          <button disabled v-show="state === 'loggingin'">Logging in</button>
         </p>
         <p class="hint">
           leave blank to login anonymously
         </p>
       </div>
       <template v-else>
-        <div id="client" title="{{ client.id }}">{{ client.id }}</div>
-        <div id="call" v-if="state === 'ready'">
+        <div id="client" title="{{ client.id }}">{{ client.id }} <a id="logout" href="javascript:;" v-on:click="logout">Logout</a></div>
+        <div id="call" v-if="state === 'ready' || state === 'calling'">
           <p>
             <input type="text" v-model="targetId" placeholder="Target ID" required autofocus/>
-            <button type="submit" v-on:click="call">call</button>
+            <button type="submit" v-show="state !== 'calling'" v-on:click="call">call</button>
+            <button disabled v-show="state === 'calling'">calling</button>
           </p>
           <p class="hint">
             Waiting for incoming calls now.
           </p>
           <p class="hint">
-            Others can call you by going to<br/><a href="{{ callLink }}">{{ callLink }}</a>
+            Others can call you by going to<br/><a href="{{ callLink }}" target="_blank">{{ callLink }}</a>
           </p>
         </div>
-        <template v-if="state === 'connected' || state === 'calling'">
+        <template v-if="state === 'connected' || state === 'waiting'">
           <div id="controller">
+            <div id="calling-hint" v-show="state === 'waiting'">Waiting for {{ targetId }}</div>
             {{ targetId }}
             <button v-on:click="hangup" class="button-error"><i class="material-icons">call_end</i></button>
             <div v-if="state === 'connected'">
@@ -65,7 +68,7 @@
       <button v-on:click="decline" class="button-error"><i class="material-icons">call_end</i></button>
     </div>
   </div>
-  <div id="camera-box" v-show="state === 'connected' || state === 'calling'">
+  <div id="camera-box" v-show="state === 'connected' || state === 'waiting'">
     <video id="remote_video" autoplay></video>
     <video id="local_video" autoplay muted></video>
   </div>

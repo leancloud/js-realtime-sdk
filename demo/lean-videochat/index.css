@@ -27,6 +27,10 @@ a:link {
   color: #2c97e8;
 }
 
+[v-cloak] {
+  display: none;
+}
+
 #remote_video {
   position: fixed;
   height: 100%;
@@ -120,6 +124,16 @@ form {
   font-size: 36px;
 }
 
+#calling-hint {
+  position: fixed;
+  top: 50%;
+  height: 40px;
+  line-height: 40px;
+  margin-top: -20px;
+  text-align: center;
+  width: 100%;
+}
+
 #logo {
   margin-top: 0;
   font-family: radikal;
@@ -135,4 +149,9 @@ form {
 #login,
 #call {
   background: #EEE;
+}
+
+#logout {
+  font-size: 60%;
+  vertical-align: top;
 }

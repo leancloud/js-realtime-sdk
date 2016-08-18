@@ -50,7 +50,7 @@ var vm = new Vue({
   methods: {
     login: function login() {
       var _this = this;
-
+      _this.state = 'loggingin';
       return realtime.createWebRTCClient(this.id).then(function (client) {
         _this.client = client;
         client.on('call', function (call) {
@@ -65,8 +65,17 @@ var vm = new Vue({
         _this.state = 'ready';
         if (autoCall) {
           _this.call();
+          autoCall = false;
         }
       }).catch(console.error.bind(console));
+    },
+    logout: function logout() {
+      var _this = this;
+      this.hangup();
+      return this.client.close().then(function() {
+        _this._statue = 0;
+        _this.client = null;
+      });
     },
     getLocalStream: function getLocalStream() {
       var _this = this;
@@ -83,8 +92,12 @@ var vm = new Vue({
     },
     call: function call() {
       var _this = this;
-
-      return this.getLocalStream().then(function (localStream) {
+      this.state = 'calling';
+      return new Promise(function(resolve) {
+        setTimeout(resolve, 16);
+      }).then(function() {
+        return _this.getLocalStream();
+      }).then(function (localStream) {
         if (_this.targetId === '') {
           throw new Error('target id required');
         }
@@ -105,8 +118,9 @@ var vm = new Vue({
           _this.reset();
         });
         outgoingCall.on('close', _this.reset.bind(_this));
-        _this.state = 'calling';
+        _this.state = 'waiting';
       }).catch(function (error) {
+        _this.reset();
         return alert(error.message);
       });
     },
@@ -135,7 +149,9 @@ var vm = new Vue({
       }).catch(console.error.bind(console));
     },
     hangup: function hungup() {
-      this.currentCall.close();
+      if (this.currentCall) {
+        this.currentCall.close();
+      }
       this.reset();
     },
     reset: function reset() {
