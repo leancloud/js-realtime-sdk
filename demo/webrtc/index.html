@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>LeanVideoChat</title>
+  <title>LeanCloud WebRTC Demo</title>
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
   <link href="https://leancloud.github.io/docs/styles/font.css" rel="stylesheet">
   <link rel="stylesheet" href="index.css"/>
@@ -10,7 +10,7 @@
 <body id="app" v-cloak>
   <form onsubmit="return false;">
     <p id="logo" v-if="!client || state === 'ready' || state === 'calling'">
-      <span class="title">LeanVideoChat</span><br/>
+      <span class="title">WebRTC Demo</span><br/>
       <span class="hint">by LeanCloud Lab</span>
     </p>
     <template v-if="supported">
@@ -58,7 +58,7 @@
     </template>
     <div v-else id="unsupported">
       <p>Sorry but your browser is not supported. </p>
-      <p class="hint">Currently LeanVideoChat supports Chrome, Firefox, Edge, Opera and Chrome for Android. See http://caniuse.com/#search=webrtc for technical details.</p>
+      <p class="hint">Currently WebRTC Demo supports Chrome, Firefox, Edge, Opera and Chrome for Android. See http://caniuse.com/#search=webrtc for technical details.</p>
     </div>
   </form>
   <div id="incoming-call" v-if="incomingCall">

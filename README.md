@@ -51,7 +51,7 @@ npm install leancloud-realtime@2
 Demo
 ----
 - [Simple Chatroom](https://leancloud.github.io/js-realtime-sdk/demo/simple-chatroom/) ([src](https://github.com/leancloud/js-realtime-sdk/tree/master/demo/simple-chatroom))
-- [WebRTC 视频通话](https://leancloud.github.io/js-realtime-sdk/demo/video-calling/) ([src](https://github.com/leancloud/js-realtime-sdk/tree/master/demo/video-calling))
+- [WebRTC 视频通话](https://leancloud.github.io/js-realtime-sdk/demo/webrtc/) ([src](https://github.com/leancloud/js-realtime-sdk/tree/master/demo/webrtc))
 
 支持
 ----
