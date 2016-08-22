@@ -1,6 +1,7 @@
 import 'should';
 import 'should-sinon';
 import Realtime from '../src/realtime';
+import { ErrorCode } from '../src';
 import Message, { MessageStatus } from '../src/messages/message';
 import TypedMessage from '../src/messages/typed-message';
 import TextMessage from '../src/messages/text-message';
@@ -216,7 +217,10 @@ describe('Messages', () => {
       return wchen
         .getConversation(EXISTING_ROOM_ID)
         .then(conversation => conversation.send(message))
-        .should.be.rejected()
+        .should.be.rejectedWith(Error, {
+          message: 'INVALID_MESSAGING_TARGET',
+          code: ErrorCode.INVALID_MESSAGING_TARGET,
+        })
         .then(() => {
           message.status.should.eql(MessageStatus.FAILED);
         });
