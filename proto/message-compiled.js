@@ -97,6 +97,12 @@ module.exports = require("protobufjs/dist/protobuf-light").newBuilder({})['impor
                     "type": "JsonObjectMessage",
                     "name": "msg",
                     "id": 2
+                },
+                {
+                    "rule": "optional",
+                    "type": "bool",
+                    "name": "offline",
+                    "id": 3
                 }
             ]
         },
@@ -192,6 +198,12 @@ module.exports = require("protobufjs/dist/protobuf-light").newBuilder({})['impor
                     "type": "bool",
                     "name": "sp",
                     "id": 15
+                },
+                {
+                    "rule": "optional",
+                    "type": "string",
+                    "name": "detail",
+                    "id": 16
                 }
             ]
         },
@@ -304,6 +316,12 @@ module.exports = require("protobufjs/dist/protobuf-light").newBuilder({})['impor
                     "type": "string",
                     "name": "roomId",
                     "id": 15
+                },
+                {
+                    "rule": "optional",
+                    "type": "string",
+                    "name": "pushData",
+                    "id": 16
                 }
             ]
         },
@@ -481,6 +499,30 @@ module.exports = require("protobufjs/dist/protobuf-light").newBuilder({})['impor
                     "type": "string",
                     "name": "s",
                     "id": 15
+                },
+                {
+                    "rule": "optional",
+                    "type": "bool",
+                    "name": "statusSub",
+                    "id": 16
+                },
+                {
+                    "rule": "optional",
+                    "type": "bool",
+                    "name": "statusPub",
+                    "id": 17
+                },
+                {
+                    "rule": "optional",
+                    "type": "int32",
+                    "name": "statusTTL",
+                    "id": 18
+                },
+                {
+                    "rule": "repeated",
+                    "type": "string",
+                    "name": "members",
+                    "id": 19
                 },
                 {
                     "rule": "optional",
@@ -697,6 +739,12 @@ module.exports = require("protobufjs/dist/protobuf-light").newBuilder({})['impor
                     "type": "string",
                     "name": "sessionPeerIds",
                     "id": 2
+                },
+                {
+                    "rule": "optional",
+                    "type": "string",
+                    "name": "cid",
+                    "id": 3
                 }
             ]
         },
@@ -761,6 +809,12 @@ module.exports = require("protobufjs/dist/protobuf-light").newBuilder({})['impor
                     "type": "string",
                     "name": "installationId",
                     "id": 6
+                },
+                {
+                    "rule": "optional",
+                    "type": "int32",
+                    "name": "priority",
+                    "id": 7
                 },
                 {
                     "rule": "optional",
@@ -1013,6 +1067,14 @@ module.exports = require("protobufjs/dist/protobuf-light").newBuilder({})['impor
                 {
                     "name": "unmute",
                     "id": 48
+                },
+                {
+                    "name": "status",
+                    "id": 49
+                },
+                {
+                    "name": "members",
+                    "id": 50
                 },
                 {
                     "name": "join",
