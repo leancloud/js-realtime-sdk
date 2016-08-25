@@ -12,6 +12,7 @@ import {
   APP_ID,
   REGION,
   EXISTING_ROOM_ID,
+  SYS_CONV_ID,
   CLIENT_ID,
 } from './configs';
 
@@ -46,6 +47,12 @@ describe('Conversation', () => {
     conversation.testProperty2 = 2;
     conversation.get('testProperty2').should.eql(2);
   });
+
+  it('system conversation', () =>
+    client.getConversation(SYS_CONV_ID).then(conv => {
+      conv.system.should.be.equal(true);
+    })
+  );
 
   it('update', () => {
     const timestamp = Date.now();
