@@ -51,7 +51,7 @@
     "grunt-contrib-connect": "^1.0.0",
     "grunt-contrib-uglify": "^2.0.0",
     "grunt-envify": "0.0.3",
-    "grunt-rollup": "^0.7.0",
+    "grunt-rollup": "^0.8.0",
     "grunt-saucelabs": "^9.0.0",
     "inherit": "^2.2.3",
     "isparta": "^4.0.0",
