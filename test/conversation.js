@@ -368,13 +368,19 @@ describe('Conversation', () => {
     const bwangId = uuid.v4();
     let bwang0;
     let conversationId;
+    const message = new Message({});
     return realtime.createIMClient()
       .then(jwu =>
         jwu.createConversation({
           members: [bwangId],
         }).then(conv => {
           conversationId = conv.id;
-          return conv.send(new Message({}));
+          // 这里连续发 3 条消息，conv.lm 可能不会被更新为最后一条消息
+          // 发送 read 命令时如果用 conv.lm 可能会导致漏标消息
+          return Promise.all([
+            conv.send(new Message({})),
+            conv.send(new Message({})),
+          ]).then(() => conv.send(message));
         }).then(tap(() => jwu.close()))
       ).then(() =>
         new Realtime({
@@ -384,15 +390,17 @@ describe('Conversation', () => {
       ).then(c => {
         bwang0 = c;
         return listen(bwang0, 'unreadmessages').then(([payload, conv]) => {
-          payload.count.should.be.eql(1);
-          conv.unreadMessagesCount.should.eql(1);
+          payload.count.should.be.eql(3);
+          payload.lastMessageId.should.be.eql(message.id);
+          payload.lastMessageTimestamp.should.be.eql(message.timestamp);
+          conv.unreadMessagesCount.should.eql(3);
           conv.id.should.be.eql(conversationId);
         });
       })
       .then(() => realtime.createIMClient(bwangId))
       .then(bwang1 => listen(bwang1, 'unreadmessages')
         .then(([payload, conv]) => {
-          payload.count.should.be.eql(1);
+          payload.count.should.be.eql(3);
           conv.id.should.be.eql(conversationId);
           return conv.markAsRead().then(conv1 => {
             conv1.unreadMessagesCount.should.be.eql(0);
