@@ -1,13 +1,18 @@
 /** @module leancloud-realtime */
-import { default as Realtime } from './realtime';
+import Realtime from './realtime';
 import Message, { MessageStatus } from './messages/message';
-import { default as TypedMessage } from './messages/typed-message';
-import { default as TextMessage } from './messages/text-message';
+import TypedMessage from './messages/typed-message';
+import TextMessage from './messages/text-message';
 import {
   messageType,
   messageField,
   IE10Compatible,
 } from './messages/helpers';
+
+const OnlineStatus = {
+  ONLINE: Symbol('online'),
+  OFFLINE: Symbol('offline'),
+};
 
 export {
   /**
@@ -65,4 +70,5 @@ export {
   messageField,
   IE10Compatible,
   MessageStatus,
+  OnlineStatus,
 };
