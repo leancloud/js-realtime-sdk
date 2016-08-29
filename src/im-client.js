@@ -241,7 +241,7 @@ export default class IMClient extends Client {
           };
           /**
            * 有用户被添加至某个对话
-           * @event IMClient#memberjoined
+           * @event IMClient#membersjoined
            * @param {Object} payload
            * @param {String[]} payload.members 被添加的用户 id 列表
            * @param {String} payload.invitedBy 邀请者 id
@@ -250,7 +250,7 @@ export default class IMClient extends Client {
           this.emit('membersjoined', payload, conversation);
           /**
            * 有成员被添加至当前对话
-           * @event Conversation#memberjoined
+           * @event Conversation#membersjoined
            * @param {Object} payload
            * @param {String[]} payload.members 被添加的成员 id 列表
            * @param {String} payload.invitedBy 邀请者 id
@@ -270,7 +270,7 @@ export default class IMClient extends Client {
           };
           /**
            * 有成员被从某个对话中移除
-           * @event IMClient#memberleft
+           * @event IMClient#membersleft
            * @param {Object} payload
            * @param {String[]} payload.members 被移除的成员 id 列表
            * @param {String} payload.kickedBy 该移除操作的发起者 id
@@ -279,7 +279,7 @@ export default class IMClient extends Client {
           this.emit('membersleft', payload, conversation);
           /**
            * 有成员被从当前对话中移除
-           * @event Conversation#memberleft
+           * @event Conversation#membersleft
            * @param {Object} payload
            * @param {String[]} payload.members 被移除的成员 id 列表
            * @param {String} payload.kickedBy 该移除操作的发起者 id
