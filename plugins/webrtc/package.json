@@ -1,6 +1,6 @@
 {
   "name": "leancloud-realtime-plugin-webrtc",
-  "version": "1.0.0-beta.1",
+  "version": "1.0.0-beta.2",
   "description": "WebRTC for LeanCloud Realtime",
   "main": "dist/webrtc.js",
   "directories": {
