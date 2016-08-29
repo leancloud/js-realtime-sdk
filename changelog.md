@@ -1,3 +1,14 @@
+<a name="3.2.2"></a>
+## 3.2.2 (2016-08-29)
+
+
+### Bug Fixes
+
+* **unread:** 修复了 `unreadmessages` 事件中 `payload.lastMessageTimestamp` 值为无效时间的问题 ([#355](https://github.com/leancloud/js-realtime-sdk/issues/355)) ([bf5727d](https://github.com/leancloud/js-realtime-sdk/commit/bf5727d))
+* **unread:** 修复了标记为已读时有可能会漏掉消息的问题 ([#355](https://github.com/leancloud/js-realtime-sdk/issues/355)) ([bf5727d](https://github.com/leancloud/js-realtime-sdk/commit/bf5727d))
+
+
+
 <a name="3.2.1"></a>
 ## 3.2.1 (2016-08-12)
 
@@ -68,6 +79,7 @@
 - leancloud-realtime-plugin-typed-messages 1.0.0
 - leancloud-realtime-plugin-webrtc 1.0.0-beta.1
 
+从这个版本开始，插件的 changelog 将更新在具体的插件目录下。
 
 ### Features
 
