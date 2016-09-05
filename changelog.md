@@ -1,3 +1,13 @@
+<a name="3.2.3"></a>
+## 3.2.3 (2016-09-05)
+
+
+### Bug Fixes
+
+* **WebSocketPlus:** 修复了 iOS 下开启飞行模式会导致自动重连机制失效的问题 ([#369](https://github.com/leancloud/js-realtime-sdk/issues/369)) ([c563483](https://github.com/leancloud/js-realtime-sdk/commit/c563483))
+
+
+
 <a name="3.2.2"></a>
 ## 3.2.2 (2016-08-29)
 
