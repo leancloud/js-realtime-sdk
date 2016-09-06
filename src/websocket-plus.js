@@ -13,7 +13,7 @@ const debug = d('LC:WebSocketPlus');
 const HEARTBEAT_TIME = 60000;
 const TIMEOUT_TIME = 180000;
 
-const DEFAULT_RETRY_STRATEGY = attempt => Math.min(1000 << attempt, 300000);
+const DEFAULT_RETRY_STRATEGY = attempt => Math.min(1000 * Math.pow(2, attempt), 300000);
 
 const requireConnected = (target, name, descriptor) =>
   Object.assign({}, descriptor, {
