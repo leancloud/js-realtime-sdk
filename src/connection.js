@@ -1,6 +1,6 @@
 import { default as d } from 'debug';
 import WebSocketPlus from './websocket-plus';
-import { createError } from './errors';
+import { createError } from './error';
 import { GenericCommand, CommandType } from '../proto/message';
 import { trim } from './utils';
 

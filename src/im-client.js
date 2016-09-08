@@ -15,7 +15,7 @@ import {
   CommandType,
   OpType,
 } from '../proto/message';
-import * as Errors from './errors';
+import { ErrorCode } from './error';
 import { tap, Expirable, Cache, keyRemap, union, difference, trim, internal } from './utils';
 import { applyDecorators } from './plugin';
 import runSignatureFactory from './signature-factory-runner';
@@ -99,7 +99,7 @@ export default class IMClient extends Client {
     } = message;
     switch (message.op) {
       case OpType.closed: {
-        if (code === Errors.SESSION_CONFLICT.code) {
+        if (code === ErrorCode.SESSION_CONFLICT) {
           /**
            * 用户在其他客户端登录，当前客户端被服务端强行下线。详见文档「单点登录」章节。
            * @event IMClient#conflict
@@ -443,7 +443,7 @@ export default class IMClient extends Client {
           internal(this).sessionToken = new Expirable(token, tokenTTL * 1000);
         }
       }, error => {
-        if (error.code === Errors.SESSION_TOKEN_EXPIRED.code) {
+        if (error.code === ErrorCode.SESSION_TOKEN_EXPIRED) {
           if (internal(this).sessionToken === undefined) {
             // let it fail if sessoinToken not cached but command rejected as token expired
             // to prevent session openning flood

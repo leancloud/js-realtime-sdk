@@ -3,7 +3,7 @@ import EventEmitter from 'eventemitter3';
 import axios from 'axios';
 import uuid from 'uuid';
 import Connection from './connection';
-import * as Errors from './errors';
+import { ErrorCode, createError } from './error';
 import { tap, Cache, trim, internal, ensureArray } from './utils';
 import { applyDecorators } from './plugin';
 import Conversation from './conversation';
@@ -155,16 +155,14 @@ export default class Realtime extends EventEmitter {
       // override handleClose
       connection.handleClose = function handleClose(event) {
         // CAUTION: non-standard API, provided by core-js
-        const fatalError = Array.find([
-          Errors.APP_NOT_AVAILABLE,
-          Errors.INVALID_LOGIN,
-          Errors.INVALID_ORIGIN,
-        ], error => error.code === event.code);
-        if (fatalError) {
+        const isFatal = Array.some([
+          ErrorCode.APP_NOT_AVAILABLE,
+          ErrorCode.INVALID_LOGIN,
+          ErrorCode.INVALID_ORIGIN,
+        ], errorCode => errorCode === event.code);
+        if (isFatal) {
           // in these cases, SDK should throw.
-          const error = new Error(`${fatalError.message || event.reason}`);
-          error.code = event.code;
-          this.throw(error);
+          this.throw(createError(event));
         } else {
           // reconnect
           this.disconnect();

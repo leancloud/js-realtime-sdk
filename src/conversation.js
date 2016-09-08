@@ -14,7 +14,7 @@ import {
   LogsCommand,
 } from '../proto/message';
 import runSignatureFactory from './signature-factory-runner';
-import { createError } from './errors';
+import { createError } from './error';
 import Message, { MessageStatus } from './messages/message';
 
 const debug = d('LC:Conversation');
