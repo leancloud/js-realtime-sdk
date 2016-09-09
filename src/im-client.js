@@ -595,6 +595,7 @@ export default class IMClient extends Client {
       msg_timestamp: 'lastMessageTimestamp',
       m: 'members',
       tr: 'transient',
+      sys: 'system',
       c: 'creator',
       mu: 'mutedMembers',
     }, rawData);

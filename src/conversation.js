@@ -34,6 +34,7 @@ export default class Conversation extends EventEmitter {
     mutedMembers = [],
     members = [],
     transient = false,
+    system = false,
     muted = false,
     // jsdoc-ignore-start
     ...attributes,
@@ -95,6 +96,13 @@ export default class Conversation extends EventEmitter {
        * @type {Boolean}
        */
       transient,
+      /**
+       * 系统对话标记
+       * @memberof Conversation#
+       * @type {Boolean}
+       * @since 3.3
+       */
+      system,
       /**
        * 当前用户静音该对话标记
        * @memberof Conversation#
@@ -420,7 +428,7 @@ export default class Conversation extends EventEmitter {
     }).then(
       this._send.bind(this)
     ).then(() => {
-      if (!this.transient) {
+      if (!this.transient && !this.system) {
         this.members = union(this.members, clientIds);
       }
       return this;
@@ -462,7 +470,7 @@ export default class Conversation extends EventEmitter {
     }).then(
       this._send.bind(this)
     ).then(() => {
-      if (!this.transient) {
+      if (!this.transient && !this.system) {
         this.members = difference(this.members, clientIds);
       }
       return this;
