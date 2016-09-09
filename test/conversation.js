@@ -1,12 +1,11 @@
 import uuid from 'uuid';
 import Realtime from '../src/realtime';
+import { Message, TextMessage, MessageStatus, OnlineStatus } from '../src';
 import { tap } from '../src/utils';
 import {
   GenericCommand,
   ConvCommand,
 } from '../proto/message';
-import Message, { MessageStatus } from '../src/messages/message';
-import TextMessage from '../src/messages/text-message';
 
 import {
   APP_ID,
@@ -422,5 +421,43 @@ describe('Conversation', () => {
       ).then(() => {
         bwang0.close();
       });
+  });
+
+  it('online status', () => {
+    const jfengId = uuid.v4();
+    let conversationId;
+    return realtime.createIMClient(jfengId).then(jfeng =>
+      jfeng.createConversation({
+        members: [CLIENT_ID],
+      }).then(conv => {
+        conversationId = conv.id;
+        return conv.updateOnlineStatusPolicy({
+          pub: true,
+          sub: true,
+        });
+      }).then(() =>
+        client.getConversation(conversationId).then(conv =>
+          conv.updateOnlineStatusPolicy({
+            sub: true,
+          }).then(() =>
+            listen(conv, 'membersstatuschange')
+          ).then(([{ members, status }]) => {
+            members.should.eql([jfengId]);
+            status.should.eql(OnlineStatus.ONLINE);
+            jfeng.close();
+            return listen(conv, 'membersstatuschange');
+          }).then(([{ members, status }]) => {
+            members.should.eql([jfengId]);
+            status.should.eql(OnlineStatus.OFFLINE);
+            realtime.createIMClient(jfengId);
+            return listen(conv, 'membersstatuschange');
+          }).then(([{ members, status }]) => {
+            members.should.eql([jfengId]);
+            status.should.eql(OnlineStatus.ONLINE);
+            return jfeng.close();
+          })
+        )
+      )
+    );
   });
 });

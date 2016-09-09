@@ -129,10 +129,11 @@ export default class Conversation extends EventEmitter {
       'kicked',
       'membersjoined',
       'membersleft',
+      'membersstatuschange',
       'message',
     ].forEach(event => this.on(
       event,
-      payload => this._debug(`${event} event emitted.`, payload)
+      (...payload) => this._debug(`${event} event emitted.`, ...payload)
     ));
     // onConversationCreate hook
     applyDecorators(this._client._plugins.onConversationCreate, this);
@@ -706,5 +707,30 @@ export default class Conversation extends EventEmitter {
      * @param {Message} payload.message 送达的消息
      */
     this.emit('receipt', { message });
+  }
+
+  /**
+   * 更新会话的上下线通知策略
+   * @param {Object} [options]
+   * @param {Boolean} [options.pub = false] 是否公开自己的上下线状态
+   * @param {Boolean} [options.sub = false] 是否订阅该会话其他成员公开的上下线状态
+   * @param {Number} [options.ttl] 下线后保留该策略的时间，单位为秒
+   */
+  updateOnlineStatusPolicy({
+    pub = false,
+    sub = false,
+    ttl,
+  }) {
+    this._debug('updateOnlineStatusPolicy', pub, sub, ttl);
+    const convMessage = new ConvCommand({
+      statusPub: pub,
+      statusSub: sub,
+      statusTTL: ttl,
+    });
+    const command = new GenericCommand({
+      op: 'status',
+      convMessage,
+    });
+    return this._send(command);
   }
 }
