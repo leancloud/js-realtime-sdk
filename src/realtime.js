@@ -367,7 +367,7 @@ export default class Realtime extends EventEmitter {
    * 在接收消息、查询消息时，会按照消息类注册顺序的逆序依次尝试解析消息内容
    *
    * @param  {Function | Function[]} messageClass 消息类，需要实现 {@link AVMessage} 接口，
-   *                     													建议继承自 {@link TypedMessage}
+   * 建议继承自 {@link TypedMessage}
    * @throws {TypeError} 如果 messageClass 没有实现 {@link AVMessage} 接口则抛出异常
    */
   register(messageClass) {

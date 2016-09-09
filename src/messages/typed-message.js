@@ -79,9 +79,11 @@ export default class TypedMessage extends Message {
     }, {});
   }
 
+  /* eslint-disable class-methods-use-this */
   _getType() {
     throw new Error('not implemented');
   }
+  /* eslint-enable class-methods-use-this */
 
   toJSON() {
     return Object.assign({

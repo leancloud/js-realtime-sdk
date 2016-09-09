@@ -162,6 +162,7 @@ export default class Call extends EventEmitter {
       default:
     }
   }
+  /* eslint-disable class-methods-use-this */
   _handleAnswer() {
     throw new Error('not implemented');
   }
@@ -171,4 +172,5 @@ export default class Call extends EventEmitter {
   _handleCancelation() {
     throw new Error('not implemented');
   }
+  /* eslint-enable class-methods-use-this */
 }
