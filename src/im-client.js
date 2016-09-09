@@ -300,10 +300,10 @@ export default class IMClient extends Client {
     return this.getConversation(presenceMessage.cid).then(conversation => {
       /**
        * 对话成员的在线状态发生变化
-       * @event Conversation#memberleft
+       * @event Conversation#membersstatuschange
        * @param {Object} payload
        * @param {String[]} payload.members 成员 id 列表
-       * @param {Symbol} payload.status 新的在线状态，值为 {module:leancloud-realtime.OnlineStatus} 之一
+       * @param {Symbol} payload.status 新的在线状态，值为 {@link module:leancloud-realtime.OnlineStatus} 之一
        */
       conversation.emit('membersstatuschange', {
         members: presenceMessage.sessionPeerIds,
