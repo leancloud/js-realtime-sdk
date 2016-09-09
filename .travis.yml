@@ -16,7 +16,7 @@ install:
   - npm install
 script:
   - npm test && codecov
-  - npm run doc
+  - npm run docs
 after_success:
   - if [[ "$TRAVIS_BRANCH" == "master" ]] && [[ "${TRAVIS_PULL_REQUEST}" = "false" ]]; then
       ./deploy.sh;
