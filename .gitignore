@@ -3,6 +3,7 @@ node_modules
 
 dist
 coverage
+.nyc_output
 docs
 gh_pages
 
