@@ -50,7 +50,7 @@ export default class Realtime extends EventEmitter {
         for (const hook in plugin) {
           if ({}.hasOwnProperty.call(plugin, hook) && hook !== 'name') {
             if (plugin.name) {
-              ensureArray(plugin[hook]).forEach(value => {
+              ensureArray(plugin[hook]).forEach((value) => {
                 // eslint-disable-next-line no-param-reassign
                 value._pluginName = plugin.name;
               });
@@ -146,7 +146,7 @@ export default class Realtime extends EventEmitter {
           debug(`${event} event emitted.`, ...payload);
           this.emit(event, ...payload);
           if (event !== 'reconnect') {
-            Object.values(this._clients).forEach(client => {
+            Object.values(this._clients).forEach((client) => {
               client.emit(event, ...payload);
             });
           }
@@ -183,7 +183,7 @@ export default class Realtime extends EventEmitter {
         .then(
           tap(info => this._cache.set('endpoints', info, info.ttl * 1000))
         )
-    ).then(info => {
+    ).then((info) => {
       debug('endpoint info:', info);
       return [info.server, info.secondary];
     });
@@ -209,7 +209,7 @@ export default class Realtime extends EventEmitter {
           )
           .then(tap(debug))
           .then(
-            route => {
+            (route) => {
               const pushRouter = route.push_router_server;
               if (!pushRouter) {
                 throw new Error('push router not exists');
@@ -326,7 +326,7 @@ export default class Realtime extends EventEmitter {
     if (idIsString && this._clients[id] !== undefined) {
       return Promise.resolve(this._clients[id]);
     }
-    const promise = this._open().then(connection => {
+    const promise = this._open().then((connection) => {
       const client = new IMClient(id, clientOptions, connection, {
         _messageParser: this._messageParser,
         _plugins: this._plugins,

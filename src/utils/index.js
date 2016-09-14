@@ -1,6 +1,6 @@
 import isPlainObject from 'lodash/isPlainObject';
 
-export const tryAll = promiseConstructors => {
+export const tryAll = (promiseConstructors) => {
   const promise = new Promise(promiseConstructors[0]);
   if (promiseConstructors.length === 1) {
     return promise;
@@ -13,7 +13,7 @@ export const tap = interceptor => value => ((interceptor(value), value));
 export { default as Expirable } from './expirable';
 export { default as Cache } from './cache';
 
-export const decodeDate = date => {
+export const decodeDate = (date) => {
   if (!date) return date;
   if (typeof date === 'string') {
     return new Date(date);
@@ -59,7 +59,7 @@ export const internal = (object) => {
 };
 
 // debug utility
-const removeNull = obj => {
+const removeNull = (obj) => {
   if (!isPlainObject(obj)) return obj;
   const object = Object.assign({}, obj);
   // eslint-disable-next-line no-restricted-syntax
@@ -77,7 +77,7 @@ const removeNull = obj => {
 };
 export const trim = message => removeNull(JSON.parse(JSON.stringify(message)));
 
-export const ensureArray = target => {
+export const ensureArray = (target) => {
   if (Array.isArray(target)) {
     return target;
   }
@@ -92,7 +92,7 @@ export const setValue = (target, key, value) => {
   const segs = key.split('.');
   const lastSeg = segs.pop();
   let currentTarget = target;
-  segs.forEach(seg => {
+  segs.forEach((seg) => {
     if (currentTarget[seg] === undefined) currentTarget[seg] = {};
     currentTarget = currentTarget[seg];
   });

@@ -78,7 +78,7 @@ export const ErrorCode = Object
     [error[code].name]: Number(code),
   }), {});
 
-export const createError = errorMessage => {
+export const createError = (errorMessage) => {
   const {
     code, reason, appCode, detail,
   } = errorMessage;

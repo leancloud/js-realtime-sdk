@@ -31,7 +31,7 @@ describe('FileMessage and subclasses', () => {
       (() => new FileMessage(file1)).should.throw();
       return file1.save()
         .then(() => new FileMessage(file1))
-        .then(message => {
+        .then((message) => {
           message.setText('chrome');
           message.setAttributes({ version: 31 });
           message.getFile().should.be.exactly(file1);
@@ -51,7 +51,7 @@ describe('FileMessage and subclasses', () => {
           });
           return FileMessage.parse(json);
         })
-        .then(message => {
+        .then((message) => {
           message.should.be.instanceof(FileMessage);
           message.text.should.eql('chrome');
           message.attributes.should.eql({ version: 31 });
@@ -65,7 +65,7 @@ describe('FileMessage and subclasses', () => {
         });
     });
     it('file created from url', () =>
-      Promise.resolve(new FileMessage(file)).then(message => {
+      Promise.resolve(new FileMessage(file)).then((message) => {
         message.setText('chrome');
         message.setAttributes({ version: 31 });
         message.getFile().should.be.exactly(file);
@@ -84,7 +84,7 @@ describe('FileMessage and subclasses', () => {
           },
         });
         return FileMessage.parse(json);
-      }).then(message => {
+      }).then((message) => {
         message.should.be.instanceof(FileMessage);
         message.text.should.eql('chrome');
         message.attributes.should.eql({ version: 31 });
@@ -108,7 +108,7 @@ describe('FileMessage and subclasses', () => {
       (() => new ImageMessage('1')).should.throw();
     });
     it('should inherit from FileMessage', () =>
-      Promise.resolve(new ImageMessage(file)).then(message => {
+      Promise.resolve(new ImageMessage(file)).then((message) => {
         message.setText('chrome');
         message.setAttributes({ version: 31 });
         message.getFile().should.be.exactly(file);
@@ -127,7 +127,7 @@ describe('FileMessage and subclasses', () => {
           },
         });
         return ImageMessage.parse(json);
-      }).then(message => {
+      }).then((message) => {
         message.should.be.instanceof(ImageMessage);
         message.should.be.instanceof(FileMessage);
         message.text.should.eql('chrome');
@@ -148,7 +148,7 @@ describe('FileMessage and subclasses', () => {
       (() => new AudioMessage('1')).should.throw();
     });
     it('should inherit from FileMessage', () =>
-      Promise.resolve(new AudioMessage(file)).then(message => {
+      Promise.resolve(new AudioMessage(file)).then((message) => {
         message.setText('chrome');
         message.setAttributes({ version: 31 });
         message.getFile().should.be.exactly(file);
@@ -157,7 +157,7 @@ describe('FileMessage and subclasses', () => {
           _lctype: -3,
         });
         return AudioMessage.parse(json);
-      }).then(message => {
+      }).then((message) => {
         message.should.be.instanceof(AudioMessage);
         message.should.be.instanceof(FileMessage);
         const fileCopy = message.getFile();
@@ -171,7 +171,7 @@ describe('FileMessage and subclasses', () => {
       (() => new VideoMessage('1')).should.throw();
     });
     it('should inherit from FileMessage', () =>
-      Promise.resolve(new VideoMessage(file)).then(message => {
+      Promise.resolve(new VideoMessage(file)).then((message) => {
         message.setText('chrome');
         message.setAttributes({ version: 31 });
         message.getFile().should.be.exactly(file);
@@ -180,7 +180,7 @@ describe('FileMessage and subclasses', () => {
           _lctype: -4,
         });
         return VideoMessage.parse(json);
-      }).then(message => {
+      }).then((message) => {
         message.should.be.instanceof(VideoMessage);
         message.should.be.instanceof(FileMessage);
         const fileCopy = message.getFile();

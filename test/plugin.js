@@ -17,7 +17,7 @@ import {
 @messageType(1)
 class PluginDefinedMessage extends TypedMessage {}
 
-const patchTestFunction = (value = true, fnName = 'test') => target => {
+const patchTestFunction = (value = true, fnName = 'test') => (target) => {
   target[fnName] = () => value;
 };
 
@@ -38,7 +38,7 @@ describe('Plugin', () => {
           beforeMessageParse: json => Object.assign({}, json, {
             _lctext: `[plugin-test]${json._lctext}`,
           }),
-          afterMessageParse: message => {
+          afterMessageParse: (message) => {
             message.foo = 'bar';
             return message;
           },
@@ -58,7 +58,7 @@ describe('Plugin', () => {
         .then(() => {
           client.test().should.be.ok();
           return client.getConversation(EXISTING_ROOM_ID);
-        }).then(conversation => {
+        }).then((conversation) => {
           conversation.test().should.be.ok();
           return conversation.createMessagesIterator({
             limit: 1,
@@ -106,7 +106,7 @@ describe('Plugin', () => {
     });
     it('all middlewares should be applied', () =>
       realtime._messageParser.parse(new TextMessage('1').toJSON())
-        .then(message => {
+        .then((message) => {
           message.should.be.instanceof(TextMessage);
           message.text.should.startWith('[plugin-test]');
           message.text.should.endWith('[plugin-test]');

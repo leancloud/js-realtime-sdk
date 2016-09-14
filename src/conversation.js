@@ -258,7 +258,7 @@ export default class Conversation extends EventEmitter {
     // set 'a' or 'a.b': delete 'a.b'
     const re = new RegExp(`^${key}`);
     const childKeys = pendingKeys.filter(re.test.bind(re));
-    childKeys.forEach(k => {
+    childKeys.forEach((k) => {
       delete pendingAttributes[k];
     });
     if (childKeys.length) {
@@ -328,7 +328,7 @@ export default class Conversation extends EventEmitter {
         op: 'update',
         convMessage,
       }))
-      .then(resCommand => {
+      .then((resCommand) => {
         this.updatedAt = resCommand.convMessage.udate;
         this._attributes = internal(this).currentAttributes;
         internal(this).pendingAttributes = {};
@@ -412,11 +412,11 @@ export default class Conversation extends EventEmitter {
         op: 'add',
         convMessage,
       })
-    ).then(command => {
+    ).then((command) => {
       if (this._client.options.conversationSignatureFactory) {
         const params = [this.id, this._client.id, clientIds.sort(), 'add'];
         return runSignatureFactory(this._client.options.conversationSignatureFactory, params)
-          .then(signatureResult => {
+          .then((signatureResult) => {
             Object.assign(command.convMessage, keyRemap({
               signature: 's',
               timestamp: 't',
@@ -454,11 +454,11 @@ export default class Conversation extends EventEmitter {
         op: 'remove',
         convMessage,
       })
-    ).then(command => {
+    ).then((command) => {
       if (this._client.options.conversationSignatureFactory) {
         const params = [this.id, this._client.id, clientIds.sort(), 'remove'];
         return runSignatureFactory(this._client.options.conversationSignatureFactory, params)
-          .then(signatureResult => {
+          .then((signatureResult) => {
             Object.assign(command.convMessage, keyRemap({
               signature: 's',
               timestamp: 't',
@@ -535,7 +535,7 @@ export default class Conversation extends EventEmitter {
       }),
     }), !message.transient);
     if (!message.transient) {
-      sendPromise = sendPromise.then(resCommand => {
+      sendPromise = sendPromise.then((resCommand) => {
         const {
           ackMessage: {
             uid,
@@ -564,7 +564,7 @@ export default class Conversation extends EventEmitter {
         internal(this).messagesWaitingForReciept[message.id] = message;
       }
       return message;
-    }, error => {
+    }, (error) => {
       message._setStatus(MessageStatus.FAILED);
       throw error;
     });
@@ -611,7 +611,7 @@ export default class Conversation extends EventEmitter {
       ),
     })).then(resCommand =>
       Promise.all(resCommand.logsMessage.logs.map(log =>
-        this._client._messageParser.parse(log.data).then(message => {
+        this._client._messageParser.parse(log.data).then((message) => {
           const messageProps = {
             id: log.msgId,
             cid: this.id,
@@ -664,7 +664,7 @@ export default class Conversation extends EventEmitter {
             beforeMessageId,
           });
         } else {
-          promise = promise.then(prevMessages => {
+          promise = promise.then((prevMessages) => {
             if (prevMessages.length === 0 || prevMessages.length < limit) {
               // no more messages
               return [];

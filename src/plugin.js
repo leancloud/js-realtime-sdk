@@ -83,9 +83,9 @@
 
 import { ensureArray, tap } from './utils';
 
-const checkType = middleware => param => {
+const checkType = middleware => (param) => {
   const { constructor } = param;
-  return Promise.resolve(param).then(middleware).then(tap(result => {
+  return Promise.resolve(param).then(middleware).then(tap((result) => {
     if (result === undefined || result === null) {
       // eslint-disable-next-line max-len
       return console.warn(`Middleware[${middleware._pluginName || 'anonymous plugin'}:${middleware.name || 'anonymous middleware'}] param/return types not match. It returns ${result} while a ${param.constructor.name} expected.`);
@@ -117,7 +117,7 @@ export const applyMiddlewares = middlewares => target =>
   ensureArray(middlewares).reduce(
     (previousPromise, middleware) => previousPromise
       .then(checkType(middleware))
-      .catch(error => {
+      .catch((error) => {
         if (middleware._pluginName) {
           // eslint-disable-next-line no-param-reassign
           error.message += `[${middleware._pluginName}]`;

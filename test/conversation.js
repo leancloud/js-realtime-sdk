@@ -27,11 +27,11 @@ describe('Conversation', () => {
       region: REGION,
     });
     return realtime.createIMClient(CLIENT_ID)
-      .then(c => {
+      .then((c) => {
         client = c;
         return client.getConversation(EXISTING_ROOM_ID);
       })
-      .then(conv => {
+      .then((conv) => {
         conversation = conv;
         return conv.send(new TextMessage('42'));
       });
@@ -48,7 +48,7 @@ describe('Conversation', () => {
   });
 
   it('system conversation', () =>
-    client.getConversation(SYS_CONV_ID).then(conv => {
+    client.getConversation(SYS_CONV_ID).then((conv) => {
       conv.system.should.be.equal(true);
     })
   );
@@ -56,20 +56,20 @@ describe('Conversation', () => {
   it('update', () => {
     const timestamp = Date.now();
     const name = conversation.name;
-    return Promise.resolve(conversation).then(conv => {
+    return Promise.resolve(conversation).then((conv) => {
       conv.name = name;
       conv.attributes = {
         timestamp,
       };
       return conv.save();
-    }).then(conv => {
+    }).then((conv) => {
       conv.should.be.exactly(conversation);
       conv.name.should.be.equal(name);
       conv.attributes.should.be.eql({ timestamp });
       return conv
         .setAttributes({ lean: 'cloud' }, true)
         .save();
-    }).then(conv => {
+    }).then((conv) => {
       conv.name.should.be.equal(name);
       conv.attributes.should.be.eql({
         timestamp,
@@ -78,7 +78,7 @@ describe('Conversation', () => {
       return conv
         .setAttribute('lee', 'yeh')
         .save();
-    }).then(conv => {
+    }).then((conv) => {
       conv.name.should.be.equal(name);
       conv.attributes.should.be.eql({
         timestamp,
@@ -86,7 +86,7 @@ describe('Conversation', () => {
         lee: 'yeh',
       });
       return conv.fetch();
-    }).then(conv => {
+    }).then((conv) => {
       conv.name.should.be.equal(name);
       conv.attributes.should.be.eql({
         timestamp,
@@ -100,7 +100,7 @@ describe('Conversation', () => {
     const { name, createdAt } = conversation;
     conversation.name = 'should not be this name';
     conversation.createdAt = new Date();
-    return conversation.fetch().then(conv => {
+    return conversation.fetch().then((conv) => {
       conv.name.should.be.equal(name);
       conv.createdAt.should.be.eql(createdAt);
       conv.should.be.exactly(conversation);
@@ -108,14 +108,14 @@ describe('Conversation', () => {
   });
 
   it('mute', () =>
-    conversation.mute().then(conv => {
+    conversation.mute().then((conv) => {
       conv.should.be.exactly(conversation);
       conv.muted.should.be.equal(true);
       conv.mutedMembers.should.containEql(CLIENT_ID);
     })
   );
   it('unmute', () =>
-    conversation.unmute().then(conv => {
+    conversation.unmute().then((conv) => {
       conv.should.be.exactly(conversation);
       conv.muted.should.be.equal(false);
       conv.mutedMembers.should.not.containEql(CLIENT_ID);
@@ -125,20 +125,20 @@ describe('Conversation', () => {
   it('add/remove', () =>
     client.createConversation({ members: ['nsun'] })
       .then(conv => conv.add('rguo'))
-      .then(conv => {
+      .then((conv) => {
         conv.members.should.containEql('rguo');
         return conv.remove('rguo');
-      }).then(conv => {
+      }).then((conv) => {
         conv.members.should.not.containEql('rguo');
       })
   );
   it('join/quit', () =>
     client.createConversation({ members: ['rguo'] })
       .then(conv => conv.quit())
-      .then(conv => {
+      .then((conv) => {
         conv.members.should.not.containEql(CLIENT_ID);
         return conv.join();
-      }).then(conv => {
+      }).then((conv) => {
         conv.members.should.containEql(CLIENT_ID);
       })
   );
@@ -152,7 +152,7 @@ describe('Conversation', () => {
       });
       return realtime.createIMClient('ycui', {
         conversationSignatureFactory: this.conversationSignatureFactory,
-      }).then(c => {
+      }).then((c) => {
         this.ycui = c;
         return c.createConversation({
           members: ['zwang', 'dli', 'zwang'], // duplicated id should be ignored
@@ -182,7 +182,7 @@ describe('Conversation', () => {
 
   describe('Message Query', () => {
     it('queryMessages', () =>
-      conversation.queryMessages().then(messages => {
+      conversation.queryMessages().then((messages) => {
         messages.should.be.an.Array();
         messages[0].should.be.instanceof(Message);
         messages[0].status.should.be.eql(MessageStatus.SENT);
@@ -191,21 +191,21 @@ describe('Conversation', () => {
     it('with limit', () =>
       conversation.queryMessages({
         limit: 0,
-      }).then(messages => {
+      }).then((messages) => {
         messages.should.be.an.empty();
       })
     );
     it('beforeTime', () =>
       conversation.queryMessages({
         beforeTime: 1,
-      }).then(messages => {
+      }).then((messages) => {
         messages.should.be.an.empty();
       })
     );
     it('afterTime', () =>
       conversation.queryMessages({
         afterTime: new Date(),
-      }).then(messages => {
+      }).then((messages) => {
         messages.should.be.an.empty();
       })
     );
@@ -232,11 +232,11 @@ describe('Conversation', () => {
         });
         let minMessageTimestamp;
         return iterator.next()
-          .then(page1 => {
+          .then((page1) => {
             minMessageTimestamp = Math.min(page1.value[0].timestamp, page1.value[1].timestamp);
             page1.value.splice(0);
             return iterator.next();
-          }).then(page2 => {
+          }).then((page2) => {
             page2.value[0].timestamp.should.lessThan(minMessageTimestamp);
           });
       });
@@ -379,7 +379,7 @@ describe('Conversation', () => {
       .then(jwu =>
         jwu.createConversation({
           members: [bwangId],
-        }).then(conv => {
+        }).then((conv) => {
           conversationId = conv.id;
           // 这里连续发 3 条消息，conv.lm 可能不会被更新为最后一条消息
           // 发送 read 命令时如果用 conv.lm 可能会导致漏标消息
@@ -393,7 +393,7 @@ describe('Conversation', () => {
           appId: APP_ID,
           region: REGION,
         }).createIMClient(bwangId)
-      ).then(c => {
+      ).then((c) => {
         bwang0 = c;
         return listen(bwang0, 'unreadmessages').then(([payload, conv]) => {
           payload.count.should.be.eql(3);
@@ -408,7 +408,7 @@ describe('Conversation', () => {
         .then(([payload, conv]) => {
           payload.count.should.be.eql(3);
           conv.id.should.be.eql(conversationId);
-          return conv.markAsRead().then(conv1 => {
+          return conv.markAsRead().then((conv1) => {
             conv1.unreadMessagesCount.should.be.eql(0);
             bwang1.close();
           });
@@ -429,7 +429,7 @@ describe('Conversation', () => {
     return realtime.createIMClient(jfengId).then(jfeng =>
       jfeng.createConversation({
         members: [CLIENT_ID],
-      }).then(conv => {
+      }).then((conv) => {
         conversationId = conv.id;
         return conv.updateOnlineStatusPolicy({
           pub: true,

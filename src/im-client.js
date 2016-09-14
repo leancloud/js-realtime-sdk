@@ -133,7 +133,7 @@ export default class IMClient extends Client {
     return Promise.all(convs.map(
       conv => this
         .getConversation(conv.cid)
-        .then(conversation => {
+        .then((conversation) => {
           let timestamp;
           if (conv.timestamp) {
             timestamp = new Date(conv.timestamp.toNumber());
@@ -181,7 +181,7 @@ export default class IMClient extends Client {
     } = message;
     switch (message.op) {
       case OpType.joined: {
-        return this.getConversation(convMessage.cid).then(conversation => {
+        return this.getConversation(convMessage.cid).then((conversation) => {
           if (!conversation.transient) {
             // eslint-disable-next-line no-param-reassign
             conversation.members = union(conversation.members, [this.id]);
@@ -207,7 +207,7 @@ export default class IMClient extends Client {
         });
       }
       case OpType.left: {
-        return this.getConversation(convMessage.cid).then(conversation => {
+        return this.getConversation(convMessage.cid).then((conversation) => {
           if (!conversation.transient) {
             // eslint-disable-next-line no-param-reassign
             conversation.members = difference(conversation.members, [this.id]);
@@ -233,7 +233,7 @@ export default class IMClient extends Client {
         });
       }
       case OpType.members_joined: {
-        return this.getConversation(convMessage.cid).then(conversation => {
+        return this.getConversation(convMessage.cid).then((conversation) => {
           if (!conversation.transient) {
             // eslint-disable-next-line no-param-reassign
             conversation.members = union(conversation.members, convMessage.m);
@@ -262,7 +262,7 @@ export default class IMClient extends Client {
         });
       }
       case OpType.members_left: {
-        return this.getConversation(convMessage.cid).then(conversation => {
+        return this.getConversation(convMessage.cid).then((conversation) => {
           if (!conversation.transient) {
             // eslint-disable-next-line no-param-reassign
             conversation.members = difference(conversation.members, convMessage.m);
@@ -297,7 +297,7 @@ export default class IMClient extends Client {
   }
 
   _dispatchPresenceMessage({ presenceMessage }) {
-    return this.getConversation(presenceMessage.cid).then(conversation => {
+    return this.getConversation(presenceMessage.cid).then((conversation) => {
       /**
        * 对话成员的在线状态发生变化
        * @event Conversation#membersstatuschange
@@ -377,7 +377,7 @@ export default class IMClient extends Client {
       return Promise.resolve();
     }
     debug('do send ack', this._ackMessageBuffer);
-    return Promise.all(Object.keys(this._ackMessageBuffer).map(cid => {
+    return Promise.all(Object.keys(this._ackMessageBuffer).map((cid) => {
       const convAckMessages = this._ackMessageBuffer[cid];
       const timestamps = convAckMessages.map(message => message.timestamp);
       const command = new GenericCommand({
@@ -414,7 +414,7 @@ export default class IMClient extends Client {
           r: isReconnect,
         }),
       }))
-      .then(command => {
+      .then((command) => {
         if (isReconnect) {
           // if sessionToken is not expired, skip signature/tag/deviceId
           const sessionToken = internal(this).sessionToken;
@@ -434,7 +434,7 @@ export default class IMClient extends Client {
         }));
         if (this.options.signatureFactory) {
           return runSignatureFactory(this.options.signatureFactory, [this.id])
-            .then(signatureResult => {
+            .then((signatureResult) => {
               Object.assign(command.sessionMessage, keyRemap({
                 signature: 's',
                 timestamp: 't',
@@ -446,7 +446,7 @@ export default class IMClient extends Client {
         return command;
       })
       .then(this._send.bind(this))
-      .then(resCommand => {
+      .then((resCommand) => {
         const {
           peerId,
           sessionMessage: {
@@ -462,7 +462,7 @@ export default class IMClient extends Client {
         if (token) {
           internal(this).sessionToken = new Expirable(token, tokenTTL * 1000);
         }
-      }, error => {
+      }, (error) => {
         if (error.code === ErrorCode.SESSION_TOKEN_EXPIRED) {
           if (internal(this).sessionToken === undefined) {
             // let it fail if sessoinToken not cached but command rejected as token expired
@@ -565,7 +565,7 @@ export default class IMClient extends Client {
     });
     return this
       ._send(command)
-      .then(resCommand => {
+      .then((resCommand) => {
         try {
           return JSON.parse(resCommand.convMessage.results.data);
         } catch (error) {
@@ -576,7 +576,7 @@ export default class IMClient extends Client {
       .then(conversations => Promise.all(conversations.map(
         this._parseConversationFromRawData.bind(this)
       )))
-      .then(conversations => conversations.map(fetchedConversation => {
+      .then(conversations => conversations.map((fetchedConversation) => {
         let conversation = this._conversationCache.get(fetchedConversation.id);
         if (!conversation) {
           conversation = fetchedConversation;
@@ -595,7 +595,7 @@ export default class IMClient extends Client {
             '_attributes',
             'transient',
             'muted',
-          ].forEach(key => {
+          ].forEach((key) => {
             const value = fetchedConversation[key];
             if (value !== undefined) conversation[key] = value;
           });
@@ -622,7 +622,7 @@ export default class IMClient extends Client {
     return Promise.resolve().then(() => {
       if (data.lastMessage) {
         return this._messageParser.parse(data.lastMessage).then(
-          message => {
+          (message) => {
             data.lastMessage = message;
             data.lastMessage.from = data.lastMessageFrom;
             data.lastMessage.id = data.lastMessageId;
@@ -692,11 +692,11 @@ export default class IMClient extends Client {
           convMessage: new ConvCommand(startCommandJson),
         })
       )
-      .then(command => {
+      .then((command) => {
         if (this.options.conversationSignatureFactory) {
           const params = [null, this.id, members, 'create'];
           return runSignatureFactory(this.options.conversationSignatureFactory, params)
-            .then(signatureResult => {
+            .then((signatureResult) => {
               Object.assign(command.convMessage, keyRemap({
                 signature: 's',
                 timestamp: 't',
@@ -736,7 +736,7 @@ export default class IMClient extends Client {
     if (!Array.isArray(conversations)) {
       throw new TypeError(`${conversations} is not an Array`);
     }
-    const ids = conversations.map(conversation => {
+    const ids = conversations.map((conversation) => {
       if (!(conversation instanceof Conversation)) {
         throw new TypeError(`${conversation} is not a Conversation`);
       }

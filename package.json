@@ -44,7 +44,7 @@
     "conventional-changelog-cli": "^1.1.1",
     "docdash": "git+https://github.com/leeyeh/docdash.git#leancloud",
     "eslint": "^3.0.0",
-    "eslint-config-airbnb-base": "^7.0.0",
+    "eslint-config-airbnb-base": "^7.1.0",
     "eslint-plugin-import": "^1.5.0",
     "espree": "^3.1.4",
     "ghooks": "^1.1.0",
