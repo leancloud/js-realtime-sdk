@@ -98,8 +98,8 @@
       "babel-register"
     ],
     "include": [
-       "src/**",
-       "plugins/typed-messages/src/**"
+      "src/**",
+      "plugins/typed-messages/src/**"
     ],
     "reporter": [
       "lcov",
@@ -107,5 +107,6 @@
     ],
     "sourceMap": false,
     "instrument": false
-  }
+  },
+  "typings": "./realtime.d.ts"
 }
