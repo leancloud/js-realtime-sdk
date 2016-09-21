@@ -14,7 +14,7 @@ import {
   LogsCommand,
 } from '../proto/message';
 import runSignatureFactory from './signature-factory-runner';
-import { createError } from './errors';
+import { createError } from './error';
 import Message, { MessageStatus } from './messages/message';
 
 const debug = d('LC:Conversation');
@@ -34,6 +34,7 @@ export default class Conversation extends EventEmitter {
     mutedMembers = [],
     members = [],
     transient = false,
+    system = false,
     muted = false,
     // jsdoc-ignore-start
     ...attributes,
@@ -96,6 +97,13 @@ export default class Conversation extends EventEmitter {
        */
       transient,
       /**
+       * 系统对话标记
+       * @memberof Conversation#
+       * @type {Boolean}
+       * @since 3.3
+       */
+      system,
+      /**
        * 当前用户静音该对话标记
        * @memberof Conversation#
        * @type {Boolean}
@@ -121,10 +129,11 @@ export default class Conversation extends EventEmitter {
       'kicked',
       'membersjoined',
       'membersleft',
+      'membersstatuschange',
       'message',
     ].forEach(event => this.on(
       event,
-      payload => this._debug(`${event} event emitted.`, payload)
+      (...payload) => this._debug(`${event} event emitted.`, ...payload)
     ));
     // onConversationCreate hook
     applyDecorators(this._client._plugins.onConversationCreate, this);
@@ -249,7 +258,7 @@ export default class Conversation extends EventEmitter {
     // set 'a' or 'a.b': delete 'a.b'
     const re = new RegExp(`^${key}`);
     const childKeys = pendingKeys.filter(re.test.bind(re));
-    childKeys.forEach(k => {
+    childKeys.forEach((k) => {
       delete pendingAttributes[k];
     });
     if (childKeys.length) {
@@ -319,7 +328,7 @@ export default class Conversation extends EventEmitter {
         op: 'update',
         convMessage,
       }))
-      .then(resCommand => {
+      .then((resCommand) => {
         this.updatedAt = resCommand.convMessage.udate;
         this._attributes = internal(this).currentAttributes;
         internal(this).pendingAttributes = {};
@@ -403,11 +412,11 @@ export default class Conversation extends EventEmitter {
         op: 'add',
         convMessage,
       })
-    ).then(command => {
+    ).then((command) => {
       if (this._client.options.conversationSignatureFactory) {
         const params = [this.id, this._client.id, clientIds.sort(), 'add'];
         return runSignatureFactory(this._client.options.conversationSignatureFactory, params)
-          .then(signatureResult => {
+          .then((signatureResult) => {
             Object.assign(command.convMessage, keyRemap({
               signature: 's',
               timestamp: 't',
@@ -420,7 +429,7 @@ export default class Conversation extends EventEmitter {
     }).then(
       this._send.bind(this)
     ).then(() => {
-      if (!this.transient) {
+      if (!this.transient && !this.system) {
         this.members = union(this.members, clientIds);
       }
       return this;
@@ -445,11 +454,11 @@ export default class Conversation extends EventEmitter {
         op: 'remove',
         convMessage,
       })
-    ).then(command => {
+    ).then((command) => {
       if (this._client.options.conversationSignatureFactory) {
         const params = [this.id, this._client.id, clientIds.sort(), 'remove'];
         return runSignatureFactory(this._client.options.conversationSignatureFactory, params)
-          .then(signatureResult => {
+          .then((signatureResult) => {
             Object.assign(command.convMessage, keyRemap({
               signature: 's',
               timestamp: 't',
@@ -462,7 +471,7 @@ export default class Conversation extends EventEmitter {
     }).then(
       this._send.bind(this)
     ).then(() => {
-      if (!this.transient) {
+      if (!this.transient && !this.system) {
         this.members = difference(this.members, clientIds);
       }
       return this;
@@ -526,7 +535,7 @@ export default class Conversation extends EventEmitter {
       }),
     }), !message.transient);
     if (!message.transient) {
-      sendPromise = sendPromise.then(resCommand => {
+      sendPromise = sendPromise.then((resCommand) => {
         const {
           ackMessage: {
             uid,
@@ -555,7 +564,7 @@ export default class Conversation extends EventEmitter {
         internal(this).messagesWaitingForReciept[message.id] = message;
       }
       return message;
-    }, error => {
+    }, (error) => {
       message._setStatus(MessageStatus.FAILED);
       throw error;
     });
@@ -602,7 +611,7 @@ export default class Conversation extends EventEmitter {
       ),
     })).then(resCommand =>
       Promise.all(resCommand.logsMessage.logs.map(log =>
-        this._client._messageParser.parse(log.data).then(message => {
+        this._client._messageParser.parse(log.data).then((message) => {
           const messageProps = {
             id: log.msgId,
             cid: this.id,
@@ -655,7 +664,7 @@ export default class Conversation extends EventEmitter {
             beforeMessageId,
           });
         } else {
-          promise = promise.then(prevMessages => {
+          promise = promise.then((prevMessages) => {
             if (prevMessages.length === 0 || prevMessages.length < limit) {
               // no more messages
               return [];
@@ -698,5 +707,30 @@ export default class Conversation extends EventEmitter {
      * @param {Message} payload.message 送达的消息
      */
     this.emit('receipt', { message });
+  }
+
+  /**
+   * 更新会话的上下线通知策略
+   * @param {Object} [options]
+   * @param {Boolean} [options.pub = false] 是否公开自己的上下线状态
+   * @param {Boolean} [options.sub = false] 是否订阅该会话其他成员公开的上下线状态
+   * @param {Number} [options.ttl] 下线后保留该策略的时间，单位为秒
+   */
+  updateOnlineStatusPolicy({
+    pub = false,
+    sub = false,
+    ttl,
+  }) {
+    this._debug('updateOnlineStatusPolicy', pub, sub, ttl);
+    const convMessage = new ConvCommand({
+      statusPub: pub,
+      statusSub: sub,
+      statusTTL: ttl,
+    });
+    const command = new GenericCommand({
+      op: 'status',
+      convMessage,
+    });
+    return this._send(command);
   }
 }

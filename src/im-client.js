@@ -15,11 +15,12 @@ import {
   CommandType,
   OpType,
 } from '../proto/message';
-import * as Errors from './errors';
+import { ErrorCode } from './error';
 import { tap, Expirable, Cache, keyRemap, union, difference, trim, internal } from './utils';
 import { applyDecorators } from './plugin';
 import runSignatureFactory from './signature-factory-runner';
 import { MessageStatus } from './messages/message';
+import { OnlineStatus } from '.';
 import { version as VERSION } from '../package.json';
 
 const debug = d('LC:IMClient');
@@ -58,7 +59,7 @@ export default class IMClient extends Client {
       'unhandledmessage',
     ].forEach(event => this.on(
       event,
-      payload => this._debug(`${event} event emitted.`, payload)
+      (...payload) => this._debug(`${event} event emitted.`, ...payload)
     ));
     // onIMClientCreate hook
     applyDecorators(this._plugins.onIMClientCreate, this);
@@ -85,6 +86,8 @@ export default class IMClient extends Client {
         return this._dispatchUnreadMessage(message);
       case CommandType.rcp:
         return this._dispatchRcpMessage(message);
+      case CommandType.presence:
+        return this._dispatchPresenceMessage(message);
       default:
         this.emit('unhandledmessage', message);
         return Promise.resolve();
@@ -99,7 +102,7 @@ export default class IMClient extends Client {
     } = message;
     switch (message.op) {
       case OpType.closed: {
-        if (code === Errors.SESSION_CONFLICT.code) {
+        if (code === ErrorCode.SESSION_CONFLICT) {
           /**
            * 用户在其他客户端登录，当前客户端被服务端强行下线。详见文档「单点登录」章节。
            * @event IMClient#conflict
@@ -130,7 +133,7 @@ export default class IMClient extends Client {
     return Promise.all(convs.map(
       conv => this
         .getConversation(conv.cid)
-        .then(conversation => {
+        .then((conversation) => {
           let timestamp;
           if (conv.timestamp) {
             timestamp = new Date(conv.timestamp.toNumber());
@@ -178,7 +181,7 @@ export default class IMClient extends Client {
     } = message;
     switch (message.op) {
       case OpType.joined: {
-        return this.getConversation(convMessage.cid).then(conversation => {
+        return this.getConversation(convMessage.cid).then((conversation) => {
           if (!conversation.transient) {
             // eslint-disable-next-line no-param-reassign
             conversation.members = union(conversation.members, [this.id]);
@@ -204,7 +207,7 @@ export default class IMClient extends Client {
         });
       }
       case OpType.left: {
-        return this.getConversation(convMessage.cid).then(conversation => {
+        return this.getConversation(convMessage.cid).then((conversation) => {
           if (!conversation.transient) {
             // eslint-disable-next-line no-param-reassign
             conversation.members = difference(conversation.members, [this.id]);
@@ -230,7 +233,7 @@ export default class IMClient extends Client {
         });
       }
       case OpType.members_joined: {
-        return this.getConversation(convMessage.cid).then(conversation => {
+        return this.getConversation(convMessage.cid).then((conversation) => {
           if (!conversation.transient) {
             // eslint-disable-next-line no-param-reassign
             conversation.members = union(conversation.members, convMessage.m);
@@ -259,7 +262,7 @@ export default class IMClient extends Client {
         });
       }
       case OpType.members_left: {
-        return this.getConversation(convMessage.cid).then(conversation => {
+        return this.getConversation(convMessage.cid).then((conversation) => {
           if (!conversation.transient) {
             // eslint-disable-next-line no-param-reassign
             conversation.members = difference(conversation.members, convMessage.m);
@@ -293,6 +296,23 @@ export default class IMClient extends Client {
     }
   }
 
+  _dispatchPresenceMessage({ presenceMessage }) {
+    return this.getConversation(presenceMessage.cid).then((conversation) => {
+      /**
+       * 对话成员的在线状态发生变化
+       * @event Conversation#membersstatuschange
+       * @param {Object} payload
+       * @param {String[]} payload.members 成员 id 列表
+       * @param {Symbol} payload.status 新的在线状态，值为 {@link module:leancloud-realtime.OnlineStatus} 之一
+       */
+      conversation.emit('membersstatuschange', {
+        members: presenceMessage.sessionPeerIds,
+        // online: 1, offline: 2
+        status: OnlineStatus[['', 'ONLINE', 'OFFLINE'][presenceMessage.status]],
+      });
+    });
+  }
+
   _dispatchDirectMessage(originalMessage) {
     const {
       directMessage,
@@ -315,7 +335,7 @@ export default class IMClient extends Client {
       message._setStatus(MessageStatus.SENT);
       conversation.lastMessage = message; // eslint-disable-line no-param-reassign
       conversation.lastMessageAt = message.timestamp; // eslint-disable-line no-param-reassign
-      conversation.unreadMessagesCount++; // eslint-disable-line no-param-reassign
+      conversation.unreadMessagesCount += 1; // eslint-disable-line no-param-reassign
       /**
        * 当前用户收到消息
        * @event IMClient#message
@@ -357,7 +377,7 @@ export default class IMClient extends Client {
       return Promise.resolve();
     }
     debug('do send ack', this._ackMessageBuffer);
-    return Promise.all(Object.keys(this._ackMessageBuffer).map(cid => {
+    return Promise.all(Object.keys(this._ackMessageBuffer).map((cid) => {
       const convAckMessages = this._ackMessageBuffer[cid];
       const timestamps = convAckMessages.map(message => message.timestamp);
       const command = new GenericCommand({
@@ -394,7 +414,7 @@ export default class IMClient extends Client {
           r: isReconnect,
         }),
       }))
-      .then(command => {
+      .then((command) => {
         if (isReconnect) {
           // if sessionToken is not expired, skip signature/tag/deviceId
           const sessionToken = internal(this).sessionToken;
@@ -414,7 +434,7 @@ export default class IMClient extends Client {
         }));
         if (this.options.signatureFactory) {
           return runSignatureFactory(this.options.signatureFactory, [this.id])
-            .then(signatureResult => {
+            .then((signatureResult) => {
               Object.assign(command.sessionMessage, keyRemap({
                 signature: 's',
                 timestamp: 't',
@@ -426,7 +446,7 @@ export default class IMClient extends Client {
         return command;
       })
       .then(this._send.bind(this))
-      .then(resCommand => {
+      .then((resCommand) => {
         const {
           peerId,
           sessionMessage: {
@@ -442,8 +462,8 @@ export default class IMClient extends Client {
         if (token) {
           internal(this).sessionToken = new Expirable(token, tokenTTL * 1000);
         }
-      }, error => {
-        if (error.code === Errors.SESSION_TOKEN_EXPIRED.code) {
+      }, (error) => {
+        if (error.code === ErrorCode.SESSION_TOKEN_EXPIRED) {
           if (internal(this).sessionToken === undefined) {
             // let it fail if sessoinToken not cached but command rejected as token expired
             // to prevent session openning flood
@@ -545,7 +565,7 @@ export default class IMClient extends Client {
     });
     return this
       ._send(command)
-      .then(resCommand => {
+      .then((resCommand) => {
         try {
           return JSON.parse(resCommand.convMessage.results.data);
         } catch (error) {
@@ -556,7 +576,7 @@ export default class IMClient extends Client {
       .then(conversations => Promise.all(conversations.map(
         this._parseConversationFromRawData.bind(this)
       )))
-      .then(conversations => conversations.map(fetchedConversation => {
+      .then(conversations => conversations.map((fetchedConversation) => {
         let conversation = this._conversationCache.get(fetchedConversation.id);
         if (!conversation) {
           conversation = fetchedConversation;
@@ -575,7 +595,7 @@ export default class IMClient extends Client {
             '_attributes',
             'transient',
             'muted',
-          ].forEach(key => {
+          ].forEach((key) => {
             const value = fetchedConversation[key];
             if (value !== undefined) conversation[key] = value;
           });
@@ -595,13 +615,14 @@ export default class IMClient extends Client {
       msg_timestamp: 'lastMessageTimestamp',
       m: 'members',
       tr: 'transient',
+      sys: 'system',
       c: 'creator',
       mu: 'mutedMembers',
     }, rawData);
     return Promise.resolve().then(() => {
       if (data.lastMessage) {
         return this._messageParser.parse(data.lastMessage).then(
-          message => {
+          (message) => {
             data.lastMessage = message;
             data.lastMessage.from = data.lastMessageFrom;
             data.lastMessage.id = data.lastMessageId;
@@ -671,11 +692,11 @@ export default class IMClient extends Client {
           convMessage: new ConvCommand(startCommandJson),
         })
       )
-      .then(command => {
+      .then((command) => {
         if (this.options.conversationSignatureFactory) {
           const params = [null, this.id, members, 'create'];
           return runSignatureFactory(this.options.conversationSignatureFactory, params)
-            .then(signatureResult => {
+            .then((signatureResult) => {
               Object.assign(command.convMessage, keyRemap({
                 signature: 's',
                 timestamp: 't',
@@ -715,7 +736,7 @@ export default class IMClient extends Client {
     if (!Array.isArray(conversations)) {
       throw new TypeError(`${conversations} is not an Array`);
     }
-    const ids = conversations.map(conversation => {
+    const ids = conversations.map((conversation) => {
       if (!(conversation instanceof Conversation)) {
         throw new TypeError(`${conversation} is not a Conversation`);
       }

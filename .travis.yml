@@ -8,6 +8,7 @@ env:
     - APP_ID=Ol0Cw6zL1xP9IIqJpiSv9uYC
     - APP_KEY=WWVkTzf8xlUTPS2dIKwuCkIz
     - EXSITING_ROOM_ID=5638313660b28815a724df31
+    - SYS_CONV_ID=57bdb5965e1072004edd532c
 before_install:
   - if [[ `npm -v` != 3* ]]; then npm i -g npm; fi
 install:
@@ -16,7 +17,7 @@ install:
   - npm install
 script:
   - npm test && codecov
-  - npm run doc
+  - npm run docs
 after_success:
   - if [[ "$TRAVIS_BRANCH" == "master" ]] && [[ "${TRAVIS_PULL_REQUEST}" = "false" ]]; then
       ./deploy.sh;

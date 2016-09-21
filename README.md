@@ -159,7 +159,7 @@ npm run test:browser
 npm run build
 ```
 ### 持续集成
-合并 PR 到 master 分支后持续集成会自动运行 `npm build` 与 `npm run doc`，然后将 dist 目录推送到 dist 分支，将文档与 demo 推送到 gh-pages。
+合并 PR 到 master 分支后持续集成会自动运行 `npm build` 与 `npm run docs`，然后将 dist 目录推送到 dist 分支，将文档与 demo 推送到 gh-pages。
 
 Release Process Workflow
 ----

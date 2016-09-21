@@ -16,10 +16,10 @@ export default class Call extends EventEmitter {
     this._peerConnection = this._createPeerConnection(RTCConfiguration);
     this._call = createCallStateMachine();
     this._promises = {};
-    const streamReady = new Promise(resolve => {
+    const streamReady = new Promise((resolve) => {
       this._promises.resolveStreamReady = resolve;
     });
-    const accept = new Promise(resolve => {
+    const accept = new Promise((resolve) => {
       this._promises.resolveAccept = resolve;
     });
     Promise.all([streamReady, accept]).then(([stream]) => {
@@ -162,6 +162,7 @@ export default class Call extends EventEmitter {
       default:
     }
   }
+  /* eslint-disable class-methods-use-this */
   _handleAnswer() {
     throw new Error('not implemented');
   }
@@ -171,4 +172,5 @@ export default class Call extends EventEmitter {
   _handleCancelation() {
     throw new Error('not implemented');
   }
+  /* eslint-enable class-methods-use-this */
 }

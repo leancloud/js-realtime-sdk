@@ -16,7 +16,7 @@ describe('WebSocketPlus', () => {
     });
     it('error event should be emitted when got 404 error', (done) => {
       const ws = new WebSocketPlus('ws://404.websocket.org');
-      ws.on('error', error => {
+      ws.on('error', (error) => {
         error.should.be.instanceof(Error);
         done();
       });

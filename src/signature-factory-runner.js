@@ -29,7 +29,7 @@ export default (signatureFactory, params) =>
     })
     .then(
       tap(signatureResult => debug('sign result', signatureResult)),
-      error => {
+      (error) => {
         // eslint-disable-next-line no-param-reassign
         error.message = `sign error: ${error.message}`;
         debug(error);

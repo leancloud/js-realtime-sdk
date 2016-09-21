@@ -3,7 +3,7 @@ import EventEmitter from 'eventemitter3';
 import axios from 'axios';
 import uuid from 'uuid';
 import Connection from './connection';
-import * as Errors from './errors';
+import { ErrorCode, createError } from './error';
 import { tap, Cache, trim, internal, ensureArray } from './utils';
 import { applyDecorators } from './plugin';
 import Conversation from './conversation';
@@ -50,7 +50,7 @@ export default class Realtime extends EventEmitter {
         for (const hook in plugin) {
           if ({}.hasOwnProperty.call(plugin, hook) && hook !== 'name') {
             if (plugin.name) {
-              ensureArray(plugin[hook]).forEach(value => {
+              ensureArray(plugin[hook]).forEach((value) => {
                 // eslint-disable-next-line no-param-reassign
                 value._pluginName = plugin.name;
               });
@@ -146,7 +146,7 @@ export default class Realtime extends EventEmitter {
           debug(`${event} event emitted.`, ...payload);
           this.emit(event, ...payload);
           if (event !== 'reconnect') {
-            Object.values(this._clients).forEach(client => {
+            Object.values(this._clients).forEach((client) => {
               client.emit(event, ...payload);
             });
           }
@@ -155,16 +155,14 @@ export default class Realtime extends EventEmitter {
       // override handleClose
       connection.handleClose = function handleClose(event) {
         // CAUTION: non-standard API, provided by core-js
-        const fatalError = Array.find([
-          Errors.APP_NOT_AVAILABLE,
-          Errors.INVALID_LOGIN,
-          Errors.INVALID_ORIGIN,
-        ], error => error.code === event.code);
-        if (fatalError) {
+        const isFatal = Array.some([
+          ErrorCode.APP_NOT_AVAILABLE,
+          ErrorCode.INVALID_LOGIN,
+          ErrorCode.INVALID_ORIGIN,
+        ], errorCode => errorCode === event.code);
+        if (isFatal) {
           // in these cases, SDK should throw.
-          const error = new Error(`${fatalError.message || event.reason}`);
-          error.code = event.code;
-          this.throw(error);
+          this.throw(createError(event));
         } else {
           // reconnect
           this.disconnect();
@@ -185,7 +183,7 @@ export default class Realtime extends EventEmitter {
         .then(
           tap(info => this._cache.set('endpoints', info, info.ttl * 1000))
         )
-    ).then(info => {
+    ).then((info) => {
       debug('endpoint info:', info);
       return [info.server, info.secondary];
     });
@@ -211,7 +209,7 @@ export default class Realtime extends EventEmitter {
           )
           .then(tap(debug))
           .then(
-            route => {
+            (route) => {
               const pushRouter = route.push_router_server;
               if (!pushRouter) {
                 throw new Error('push router not exists');
@@ -328,7 +326,7 @@ export default class Realtime extends EventEmitter {
     if (idIsString && this._clients[id] !== undefined) {
       return Promise.resolve(this._clients[id]);
     }
-    const promise = this._open().then(connection => {
+    const promise = this._open().then((connection) => {
       const client = new IMClient(id, clientOptions, connection, {
         _messageParser: this._messageParser,
         _plugins: this._plugins,
@@ -369,7 +367,7 @@ export default class Realtime extends EventEmitter {
    * 在接收消息、查询消息时，会按照消息类注册顺序的逆序依次尝试解析消息内容
    *
    * @param  {Function | Function[]} messageClass 消息类，需要实现 {@link AVMessage} 接口，
-   *                     													建议继承自 {@link TypedMessage}
+   * 建议继承自 {@link TypedMessage}
    * @throws {TypeError} 如果 messageClass 没有实现 {@link AVMessage} 接口则抛出异常
    */
   register(messageClass) {

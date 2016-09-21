@@ -30,7 +30,7 @@ export default class IncomingCall extends Call {
     return this._handleOfferPromise
       .then(() => this._peerConnection.addStream(stream))
       .then(() => this._peerConnection.createAnswer())
-      .then((answer) => this._peerConnection.setLocalDescription(answer))
+      .then(answer => this._peerConnection.setLocalDescription(answer))
       .then(() => this._conversation.send(new Answer(this._peerConnection.localDescription)))
       .then(() => this._promises.resolveAccept());
   }

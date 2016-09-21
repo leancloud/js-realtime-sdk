@@ -43,7 +43,7 @@ export default class WebRTCClient extends EventEmitter {
   }
 
   _open(realtime, clientOptions) {
-    return realtime.createIMClient(this.id, clientOptions, 'webrtc').then(imClient => {
+    return realtime.createIMClient(this.id, clientOptions, 'webrtc').then((imClient) => {
       this._imClient = imClient;
       this.id = imClient.id;
       imClient.on('message', (message, conversation) => {

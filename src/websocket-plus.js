@@ -13,7 +13,7 @@ const debug = d('LC:WebSocketPlus');
 const HEARTBEAT_TIME = 60000;
 const TIMEOUT_TIME = 180000;
 
-const DEFAULT_RETRY_STRATEGY = attempt => Math.min(1000 << attempt, 300000);
+const DEFAULT_RETRY_STRATEGY = attempt => Math.min(1000 * Math.pow(2, attempt), 300000);
 
 const requireConnected = (target, name, descriptor) =>
   Object.assign({}, descriptor, {
@@ -52,7 +52,7 @@ class WebSocketPlus extends EventEmitter {
   }
 
   _createWs(getUrls, protocol) {
-    return getUrls().then(wsUrls => {
+    return getUrls().then((wsUrls) => {
       let urls = wsUrls;
       if (!(urls instanceof Array)) {
         urls = [urls];
@@ -65,7 +65,7 @@ class WebSocketPlus extends EventEmitter {
           ) : new WebSocket(url);
           ws.binaryType = this.binaryType || 'arraybuffer';
           ws.onopen = () => resolve(ws);
-          ws.onerror = ws.onclose = error => {
+          ws.onerror = ws.onclose = (error) => {
             if (error instanceof Error) {
               return reject(error);
             }
@@ -73,7 +73,7 @@ class WebSocketPlus extends EventEmitter {
             return reject(new Error(`Failed to connect [${url}]`));
           };
         })
-      ).then(ws => {
+      ).then((ws) => {
         this._ws = ws;
         this._ws.onclose = this._handleClose.bind(this);
         this._ws.onmessage = this._handleMessage.bind(this);

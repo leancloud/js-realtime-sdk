@@ -1,13 +1,26 @@
 /** @module leancloud-realtime */
-import { default as Realtime } from './realtime';
+import Realtime from './realtime';
 import Message, { MessageStatus } from './messages/message';
-import { default as TypedMessage } from './messages/typed-message';
-import { default as TextMessage } from './messages/text-message';
+import TypedMessage from './messages/typed-message';
+import TextMessage from './messages/text-message';
 import {
   messageType,
   messageField,
   IE10Compatible,
 } from './messages/helpers';
+
+/**
+ * 消息状态枚举
+ * @enum {Symbol}
+ * @since 3.3.0
+ * @memberof module:leancloud-realtime
+ */
+const OnlineStatus = {
+  /** 在线 */
+  ONLINE: Symbol('online'),
+  /** 离线 */
+  OFFLINE: Symbol('offline'),
+};
 
 export {
   /**
@@ -65,4 +78,14 @@ export {
   messageField,
   IE10Compatible,
   MessageStatus,
+  OnlineStatus,
 };
+
+export {
+  /**
+   * 错误码，详见 {@link https://leancloud.cn/docs/realtime_v2.html#云端错误码说明}
+   * @enum {Number}
+   * @since 3.3.0
+   */
+  ErrorCode,
+} from './error';

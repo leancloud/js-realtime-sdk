@@ -38,7 +38,7 @@ describe('ConversationQuery', () => {
     });
     it('equalTo', () =>
       client.getQuery().equalTo('objectId', EXISTING_ROOM_ID).find()
-        .then(conversations => {
+        .then((conversations) => {
           conversations.length.should.be.equal(1);
           conversations[0].id.should.be.equal(EXISTING_ROOM_ID);
         })
@@ -48,14 +48,14 @@ describe('ConversationQuery', () => {
         client.getQuery().equalTo('objectId', EXISTING_ROOM_ID)
           .containsMembers(['hjiang'])
           .find()
-          .then(conversations => {
+          .then((conversations) => {
             conversations.length.should.be.equal(1);
             conversations[0].id.should.be.equal(EXISTING_ROOM_ID);
           }),
         client.getQuery().equalTo('objectId', EXISTING_ROOM_ID)
           .containsMembers(['nobody'])
           .find()
-          .then(conversations => {
+          .then((conversations) => {
             conversations.length.should.be.equal(0);
           }),
       ])
@@ -65,20 +65,20 @@ describe('ConversationQuery', () => {
         client.getQuery().equalTo('objectId', EXISTING_ROOM_ID)
           .withMembers(['hjiang', 'leeyeh'], true)
           .find()
-          .then(conversations => {
+          .then((conversations) => {
             conversations.length.should.be.equal(0);
           }),
         client.getQuery().equalTo('objectId', EXISTING_ROOM_ID)
           .withMembers(['hjiang', 'leeyeh'])
           .find()
-          .then(conversations => {
+          .then((conversations) => {
             conversations.length.should.be.equal(1);
             conversations[0].id.should.be.equal(EXISTING_ROOM_ID);
           }),
         client.getQuery().equalTo('objectId', EXISTING_ROOM_ID)
           .withMembers(['hjiang'])
           .find()
-          .then(conversations => {
+          .then((conversations) => {
             conversations.length.should.be.equal(0);
           }),
       ])
@@ -88,14 +88,14 @@ describe('ConversationQuery', () => {
         client.getQuery().equalTo('objectId', EXISTING_ROOM_ID)
           .notEqualTo('name', 'not-this-name')
           .find()
-          .then(conversations => {
+          .then((conversations) => {
             conversations.length.should.be.equal(1);
             conversations[0].id.should.be.equal(EXISTING_ROOM_ID);
           }),
         client.getQuery().equalTo('objectId', EXISTING_ROOM_ID)
           .notEqualTo('name', 'js-realtime-sdk-testconv')
           .find()
-          .then(conversations => {
+          .then((conversations) => {
             conversations.length.should.be.equal(0);
           }),
       ])
@@ -105,14 +105,14 @@ describe('ConversationQuery', () => {
         client.getQuery().equalTo('objectId', EXISTING_ROOM_ID)
           .matches('name', /REALTIME-SDK/i)
           .find()
-          .then(conversations => {
+          .then((conversations) => {
             conversations.length.should.be.equal(1);
             conversations[0].id.should.be.equal(EXISTING_ROOM_ID);
           }),
         client.getQuery().equalTo('objectId', EXISTING_ROOM_ID)
           .matches('name', /REALTIME-SDK/)
           .find()
-          .then(conversations => {
+          .then((conversations) => {
             conversations.length.should.be.equal(0);
           }),
       ])
@@ -122,14 +122,14 @@ describe('ConversationQuery', () => {
         client.getQuery().equalTo('objectId', EXISTING_ROOM_ID)
           .contains('name', 'realtime-sdk')
           .find()
-          .then(conversations => {
+          .then((conversations) => {
             conversations.length.should.be.equal(1);
             conversations[0].id.should.be.equal(EXISTING_ROOM_ID);
           }),
         client.getQuery().equalTo('objectId', EXISTING_ROOM_ID)
           .contains('name', 'REALTIME-SDK')
           .find()
-          .then(conversations => {
+          .then((conversations) => {
             conversations.length.should.be.equal(0);
           }),
       ])
@@ -139,14 +139,14 @@ describe('ConversationQuery', () => {
         client.getQuery().equalTo('objectId', EXISTING_ROOM_ID)
           .startsWith('name', 'js-realtime')
           .find()
-          .then(conversations => {
+          .then((conversations) => {
             conversations.length.should.be.equal(1);
             conversations[0].id.should.be.equal(EXISTING_ROOM_ID);
           }),
         client.getQuery().equalTo('objectId', EXISTING_ROOM_ID)
           .startsWith('name', 'JS-REALTIME')
           .find()
-          .then(conversations => {
+          .then((conversations) => {
             conversations.length.should.be.equal(0);
           }),
       ])
@@ -156,14 +156,14 @@ describe('ConversationQuery', () => {
         client.getQuery().equalTo('objectId', EXISTING_ROOM_ID)
           .endsWith('name', 'testconv')
           .find()
-          .then(conversations => {
+          .then((conversations) => {
             conversations.length.should.be.equal(1);
             conversations[0].id.should.be.equal(EXISTING_ROOM_ID);
           }),
         client.getQuery().equalTo('objectId', EXISTING_ROOM_ID)
           .endsWith('name', 'TESTCONV')
           .find()
-          .then(conversations => {
+          .then((conversations) => {
             conversations.length.should.be.equal(0);
           }),
       ])
@@ -188,14 +188,14 @@ describe('ConversationQuery', () => {
         client.getQuery().equalTo('objectId', EXISTING_ROOM_ID)
           .lessThan('createdAt', new Date())
           .find()
-          .then(conversations => {
+          .then((conversations) => {
             conversations.length.should.be.equal(1);
             conversations[0].id.should.be.equal(EXISTING_ROOM_ID);
           }),
         client.getQuery().equalTo('objectId', EXISTING_ROOM_ID)
           .lessThan('createdAt', new Date(0))
           .find()
-          .then(conversations => {
+          .then((conversations) => {
             conversations.length.should.be.equal(0);
           }),
       ])
@@ -205,14 +205,14 @@ describe('ConversationQuery', () => {
         client.getQuery().equalTo('objectId', EXISTING_ROOM_ID)
           .lessThanOrEqualTo('createdAt', new Date())
           .find()
-          .then(conversations => {
+          .then((conversations) => {
             conversations.length.should.be.equal(1);
             conversations[0].id.should.be.equal(EXISTING_ROOM_ID);
           }),
         client.getQuery().equalTo('objectId', EXISTING_ROOM_ID)
           .lessThanOrEqualTo('createdAt', new Date(0))
           .find()
-          .then(conversations => {
+          .then((conversations) => {
             conversations.length.should.be.equal(0);
           }),
       ])
@@ -222,14 +222,14 @@ describe('ConversationQuery', () => {
         client.getQuery().equalTo('objectId', EXISTING_ROOM_ID)
           .greaterThan('createdAt', new Date(0))
           .find()
-          .then(conversations => {
+          .then((conversations) => {
             conversations.length.should.be.equal(1);
             conversations[0].id.should.be.equal(EXISTING_ROOM_ID);
           }),
         client.getQuery().equalTo('objectId', EXISTING_ROOM_ID)
           .greaterThan('createdAt', new Date())
           .find()
-          .then(conversations => {
+          .then((conversations) => {
             conversations.length.should.be.equal(0);
           }),
       ])
@@ -239,14 +239,14 @@ describe('ConversationQuery', () => {
         client.getQuery().equalTo('objectId', EXISTING_ROOM_ID)
           .greaterThanOrEqualTo('createdAt', new Date(0))
           .find()
-          .then(conversations => {
+          .then((conversations) => {
             conversations.length.should.be.equal(1);
             conversations[0].id.should.be.equal(EXISTING_ROOM_ID);
           }),
         client.getQuery().equalTo('objectId', EXISTING_ROOM_ID)
           .greaterThanOrEqualTo('createdAt', new Date())
           .find()
-          .then(conversations => {
+          .then((conversations) => {
             conversations.length.should.be.equal(0);
           }),
       ])
@@ -291,7 +291,7 @@ describe('ConversationQuery', () => {
       client.getQuery().equalTo('objectId', EXISTING_ROOM_ID)
         .compact(true)
         .find()
-        .then(conversations => {
+        .then((conversations) => {
           conversations.length.should.be.equal(1);
           conversations[0].members.length.should.be.equal(0);
         })
@@ -300,7 +300,7 @@ describe('ConversationQuery', () => {
       client.getQuery().equalTo('objectId', EXISTING_ROOM_ID)
         .withLastMessagesRefreshed()
         .find()
-        .then(conversations => {
+        .then((conversations) => {
           conversations.length.should.be.equal(1);
           const message = conversations[0].lastMessage;
           message.should.be.instanceof(Message);
@@ -325,7 +325,7 @@ describe('ConversationQuery', () => {
           .find().then(conversations => conversations[0]),
         client.getQuery().equalTo('objectId', EXISTING_ROOM_ID)
           .find().then(conversations => conversations[0]),
-      ]).then(conversations => {
+      ]).then((conversations) => {
         conversations[0].should.be.exactly(conversations[1]);
       })
     );

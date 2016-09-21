@@ -34,17 +34,17 @@ var require = require || function(id) {throw new Error('Unexpected required ' + 
   };
 
   var SAUCE_BROWSERS = [{
-   browserName: 'firefox',
-    version: '46',
-    platform: 'Windows 7'
-  }, {
+//    browserName: 'firefox',
+//    version: '46',
+//    platform: 'Windows 7'
+//  }, {
     browserName: 'iPhone',
     version: '8.4'
   }, {
-    browserName: 'chrome',
-    version: 'latest',
-    platform: 'Windows 7'
-  }, {
+//    browserName: 'chrome',
+//    version: 'latest',
+//    platform: 'Windows 7'
+//  }, {
     browserName: 'chrome',
     version: '31'
   }];
@@ -228,7 +228,7 @@ var require = require || function(id) {throw new Error('Unexpected required ' + 
           build: process.env.TRAVIS_JOB_NUMBER,
           testname: 'LeanCloud Realtime SDK Test #' + (process.env.TRAVIS_COMMIT || '').slice(0, 7),
           browsers: SAUCE_BROWSERS,
-          throttled: 2,
+          throttled: 1,
           pollInterval: 3000,
           statusCheckAttempts: 200,
           tunnelArgs: ['--vm-version', 'dev-varnish']

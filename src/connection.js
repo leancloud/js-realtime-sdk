@@ -1,6 +1,6 @@
 import { default as d } from 'debug';
 import WebSocketPlus from './websocket-plus';
-import { createError } from './errors';
+import { createError } from './error';
 import { GenericCommand, CommandType } from '../proto/message';
 import { trim } from './utils';
 
@@ -21,7 +21,8 @@ export default class Connection extends WebSocketPlus {
   send(command, waitingForRespond = true) {
     let serialId;
     if (waitingForRespond) {
-      serialId = ++this._serialId;
+      this._serialId += 1;
+      serialId = this._serialId;
       command.i = serialId; // eslint-disable-line no-param-reassign
     }
     debug('↑', trim(command), 'sent');

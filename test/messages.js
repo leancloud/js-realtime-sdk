@@ -1,6 +1,7 @@
 import 'should';
 import 'should-sinon';
 import Realtime from '../src/realtime';
+import { ErrorCode } from '../src';
 import Message, { MessageStatus } from '../src/messages/message';
 import TypedMessage from '../src/messages/typed-message';
 import TextMessage from '../src/messages/text-message';
@@ -131,16 +132,16 @@ describe('Messages', () => {
       return Promise.all([
         realtime.createIMClient(),
         realtime.createIMClient(),
-      ]).then(clients => {
+      ]).then((clients) => {
         [wchen, zwang] = clients;
         return wchen.createConversation({
           members: [zwang.id],
           name: 'message test conversation',
         });
-      }).then(conversation => {
+      }).then((conversation) => {
         conversationWchen = conversation;
         return zwang.getConversation(conversation.id);
-      }).then(conversation => {
+      }).then((conversation) => {
         conversationZwang = conversation;
       });
     });
@@ -156,7 +157,7 @@ describe('Messages', () => {
         listen(conversationZwang, 'message'),
         listen(zwang, 'message'),
         conversationWchen.send(message),
-      ]).then(messages => {
+      ]).then((messages) => {
         const [
           [receivedMessage],
           [clientReceivedMessage, clientReceivedConversation],
@@ -182,7 +183,7 @@ describe('Messages', () => {
           leancloud: 'rocks',
         })
       );
-      return Promise.all([receivePromise, sendPromise]).then(messages => {
+      return Promise.all([receivePromise, sendPromise]).then((messages) => {
         const [[receivedMessage], sentMessage] = messages;
         receivedMessage.id.should.be.equal(sentMessage.id);
         receivedMessage.getText().should.eql(sentMessage.getText());
@@ -194,7 +195,7 @@ describe('Messages', () => {
       message.setTransient(true);
       // transient message 不返回 ack
       // 这里确保成功 resolve
-      return conversationZwang.send(message).then(msg => {
+      return conversationZwang.send(message).then((msg) => {
         msg.should.be.instanceof(Message);
         msg.status.should.eql(MessageStatus.SENT);
       });
@@ -216,7 +217,10 @@ describe('Messages', () => {
       return wchen
         .getConversation(EXISTING_ROOM_ID)
         .then(conversation => conversation.send(message))
-        .should.be.rejected()
+        .should.be.rejectedWith(Error, {
+          message: 'INVALID_MESSAGING_TARGET',
+          code: ErrorCode.INVALID_MESSAGING_TARGET,
+        })
         .then(() => {
           message.status.should.eql(MessageStatus.FAILED);
         });

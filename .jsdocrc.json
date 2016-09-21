@@ -6,7 +6,7 @@
   "source": {
     "exclude": ["plugins/webrtc/src/signalings"]
   },
-  "plugins": ["node_modules/jsdoc-ignore-future"],
+  "plugins": ["node_modules/jsdoc-ignore-future/index"],
   "ignoreFuture": {
     "start": " jsdoc-ignore-start",
     "end": " jsdoc-ignore-end"

@@ -15,7 +15,7 @@ import {
   NON_EXISTING_ROOM_ID,
 } from './configs';
 
-const createRealtime = (options) => new Realtime(Object.assign({
+const createRealtime = options => new Realtime(Object.assign({
   appId: APP_ID,
   region: REGION,
   pushUnread: false,
@@ -37,12 +37,12 @@ describe('Realtime', () => {
       const realtime = createRealtime();
       let firstConnection;
       return realtime._open()
-        .then(connection => {
+        .then((connection) => {
           connection.should.be.a.instanceof(Connection);
           firstConnection = connection;
         })
         .then(() => realtime._open())
-        .then(connection => {
+        .then((connection) => {
           connection.should.be.exactly(firstConnection);
           connection.close();
         });
@@ -50,15 +50,15 @@ describe('Realtime', () => {
     it('_close', () => {
       const realtime = createRealtime();
       return realtime._open()
-        .then(connection => {
+        .then((connection) => {
           should(realtime._openPromise).not.be.undefined();
           return connection;
         })
-        .then(connection => {
+        .then((connection) => {
           realtime._close();
           return connection;
         })
-        .then(connection => {
+        .then((connection) => {
           should(realtime._openPromise).be.undefined();
           connection.current.should.be.equal('closed');
         });
@@ -92,7 +92,7 @@ describe('Realtime', () => {
     const realtime = createRealtime();
     const _disconnect = sinon.spy(realtime, '_close');
     return realtime._open()
-      .then(connection => {
+      .then((connection) => {
         const a = new Client('a', connection);
         const b = new Client('b', connection);
         const c = new Client(undefined, connection);
@@ -113,7 +113,7 @@ describe('Realtime', () => {
     it('should proxy network events', () => {
       const realtime = createRealtime();
       return realtime._open()
-        .then(connection => {
+        .then((connection) => {
           const callbackPromise = Promise.all(['retry', 'schedule', 'disconnect', 'reconnect'].map(
             event => listen(realtime, event)
           ));
@@ -156,7 +156,7 @@ describe('Realtime', () => {
       (() => realtime.retry()).should.throw();
     });
     it('should retry when offline', () =>
-      realtime._open().then(connection => {
+      realtime._open().then((connection) => {
         const promise = listen(realtime, 'disconnect', 'eroor');
         connection.disconnect();
         return promise;
@@ -173,7 +173,7 @@ describe('Connection', () => {
   let connection;
   before(() =>
     createRealtime().createIMClient()
-      .then(c => {
+      .then((c) => {
         client = c;
         connection = client._connection;
         return connection.ping();
@@ -183,7 +183,7 @@ describe('Connection', () => {
 
   it('ping', () =>
     connection.ping()
-      .then(resCommand => {
+      .then((resCommand) => {
         resCommand.cmd.should.be.equal(CommandType.echo);
       })
   );

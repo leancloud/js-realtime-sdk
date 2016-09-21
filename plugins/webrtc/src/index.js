@@ -16,7 +16,7 @@ const messageClasses = [
   Cancelation,
 ];
 
-const onRealtimeCreate = realtime => {
+const onRealtimeCreate = (realtime) => {
   /**
    * 创建一个 WebRTC 客户端，多次创建相同 id 的客户端会返回同一个实例。应用 WebRTC 插件后，Realtime 类会增加该实例方法。
    * WebRTC 客户端是单点登录的，既在同一时刻，同一个 id 只允许一个客户端在线，后登录的客户端会将原来在线上的客户端踢下线。
