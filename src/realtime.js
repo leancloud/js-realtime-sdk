@@ -4,7 +4,7 @@ import axios from 'axios';
 import uuid from 'uuid';
 import Connection from './connection';
 import { ErrorCode, createError } from './error';
-import { tap, Cache, trim, internal, ensureArray } from './utils';
+import { tap, Cache, trim, internal, ensureArray, isWeapp } from './utils';
 import { applyDecorators } from './plugin';
 import Conversation from './conversation';
 import Client from './client';
@@ -39,6 +39,7 @@ export default class Realtime extends EventEmitter {
       appId: undefined,
       region: 'cn',
       pushOfflineMessages: false,
+      noBinary: isWeapp,
       ssl: true,
     }, options);
     this._id = uuid.v4();

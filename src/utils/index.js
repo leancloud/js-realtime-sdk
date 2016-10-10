@@ -99,3 +99,6 @@ export const setValue = (target, key, value) => {
   currentTarget[lastSeg] = value;
   return target;
 };
+
+// eslint-disable-next-line no-undef
+export const isWeapp = typeof wx === 'object' && typeof wx.connectSocket === 'function';
