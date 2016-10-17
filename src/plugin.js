@@ -100,7 +100,7 @@ const checkType = middleware => (param) => {
 
 export const applyDecorators = (decorators, target) => {
   if (decorators) {
-    for (const decorator of decorators) {
+    decorators.forEach((decorator) => {
       try {
         decorator(target);
       } catch (error) {
@@ -109,7 +109,7 @@ export const applyDecorators = (decorators, target) => {
         }
         throw error;
       }
-    }
+    });
   }
 };
 
