@@ -37,7 +37,7 @@ export default class Conversation extends EventEmitter {
     system = false,
     muted = false,
     // jsdoc-ignore-start
-    ...attributes,
+    ...attributes
     // jsdoc-ignore-end
   }, client) {
     super();

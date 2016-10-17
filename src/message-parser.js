@@ -58,6 +58,7 @@ export default class MessageParser {
   // jsdoc-ignore-end
   parse(content) {
     debug('parsing message:', content);
+    // eslint-disable-next-line no-restricted-syntax
     for (const Klass of this._messageClasses) {
       const contentCopy = isPlainObject(content) ? Object.assign({}, content) : content;
       let valid;
