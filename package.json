@@ -70,7 +70,7 @@
     "should": "^11.0.0",
     "should-sinon": "0.0.5",
     "sinon": "2.0.0-pre",
-    "validate-commit-msg": "^2.5.0"
+    "validate-commit-msg": "^2.7.0"
   },
   "dependencies": {
     "axios": "^0.15.0",
