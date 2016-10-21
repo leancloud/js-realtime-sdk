@@ -500,6 +500,8 @@ export default class Conversation extends EventEmitter {
    * @param  {Message} message 消息，Message 及其子类的实例
    * @param {Object} [options] 发送选项
    * @param {Boolean} [options.reciept] 是否需要送达回执，仅在普通对话中有效
+   * @param {MessagePriority} [options.priority] 消息优先级，仅在暂态对话中有效
+   * @param {Object} [options.pushData] 消息对应的离线推送内容，如果消息接收方不在线，会推送指定的内容。其结构说明参见: {@link https://url.leanapp.cn/pushData 推送消息内容}
    * @return {Promise.<Message>} 发送的消息
    */
   send(message, options) {
@@ -509,6 +511,8 @@ export default class Conversation extends EventEmitter {
     }
     const {
       reciept,
+      priority,
+      pushData,
     } = Object.assign(
       // support deprecated attribute: message.needReceipt
       { reciept: message.needReceipt },
@@ -524,6 +528,9 @@ export default class Conversation extends EventEmitter {
       } else if (this.members.length > 2) {
         console.warn('receipt option is recommended to be used in one-on-one conversation.'); // eslint-disable-line max-len
       }
+    }
+    if (priority && !this.transient) {
+      console.warn('priority option is ignored as the conversation is not transient.');
     }
     Object.assign(message, {
       cid: this.id,
@@ -542,7 +549,9 @@ export default class Conversation extends EventEmitter {
         r: reciept,
         transient: message.transient,
         dt: message.id,
+        pushData: JSON.stringify(pushData),
       }),
+      priority,
     }), !message.transient);
     if (!message.transient) {
       sendPromise = sendPromise.then((resCommand) => {

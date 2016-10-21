@@ -1,13 +1,14 @@
 import 'should';
 import 'should-sinon';
 import Realtime from '../src/realtime';
-import { ErrorCode } from '../src';
+import Conversation from '../src/conversation';
+import { ErrorCode, MessagePriority } from '../src';
 import Message, { MessageStatus } from '../src/messages/message';
 import TypedMessage from '../src/messages/typed-message';
 import TextMessage from '../src/messages/text-message';
 import { messageType, messageField, IE10Compatible } from '../src/messages/helpers';
 
-import { listen } from './test-utils';
+import { listen, sinon } from './test-utils';
 
 import {
   APP_ID,
@@ -198,6 +199,30 @@ describe('Messages', () => {
       return conversationZwang.send(message).then((msg) => {
         msg.should.be.instanceof(Message);
         msg.status.should.eql(MessageStatus.SENT);
+      });
+    });
+    describe('sendOptions', () => {
+      let spy;
+      before(() => {
+        spy = sinon.spy(Conversation.prototype, '_send');
+      });
+      after(() => spy.restore());
+      it('sendOptions', () => {
+        const message = new TextMessage('sendOptions test');
+        const pushData = {
+          alert: 'test',
+        };
+        conversationZwang.send(message, {
+          priority: MessagePriority.LOW,
+          pushData,
+        });
+        const command = spy.getCall(0).args[0];
+        command.should.containDeepOrdered({
+          priority: MessagePriority.LOW,
+          directMessage: {
+            pushData: JSON.stringify(pushData),
+          },
+        });
       });
     });
     it('receipt', () => {

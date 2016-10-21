@@ -9,6 +9,21 @@ import {
   IE10Compatible,
 } from './messages/helpers';
 
+/**
+ * 消息优先级枚举
+ * @enum {Symbol}
+ * @since 3.3.0
+ * @memberof module:leancloud-realtime
+ */
+const MessagePriority = {
+  /** 高 */
+  HIGH: 1,
+  /** 普通 */
+  NORMAL: 2,
+  /** 低 */
+  LOW: 3,
+};
+
 export {
   /**
    * @see Realtime
@@ -64,6 +79,7 @@ export {
    */
   messageField,
   IE10Compatible,
+  MessagePriority,
   MessageStatus,
 };
 
