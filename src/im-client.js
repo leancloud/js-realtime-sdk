@@ -20,7 +20,6 @@ import { tap, Expirable, Cache, keyRemap, union, difference, trim, internal } fr
 import { applyDecorators } from './plugin';
 import runSignatureFactory from './signature-factory-runner';
 import { MessageStatus } from './messages/message';
-import { OnlineStatus } from '.';
 import { version as VERSION } from '../package.json';
 
 const debug = d('LC:IMClient');
@@ -86,8 +85,6 @@ export default class IMClient extends Client {
         return this._dispatchUnreadMessage(message);
       case CommandType.rcp:
         return this._dispatchRcpMessage(message);
-      case CommandType.presence:
-        return this._dispatchPresenceMessage(message);
       default:
         this.emit('unhandledmessage', message);
         return Promise.resolve();
@@ -294,23 +291,6 @@ export default class IMClient extends Client {
         this.emit('unhandledmessage', message);
         return Promise.reject(new Error('Unrecognized conversation command'));
     }
-  }
-
-  _dispatchPresenceMessage({ presenceMessage }) {
-    return this.getConversation(presenceMessage.cid).then((conversation) => {
-      /**
-       * 对话成员的在线状态发生变化
-       * @event Conversation#membersstatuschange
-       * @param {Object} payload
-       * @param {String[]} payload.members 成员 id 列表
-       * @param {Symbol} payload.status 新的在线状态，值为 {@link module:leancloud-realtime.OnlineStatus} 之一
-       */
-      conversation.emit('membersstatuschange', {
-        members: presenceMessage.sessionPeerIds,
-        // online: 1, offline: 2
-        status: OnlineStatus[['', 'ONLINE', 'OFFLINE'][presenceMessage.status]],
-      });
-    });
   }
 
   _dispatchDirectMessage(originalMessage) {

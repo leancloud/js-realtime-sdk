@@ -9,19 +9,6 @@ import {
   IE10Compatible,
 } from './messages/helpers';
 
-/**
- * 消息状态枚举
- * @enum {Symbol}
- * @since 3.3.0
- * @memberof module:leancloud-realtime
- */
-const OnlineStatus = {
-  /** 在线 */
-  ONLINE: Symbol('online'),
-  /** 离线 */
-  OFFLINE: Symbol('offline'),
-};
-
 export {
   /**
    * @see Realtime
@@ -78,7 +65,6 @@ export {
   messageField,
   IE10Compatible,
   MessageStatus,
-  OnlineStatus,
 };
 
 export {
