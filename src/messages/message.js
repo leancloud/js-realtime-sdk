@@ -64,6 +64,7 @@ export default class Message {
        * 标记需要回执
        * @memberof Message#
        * @type {Boolean}
+       * @deprecated 指定是否需要送达回执请使用 {@link Conversation#send} 方法的 `options.reciept` 参数。
        */
       needReceipt: false,
       /**
@@ -85,8 +86,10 @@ export default class Message {
    * 设置是否需要送达回执
    * @param {Boolean} needReceipt
    * @return {Message} self
+   * @deprecated 请使用 {@link Conversation#send} 方法的 `options.reciept` 选项代替。
    */
   setNeedReceipt(needReceipt) {
+    console.warn('DEPRECATION Message#setNeedReceipt: Use Conversation#send with sendOptions.reciept instead.');
     this.needReceipt = needReceipt;
     return this;
   }
