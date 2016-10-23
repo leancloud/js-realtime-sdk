@@ -33,11 +33,8 @@ npm install leancloud-realtime@2
   - iOS 8.0+
   - Android 4.4+
 - Node.js 0.12+
-- React Native
-  - iOS 0.22+
-  - Android 0.25+
-
-其中在 React Native 中运行需要在初始化 [Realtime](https://leancloud.github.io/js-realtime-sdk/docs/Realtime.html#Realtime) 时设置 `options.noBinary` 为 `true`。
+- React Native 0.26+
+- 微信小程序 (0.10.101400)
 
 文档
 ----

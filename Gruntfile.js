@@ -10,11 +10,10 @@ module.exports = function(grunt) {
   var commonjs = require('rollup-plugin-commonjs');
 
   var env = function () {
-    var envString = JSON.stringify(process.env);
     return {
       intro() {
         return `
-var process = window.process || {};
+var process = (window && window.process) || {};
 process.env = process.env || {};`;
       }
     };
@@ -23,9 +22,6 @@ process.env = process.env || {};`;
     return {
       intro() {
         return `
-var global = typeof window !== 'undefined' ? window :
-             typeof global !== 'undefined' ? global :
-             this;
 var define = undefined;
 var require = require || function(id) {throw new Error('Unexpected required ' + id)};
 `;
@@ -62,7 +58,7 @@ var require = require || function(id) {throw new Error('Unexpected required ' + 
       options: {
         sourceMap: true
       },
-      dist: {
+      node: {
         dest: 'dist/realtime.js',
         src: 'src/index.js',
         options: {
@@ -78,7 +74,7 @@ var require = require || function(id) {throw new Error('Unexpected required ' + 
           format: 'cjs'
         }
       },
-      'dist-browser': {
+      'browser': {
         dest: 'dist/realtime.browser.js',
         src: 'src/index.js',
         options: {
@@ -102,28 +98,15 @@ var require = require || function(id) {throw new Error('Unexpected required ' + 
           moduleId: 'leancloud-realtime',
         }
       },
+      'weapp': {
+        dest: 'dist/realtime.weapp.js',
+        src: 'src/index-weapp.js',
+        options: '<%= rollup.browser.options %>',
+      },
       'test-browser': {
         dest: 'test/browser/index.js',
         src: 'test/index.js',
-        options: {
-          plugins: [
-            json(),
-            nodeResolve({
-              main: true,
-              browser: true
-            }),
-            commonjsGlobal(),
-            commonjs({
-              include: ['node_modules/**', 'proto/**'],
-            }),
-            babel(Object.assign({}, babelConfigs, {
-              include: ['src/**', 'test/**', 'proto/**', 'node_modules/axios/**'],
-            })),
-            env()
-          ],
-          format: 'umd',
-          moduleName: 'AV'
-        }
+        options: '<%= rollup.browser.options %>',
       },
       'typed-messages': {
         dest: 'plugins/typed-messages/dist/typed-messages.js',
@@ -249,14 +232,15 @@ var require = require || function(id) {throw new Error('Unexpected required ' + 
     grunt.task.run(tasks);
   });
   grunt.registerTask('build', [
-    'rollup:dist-browser',
-    'rollup:dist',
+    'rollup:browser',
+    'rollup:node',
     'uglify:browser',
     'rollup:typed-messages',
     'uglify:typed-messages',
     'rollup:webrtc',
     'uglify:webrtc',
-    'validate-es5'
+    'rollup:weapp',
+    'validate-es5',
   ]);
   grunt.registerTask('cdn', 'Upload dist to CDN.', function() {
 
