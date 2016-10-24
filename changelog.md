@@ -1,3 +1,20 @@
+<a name="3.3.0"></a>
+# 3.3.0 (2016-10-24)
+
+
+### Features
+
+* 支持微信小程序 ([#417](https://github.com/leancloud/js-realtime-sdk/issues/417)) ([5e138cc](https://github.com/leancloud/js-realtime-sdk/commit/5e138cc))
+* **Conversation:** 增加 `system` 属性，标识对话是否是系统对话 ([#357](https://github.com/leancloud/js-realtime-sdk/issues/357)) ([075d508](https://github.com/leancloud/js-realtime-sdk/commit/075d508))
+* **Conversation:** `send` 方法新增参数 `options`，可选的参数包括
+  * `options.pushData`：离线推送内容
+  * `options.priority`：聊天室消息的优先级
+  * `options.reciept`：是否需要送达回执
+* **Message:** 废弃了 `Message#setNeedReciept` 方法与 Message 的 `needReciept` 属性，推荐使用 `Conversation#send` 方法的 `options.reciept` 参数 ([a38c481](https://github.com/leancloud/js-realtime-sdk/commit/a38c481))
+* **Error:** 新增了 ErrorCode，用于判断捕获的异常 ([#353](https://github.com/leancloud/js-realtime-sdk/issues/353)) ([bbdf608](https://github.com/leancloud/js-realtime-sdk/commit/bbdf608))
+* 增加 TypeScript 定义文件 ([#373](https://github.com/leancloud/js-realtime-sdk/issues/373)) ([2e5da17](https://github.com/leancloud/js-realtime-sdk/commit/2e5da17))
+
+
 <a name="3.2.3"></a>
 ## 3.2.3 (2016-09-05)
 
