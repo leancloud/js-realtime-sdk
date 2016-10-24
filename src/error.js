@@ -1,4 +1,4 @@
-export const error = {
+export const error = Object.freeze({
   1000: {
     name: 'CLOSE_NORMAL',
   },
@@ -70,13 +70,13 @@ export const error = {
   4402: {
     name: 'MESSAGE_REJECTED_BY_APP',
   },
-};
+});
 
-export const ErrorCode = Object
-  .keys(error)
-  .reduce((result, code) => Object.assign(result, {
+export const ErrorCode = Object.freeze(
+  Object.keys(error).reduce((result, code) => Object.assign(result, {
     [error[code].name]: Number(code),
-  }), {});
+  }), {})
+);
 
 export const createError = (errorMessage) => {
   const {

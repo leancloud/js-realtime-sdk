@@ -1,13 +1,14 @@
 import 'should';
 import 'should-sinon';
 import Realtime from '../src/realtime';
-import { ErrorCode } from '../src';
+import Conversation from '../src/conversation';
+import { ErrorCode, MessagePriority } from '../src';
 import Message, { MessageStatus } from '../src/messages/message';
 import TypedMessage from '../src/messages/typed-message';
 import TextMessage from '../src/messages/text-message';
 import { messageType, messageField, IE10Compatible } from '../src/messages/helpers';
 
-import { listen } from './test-utils';
+import { listen, sinon } from './test-utils';
 
 import {
   APP_ID,
@@ -24,6 +25,9 @@ class CustomMessage extends TypedMessage {
     this.foo = foo;
   }
 }
+CustomMessage.sendOptions = {
+  priority: MessagePriority.HIGH,
+};
 
 describe('Messages', () => {
   describe('helpers', () => {
@@ -198,6 +202,38 @@ describe('Messages', () => {
       return conversationZwang.send(message).then((msg) => {
         msg.should.be.instanceof(Message);
         msg.status.should.eql(MessageStatus.SENT);
+      });
+    });
+    describe('sendOptions', () => {
+      beforeEach(function () {
+        this.spy = sinon.spy(Conversation.prototype, '_send');
+      });
+      afterEach(function () {
+        this.spy.restore();
+      });
+      it('sendOptions', function () {
+        const message = new TextMessage('sendOptions test');
+        const pushData = {
+          alert: 'test',
+        };
+        conversationZwang.send(message, {
+          priority: MessagePriority.LOW,
+          pushData,
+        });
+        const command = this.spy.getCall(0).args[0];
+        command.should.containDeepOrdered({
+          priority: MessagePriority.LOW,
+          directMessage: {
+            pushData: JSON.stringify(pushData),
+          },
+        });
+      });
+      it('Message.sendOptions', function () {
+        conversationZwang.send(new CustomMessage());
+        const command = this.spy.getCall(0).args[0];
+        command.should.containDeepOrdered({
+          priority: MessagePriority.HIGH,
+        });
       });
     });
     it('receipt', () => {

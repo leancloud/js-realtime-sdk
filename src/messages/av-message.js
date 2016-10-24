@@ -5,6 +5,15 @@
  */
 
 /**
+ * 消息的默认发送选项，指定该属性后发送该类型的消息时会将其作为默认的发送选项。比如可以用来指定某种类型的消息默认优先级为高。
+ *
+ * @static
+ * @name AVMessage.sendOptions
+ * @see Conversation#send
+ * @since 3.3.0
+ */
+
+/**
  * 判断给定的内容是否是该类型的 Message
  *
  * @function

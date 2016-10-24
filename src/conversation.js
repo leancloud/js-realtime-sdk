@@ -498,21 +498,40 @@ export default class Conversation extends EventEmitter {
   /**
    * 发送消息
    * @param  {Message} message 消息，Message 及其子类的实例
+   * @param {Object} [options] 发送选项
+   * @param {Boolean} [options.reciept] 是否需要送达回执，仅在普通对话中有效
+   * @param {MessagePriority} [options.priority] 消息优先级，仅在暂态对话中有效，
+   * see: {@link module:leancloud-realtime.MessagePriority MessagePriority}
+   * @param {Object} [options.pushData] 消息对应的离线推送内容，如果消息接收方不在线，会推送指定的内容。其结构说明参见: {@link https://url.leanapp.cn/pushData 推送消息内容}
    * @return {Promise.<Message>} 发送的消息
    */
-  send(message) {
+  send(message, options) {
     this._debug(message, 'send');
     if (!(message instanceof Message)) {
       throw new TypeError(`${message} is not a Message`);
     }
-    if (message.needReceipt) {
+    const {
+      reciept,
+      priority,
+      pushData,
+    } = Object.assign(
+      // support deprecated attribute: message.needReceipt
+      { reciept: message.needReceipt },
+      // support Message static property: sendOptions
+      message.constructor.sendOptions,
+      options
+    );
+    if (reciept) {
       if (this.transient) {
-        console.warn('message needReceipt option is ignored as the conversation is transient.');
+        console.warn('receipt option is ignored as the conversation is transient.');
       } else if (message.transient) {
-        console.warn('message needReceipt option is ignored as the message is transient.');
+        console.warn('receipt option is ignored as the message is transient.');
       } else if (this.members.length > 2) {
-        console.warn('message with needReceipt option is recommended to be sent in one-on-one conversation.'); // eslint-disable-line max-len
+        console.warn('receipt option is recommended to be used in one-on-one conversation.'); // eslint-disable-line max-len
       }
+    }
+    if (priority && !this.transient) {
+      console.warn('priority option is ignored as the conversation is not transient.');
     }
     Object.assign(message, {
       cid: this.id,
@@ -528,10 +547,12 @@ export default class Conversation extends EventEmitter {
       directMessage: new DirectCommand({
         msg,
         cid: this.id,
-        r: message.needReceipt,
+        r: reciept,
         transient: message.transient,
         dt: message.id,
+        pushData: JSON.stringify(pushData),
       }),
+      priority,
     }), !message.transient);
     if (!message.transient) {
       sendPromise = sendPromise.then((resCommand) => {
@@ -559,7 +580,7 @@ export default class Conversation extends EventEmitter {
     }
     return sendPromise.then(() => {
       message._setStatus(MessageStatus.SENT);
-      if (message.needReceipt) {
+      if (reciept) {
         internal(this).messagesWaitingForReciept[message.id] = message;
       }
       return message;
