@@ -23,6 +23,7 @@ const MessagePriority = {
   /** 低 */
   LOW: 3,
 };
+Object.freeze(MessagePriority);
 
 export {
   /**
