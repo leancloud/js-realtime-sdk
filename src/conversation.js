@@ -500,7 +500,8 @@ export default class Conversation extends EventEmitter {
    * @param  {Message} message 消息，Message 及其子类的实例
    * @param {Object} [options] 发送选项
    * @param {Boolean} [options.reciept] 是否需要送达回执，仅在普通对话中有效
-   * @param {MessagePriority} [options.priority] 消息优先级，仅在暂态对话中有效
+   * @param {MessagePriority} [options.priority] 消息优先级，仅在暂态对话中有效，
+   * see: {@link module:leancloud-realtime.MessagePriority MessagePriority}
    * @param {Object} [options.pushData] 消息对应的离线推送内容，如果消息接收方不在线，会推送指定的内容。其结构说明参见: {@link https://url.leanapp.cn/pushData 推送消息内容}
    * @return {Promise.<Message>} 发送的消息
    */
@@ -517,7 +518,7 @@ export default class Conversation extends EventEmitter {
       // support deprecated attribute: message.needReceipt
       { reciept: message.needReceipt },
       // support Message static property: sendOptions
-      message.sendOptions,
+      message.constructor.sendOptions,
       options
     );
     if (reciept) {

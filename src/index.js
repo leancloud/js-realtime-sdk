@@ -11,7 +11,7 @@ import {
 
 /**
  * 消息优先级枚举
- * @enum {Symbol}
+ * @enum {Number}
  * @since 3.3.0
  * @memberof module:leancloud-realtime
  */

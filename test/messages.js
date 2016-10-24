@@ -25,6 +25,9 @@ class CustomMessage extends TypedMessage {
     this.foo = foo;
   }
 }
+CustomMessage.sendOptions = {
+  priority: MessagePriority.HIGH,
+};
 
 describe('Messages', () => {
   describe('helpers', () => {
@@ -202,12 +205,13 @@ describe('Messages', () => {
       });
     });
     describe('sendOptions', () => {
-      let spy;
-      before(() => {
-        spy = sinon.spy(Conversation.prototype, '_send');
+      beforeEach(function () {
+        this.spy = sinon.spy(Conversation.prototype, '_send');
       });
-      after(() => spy.restore());
-      it('sendOptions', () => {
+      afterEach(function () {
+        this.spy.restore();
+      });
+      it('sendOptions', function () {
         const message = new TextMessage('sendOptions test');
         const pushData = {
           alert: 'test',
@@ -216,12 +220,19 @@ describe('Messages', () => {
           priority: MessagePriority.LOW,
           pushData,
         });
-        const command = spy.getCall(0).args[0];
+        const command = this.spy.getCall(0).args[0];
         command.should.containDeepOrdered({
           priority: MessagePriority.LOW,
           directMessage: {
             pushData: JSON.stringify(pushData),
           },
+        });
+      });
+      it('Message.sendOptions', function () {
+        conversationZwang.send(new CustomMessage());
+        const command = this.spy.getCall(0).args[0];
+        command.should.containDeepOrdered({
+          priority: MessagePriority.HIGH,
         });
       });
     });
