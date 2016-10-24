@@ -1,4 +1,7 @@
 import isPlainObject from 'lodash/isPlainObject';
+import global from './global';
+
+export { global };
 
 export const tryAll = (promiseConstructors) => {
   const promise = new Promise(promiseConstructors[0]);
