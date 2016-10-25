@@ -34,7 +34,7 @@ npm install leancloud-realtime@2
   - Android 4.4+
 - Node.js 0.12+
 - React Native 0.26+
-- 微信小程序 (0.10.101400)
+- 微信小程序开发者工具 latest
 
 文档
 ----
@@ -76,9 +76,10 @@ Demo
 ├── demo
 ├── deploy.sh                 // 部署 gh-pages 分支
 ├── release.sh                // 部署 dist 分支
-├── dist                      // 打包产出
+├── dist                      // 打包产出 (dist 分支)
 │   ├── realtime.browser.js     // 浏览器用
 │   ├── realtime.browser.min.js // 浏览器用(uglified)
+│   ├── realtime.weapp.js       // 微信小程序用
 │   └── realtime.js             // node 用
 ├── proto
 │   ├── message-compiled.js     // 使用 pbjs 生成的 message 类
