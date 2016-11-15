@@ -71,6 +71,9 @@ export default class Message {
        * 标记暂态消息
        * @memberof Message#
        * @type {Boolean}
+       * @deprecated 指定是否作为暂态消息发送请使用 {@link Conversation#send} 方法的 `options.transient` 参数。
+       * 请不要将是否为暂态作为区分某些消息的标记，请使用富媒体消息的属性（attributes）或使用自定义消息类型。
+       * 该字段将在 v4.0 中移除。
        */
       transient: false,
       /**
@@ -98,8 +101,10 @@ export default class Message {
    * 设置是否是暂态消息
    * @param {Boolean} transient
    * @return {Message} self
+   * @deprecated 请使用 {@link Conversation#send} 方法的 `options.transient` 选项代替。
    */
   setTransient(transient) {
+    console.warn('DEPRECATION Message#setTransient: Use Conversation#send with sendOptions.transient instead.');
     this.transient = transient;
     return this;
   }

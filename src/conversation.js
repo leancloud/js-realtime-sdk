@@ -498,7 +498,8 @@ export default class Conversation extends EventEmitter {
   /**
    * 发送消息
    * @param  {Message} message 消息，Message 及其子类的实例
-   * @param {Object} [options] 发送选项
+   * @param {Object} [options] 发送选项，since v3.3.0
+   * @param {Boolean} [options.transient] 是否作为暂态消息发送，since v3.3.1
    * @param {Boolean} [options.reciept] 是否需要送达回执，仅在普通对话中有效
    * @param {MessagePriority} [options.priority] 消息优先级，仅在暂态对话中有效，
    * see: {@link module:leancloud-realtime.MessagePriority MessagePriority}
@@ -511,12 +512,16 @@ export default class Conversation extends EventEmitter {
       throw new TypeError(`${message} is not a Message`);
     }
     const {
+      transient,
       reciept,
       priority,
       pushData,
     } = Object.assign(
       // support deprecated attribute: message.needReceipt
-      { reciept: message.needReceipt },
+      {
+        transient: message.transient,
+        reciept: message.needReceipt,
+      },
       // support Message static property: sendOptions
       message.constructor.sendOptions,
       options
@@ -524,8 +529,8 @@ export default class Conversation extends EventEmitter {
     if (reciept) {
       if (this.transient) {
         console.warn('receipt option is ignored as the conversation is transient.');
-      } else if (message.transient) {
-        console.warn('receipt option is ignored as the message is transient.');
+      } else if (transient) {
+        console.warn('receipt option is ignored as the message is sent transiently.');
       } else if (this.members.length > 2) {
         console.warn('receipt option is recommended to be used in one-on-one conversation.'); // eslint-disable-line max-len
       }
@@ -553,8 +558,8 @@ export default class Conversation extends EventEmitter {
         pushData: JSON.stringify(pushData),
       }),
       priority,
-    }), !message.transient);
-    if (!message.transient) {
+    }), !transient);
+    if (!transient) {
       sendPromise = sendPromise.then((resCommand) => {
         const {
           ackMessage: {
