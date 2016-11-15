@@ -81,7 +81,7 @@
     "javascript-state-machine": "^2.3.5",
     "lodash": "^4.6.0",
     "protobufjs": "^5.0.1",
-    "uuid": "^2.0.1",
+    "uuid": "^2.0.3",
     "ws": "^1.1.1"
   },
   "browser": {
