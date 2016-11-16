@@ -1,3 +1,13 @@
+<a name="3.3.1"></a>
+## 3.3.1 (2016-11-16)
+
+
+### Bug Fixes
+
+在 3.3.0 中`send` 方法增加了 `options` 参数，与消息内容无关的信息现在作为发送选项设置，但是遗漏了 transient（暂态）信息。在这个补丁中 transient（暂态）从消息的属性变为了发送选项。
+* **Conversation:**`send` 方法的 `options` 参数增加了 `options.transient` 参数，用于指定是否作为暂态消息发送 ([#439](https://github.com/leancloud/js-realtime-sdk/issues/439)) ([9b4d2ef](https://github.com/leancloud/js-realtime-sdk/commit/9b4d2ef))
+* **Message:** 废弃了 `Message#setTransient` 方法与 Message 的 `transient` 属性，请使用 `Conversation#send` 方法的 `options.transient` 代替。请不要将是否为暂态作为区分某些消息的标记，可以使用富媒体消息的属性（attributes）或使用自定义消息类型代替。
+
 <a name="3.3.0"></a>
 # 3.3.0 (2016-10-24)
 
@@ -6,7 +16,7 @@
 
 * 支持微信小程序 ([#417](https://github.com/leancloud/js-realtime-sdk/issues/417)) ([5e138cc](https://github.com/leancloud/js-realtime-sdk/commit/5e138cc))
 * **Conversation:** 增加 `system` 属性，标识对话是否是系统对话 ([#357](https://github.com/leancloud/js-realtime-sdk/issues/357)) ([075d508](https://github.com/leancloud/js-realtime-sdk/commit/075d508))
-* **Conversation:** `send` 方法新增参数 `options`，可选的参数包括
+* **Conversation:** `send` 方法新增参数 `options`，与消息内容无关的信息现在作为发送选项设置，可选的参数包括
   * `options.pushData`：离线推送内容
   * `options.priority`：聊天室消息的优先级
   * `options.reciept`：是否需要送达回执
