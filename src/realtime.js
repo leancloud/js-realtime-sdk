@@ -241,6 +241,7 @@ export default class Realtime extends EventEmitter {
           params: {
             appId,
             secure: ssl,
+            features: isWeapp ? 'wechat' : undefined,
             server,
             _t: Date.now(),
           },
