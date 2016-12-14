@@ -71,7 +71,7 @@
     "should-sinon": "0.0.5",
     "sinon": "2.0.0-pre",
     "validate-commit-msg": "^2.5.0",
-    "weapp-polyfill": "github:leancloud/weapp-polyfill#8545044"
+    "weapp-polyfill": "github:leancloud/weapp-polyfill#ad5053b"
   },
   "dependencies": {
     "axios": "^0.15.0",
