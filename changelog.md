@@ -1,3 +1,13 @@
+<a name="3.3.2"></a>
+## 3.3.2 (2016-12-14)
+
+
+### Bug Fixes
+
+* 支持微信小程序真机 ([#458](https://github.com/leancloud/js-realtime-sdk/issues/458)) ([fc9e346](https://github.com/leancloud/js-realtime-sdk/commit/fc9e346))
+
+
+
 <a name="3.3.1"></a>
 ## 3.3.1 (2016-11-16)
 

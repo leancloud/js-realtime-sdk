@@ -1,6 +1,6 @@
 {
   "name": "leancloud-realtime",
-  "version": "3.3.1",
+  "version": "3.3.2",
   "description": "LeanCloud Realtime Message JavaScript SDK",
   "main": "./dist/realtime.js",
   "jsnext:main": "./src/index.js",
