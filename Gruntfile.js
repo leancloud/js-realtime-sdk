@@ -89,7 +89,7 @@ var require = require || function(id) {throw new Error('Unexpected required ' + 
               include: ['node_modules/**', 'proto/**'],
             }),
             babel(Object.assign({}, babelConfigs, {
-              include: ['src/**', 'test/**', 'proto/**', 'node_modules/axios/**'],
+              include: ['src/**', 'test/**', 'proto/**', 'node_modules/axios/**', 'node_modules/weapp-polyfill/**'],
             })),
             env(),
           ],
@@ -177,6 +177,15 @@ var require = require || function(id) {throw new Error('Unexpected required ' + 
           'dist/realtime.browser.min.js': ['dist/realtime.browser.js']
         }
       },
+      weapp: {
+        options: {
+          sourceMap: true,
+          sourceMapIn: 'dist/realtime.weapp.js.map'
+        },
+        files: {
+          'dist/realtime.weapp.min.js': ['dist/realtime.weapp.js']
+        }
+      },
       'typed-messages': {
         options: {
           sourceMap: true,
@@ -240,6 +249,7 @@ var require = require || function(id) {throw new Error('Unexpected required ' + 
     'rollup:webrtc',
     'uglify:webrtc',
     'rollup:weapp',
+    'uglify:weapp',
     'validate-es5',
   ]);
   grunt.registerTask('cdn', 'Upload dist to CDN.', function() {
@@ -282,7 +292,8 @@ var require = require || function(id) {throw new Error('Unexpected required ' + 
     [
       './plugins/typed-messages/dist/typed-messages.js',
       './plugins/webrtc/dist/webrtc.js',
-      './dist/realtime.browser.js'
+      './dist/realtime.browser.js',
+      './dist/realtime.weapp.js',
     ].forEach(file => {
       grunt.log.write('validate ' + file + ' ');
       var code = fs.readFileSync(file);

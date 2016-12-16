@@ -71,12 +71,12 @@
     "should-sinon": "0.0.5",
     "sinon": "2.0.0-pre",
     "validate-commit-msg": "^2.5.0",
-    "weapp-polyfill": "github:leancloud/weapp-polyfill#ad5053b"
+    "weapp-polyfill": "github:leancloud/weapp-polyfill#4c13db3"
   },
   "dependencies": {
     "axios": "^0.15.0",
     "babel-runtime": "^6.6.1",
-    "debug": "^2.2.0",
+    "debug": "^2.4.4",
     "eventemitter3": "^2.0.0",
     "javascript-state-machine": "^2.3.5",
     "lodash": "^4.6.0",
