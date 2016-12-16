@@ -34,7 +34,7 @@ npm install leancloud-realtime@2
   - Android 4.4+
 - Node.js 0.12+
 - React Native 0.26+
-- 微信小程序开发者工具 latest
+- 微信小程序 latest
 
 文档
 ----

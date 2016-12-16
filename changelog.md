@@ -1,3 +1,13 @@
+<a name="3.3.3"></a>
+## 3.3.3 (2016-12-16)
+
+
+### Bug Fixes
+
+* 修复 React Native 与小程序中访问 `navigator.userAgent` 导致异常的问题 ([#469](https://github.com/leancloud/js-realtime-sdk/issues/469)) ([4a1abd7](https://github.com/leancloud/js-realtime-sdk/commit/4a1abd7))
+
+
+
 <a name="3.3.2"></a>
 ## 3.3.2 (2016-12-14)
 
