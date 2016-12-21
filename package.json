@@ -105,5 +105,6 @@
     "sourceMap": false,
     "instrument": false
   },
+  "types": "./realtime.d.ts",
   "typings": "./realtime.d.ts"
 }
