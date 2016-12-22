@@ -6,7 +6,7 @@ import { listen, wait, sinon } from './test-utils';
 describe('WebSocketPlus', () => {
   describe('open/close', () => {
     it('basic open and close', () => {
-      const ws = new WebSocketPlus('wss://websocket.leanapp.cn/echo');
+      const ws = new WebSocketPlus('wss://echo.websocket.org/');
       return listen(ws, 'open', 'error').then(() => {
         ws.is('connected').should.be.true();
         ws.close();
@@ -24,13 +24,13 @@ describe('WebSocketPlus', () => {
     it('backup endpoint should be used when the primary one fails', () => {
       const ws = new WebSocketPlus([
         'ws://404.github.com',
-        'ws://websocket.leanapp.cn/echo',
+        'ws://echo.websocket.org/',
       ]);
       return listen(ws, 'open', 'error').then(() => ws.close());
     });
     it('should support promised endpoints', () => {
       const ws = new WebSocketPlus(Promise.resolve([
-        'wss://websocket.leanapp.cn/echo',
+        'wss://echo.websocket.org/',
       ]));
       return listen(ws, 'open', 'error').then(() => ws.close());
     });
@@ -38,7 +38,7 @@ describe('WebSocketPlus', () => {
 
   describe('send', () => {
     it('should throw if not connected', () => {
-      const ws = new WebSocketPlus('ws://websocket.leanapp.cn/echo');
+      const ws = new WebSocketPlus('ws://echo.websocket.org/');
       (() => ws.send()).should.throw(/Connection unavailable/);
       (() => ws._ping()).should.throw(/Connection unavailable/);
       ws.on('open', () => ws.close());
@@ -48,7 +48,7 @@ describe('WebSocketPlus', () => {
   describe('Auto reconnecting', () => {
     let ws;
     before(() => {
-      ws = new WebSocketPlus('ws://websocket.leanapp.cn/echo');
+      ws = new WebSocketPlus('ws://echo.websocket.org/');
       return listen(ws, 'open', 'error');
     });
     after(() => {
