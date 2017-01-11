@@ -49,7 +49,7 @@ bindEvent(document.body, 'keydown', function(e) {
 });
 
 function main() {
-  showLog('正在连接服务器，请等待。。。');
+  showLog('正在连接，请等待');
   var val = inputName.value;
   if (val) {
     clientId = val;
@@ -67,11 +67,29 @@ function main() {
   // 创建聊天客户端
   realtime.createIMClient(clientId)
   .then(function(c) {
-    showLog('服务器连接成功！');
+    showLog('连接成功');
     firstFlag = false;
     client = c;
     client.on('disconnect', function() {
-      showLog('服务器正在重连，请耐心等待。。。');
+      showLog('[disconnect] 服务器连接已断开');
+    });
+    client.on('offline', function() {
+      showLog('[offline] 离线（网络连接已断开）');
+    });
+    client.on('online', function() {
+      showLog('[online] 已恢复在线');
+    });
+    client.on('schedule', function(attempt, time) {
+      showLog('[schedule] ' + time / 1000 + 's 后进行第 ' + (attempt + 1) + ' 次重连');
+    });
+    client.on('retry', function(attempt) {
+      showLog('[retry] 正在进行第 ' + (attempt + 1) + ' 次重连');
+    });
+    client.on('reconnect', function() {
+      showLog('[reconnect] 重连成功');
+    });
+    client.on('reconnecterror', function() {
+      showLog('[reconnecterror] 重连失败');
     });
     // 获取对话
     return c.getConversation(roomId);
@@ -81,7 +99,7 @@ function main() {
       return conversation;
     } else {
       // 如果服务器端不存在这个 conversation
-      showLog('服务器不存在这个 conversation，创建一个。');
+      showLog('不存在这个 conversation，创建一个。');
       return client.createConversation({
         name: 'LeanCloud-Conversation',
         members: [

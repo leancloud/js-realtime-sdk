@@ -57,11 +57,15 @@ describe('WebSocketPlus', () => {
     it('should reconnect when closed', () => {
       const disconnectCallback = sinon.spy();
       ws.on('disconnect', disconnectCallback);
+      const scheduleCallback = sinon.spy();
+      ws.on('schedule', scheduleCallback);
       const retryCallback = sinon.spy();
       ws.on('retry', retryCallback);
       ws._ws.close();
       return listen(ws, 'reconnect').then(() => {
         disconnectCallback.should.be.calledOnce();
+        scheduleCallback.should.be.calledOnce();
+        scheduleCallback.should.be.calledWith(0, 1000);
         retryCallback.should.be.calledOnce();
         retryCallback.should.be.calledWith(0);
         ws.is('connected').should.be.true();
@@ -74,6 +78,33 @@ describe('WebSocketPlus', () => {
       return wait(500).then(() => {
         disconnectCallback.should.have.callCount(0);
         ws.is('closed').should.be.true();
+      });
+    });
+  });
+
+  describe('online/offline', () => {
+    let ws;
+    before(() => {
+      ws = new WebSocketPlus('ws://echo.websocket.org/');
+      return listen(ws, 'open', 'error');
+    });
+    after(() => {
+      if (!ws.is('closed')) ws.close();
+    });
+    it('should emit offline-disconnect-online-schedule in order', () => {
+      const offlineCallback = sinon.spy();
+      ws.on('offline', offlineCallback);
+      const onlineCallback = sinon.spy();
+      ws.on('online', onlineCallback);
+      const listenDisconnect = listen(ws, 'disconnect');
+      const listenSchedule = listen(ws, 'schedule');
+      ws.pause();
+      return listenDisconnect.then(() => {
+        offlineCallback.should.be.calledOnce();
+        ws.resume();
+        return listenSchedule;
+      }).then(() => {
+        onlineCallback.should.be.calledOnce();
       });
     });
   });

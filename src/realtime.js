@@ -103,7 +103,9 @@ export default class Realtime extends EventEmitter {
       connection.on('error', reject);
       connection.on('message', this._dispatchMessage.bind(this));
       /**
-       * 网络连接断开
+       * 连接断开。
+       * 连接断开可能是因为 SDK 进入了离线状态（see {@link Realtime#event:offline}），或长时间没有收到服务器心跳。
+       * 连接断开后所有的网络操作都会失败，请在连接断开后禁用相关的 UI 元素。
        * @event Realtime#disconnect
        */
       /**
@@ -118,13 +120,15 @@ export default class Realtime extends EventEmitter {
        * @param {Number} attempt 尝试重连的次数
        */
       /**
-       * 网络连接恢复正常
+       * 连接恢复正常。
+       * 请重新启用在 {@link Realtime#event:disconnect} 事件中禁用的相关 UI 元素
        * @event Realtime#reconnect
        */
 
       /**
        * 客户端连接断开
        * @event IMClient#disconnect
+       * @see Realtime#event:disconnect
        * @since 3.2.0
        */
       /**
@@ -141,8 +145,33 @@ export default class Realtime extends EventEmitter {
        * @since 3.2.0
        */
 
+      /**
+       * 客户端进入离线状态。
+       * 这通常意味着网络已断开，或者 {@link Realtime#pause} 被调用
+       * @event Realtime#offline
+       * @since 3.4.0
+       */
+      /**
+       * 客户端恢复在线状态
+       * 这通常意味着网络已恢复，或者 {@link Realtime#resume} 被调用
+       * @event Realtime#online
+       * @since 3.4.0
+       */
+      /**
+       * 进入离线状态。
+       * 这通常意味着网络已断开，或者 {@link Realtime#pause} 被调用
+       * @event IMClient#offline
+       * @since 3.4.0
+       */
+      /**
+       * 恢复在线状态
+       * 这通常意味着网络已恢复，或者 {@link Realtime#resume} 被调用
+       * @event IMClient#online
+       * @since 3.4.0
+       */
+
       // event proxy
-      ['disconnect', 'reconnect', 'retry', 'schedule'].forEach(
+      ['disconnect', 'reconnect', 'retry', 'schedule', 'offline', 'online'].forEach(
         event => connection.on(event, (...payload) => {
           debug(`${event} event emitted.`, ...payload);
           this.emit(event, ...payload);
@@ -271,10 +300,38 @@ export default class Realtime extends EventEmitter {
     }
     if (connection.cannot('retry')) {
       throw new Error(
-        `retrying not allowed when not offline. the connection is now ${connection.current}`
+        `retrying not allowed when not disconnected. the connection is now ${connection.current}`
       );
     }
     return connection.retry();
+  }
+  /**
+   * 暂停，使 SDK 进入离线状态。
+   * 你可以在网络断开、应用进入后台等时刻调用该方法让 SDK 进入离线状态，离线状态下不会尝试重连。
+   * 在浏览器中 SDK 会自动监听网络变化，因此无需手动调用该方法。
+   *
+   * @since 3.4.0
+   * @see Realtime#event:offline
+   */
+  pause() {
+    // 这个方法常常在网络断开、进入后台时被调用，此时 connection 可能没有建立或者已经 close。
+    // 因此不像 retry，这个方法应该尽可能 loose
+    const connection = internal(this).connection;
+    if (!connection) return;
+    if (connection.can('pause')) connection.pause();
+  }
+  /**
+   * 恢复在线状态。
+   * 你可以在网络恢复、应用回到前台等时刻调用该方法让 SDK 恢复在线状态，恢复在线状态后 SDK 会开始尝试重连。
+   *
+   * @since 3.4.0
+   * @see Realtime#event:online
+   */
+  resume() {
+    // 与 pause 一样，这个方法应该尽可能 loose
+    const connection = internal(this).connection;
+    if (!connection) return;
+    if (connection.can('resume')) connection.resume();
   }
 
   _register(client) {
@@ -338,6 +395,7 @@ export default class Realtime extends EventEmitter {
           /**
            * 客户端连接恢复正常，该事件通常在 {@link Realtime#event:reconnect} 之后发生
            * @event IMClient#reconnect
+           * @see Realtime#event:reconnect
            * @since 3.2.0
            */
           /**
