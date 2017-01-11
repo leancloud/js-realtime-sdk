@@ -553,7 +553,7 @@ export default class Conversation extends EventEmitter {
         msg,
         cid: this.id,
         r: reciept,
-        transient: message.transient,
+        transient,
         dt: message.id,
         pushData: JSON.stringify(pushData),
       }),
