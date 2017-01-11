@@ -1,0 +1,662 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>AVMessage - Documentation</title>
+
+    <script src="scripts/prettify/prettify.js"></script>
+    <script src="scripts/prettify/lang-css.js"></script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc.css">
+</head>
+<body>
+
+<input type="checkbox" id="nav-trigger" class="nav-trigger" />
+<label for="nav-trigger" class="navicon-button x">
+  <div class="navicon"></div>
+</label>
+
+<label for="nav-trigger" class="overlay"></label>
+
+<nav>
+    <h2><a href="index.html">leancloud-realtime</a> <span class='package-version'>v3.3.4</span></h2><h3>Classes</h3><ul><li><a href="Conversation.html">Conversation</a><ul class='methods'><li data-type='method'><a href="Conversation.html#add">add</a></li><li data-type='method'><a href="Conversation.html#count">count</a></li><li data-type='method'><a href="Conversation.html#createMessagesIterator">createMessagesIterator</a></li><li data-type='method'><a href="Conversation.html#emit">emit</a></li><li data-type='method'><a href="Conversation.html#fetch">fetch</a></li><li data-type='method'><a href="Conversation.html#get">get</a></li><li data-type='method'><a href="Conversation.html#join">join</a></li><li data-type='method'><a href="Conversation.html#markAsRead">markAsRead</a></li><li data-type='method'><a href="Conversation.html#mute">mute</a></li><li data-type='method'><a href="Conversation.html#off">off</a></li><li data-type='method'><a href="Conversation.html#on">on</a></li><li data-type='method'><a href="Conversation.html#once">once</a></li><li data-type='method'><a href="Conversation.html#queryMessages">queryMessages</a></li><li data-type='method'><a href="Conversation.html#quit">quit</a></li><li data-type='method'><a href="Conversation.html#remove">remove</a></li><li data-type='method'><a href="Conversation.html#save">save</a></li><li data-type='method'><a href="Conversation.html#send">send</a></li><li data-type='method'><a href="Conversation.html#set">set</a></li><li data-type='method'><a href="Conversation.html#setAttribute">setAttribute</a></li><li data-type='method'><a href="Conversation.html#setAttributes">setAttributes</a></li><li data-type='method'><a href="Conversation.html#setName">setName</a></li><li data-type='method'><a href="Conversation.html#unmute">unmute</a></li></ul></li><li><a href="ConversationQuery.html">ConversationQuery</a><ul class='methods'><li data-type='method'><a href="ConversationQuery.html#addAscending">addAscending</a></li><li data-type='method'><a href="ConversationQuery.html#addDescending">addDescending</a></li><li data-type='method'><a href="ConversationQuery.html#ascending">ascending</a></li><li data-type='method'><a href="ConversationQuery.html#compact">compact</a></li><li data-type='method'><a href="ConversationQuery.html#containedIn">containedIn</a></li><li data-type='method'><a href="ConversationQuery.html#contains">contains</a></li><li data-type='method'><a href="ConversationQuery.html#containsAll">containsAll</a></li><li data-type='method'><a href="ConversationQuery.html#containsMembers">containsMembers</a></li><li data-type='method'><a href="ConversationQuery.html#descending">descending</a></li><li data-type='method'><a href="ConversationQuery.html#endsWith">endsWith</a></li><li data-type='method'><a href="ConversationQuery.html#equalTo">equalTo</a></li><li data-type='method'><a href="ConversationQuery.html#find">find</a></li><li data-type='method'><a href="ConversationQuery.html#greaterThan">greaterThan</a></li><li data-type='method'><a href="ConversationQuery.html#greaterThanOrEqualTo">greaterThanOrEqualTo</a></li><li data-type='method'><a href="ConversationQuery.html#lessThan">lessThan</a></li><li data-type='method'><a href="ConversationQuery.html#lessThanOrEqualTo">lessThanOrEqualTo</a></li><li data-type='method'><a href="ConversationQuery.html#limit">limit</a></li><li data-type='method'><a href="ConversationQuery.html#matches">matches</a></li><li data-type='method'><a href="ConversationQuery.html#notContainsIn">notContainsIn</a></li><li data-type='method'><a href="ConversationQuery.html#notEqualTo">notEqualTo</a></li><li data-type='method'><a href="ConversationQuery.html#sizeEqualTo">sizeEqualTo</a></li><li data-type='method'><a href="ConversationQuery.html#skip">skip</a></li><li data-type='method'><a href="ConversationQuery.html#startsWith">startsWith</a></li><li data-type='method'><a href="ConversationQuery.html#withLastMessages">withLastMessages</a></li><li data-type='method'><a href="ConversationQuery.html#withLastMessagesRefreshed">withLastMessagesRefreshed</a></li><li data-type='method'><a href="ConversationQuery.html#withMembers">withMembers</a></li></ul></li><li><a href="IMClient.html">IMClient</a><ul class='methods'><li data-type='method'><a href="IMClient.html#close">close</a></li><li data-type='method'><a href="IMClient.html#createConversation">createConversation</a></li><li data-type='method'><a href="IMClient.html#emit">emit</a></li><li data-type='method'><a href="IMClient.html#getConversation">getConversation</a></li><li data-type='method'><a href="IMClient.html#getQuery">getQuery</a></li><li data-type='method'><a href="IMClient.html#markAllAsRead">markAllAsRead</a></li><li data-type='method'><a href="IMClient.html#off">off</a></li><li data-type='method'><a href="IMClient.html#on">on</a></li><li data-type='method'><a href="IMClient.html#once">once</a></li><li data-type='method'><a href="IMClient.html#ping">ping</a></li></ul></li><li><a href="Message.html">Message</a><ul class='methods'><li data-type='method'><a href="Message.html#.parse">parse</a></li><li data-type='method'><a href="Message.html#.validate">validate</a></li><li data-type='method'><a href="Message.html#setNeedReceipt">setNeedReceipt</a></li><li data-type='method'><a href="Message.html#setTransient">setTransient</a></li><li data-type='method'><a href="Message.html#toJSON">toJSON</a></li></ul></li><li><a href="Realtime.html">Realtime</a><ul class='methods'><li data-type='method'><a href="Realtime.html#.defineConversationProperty">defineConversationProperty</a></li><li data-type='method'><a href="Realtime.html#createIMClient">createIMClient</a></li><li data-type='method'><a href="Realtime.html#emit">emit</a></li><li data-type='method'><a href="Realtime.html#off">off</a></li><li data-type='method'><a href="Realtime.html#on">on</a></li><li data-type='method'><a href="Realtime.html#once">once</a></li><li data-type='method'><a href="Realtime.html#register">register</a></li><li data-type='method'><a href="Realtime.html#retry">retry</a></li></ul></li><li><a href="TextMessage.html">TextMessage</a><ul class='methods'><li data-type='method'><a href="TextMessage.html#getAttributes">getAttributes</a></li><li data-type='method'><a href="TextMessage.html#getText">getText</a></li><li data-type='method'><a href="TextMessage.html#setAttributes">setAttributes</a></li><li data-type='method'><a href="TextMessage.html#setNeedReceipt">setNeedReceipt</a></li><li data-type='method'><a href="TextMessage.html#setText">setText</a></li><li data-type='method'><a href="TextMessage.html#setTransient">setTransient</a></li><li data-type='method'><a href="TextMessage.html#toJSON">toJSON</a></li></ul></li><li><a href="TypedMessage.html">TypedMessage</a><ul class='methods'><li data-type='method'><a href="TypedMessage.html#.parse">parse</a></li><li data-type='method'><a href="TypedMessage.html#getAttributes">getAttributes</a></li><li data-type='method'><a href="TypedMessage.html#getText">getText</a></li><li data-type='method'><a href="TypedMessage.html#setAttributes">setAttributes</a></li><li data-type='method'><a href="TypedMessage.html#setNeedReceipt">setNeedReceipt</a></li><li data-type='method'><a href="TypedMessage.html#setText">setText</a></li><li data-type='method'><a href="TypedMessage.html#setTransient">setTransient</a></li><li data-type='method'><a href="TypedMessage.html#toJSON">toJSON</a></li></ul></li></ul><h3>Modules</h3><ul><li><a href="module-leancloud-realtime.html">leancloud-realtime</a><ul class='methods'><li data-type='method'><a href="module-leancloud-realtime.html#.messageField">messageField</a></li><li data-type='method'><a href="module-leancloud-realtime.html#.messageType">messageType</a></li></ul></li></ul><h3>Events</h3><ul><li><a href="Conversation.html#Events">Conversation</a><ul class='events'><a href="Conversation.html#event:invited">invited</a><a href="Conversation.html#event:kicked">kicked</a><a href="Conversation.html#event:membersjoined">membersjoined</a><a href="Conversation.html#event:membersleft">membersleft</a><a href="Conversation.html#event:message">message</a><a href="Conversation.html#event:receipt">receipt</a></ul></li><li><a href="IMClient.html#Events">IMClient</a><ul class='events'><a href="IMClient.html#event:close">close</a><a href="IMClient.html#event:conflict">conflict</a><a href="IMClient.html#event:disconnect">disconnect</a><a href="IMClient.html#event:invited">invited</a><a href="IMClient.html#event:kicked">kicked</a><a href="IMClient.html#event:membersjoined">membersjoined</a><a href="IMClient.html#event:membersleft">membersleft</a><a href="IMClient.html#event:message">message</a><a href="IMClient.html#event:reconnect">reconnect</a><a href="IMClient.html#event:reconnecterror">reconnecterror</a><a href="IMClient.html#event:retry">retry</a><a href="IMClient.html#event:schedule">schedule</a><a href="IMClient.html#event:unreadmessages">unreadmessages</a></ul></li><li><a href="Realtime.html#Events">Realtime</a><ul class='events'><a href="Realtime.html#event:disconnect">disconnect</a><a href="Realtime.html#event:reconnect">reconnect</a><a href="Realtime.html#event:retry">retry</a><a href="Realtime.html#event:schedule">schedule</a></ul></li></ul><h3>Interfaces</h3><ul><li><a href="AVMessage.html">AVMessage</a><ul class='methods'><li data-type='method'><a href="AVMessage.html#.parse">parse</a></li><li data-type='method'><a href="AVMessage.html#.validate">validate</a></li><li data-type='method'><a href="AVMessage.html#toJSON">toJSON</a></li></ul></li><li><a href="Plugin.html">Plugin</a></li></ul>
+</nav>
+
+<div id="main">
+    
+    <h1 class="page-title">AVMessage</h1>
+    
+
+    
+
+
+
+
+<section>
+
+<header>
+    
+        <h2>
+        AVMessage
+        </h2>
+        
+    
+</header>
+
+<article>
+    <div class="container-overview">
+    
+        
+
+<dl class="details">
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="messages_av-message.js.html">messages/av-message.js</a>, <a href="messages_av-message.js.html#line1">line 1</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+        
+            <div class="description">消息接口，所有通过 <a href="Realtime.html#register">Realtime#register</a> 注册的消息类需要实现该接口</div>
+        
+
+        
+    
+    </div>
+
+    
+
+    
+
+    
+
+     
+
+    
+
+    
+        <h3 class="subsection-title">Members</h3>
+
+        
+            
+<h4 class="name" id=".sendOptions"><span class="type-signature">(static) </span>sendOptions<span class="type-signature"></span></h4>
+
+
+
+
+
+<dl class="details">
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="messages_av-message.js.html">messages/av-message.js</a>, <a href="messages_av-message.js.html#line7">line 7</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+    <dt class="tag-since">Since:</dt>
+    <dd class="tag-since"><ul class="dummy"><li>3.3.0</li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-see">See:</dt>
+    <dd class="tag-see">
+        <ul>
+            <li><a href="Conversation.html#send">Conversation#send</a></li>
+        </ul>
+    </dd>
+    
+
+    
+</dl>
+
+
+
+
+
+<div class="description">
+    消息的默认发送选项，指定该属性后发送该类型的消息时会将其作为默认的发送选项。比如可以用来指定某种类型的消息默认优先级为高。
+</div>
+
+
+
+
+
+
+
+
+        
+    
+
+    
+        <h3 class="subsection-title">Methods</h3>
+
+        
+            
+
+    
+
+    <h4 class="name" id=".parse"><span class="type-signature">(static) </span>parse<span class="signature">(json, message)</span><span class="type-signature"> &rarr; {<a href="AVMessage.html">AVMessage</a>}</span></h4>
+
+    
+
+
+
+
+<dl class="details">
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="messages_av-message.js.html">messages/av-message.js</a>, <a href="messages_av-message.js.html#line26">line 26</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+<div class="description">
+    解析处理消息内容 （JSON -> AVMessage）
+<p>
+如果子类没有提供 message，直接使用该 message，
+如果没有提供，实例化一个当前类型的 message，
+将 JSON 格式的消息内容中相关的信息设置给该消息，
+然后将其传递给父类的 parse 方法
+（当然，你也可以不管父类直接返回 message）。
+</div>
+
+
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>json</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">JSON 格式的消息内容</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>message</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="AVMessage.html">AVMessage</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">子类提供的消息实例</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+
+
+<dl class="param-type">
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type"><a href="AVMessage.html">AVMessage</a></span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+        
+            
+
+    
+
+    <h4 class="name" id=".validate"><span class="type-signature">(static) </span>validate<span class="signature">(json)</span><span class="type-signature"> &rarr; {Boolean}</span></h4>
+
+    
+
+
+
+
+<dl class="details">
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="messages_av-message.js.html">messages/av-message.js</a>, <a href="messages_av-message.js.html#line16">line 16</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+<div class="description">
+    判断给定的内容是否是该类型的 Message
+</div>
+
+
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>json</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">JSON 格式的消息内容</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+
+
+<dl class="param-type">
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Boolean</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="toJSON"><span class="type-signature"></span>toJSON<span class="signature">()</span><span class="type-signature"> &rarr; {Object}</span></h4>
+
+    
+
+
+
+
+<dl class="details">
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="messages_av-message.js.html">messages/av-message.js</a>, <a href="messages_av-message.js.html#line43">line 43</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+<div class="description">
+    将当前消息序列化为 JSON 对象 （AVMessage -> JSON)
+<p>
+在这个方法中，应该先调用父类的 toJSON 方法，得到 JSON 对象，
+然后，将当前消息实例的信息修改 JSON 对象后返回
+（当然，你也可以不管父类返回的 JSON）。
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    JSON 格式的消息内容
+</div>
+
+
+
+<dl class="param-type">
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Object</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+        
+    
+
+    
+
+    
+</article>
+
+</section>
+
+
+
+
+</div>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.0</a> on Wed Jan 11 2017 13:40:03 GMT+0000 (UTC) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
+</footer>
+
+<script>prettyPrint();</script>
+<script src="scripts/linenumber.js"></script>
+</body>
+</html>

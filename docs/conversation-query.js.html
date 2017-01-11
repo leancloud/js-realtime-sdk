@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>conversation-query.js - Documentation</title>
+
+    <script src="scripts/prettify/prettify.js"></script>
+    <script src="scripts/prettify/lang-css.js"></script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc.css">
+</head>
+<body>
+
+<input type="checkbox" id="nav-trigger" class="nav-trigger" />
+<label for="nav-trigger" class="navicon-button x">
+  <div class="navicon"></div>
+</label>
+
+<label for="nav-trigger" class="overlay"></label>
+
+<nav>
+    <h2><a href="index.html">leancloud-realtime</a> <span class='package-version'>v3.3.4</span></h2><h3>Classes</h3><ul><li><a href="Conversation.html">Conversation</a><ul class='methods'><li data-type='method'><a href="Conversation.html#add">add</a></li><li data-type='method'><a href="Conversation.html#count">count</a></li><li data-type='method'><a href="Conversation.html#createMessagesIterator">createMessagesIterator</a></li><li data-type='method'><a href="Conversation.html#emit">emit</a></li><li data-type='method'><a href="Conversation.html#fetch">fetch</a></li><li data-type='method'><a href="Conversation.html#get">get</a></li><li data-type='method'><a href="Conversation.html#join">join</a></li><li data-type='method'><a href="Conversation.html#markAsRead">markAsRead</a></li><li data-type='method'><a href="Conversation.html#mute">mute</a></li><li data-type='method'><a href="Conversation.html#off">off</a></li><li data-type='method'><a href="Conversation.html#on">on</a></li><li data-type='method'><a href="Conversation.html#once">once</a></li><li data-type='method'><a href="Conversation.html#queryMessages">queryMessages</a></li><li data-type='method'><a href="Conversation.html#quit">quit</a></li><li data-type='method'><a href="Conversation.html#remove">remove</a></li><li data-type='method'><a href="Conversation.html#save">save</a></li><li data-type='method'><a href="Conversation.html#send">send</a></li><li data-type='method'><a href="Conversation.html#set">set</a></li><li data-type='method'><a href="Conversation.html#setAttribute">setAttribute</a></li><li data-type='method'><a href="Conversation.html#setAttributes">setAttributes</a></li><li data-type='method'><a href="Conversation.html#setName">setName</a></li><li data-type='method'><a href="Conversation.html#unmute">unmute</a></li></ul></li><li><a href="ConversationQuery.html">ConversationQuery</a><ul class='methods'><li data-type='method'><a href="ConversationQuery.html#addAscending">addAscending</a></li><li data-type='method'><a href="ConversationQuery.html#addDescending">addDescending</a></li><li data-type='method'><a href="ConversationQuery.html#ascending">ascending</a></li><li data-type='method'><a href="ConversationQuery.html#compact">compact</a></li><li data-type='method'><a href="ConversationQuery.html#containedIn">containedIn</a></li><li data-type='method'><a href="ConversationQuery.html#contains">contains</a></li><li data-type='method'><a href="ConversationQuery.html#containsAll">containsAll</a></li><li data-type='method'><a href="ConversationQuery.html#containsMembers">containsMembers</a></li><li data-type='method'><a href="ConversationQuery.html#descending">descending</a></li><li data-type='method'><a href="ConversationQuery.html#endsWith">endsWith</a></li><li data-type='method'><a href="ConversationQuery.html#equalTo">equalTo</a></li><li data-type='method'><a href="ConversationQuery.html#find">find</a></li><li data-type='method'><a href="ConversationQuery.html#greaterThan">greaterThan</a></li><li data-type='method'><a href="ConversationQuery.html#greaterThanOrEqualTo">greaterThanOrEqualTo</a></li><li data-type='method'><a href="ConversationQuery.html#lessThan">lessThan</a></li><li data-type='method'><a href="ConversationQuery.html#lessThanOrEqualTo">lessThanOrEqualTo</a></li><li data-type='method'><a href="ConversationQuery.html#limit">limit</a></li><li data-type='method'><a href="ConversationQuery.html#matches">matches</a></li><li data-type='method'><a href="ConversationQuery.html#notContainsIn">notContainsIn</a></li><li data-type='method'><a href="ConversationQuery.html#notEqualTo">notEqualTo</a></li><li data-type='method'><a href="ConversationQuery.html#sizeEqualTo">sizeEqualTo</a></li><li data-type='method'><a href="ConversationQuery.html#skip">skip</a></li><li data-type='method'><a href="ConversationQuery.html#startsWith">startsWith</a></li><li data-type='method'><a href="ConversationQuery.html#withLastMessages">withLastMessages</a></li><li data-type='method'><a href="ConversationQuery.html#withLastMessagesRefreshed">withLastMessagesRefreshed</a></li><li data-type='method'><a href="ConversationQuery.html#withMembers">withMembers</a></li></ul></li><li><a href="IMClient.html">IMClient</a><ul class='methods'><li data-type='method'><a href="IMClient.html#close">close</a></li><li data-type='method'><a href="IMClient.html#createConversation">createConversation</a></li><li data-type='method'><a href="IMClient.html#emit">emit</a></li><li data-type='method'><a href="IMClient.html#getConversation">getConversation</a></li><li data-type='method'><a href="IMClient.html#getQuery">getQuery</a></li><li data-type='method'><a href="IMClient.html#markAllAsRead">markAllAsRead</a></li><li data-type='method'><a href="IMClient.html#off">off</a></li><li data-type='method'><a href="IMClient.html#on">on</a></li><li data-type='method'><a href="IMClient.html#once">once</a></li><li data-type='method'><a href="IMClient.html#ping">ping</a></li></ul></li><li><a href="Message.html">Message</a><ul class='methods'><li data-type='method'><a href="Message.html#.parse">parse</a></li><li data-type='method'><a href="Message.html#.validate">validate</a></li><li data-type='method'><a href="Message.html#setNeedReceipt">setNeedReceipt</a></li><li data-type='method'><a href="Message.html#setTransient">setTransient</a></li><li data-type='method'><a href="Message.html#toJSON">toJSON</a></li></ul></li><li><a href="Realtime.html">Realtime</a><ul class='methods'><li data-type='method'><a href="Realtime.html#.defineConversationProperty">defineConversationProperty</a></li><li data-type='method'><a href="Realtime.html#createIMClient">createIMClient</a></li><li data-type='method'><a href="Realtime.html#emit">emit</a></li><li data-type='method'><a href="Realtime.html#off">off</a></li><li data-type='method'><a href="Realtime.html#on">on</a></li><li data-type='method'><a href="Realtime.html#once">once</a></li><li data-type='method'><a href="Realtime.html#register">register</a></li><li data-type='method'><a href="Realtime.html#retry">retry</a></li></ul></li><li><a href="TextMessage.html">TextMessage</a><ul class='methods'><li data-type='method'><a href="TextMessage.html#getAttributes">getAttributes</a></li><li data-type='method'><a href="TextMessage.html#getText">getText</a></li><li data-type='method'><a href="TextMessage.html#setAttributes">setAttributes</a></li><li data-type='method'><a href="TextMessage.html#setNeedReceipt">setNeedReceipt</a></li><li data-type='method'><a href="TextMessage.html#setText">setText</a></li><li data-type='method'><a href="TextMessage.html#setTransient">setTransient</a></li><li data-type='method'><a href="TextMessage.html#toJSON">toJSON</a></li></ul></li><li><a href="TypedMessage.html">TypedMessage</a><ul class='methods'><li data-type='method'><a href="TypedMessage.html#.parse">parse</a></li><li data-type='method'><a href="TypedMessage.html#getAttributes">getAttributes</a></li><li data-type='method'><a href="TypedMessage.html#getText">getText</a></li><li data-type='method'><a href="TypedMessage.html#setAttributes">setAttributes</a></li><li data-type='method'><a href="TypedMessage.html#setNeedReceipt">setNeedReceipt</a></li><li data-type='method'><a href="TypedMessage.html#setText">setText</a></li><li data-type='method'><a href="TypedMessage.html#setTransient">setTransient</a></li><li data-type='method'><a href="TypedMessage.html#toJSON">toJSON</a></li></ul></li></ul><h3>Modules</h3><ul><li><a href="module-leancloud-realtime.html">leancloud-realtime</a><ul class='methods'><li data-type='method'><a href="module-leancloud-realtime.html#.messageField">messageField</a></li><li data-type='method'><a href="module-leancloud-realtime.html#.messageType">messageType</a></li></ul></li></ul><h3>Events</h3><ul><li><a href="Conversation.html#Events">Conversation</a><ul class='events'><a href="Conversation.html#event:invited">invited</a><a href="Conversation.html#event:kicked">kicked</a><a href="Conversation.html#event:membersjoined">membersjoined</a><a href="Conversation.html#event:membersleft">membersleft</a><a href="Conversation.html#event:message">message</a><a href="Conversation.html#event:receipt">receipt</a></ul></li><li><a href="IMClient.html#Events">IMClient</a><ul class='events'><a href="IMClient.html#event:close">close</a><a href="IMClient.html#event:conflict">conflict</a><a href="IMClient.html#event:disconnect">disconnect</a><a href="IMClient.html#event:invited">invited</a><a href="IMClient.html#event:kicked">kicked</a><a href="IMClient.html#event:membersjoined">membersjoined</a><a href="IMClient.html#event:membersleft">membersleft</a><a href="IMClient.html#event:message">message</a><a href="IMClient.html#event:reconnect">reconnect</a><a href="IMClient.html#event:reconnecterror">reconnecterror</a><a href="IMClient.html#event:retry">retry</a><a href="IMClient.html#event:schedule">schedule</a><a href="IMClient.html#event:unreadmessages">unreadmessages</a></ul></li><li><a href="Realtime.html#Events">Realtime</a><ul class='events'><a href="Realtime.html#event:disconnect">disconnect</a><a href="Realtime.html#event:reconnect">reconnect</a><a href="Realtime.html#event:retry">retry</a><a href="Realtime.html#event:schedule">schedule</a></ul></li></ul><h3>Interfaces</h3><ul><li><a href="AVMessage.html">AVMessage</a><ul class='methods'><li data-type='method'><a href="AVMessage.html#.parse">parse</a></li><li data-type='method'><a href="AVMessage.html#.validate">validate</a></li><li data-type='method'><a href="AVMessage.html#toJSON">toJSON</a></li></ul></li><li><a href="Plugin.html">Plugin</a></li></ul>
+</nav>
+
+<div id="main">
+    
+    <h1 class="page-title">conversation-query.js</h1>
+    
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>import { default as d } from 'debug';
+
+const debug = d('LC:ConversationQuery');
+
+export default class ConversationQuery {
+  static _encode(value) {
+    if (value instanceof Date) {
+      return { __type: 'Date', iso: value.toJSON() };
+    }
+    if (value instanceof RegExp) {
+      return value.source;
+    }
+    return value;
+  }
+
+  static _quote(s) {
+    return `\\Q${s.replace('\\E', '\\E\\\\E\\Q')}\\E`;
+  }
+
+  static _calculateFlag(options) {
+    return [
+      'withLastMessagesRefreshed',
+      'compact',
+    ].reduce(
+      // eslint-disable-next-line no-bitwise
+      (prev, key) => (prev &lt;&lt; 1) + (Boolean)(options[key]),
+      0
+    );
+  }
+
+  /**
+   * Create a ConversationQuery
+   * @param  {IMClient} client
+   */
+  constructor(client) {
+    this._client = client;
+    this._where = {};
+    this._extraOptions = {};
+  }
+
+  _addCondition(key, condition, value) {
+    // Check if we already have a condition
+    if (!this._where[key]) {
+      this._where[key] = {};
+    }
+    this._where[key][condition] = this.constructor._encode(value);
+    return this;
+  }
+
+  toJSON() {
+    const json = {
+      where: this._where,
+      flag: this.constructor._calculateFlag(this._extraOptions),
+    };
+    if (typeof this._skip !== 'undefined') json.skip = this._skip;
+    if (typeof this._limit !== 'undefined') json.limit = this._limit;
+    if (typeof this._order !== 'undefined') json.sort = this._order;
+    debug(json);
+    return json;
+  }
+
+  /**
+   * 增加查询条件，指定聊天室的组员包含某些成员即可返回
+   * @param {string[]} peerIds - 成员 ID 列表
+   * @return {ConversationQuery} self
+   */
+  containsMembers(peerIds) {
+    return this.containsAll('m', peerIds);
+  }
+
+  /**
+   * 增加查询条件，指定聊天室的组员条件满足条件的才返回
+   *
+   * @param {string[]} - 成员 ID 列表
+   * @param {Boolean} includeSelf - 是否包含自己
+   * @return {ConversationQuery} self
+   */
+  withMembers(peerIds, includeSelf) {
+    const peerIdsSet = new Set(peerIds);
+    if (includeSelf) {
+      peerIdsSet.add(this._client.id);
+    }
+    this.sizeEqualTo('m', peerIdsSet.size);
+    return this.containsMembers(Array.from(peerIdsSet));
+  }
+
+  /**
+   * 增加查询条件，当 conversation 的属性中对应的字段满足等于条件时即可返回
+   *
+   * @param {string} key
+   * @param value
+   * @return {ConversationQuery} self
+   */
+  equalTo(key, value) {
+    this._where[key] = this.constructor._encode(value);
+    return this;
+  }
+
+  /**
+   * 增加查询条件，当 conversation 的属性中对应的字段满足小于条件时即可返回
+   * @param {string} key
+   * @param value
+   * @return {ConversationQuery} self
+   */
+  lessThan(key, value) {
+    return this._addCondition(key, '$lt', value);
+  }
+
+
+  /**
+   * 增加查询条件，当 conversation 的属性中对应的字段满足小于等于条件时即可返回
+
+   * @param {string} key
+   * @param value
+   * @return {ConversationQuery} self
+   */
+  lessThanOrEqualTo(key, value) {
+    return this._addCondition(key, '$lte', value);
+  }
+
+  /**
+   * 增加查询条件，当 conversation 的属性中对应的字段满足大于条件时即可返回
+   *
+   * @param {string} key
+   * @param value
+   * @return {ConversationQuery} self
+   */
+
+  greaterThan(key, value) {
+    return this._addCondition(key, '$gt', value);
+  }
+
+  /**
+   * 增加查询条件，当 conversation 的属性中对应的字段满足大于等于条件时即可返回
+   *
+   * @param {string} key
+   * @param value
+   * @return {ConversationQuery} self
+   */
+
+  greaterThanOrEqualTo(key, value) {
+    return this._addCondition(key, '$gte', value);
+  }
+
+  /**
+   * 增加查询条件，当 conversation 的属性中对应的字段满足不等于条件时即可返回
+   *
+   * @param {string} key
+   * @param value
+   * @return {ConversationQuery} self
+   */
+  notEqualTo(key, value) {
+    return this._addCondition(key, '$ne', value);
+  }
+
+  /**
+   * 增加查询条件，当 conversation 的属性中对应的字段对应的值包含在指定值中时即可返回
+   *
+   * @param {string} key
+   * @param values
+   * @return {ConversationQuery} self
+   */
+  containedIn(key, values) {
+    return this._addCondition(key, '$in', values);
+  }
+
+  /**
+   * 增加查询条件，当 conversation 的属性中对应的字段对应的值不包含在指定值中时即可返回
+   *
+   * @param {string} key
+   * @param values
+   * @return {ConversationQuery} self
+   */
+  notContainsIn(key, values) {
+    return this._addCondition(key, '$nin', values);
+  }
+  /**
+   * 增加查询条件，当conversation的属性中对应的字段中的元素包含所有的值才可返回
+   *
+   * @param {string} key
+   * @param values
+   * @return {ConversationQuery} self
+   */
+  containsAll(key, values) {
+    return this._addCondition(key, '$all', values);
+  }
+
+  /**
+   * 增加查询条件，当 conversation 的属性中对应的字段对应的值包含此字符串即可返回
+   *
+   * @param {string} key
+   * @param {string} subString
+   * @return {ConversationQuery} self
+   */
+  contains(key, subString) {
+    return this._addCondition(key, '$regex', ConversationQuery._quote(subString));
+  }
+
+  /**
+   * 增加查询条件，当 conversation 的属性中对应的字段对应的值以此字符串起始即可返回
+   *
+   * @param {string} key
+   * @param {string} prefix
+   * @return {ConversationQuery} self
+   */
+  startsWith(key, prefix) {
+    return this._addCondition(key, '$regex', `^${ConversationQuery._quote(prefix)}`);
+  }
+
+  /**
+   * 增加查询条件，当 conversation 的属性中对应的字段对应的值以此字符串结束即可返回
+   *
+   * @param {string} key
+   * @param {string} suffix
+   * @return {ConversationQuery} self
+   */
+  endsWith(key, suffix) {
+    return this._addCondition(key, '$regex', `${ConversationQuery._quote(suffix)}$`);
+  }
+
+  /**
+   * 增加查询条件，当 conversation 的属性中对应的字段对应的值满足提供的正则表达式即可返回
+   *
+   * @param {string} key
+   * @param {RegExp} regex
+   * @return {ConversationQuery} self
+   */
+  matches(key, regex) {
+    this._addCondition(key, '$regex', regex);
+    // Javascript regex options support mig as inline options but store them
+    // as properties of the object. We support mi &amp; should migrate them to
+    // modifiers
+    let _modifiers = '';
+    if (regex.ignoreCase) { _modifiers += 'i'; }
+    if (regex.multiline) { _modifiers += 'm'; }
+
+    if (_modifiers &amp;&amp; _modifiers.length) {
+      this._addCondition(key, '$options', _modifiers);
+    }
+    return this;
+  }
+
+  /**
+   * 添加查询约束条件，查找 key 类型是数组，该数组的长度匹配提供的数值
+   *
+   * @param {string} key
+   * @param {Number} length
+   * @return {ConversationQuery} self
+   */
+  sizeEqualTo(key, length) {
+    return this._addCondition(key, '$size', length);
+  }
+
+  /**
+   * 设置返回集合的大小上限
+   *
+   * @param {Number} limit - 上限
+   * @return {ConversationQuery} self
+   */
+  limit(limit) {
+    this._limit = limit;
+    return this;
+  }
+
+  /**
+   * 设置返回集合的起始位置，一般用于分页
+   *
+   * @param {Number} skip - 起始位置跳过几个对象
+   * @return {ConversationQuery} self
+   */
+  skip(skip) {
+    this._skip = skip;
+    return this;
+  }
+
+  /**
+   * 设置返回集合按照指定key进行增序排列
+   *
+   * @param {string} key
+   * @return {ConversationQuery} self
+   */
+  ascending(key) {
+    this._order = key;
+    return this;
+  }
+
+  /**
+   * 设置返回集合按照指定key进行增序排列，如果已设置其他排序，原排序的优先级较高
+   *
+   * @param {string} key
+   * @return {ConversationQuery} self
+   */
+  addAscending(key) {
+    if (this._order) {
+      this._order += `,${key}`;
+    } else {
+      this._order = key;
+    }
+    return this;
+  }
+
+  /**
+   * 设置返回集合按照指定 key 进行降序排列
+   *
+   * @param {string} key
+   * @return {ConversationQuery} self
+   */
+  descending(key) {
+    this._order = `-${key}`;
+    return this;
+  }
+
+  /**
+   * 设置返回集合按照指定 key 进行降序排列，如果已设置其他排序，原排序的优先级较高
+   *
+   * @param {string} key
+   * @return {ConversationQuery} self
+   */
+  addDescending(key) {
+    if (this._order) {
+      this._order += `,-${key}`;
+    } else {
+      this._order = `-${key}`;
+    }
+    return this;
+  }
+
+  /**
+   * 设置返回的 conversations 刷新最后一条消息
+   * @param  {Boolean} [enabled=true]
+   * @return {ConversationQuery} self
+   */
+  withLastMessagesRefreshed(enabled = true) {
+    this._extraOptions.withLastMessagesRefreshed = enabled;
+    return this;
+  }
+
+  /**
+   * @deprecated 请替换为 {@link ConversationQuery#withLastMessagesRefreshed}
+   * @param  {Boolean} [enabled=true]
+   * @return {ConversationQuery} self
+   */
+  withLastMessages(enabled) {
+    console.warn('DEPRECATION ConversationQuery#withLastMessages: ' +
+      'Use ConversationQuery#withLastMessagesRefreshed instead.');
+    return this.withLastMessagesRefreshed(enabled);
+  }
+
+  /**
+   * 设置返回的 conversations 为精简模式，即不含成员列表
+   * @param  {Boolean} [enabled=true]
+   * @return {ConversationQuery} self
+   */
+  compact(enabled = true) {
+    this._extraOptions.compact = enabled;
+    return this;
+  }
+
+  /**
+   * 执行查询
+   * @return {Promise.&lt;Conversation[]>}
+   */
+  find() {
+    return this._client._executeQuery(this);
+  }
+}
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.0</a> on Wed Jan 11 2017 13:40:03 GMT+0000 (UTC) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
+</footer>
+
+<script>prettyPrint();</script>
+<script src="scripts/linenumber.js"></script>
+</body>
+</html>

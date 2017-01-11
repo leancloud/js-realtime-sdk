@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>leancloud-realtime-plugin-typed-messages - Documentation</title>
+
+    <script src="scripts/prettify/prettify.js"></script>
+    <script src="scripts/prettify/lang-css.js"></script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc.css">
+</head>
+<body>
+
+<input type="checkbox" id="nav-trigger" class="nav-trigger" />
+<label for="nav-trigger" class="navicon-button x">
+  <div class="navicon"></div>
+</label>
+
+<label for="nav-trigger" class="overlay"></label>
+
+<nav>
+    <h2><a href="index.html">leancloud-realtime-plugin-typed-messages</a> <span class='package-version'>v1.0.0</span></h2><h3>Classes</h3><ul><li><a href="AudioMessage.html">AudioMessage</a><ul class='methods'><li data-type='method'><a href="AudioMessage.html#getAttributes">getAttributes</a></li><li data-type='method'><a href="AudioMessage.html#getFile">getFile</a></li><li data-type='method'><a href="AudioMessage.html#getText">getText</a></li><li data-type='method'><a href="AudioMessage.html#setAttributes">setAttributes</a></li><li data-type='method'><a href="AudioMessage.html#setNeedReceipt">setNeedReceipt</a></li><li data-type='method'><a href="AudioMessage.html#setText">setText</a></li><li data-type='method'><a href="AudioMessage.html#setTransient">setTransient</a></li><li data-type='method'><a href="AudioMessage.html#toJSON">toJSON</a></li></ul></li><li><a href="FileMessage.html">FileMessage</a><ul class='methods'><li data-type='method'><a href="FileMessage.html#getAttributes">getAttributes</a></li><li data-type='method'><a href="FileMessage.html#getFile">getFile</a></li><li data-type='method'><a href="FileMessage.html#getText">getText</a></li><li data-type='method'><a href="FileMessage.html#setAttributes">setAttributes</a></li><li data-type='method'><a href="FileMessage.html#setNeedReceipt">setNeedReceipt</a></li><li data-type='method'><a href="FileMessage.html#setText">setText</a></li><li data-type='method'><a href="FileMessage.html#setTransient">setTransient</a></li><li data-type='method'><a href="FileMessage.html#toJSON">toJSON</a></li></ul></li><li><a href="ImageMessage.html">ImageMessage</a><ul class='methods'><li data-type='method'><a href="ImageMessage.html#getAttributes">getAttributes</a></li><li data-type='method'><a href="ImageMessage.html#getFile">getFile</a></li><li data-type='method'><a href="ImageMessage.html#getText">getText</a></li><li data-type='method'><a href="ImageMessage.html#setAttributes">setAttributes</a></li><li data-type='method'><a href="ImageMessage.html#setNeedReceipt">setNeedReceipt</a></li><li data-type='method'><a href="ImageMessage.html#setText">setText</a></li><li data-type='method'><a href="ImageMessage.html#setTransient">setTransient</a></li><li data-type='method'><a href="ImageMessage.html#toJSON">toJSON</a></li></ul></li><li><a href="LocationMessage.html">LocationMessage</a><ul class='methods'><li data-type='method'><a href="LocationMessage.html#getAttributes">getAttributes</a></li><li data-type='method'><a href="LocationMessage.html#getLocation">getLocation</a></li><li data-type='method'><a href="LocationMessage.html#getText">getText</a></li><li data-type='method'><a href="LocationMessage.html#setAttributes">setAttributes</a></li><li data-type='method'><a href="LocationMessage.html#setNeedReceipt">setNeedReceipt</a></li><li data-type='method'><a href="LocationMessage.html#setText">setText</a></li><li data-type='method'><a href="LocationMessage.html#setTransient">setTransient</a></li><li data-type='method'><a href="LocationMessage.html#toJSON">toJSON</a></li></ul></li><li><a href="Message.html">Message</a><ul class='methods'><li data-type='method'><a href="Message.html#.parse">parse</a></li><li data-type='method'><a href="Message.html#.validate">validate</a></li><li data-type='method'><a href="Message.html#setNeedReceipt">setNeedReceipt</a></li><li data-type='method'><a href="Message.html#setTransient">setTransient</a></li><li data-type='method'><a href="Message.html#toJSON">toJSON</a></li></ul></li><li><a href="TextMessage.html">TextMessage</a><ul class='methods'><li data-type='method'><a href="TextMessage.html#getAttributes">getAttributes</a></li><li data-type='method'><a href="TextMessage.html#getText">getText</a></li><li data-type='method'><a href="TextMessage.html#setAttributes">setAttributes</a></li><li data-type='method'><a href="TextMessage.html#setNeedReceipt">setNeedReceipt</a></li><li data-type='method'><a href="TextMessage.html#setText">setText</a></li><li data-type='method'><a href="TextMessage.html#setTransient">setTransient</a></li><li data-type='method'><a href="TextMessage.html#toJSON">toJSON</a></li></ul></li><li><a href="TypedMessage.html">TypedMessage</a><ul class='methods'><li data-type='method'><a href="TypedMessage.html#.parse">parse</a></li><li data-type='method'><a href="TypedMessage.html#getAttributes">getAttributes</a></li><li data-type='method'><a href="TypedMessage.html#getText">getText</a></li><li data-type='method'><a href="TypedMessage.html#setAttributes">setAttributes</a></li><li data-type='method'><a href="TypedMessage.html#setNeedReceipt">setNeedReceipt</a></li><li data-type='method'><a href="TypedMessage.html#setText">setText</a></li><li data-type='method'><a href="TypedMessage.html#setTransient">setTransient</a></li><li data-type='method'><a href="TypedMessage.html#toJSON">toJSON</a></li></ul></li><li><a href="VideoMessage.html">VideoMessage</a><ul class='methods'><li data-type='method'><a href="VideoMessage.html#getAttributes">getAttributes</a></li><li data-type='method'><a href="VideoMessage.html#getFile">getFile</a></li><li data-type='method'><a href="VideoMessage.html#getText">getText</a></li><li data-type='method'><a href="VideoMessage.html#setAttributes">setAttributes</a></li><li data-type='method'><a href="VideoMessage.html#setNeedReceipt">setNeedReceipt</a></li><li data-type='method'><a href="VideoMessage.html#setText">setText</a></li><li data-type='method'><a href="VideoMessage.html#setTransient">setTransient</a></li><li data-type='method'><a href="VideoMessage.html#toJSON">toJSON</a></li></ul></li></ul><h3>Modules</h3><ul><li><a href="module-leancloud-realtime-plugin-typed-messages.html">leancloud-realtime-plugin-typed-messages</a></li></ul><h3>Interfaces</h3><ul><li><a href="AVMessage.html">AVMessage</a><ul class='methods'><li data-type='method'><a href="AVMessage.html#.parse">parse</a></li><li data-type='method'><a href="AVMessage.html#.validate">validate</a></li><li data-type='method'><a href="AVMessage.html#toJSON">toJSON</a></li></ul></li></ul>
+</nav>
+
+<div id="main">
+    
+    <h1 class="page-title">leancloud-realtime-plugin-typed-messages</h1>
+    
+
+    
+
+
+
+
+<section>
+
+<header>
+    
+        
+    
+</header>
+
+<article>
+    <div class="container-overview">
+    
+        
+
+        
+    
+    </div>
+
+    
+
+    
+
+    
+
+     
+
+    
+
+    
+        <h3 class="subsection-title">Members</h3>
+
+        
+            
+<h4 class="name" id=".AudioMessage"><span class="type-signature">(static) </span>AudioMessage<span class="type-signature"></span></h4>
+
+
+
+
+
+<dl class="details">
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="plugins_typed-messages_src_index.js.html">plugins/typed-messages/src/index.js</a>, <a href="plugins_typed-messages_src_index.js.html#line41">line 41</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-see">See:</dt>
+    <dd class="tag-see">
+        <ul>
+            <li><a href="AudioMessage.html">AudioMessage</a></li>
+        </ul>
+    </dd>
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+<h4 class="name" id=".FileMessage"><span class="type-signature">(static) </span>FileMessage<span class="type-signature"></span></h4>
+
+
+
+
+
+<dl class="details">
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="plugins_typed-messages_src_index.js.html">plugins/typed-messages/src/index.js</a>, <a href="plugins_typed-messages_src_index.js.html#line33">line 33</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-see">See:</dt>
+    <dd class="tag-see">
+        <ul>
+            <li><a href="FileMessage.html">FileMessage</a></li>
+        </ul>
+    </dd>
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+<h4 class="name" id=".ImageMessage"><span class="type-signature">(static) </span>ImageMessage<span class="type-signature"></span></h4>
+
+
+
+
+
+<dl class="details">
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="plugins_typed-messages_src_index.js.html">plugins/typed-messages/src/index.js</a>, <a href="plugins_typed-messages_src_index.js.html#line37">line 37</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-see">See:</dt>
+    <dd class="tag-see">
+        <ul>
+            <li><a href="ImageMessage.html">ImageMessage</a></li>
+        </ul>
+    </dd>
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+<h4 class="name" id=".LocationMessage"><span class="type-signature">(static) </span>LocationMessage<span class="type-signature"></span></h4>
+
+
+
+
+
+<dl class="details">
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="plugins_typed-messages_src_index.js.html">plugins/typed-messages/src/index.js</a>, <a href="plugins_typed-messages_src_index.js.html#line49">line 49</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-see">See:</dt>
+    <dd class="tag-see">
+        <ul>
+            <li><a href="LocationMessage.html">LocationMessage</a></li>
+        </ul>
+    </dd>
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+<h4 class="name" id=".TypedMessagesPlugin"><span class="type-signature">(static, constant) </span>TypedMessagesPlugin<span class="type-signature"></span></h4>
+
+
+
+
+
+<dl class="details">
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="plugins_typed-messages_src_index.js.html">plugins/typed-messages/src/index.js</a>, <a href="plugins_typed-messages_src_index.js.html#line18">line 18</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+<div class="description">
+    TypedMessages 插件，使用后可支持接收 LeanCloud 提供的富媒体类型的消息
+</div>
+
+
+
+
+
+
+
+    <h5>Example</h5>
+    
+    <pre class="prettyprint"><code>var realtime = new Realtime({
+  appId: appId,
+  plugins: TypedMessagesPlugin,
+});</code></pre>
+
+
+
+        
+            
+<h4 class="name" id=".VideoMessage"><span class="type-signature">(static) </span>VideoMessage<span class="type-signature"></span></h4>
+
+
+
+
+
+<dl class="details">
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="plugins_typed-messages_src_index.js.html">plugins/typed-messages/src/index.js</a>, <a href="plugins_typed-messages_src_index.js.html#line45">line 45</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-see">See:</dt>
+    <dd class="tag-see">
+        <ul>
+            <li><a href="VideoMessage.html">VideoMessage</a></li>
+        </ul>
+    </dd>
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+        
+    
+
+    
+
+    
+
+    
+</article>
+
+</section>
+
+
+
+
+</div>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.0</a> on Wed Jan 11 2017 13:40:04 GMT+0000 (UTC) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
+</footer>
+
+<script>prettyPrint();</script>
+<script src="scripts/linenumber.js"></script>
+</body>
+</html>

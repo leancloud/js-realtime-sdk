@@ -1,0 +1,794 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>conversation.js - Documentation</title>
+
+    <script src="scripts/prettify/prettify.js"></script>
+    <script src="scripts/prettify/lang-css.js"></script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc.css">
+</head>
+<body>
+
+<input type="checkbox" id="nav-trigger" class="nav-trigger" />
+<label for="nav-trigger" class="navicon-button x">
+  <div class="navicon"></div>
+</label>
+
+<label for="nav-trigger" class="overlay"></label>
+
+<nav>
+    <h2><a href="index.html">leancloud-realtime</a> <span class='package-version'>v3.3.4</span></h2><h3>Classes</h3><ul><li><a href="Conversation.html">Conversation</a><ul class='methods'><li data-type='method'><a href="Conversation.html#add">add</a></li><li data-type='method'><a href="Conversation.html#count">count</a></li><li data-type='method'><a href="Conversation.html#createMessagesIterator">createMessagesIterator</a></li><li data-type='method'><a href="Conversation.html#emit">emit</a></li><li data-type='method'><a href="Conversation.html#fetch">fetch</a></li><li data-type='method'><a href="Conversation.html#get">get</a></li><li data-type='method'><a href="Conversation.html#join">join</a></li><li data-type='method'><a href="Conversation.html#markAsRead">markAsRead</a></li><li data-type='method'><a href="Conversation.html#mute">mute</a></li><li data-type='method'><a href="Conversation.html#off">off</a></li><li data-type='method'><a href="Conversation.html#on">on</a></li><li data-type='method'><a href="Conversation.html#once">once</a></li><li data-type='method'><a href="Conversation.html#queryMessages">queryMessages</a></li><li data-type='method'><a href="Conversation.html#quit">quit</a></li><li data-type='method'><a href="Conversation.html#remove">remove</a></li><li data-type='method'><a href="Conversation.html#save">save</a></li><li data-type='method'><a href="Conversation.html#send">send</a></li><li data-type='method'><a href="Conversation.html#set">set</a></li><li data-type='method'><a href="Conversation.html#setAttribute">setAttribute</a></li><li data-type='method'><a href="Conversation.html#setAttributes">setAttributes</a></li><li data-type='method'><a href="Conversation.html#setName">setName</a></li><li data-type='method'><a href="Conversation.html#unmute">unmute</a></li></ul></li><li><a href="ConversationQuery.html">ConversationQuery</a><ul class='methods'><li data-type='method'><a href="ConversationQuery.html#addAscending">addAscending</a></li><li data-type='method'><a href="ConversationQuery.html#addDescending">addDescending</a></li><li data-type='method'><a href="ConversationQuery.html#ascending">ascending</a></li><li data-type='method'><a href="ConversationQuery.html#compact">compact</a></li><li data-type='method'><a href="ConversationQuery.html#containedIn">containedIn</a></li><li data-type='method'><a href="ConversationQuery.html#contains">contains</a></li><li data-type='method'><a href="ConversationQuery.html#containsAll">containsAll</a></li><li data-type='method'><a href="ConversationQuery.html#containsMembers">containsMembers</a></li><li data-type='method'><a href="ConversationQuery.html#descending">descending</a></li><li data-type='method'><a href="ConversationQuery.html#endsWith">endsWith</a></li><li data-type='method'><a href="ConversationQuery.html#equalTo">equalTo</a></li><li data-type='method'><a href="ConversationQuery.html#find">find</a></li><li data-type='method'><a href="ConversationQuery.html#greaterThan">greaterThan</a></li><li data-type='method'><a href="ConversationQuery.html#greaterThanOrEqualTo">greaterThanOrEqualTo</a></li><li data-type='method'><a href="ConversationQuery.html#lessThan">lessThan</a></li><li data-type='method'><a href="ConversationQuery.html#lessThanOrEqualTo">lessThanOrEqualTo</a></li><li data-type='method'><a href="ConversationQuery.html#limit">limit</a></li><li data-type='method'><a href="ConversationQuery.html#matches">matches</a></li><li data-type='method'><a href="ConversationQuery.html#notContainsIn">notContainsIn</a></li><li data-type='method'><a href="ConversationQuery.html#notEqualTo">notEqualTo</a></li><li data-type='method'><a href="ConversationQuery.html#sizeEqualTo">sizeEqualTo</a></li><li data-type='method'><a href="ConversationQuery.html#skip">skip</a></li><li data-type='method'><a href="ConversationQuery.html#startsWith">startsWith</a></li><li data-type='method'><a href="ConversationQuery.html#withLastMessages">withLastMessages</a></li><li data-type='method'><a href="ConversationQuery.html#withLastMessagesRefreshed">withLastMessagesRefreshed</a></li><li data-type='method'><a href="ConversationQuery.html#withMembers">withMembers</a></li></ul></li><li><a href="IMClient.html">IMClient</a><ul class='methods'><li data-type='method'><a href="IMClient.html#close">close</a></li><li data-type='method'><a href="IMClient.html#createConversation">createConversation</a></li><li data-type='method'><a href="IMClient.html#emit">emit</a></li><li data-type='method'><a href="IMClient.html#getConversation">getConversation</a></li><li data-type='method'><a href="IMClient.html#getQuery">getQuery</a></li><li data-type='method'><a href="IMClient.html#markAllAsRead">markAllAsRead</a></li><li data-type='method'><a href="IMClient.html#off">off</a></li><li data-type='method'><a href="IMClient.html#on">on</a></li><li data-type='method'><a href="IMClient.html#once">once</a></li><li data-type='method'><a href="IMClient.html#ping">ping</a></li></ul></li><li><a href="Message.html">Message</a><ul class='methods'><li data-type='method'><a href="Message.html#.parse">parse</a></li><li data-type='method'><a href="Message.html#.validate">validate</a></li><li data-type='method'><a href="Message.html#setNeedReceipt">setNeedReceipt</a></li><li data-type='method'><a href="Message.html#setTransient">setTransient</a></li><li data-type='method'><a href="Message.html#toJSON">toJSON</a></li></ul></li><li><a href="Realtime.html">Realtime</a><ul class='methods'><li data-type='method'><a href="Realtime.html#.defineConversationProperty">defineConversationProperty</a></li><li data-type='method'><a href="Realtime.html#createIMClient">createIMClient</a></li><li data-type='method'><a href="Realtime.html#emit">emit</a></li><li data-type='method'><a href="Realtime.html#off">off</a></li><li data-type='method'><a href="Realtime.html#on">on</a></li><li data-type='method'><a href="Realtime.html#once">once</a></li><li data-type='method'><a href="Realtime.html#register">register</a></li><li data-type='method'><a href="Realtime.html#retry">retry</a></li></ul></li><li><a href="TextMessage.html">TextMessage</a><ul class='methods'><li data-type='method'><a href="TextMessage.html#getAttributes">getAttributes</a></li><li data-type='method'><a href="TextMessage.html#getText">getText</a></li><li data-type='method'><a href="TextMessage.html#setAttributes">setAttributes</a></li><li data-type='method'><a href="TextMessage.html#setNeedReceipt">setNeedReceipt</a></li><li data-type='method'><a href="TextMessage.html#setText">setText</a></li><li data-type='method'><a href="TextMessage.html#setTransient">setTransient</a></li><li data-type='method'><a href="TextMessage.html#toJSON">toJSON</a></li></ul></li><li><a href="TypedMessage.html">TypedMessage</a><ul class='methods'><li data-type='method'><a href="TypedMessage.html#.parse">parse</a></li><li data-type='method'><a href="TypedMessage.html#getAttributes">getAttributes</a></li><li data-type='method'><a href="TypedMessage.html#getText">getText</a></li><li data-type='method'><a href="TypedMessage.html#setAttributes">setAttributes</a></li><li data-type='method'><a href="TypedMessage.html#setNeedReceipt">setNeedReceipt</a></li><li data-type='method'><a href="TypedMessage.html#setText">setText</a></li><li data-type='method'><a href="TypedMessage.html#setTransient">setTransient</a></li><li data-type='method'><a href="TypedMessage.html#toJSON">toJSON</a></li></ul></li></ul><h3>Modules</h3><ul><li><a href="module-leancloud-realtime.html">leancloud-realtime</a><ul class='methods'><li data-type='method'><a href="module-leancloud-realtime.html#.messageField">messageField</a></li><li data-type='method'><a href="module-leancloud-realtime.html#.messageType">messageType</a></li></ul></li></ul><h3>Events</h3><ul><li><a href="Conversation.html#Events">Conversation</a><ul class='events'><a href="Conversation.html#event:invited">invited</a><a href="Conversation.html#event:kicked">kicked</a><a href="Conversation.html#event:membersjoined">membersjoined</a><a href="Conversation.html#event:membersleft">membersleft</a><a href="Conversation.html#event:message">message</a><a href="Conversation.html#event:receipt">receipt</a></ul></li><li><a href="IMClient.html#Events">IMClient</a><ul class='events'><a href="IMClient.html#event:close">close</a><a href="IMClient.html#event:conflict">conflict</a><a href="IMClient.html#event:disconnect">disconnect</a><a href="IMClient.html#event:invited">invited</a><a href="IMClient.html#event:kicked">kicked</a><a href="IMClient.html#event:membersjoined">membersjoined</a><a href="IMClient.html#event:membersleft">membersleft</a><a href="IMClient.html#event:message">message</a><a href="IMClient.html#event:reconnect">reconnect</a><a href="IMClient.html#event:reconnecterror">reconnecterror</a><a href="IMClient.html#event:retry">retry</a><a href="IMClient.html#event:schedule">schedule</a><a href="IMClient.html#event:unreadmessages">unreadmessages</a></ul></li><li><a href="Realtime.html#Events">Realtime</a><ul class='events'><a href="Realtime.html#event:disconnect">disconnect</a><a href="Realtime.html#event:reconnect">reconnect</a><a href="Realtime.html#event:retry">retry</a><a href="Realtime.html#event:schedule">schedule</a></ul></li></ul><h3>Interfaces</h3><ul><li><a href="AVMessage.html">AVMessage</a><ul class='methods'><li data-type='method'><a href="AVMessage.html#.parse">parse</a></li><li data-type='method'><a href="AVMessage.html#.validate">validate</a></li><li data-type='method'><a href="AVMessage.html#toJSON">toJSON</a></li></ul></li><li><a href="Plugin.html">Plugin</a></li></ul>
+</nav>
+
+<div id="main">
+    
+    <h1 class="page-title">conversation.js</h1>
+    
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>import EventEmitter from 'eventemitter3';
+import isEmpty from 'lodash/isEmpty';
+import isPlainObject from 'lodash/isPlainObject';
+import cloneDeep from 'lodash/cloneDeep';
+import { default as d } from 'debug';
+import { decodeDate, keyRemap, union, difference, internal, setValue } from './utils';
+import { applyDecorators } from './plugin';
+import IMClient from './im-client';
+import {
+  GenericCommand,
+  ConvCommand,
+  JsonObjectMessage,
+  DirectCommand,
+  LogsCommand,
+} from '../proto/message';
+import runSignatureFactory from './signature-factory-runner';
+import { createError } from './error';
+import Message, { MessageStatus } from './messages/message';
+
+const debug = d('LC:Conversation');
+
+export default class Conversation extends EventEmitter {
+  /**
+   * 无法直接实例化，请使用 {@link IMClient#createConversation} 创建新的对话
+   * @extends EventEmitter
+   */
+  constructor({
+    id,
+    creator,
+    createdAt,
+    updatedAt,
+    lastMessageAt,
+    lastMessage,
+    mutedMembers = [],
+    members = [],
+    transient = false,
+    system = false,
+    muted = false,
+    // jsdoc-ignore-start
+    ...attributes
+    // jsdoc-ignore-end
+  }, client) {
+    super();
+    Object.assign(this, {
+      /**
+       * 对话 id，对应 _Conversation 表中的 objectId
+       * @memberof Conversation#
+       * @type {String}
+       */
+      id,
+      /**
+       * 对话创建者
+       * @memberof Conversation#
+       * @type {String}
+       */
+      creator,
+      /**
+       * 对话创建时间
+       * @memberof Conversation#
+       * @type {Date}
+       */
+      createdAt,
+      /**
+       * 对话更新时间
+       * @memberof Conversation#
+       * @type {Date}
+       */
+      updatedAt,
+      /**
+       * 最后一条消息时间
+       * @memberof Conversation#
+       * @type {Date}
+       */
+      lastMessageAt,
+      /**
+       * 最后一条消息
+       * @memberof Conversation#
+       * @type {?Message}
+       */
+      lastMessage,
+      /**
+       * 对该对话设置了静音的用户列表
+       * @memberof Conversation#
+       * @type {?String[]}
+       */
+      mutedMembers,
+      /**
+       * 参与该对话的用户列表
+       * @memberof Conversation#
+       * @type {String[]}
+       */
+      members,
+      /**
+       * 暂态对话标记
+       * @memberof Conversation#
+       * @type {Boolean}
+       */
+      transient,
+      /**
+       * 系统对话标记
+       * @memberof Conversation#
+       * @type {Boolean}
+       * @since 3.3
+       */
+      system,
+      /**
+       * 当前用户静音该对话标记
+       * @memberof Conversation#
+       * @type {Boolean}
+       */
+      muted,
+    });
+    this._attributes = attributes;
+    this._reset();
+    /**
+     * 当前用户在该对话的未读消息数
+     * @memberof Conversation#
+     * @type {Number}
+     */
+    this.unreadMessagesCount = 0;
+    this.members = Array.from(new Set(this.members));
+    internal(this).messagesWaitingForReciept = {};
+    if (client instanceof IMClient) {
+      this._client = client;
+    } else {
+      throw new TypeError('Conversation must be initialized with a client');
+    }
+    [
+      'kicked',
+      'membersjoined',
+      'membersleft',
+      'message',
+    ].forEach(event => this.on(
+      event,
+      (...payload) => this._debug(`${event} event emitted.`, ...payload)
+    ));
+    // onConversationCreate hook
+    applyDecorators(this._client._plugins.onConversationCreate, this);
+  }
+
+  set createdAt(value) {
+    this._createdAt = decodeDate(value);
+  }
+  get createdAt() {
+    return this._createdAt;
+  }
+  set updatedAt(value) {
+    this._updatedAt = decodeDate(value);
+  }
+  get updatedAt() {
+    return this._updatedAt;
+  }
+  set lastMessageAt(value) {
+    this._lastMessageAt = decodeDate(value);
+  }
+  get lastMessageAt() {
+    return this._lastMessageAt;
+  }
+
+  /**
+   * 对话额外属性，对应 _Conversation 表中的 attr
+   * @type {Object}
+   * @deprecated Use {@link Conversation#get conversation.get('attr')},
+   * {@link Conversation#set conversation.set('attr', value)} instead
+   */
+  get attributes() {
+    console.warn('DEPRECATION Conversation.attributes: Use conversation.get(\'attr\') instead. See https://url.leanapp.cn/DeprecateAttributes for more details.');
+    return this.get('attr');
+  }
+  set attributes(value) {
+    console.warn('DEPRECATION Conversation.attributes: Use conversation.set(\'attr\', value) instead. See https://url.leanapp.cn/DeprecateAttributes for more details.');
+    this.set('attr', value);
+  }
+  /**
+   * 设置对话额外属性
+   * @param {Object} map    key-value 对
+   * @param {Boolean} [assign=false] 使用 Object.assign 更新属性，而不是替换整个 attributes
+   * @return {Conversation} self
+   * @deprecated Use {@link Conversation#set} instead. See {@link https://url.leanapp.cn/DeprecateAttributes} for more details.
+   */
+  setAttributes(map, assign = false) {
+    console.warn('DEPRECATION Conversation#setAttributes: Use conversation.set() instead. See https://url.leanapp.cn/DeprecateAttributes for more details.');
+    this._debug(`set attributes: value=${JSON.stringify(map)}, assign=${assign}`);
+    if (!isPlainObject(map)) {
+      throw new TypeError('attributes must be a plain object');
+    }
+    if (!assign) {
+      this.set('attr', map);
+    } else {
+      Object.keys(map).forEach(key => this.setAttribute(key, map[key]));
+    }
+    return this;
+  }
+  /**
+   * 设置对话额外属性
+   * @param {String} key
+   * @param {Any} value
+   * @return {Conversation} self
+   * @deprecated Use {@link Conversation#set conversation.set('attr.key', value)} instead
+   */
+  setAttribute(key, value) {
+    console.warn('DEPRECATION Conversation#setAttribute: Use conversation.set(\'attr.key\', value) instead. See https://url.leanapp.cn/DeprecateAttributes for more details.');
+    return this.set(`attr.${key}`, value);
+  }
+  /**
+   * 对话名字，对应 _Conversation 表中的 name
+   * @type {String}
+   */
+  get name() {
+    return this.get('name');
+  }
+  set name(value) {
+    this.set('name', value);
+  }
+  /**
+   * 设置对话名字
+   * @param {String} value
+   * @return {Conversation} self
+   * @deprecated Use {@link Conversation#set conversation.set('name', value)} instead
+   */
+  setName(value) {
+    console.warn('DEPRECATION Conversation#setName: Use conversation.set(\'name\', value) instead. See https://url.leanapp.cn/DeprecateAttributes for more details.');
+    return this.set('name', value);
+  }
+
+  /**
+   * 获取对话的自定义属性
+   * @since 3.2.0
+   * @param  {String} key key 属性的键名，'x' 对应 Conversation 表中的 x 列
+   * @return {Any} 属性的值
+   */
+  get(key) {
+    return internal(this).currentAttributes[key];
+  }
+
+  /**
+   * 设置对话的自定义属性
+   * @since 3.2.0
+   * @param {String} key 属性的键名，'x' 对应 Conversation 表中的 x 列，支持使用 'x.y.z' 来修改对象的部分字段。
+   * @param {Any} value 属性的值
+   * @return {Conversation} self
+   * @example
+   *
+   * // 设置对话的 color 属性
+   * conversation.set('color', {
+   *   text: '#000',
+   *   background: '#DDD',
+   * });
+   * // 设置对话的 color.text 属性
+   * conversation.set('color.text', '#333');
+   */
+  set(key, value) {
+    this._debug(`set [${key}]: ${value}`);
+    const pendingAttributes = internal(this).pendingAttributes;
+    const pendingKeys = Object.keys(pendingAttributes);
+    // suppose pendingAttributes = { 'a.b': {} }
+    // set 'a' or 'a.b': delete 'a.b'
+    const re = new RegExp(`^${key}`);
+    const childKeys = pendingKeys.filter(re.test.bind(re));
+    childKeys.forEach((k) => {
+      delete pendingAttributes[k];
+    });
+    if (childKeys.length) {
+      pendingAttributes[key] = value;
+    } else {
+      // set 'a.c': nothing to do
+      // set 'a.b.c.d': assign c: { d: {} } to 'a.b'
+      // CAUTION: non-standard API, provided by core-js
+      const parentKey = Array.find(pendingKeys, k => key.indexOf(k) === 0); // 'a.b'
+      if (parentKey) {
+        setValue(pendingAttributes[parentKey], key.slice(parentKey.length + 1), value);
+      } else {
+        pendingAttributes[key] = value;
+      }
+    }
+    // build currentAttributes
+    internal(this).currentAttributes = Object.keys(pendingAttributes)
+      .reduce(
+        (target, k) => setValue(target, k, pendingAttributes[k]),
+        cloneDeep(this._attributes)
+      );
+    return this;
+  }
+
+  _reset() {
+    internal(this).pendingAttributes = {};
+    internal(this).currentAttributes = this._attributes;
+  }
+
+  _debug(...params) {
+    debug(...params, `[${this.id}]`);
+  }
+
+  _send(command, ...args) {
+    /* eslint-disable no-param-reassign */
+    if (command.cmd === null) {
+      command.cmd = 'conv';
+    }
+    if (command.cmd === 'conv' &amp;&amp; command.convMessage === null) {
+      command.convMessage = new ConvCommand();
+    }
+    if (command.convMessage &amp;&amp; command.convMessage.cid === null) {
+      command.convMessage.cid = this.id;
+    }
+    /* eslint-enable no-param-reassign */
+    return this._client._send(command, ...args);
+  }
+  /**
+   * 保存当前对话的属性至服务器
+   * @return {Promise.&lt;Conversation>} self
+   */
+  save() {
+    this._debug('save');
+    const attr = internal(this).pendingAttributes;
+    if (isEmpty(attr)) {
+      this._debug('nothing touched, resolve with self');
+      return Promise.resolve(this);
+    }
+    this._debug(`attr: ${JSON.stringify(attr)}`);
+    const convMessage = new ConvCommand({
+      attr: new JsonObjectMessage({
+        data: JSON.stringify(attr),
+      }),
+    });
+    return this
+      ._send(new GenericCommand({
+        op: 'update',
+        convMessage,
+      }))
+      .then((resCommand) => {
+        this.updatedAt = resCommand.convMessage.udate;
+        this._attributes = internal(this).currentAttributes;
+        internal(this).pendingAttributes = {};
+        return this;
+      });
+  }
+
+  /**
+   * 从服务器更新对话的属性
+   * @return {Promise.&lt;Conversation>} self
+   */
+  fetch() {
+    return this
+      ._client
+      .getQuery()
+      .equalTo('objectId', this.id)
+      .find()
+      .then(() => this);
+  }
+
+  /**
+   * 静音，客户端拒绝收到服务器端的离线推送通知
+   * @return {Promise.&lt;Conversation>} self
+   */
+  mute() {
+    this._debug('mute');
+    return this._send(new GenericCommand({
+      op: 'mute',
+    })).then(() => {
+      if (!this.transient) {
+        this.muted = true;
+        this.mutedMembers = union(this.mutedMembers, [this._client.id]);
+      }
+      return this;
+    });
+  }
+
+  /**
+   * 取消静音
+   * @return {Promise.&lt;Conversation>} self
+   */
+  unmute() {
+    this._debug('unmute');
+    return this._send(new GenericCommand({
+      op: 'unmute',
+    })).then(() => {
+      if (!this.transient) {
+        this.muted = false;
+        this.mutedMembers = difference(this.mutedMembers, [this._client.id]);
+      }
+      return this;
+    });
+  }
+
+  /**
+   * 获取对话人数，或暂态对话的在线人数
+   * @return {Promise.&lt;Number>}
+   */
+  count() {
+    this._debug('unmute');
+    return this._send(new GenericCommand({
+      op: 'count',
+    })).then(resCommand => resCommand.convMessage.count);
+  }
+
+  /**
+   * 增加成员
+   * @param {String|String[]} clientIds 新增成员 client id
+   * @return {Promise.&lt;Conversation>} self
+   */
+  add(clientIds) {
+    this._debug('add', clientIds);
+    if (typeof clientIds === 'string') {
+      clientIds = [clientIds]; // eslint-disable-line no-param-reassign
+    }
+    const convMessage = new ConvCommand({
+      m: clientIds,
+    });
+    return Promise.resolve(
+      new GenericCommand({
+        op: 'add',
+        convMessage,
+      })
+    ).then((command) => {
+      if (this._client.options.conversationSignatureFactory) {
+        const params = [this.id, this._client.id, clientIds.sort(), 'add'];
+        return runSignatureFactory(this._client.options.conversationSignatureFactory, params)
+          .then((signatureResult) => {
+            Object.assign(command.convMessage, keyRemap({
+              signature: 's',
+              timestamp: 't',
+              nonce: 'n',
+            }, signatureResult));
+            return command;
+          });
+      }
+      return command;
+    }).then(
+      this._send.bind(this)
+    ).then(() => {
+      if (!this.transient &amp;&amp; !this.system) {
+        this.members = union(this.members, clientIds);
+      }
+      return this;
+    });
+  }
+
+  /**
+   * 剔除成员
+   * @param {String|String[]} clientIds 成员 client id
+   * @return {Promise.&lt;Conversation>} self
+   */
+  remove(clientIds) {
+    this._debug('remove', clientIds);
+    if (typeof clientIds === 'string') {
+      clientIds = [clientIds]; // eslint-disable-line no-param-reassign
+    }
+    const convMessage = new ConvCommand({
+      m: clientIds,
+    });
+    return Promise.resolve(
+      new GenericCommand({
+        op: 'remove',
+        convMessage,
+      })
+    ).then((command) => {
+      if (this._client.options.conversationSignatureFactory) {
+        const params = [this.id, this._client.id, clientIds.sort(), 'remove'];
+        return runSignatureFactory(this._client.options.conversationSignatureFactory, params)
+          .then((signatureResult) => {
+            Object.assign(command.convMessage, keyRemap({
+              signature: 's',
+              timestamp: 't',
+              nonce: 'n',
+            }, signatureResult));
+            return command;
+          });
+      }
+      return command;
+    }).then(
+      this._send.bind(this)
+    ).then(() => {
+      if (!this.transient &amp;&amp; !this.system) {
+        this.members = difference(this.members, clientIds);
+      }
+      return this;
+    });
+  }
+
+  /**
+   * （当前用户）加入该对话
+   * @return {Promise.&lt;Conversation>} self
+   */
+  join() {
+    this._debug('join');
+    return this.add(this._client.id);
+  }
+
+  /**
+   * （当前用户）退出该对话
+   * @return {Promise.&lt;Conversation>} self
+   */
+  quit() {
+    this._debug('quit');
+    return this.remove(this._client.id);
+  }
+
+  /**
+   * 发送消息
+   * @param  {Message} message 消息，Message 及其子类的实例
+   * @param {Object} [options] 发送选项，since v3.3.0
+   * @param {Boolean} [options.transient] 是否作为暂态消息发送，since v3.3.1
+   * @param {Boolean} [options.reciept] 是否需要送达回执，仅在普通对话中有效
+   * @param {MessagePriority} [options.priority] 消息优先级，仅在暂态对话中有效，
+   * see: {@link module:leancloud-realtime.MessagePriority MessagePriority}
+   * @param {Object} [options.pushData] 消息对应的离线推送内容，如果消息接收方不在线，会推送指定的内容。其结构说明参见: {@link https://url.leanapp.cn/pushData 推送消息内容}
+   * @return {Promise.&lt;Message>} 发送的消息
+   */
+  send(message, options) {
+    this._debug(message, 'send');
+    if (!(message instanceof Message)) {
+      throw new TypeError(`${message} is not a Message`);
+    }
+    const {
+      transient,
+      reciept,
+      priority,
+      pushData,
+    } = Object.assign(
+      // support deprecated attribute: message.needReceipt
+      {
+        transient: message.transient,
+        reciept: message.needReceipt,
+      },
+      // support Message static property: sendOptions
+      message.constructor.sendOptions,
+      options
+    );
+    if (reciept) {
+      if (this.transient) {
+        console.warn('receipt option is ignored as the conversation is transient.');
+      } else if (transient) {
+        console.warn('receipt option is ignored as the message is sent transiently.');
+      } else if (this.members.length > 2) {
+        console.warn('receipt option is recommended to be used in one-on-one conversation.'); // eslint-disable-line max-len
+      }
+    }
+    if (priority &amp;&amp; !this.transient) {
+      console.warn('priority option is ignored as the conversation is not transient.');
+    }
+    Object.assign(message, {
+      cid: this.id,
+      from: this._client.id,
+    });
+    message._setStatus(MessageStatus.SENDING);
+    let msg = message.toJSON();
+    if (typeof msg !== 'string') {
+      msg = JSON.stringify(msg);
+    }
+    let sendPromise = this._send(new GenericCommand({
+      cmd: 'direct',
+      directMessage: new DirectCommand({
+        msg,
+        cid: this.id,
+        r: reciept,
+        transient,
+        dt: message.id,
+        pushData: JSON.stringify(pushData),
+      }),
+      priority,
+    }), !transient);
+    if (!transient) {
+      sendPromise = sendPromise.then((resCommand) => {
+        const {
+          ackMessage: {
+            uid,
+            t,
+            code,
+            reason,
+            appCode,
+            },
+          } = resCommand;
+        if (code !== null) {
+          throw createError({
+            code, reason, appCode,
+          });
+        }
+        Object.assign(message, {
+          id: uid,
+          timestamp: new Date(t.toNumber()),
+        });
+        this.lastMessage = message;
+        this.lastMessageAt = message.timestamp;
+      });
+    }
+    return sendPromise.then(() => {
+      message._setStatus(MessageStatus.SENT);
+      if (reciept) {
+        internal(this).messagesWaitingForReciept[message.id] = message;
+      }
+      return message;
+    }, (error) => {
+      message._setStatus(MessageStatus.FAILED);
+      throw error;
+    });
+  }
+
+  /**
+   * 查询消息记录
+   * 如果仅需实现消息记录翻页查询需求，建议使用 {@link Conversation#createMessagesIterator}
+   * @param  {Object} [options]
+   * @param  {Date}   [options.beforeTime] 限制查询结果为小于这个该时间之前的消息，不传则为当前时间
+   * @param  {String} [options.beforeMessageId] 限制查询结果为该消息之前的消息，需要与 beforeTime 同时使用，为防止某时刻有重复消息
+   * @param  {Date}   [options.afterTime] 限制查询结果为大于这个该时间之前的消息
+   * @param  {String} [options.afterMessageId] 限制查询结果为该消息之后的消息，需要与 afterTime 同时使用，为防止某时刻有重复消息
+   * @param  {Number} [options.limit] 限制查询结果的数量，目前服务端默认为 20
+   * @return {Promise.&lt;Message[]>} 消息列表
+   */
+  queryMessages(options = {}) {
+    this._debug('query messages', options);
+    if (options.beforeMessageId &amp;&amp; !options.beforeTime) {
+      throw new Error('query option beforeMessageId must be used with option beforeTime');
+    }
+    if (options.afterMessageId &amp;&amp; !options.afterTime) {
+      throw new Error('query option afterMessageId must be used with option afterTime');
+    }
+    const conditions = keyRemap({
+      beforeTime: 't',
+      beforeMessageId: 'mid',
+      afterTime: 'tt',
+      afterMessageId: 'tmid',
+      limit: 'l',
+    }, options);
+    if (conditions.t instanceof Date) {
+      conditions.t = conditions.t.getTime();
+    }
+    if (conditions.tt instanceof Date) {
+      conditions.tt = conditions.tt.getTime();
+    }
+    return this._send(new GenericCommand({
+      cmd: 'logs',
+      logsMessage: new LogsCommand(
+        Object.assign(conditions, {
+          cid: this.id,
+        })
+      ),
+    })).then(resCommand =>
+      Promise.all(resCommand.logsMessage.logs.map(log =>
+        this._client._messageParser.parse(log.data).then((message) => {
+          const messageProps = {
+            id: log.msgId,
+            cid: this.id,
+            timestamp: new Date(log.timestamp.toNumber()),
+            from: log.from,
+          };
+          Object.assign(message, messageProps);
+          message._setStatus(MessageStatus.SENT);
+          return message;
+        })
+      ))
+    );
+  }
+
+  /**
+   * 获取消息翻页迭代器
+   * @param  {Object} [options]
+   * @param  {Date}   [options.beforeTime] 限制起始查询结果为小于这个该时间之前的消息，不传则为当前时间
+   * @param  {String} [options.beforeMessageId] 限制起始查询结果为该消息之前的消息，需要与 beforeTime 同时使用，为防止某时刻有重复消息
+   * @param  {Number} [options.limit] 限制每页查询结果的数量，目前服务端默认为 20
+   * @return {AsyncIterater.&lt;Promise.&lt;IteratorResult&lt;Message[]>>>} [AsyncIterator]{@link https://github.com/tc39/proposal-async-iteration}，调用其 next 方法返回获取下一页消息的 Promise
+   * @example
+   * var messageIterator = conversation.createMessagesIterator({ limit: 10 });
+   * messageIterator.next().then(function(result) {
+   *   // result: {
+   *   //   value: [message1, ..., message10],
+   *   //   done: false,
+   *   // }
+   * });
+   * messageIterator.next().then(function(result) {
+   *   // result: {
+   *   //   value: [message11, ..., message20],
+   *   //   done: false,
+   *   // }
+   * });
+   * messageIterator.next().then(function(result) {
+   *   // No more messages
+   *   // result: { value: [], done: true }
+   * });
+   */
+  createMessagesIterator({ beforeTime, beforeMessageId, limit } = {}) {
+    let promise;
+    return {
+      next: () => {
+        if (promise === undefined) {
+          // first call
+          promise = this.queryMessages({
+            limit,
+            beforeTime,
+            beforeMessageId,
+          });
+        } else {
+          promise = promise.then((prevMessages) => {
+            if (prevMessages.length === 0 || prevMessages.length &lt; limit) {
+              // no more messages
+              return [];
+            }
+            return this.queryMessages({
+              beforeTime: prevMessages[0].timestamp,
+              beforeMessageId: prevMessages[0].id,
+              limit,
+            });
+          });
+        }
+        return promise.then(value => ({
+          value: Array.from(value),
+          done: value.length === 0 || value.length &lt; limit,
+        }));
+      },
+    };
+  }
+
+  /**
+   * 将该会话标记为已读
+   * @return {Promise.&lt;Conversation>} self
+   */
+  markAsRead() {
+    return this._client.markAllAsRead([this]).then(() => this);
+  }
+
+  _handleReceipt({ messageId, deliveredAt }) {
+    const { messagesWaitingForReciept } = internal(this);
+    const message = messagesWaitingForReciept[messageId];
+    delete messagesWaitingForReciept[messageId];
+    if (!message) return;
+    message._setStatus(MessageStatus.DELIVERED);
+    message.deliveredAt = deliveredAt;
+    /**
+     * 消息已送达。只有在发送时设置了需要回执的情况下才会收到送达回执，该回执并不代表用户已读。
+     * @event Conversation#receipt
+     * @since 3.2.0
+     * @param {Object} payload
+     * @param {Message} payload.message 送达的消息
+     */
+    this.emit('receipt', { message });
+  }
+}
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.0</a> on Wed Jan 11 2017 13:40:03 GMT+0000 (UTC) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
+</footer>
+
+<script>prettyPrint();</script>
+<script src="scripts/linenumber.js"></script>
+</body>
+</html>

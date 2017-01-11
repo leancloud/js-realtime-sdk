@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>call/call.js - Documentation</title>
+
+    <script src="scripts/prettify/prettify.js"></script>
+    <script src="scripts/prettify/lang-css.js"></script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc.css">
+</head>
+<body>
+
+<input type="checkbox" id="nav-trigger" class="nav-trigger" />
+<label for="nav-trigger" class="navicon-button x">
+  <div class="navicon"></div>
+</label>
+
+<label for="nav-trigger" class="overlay"></label>
+
+<nav>
+    <h2><a href="index.html">leancloud-realtime-plugin-webrtc</a> <span class='package-version'>v1.0.0-beta.3</span></h2><h3>Classes</h3><ul><li><a href="Call.html">Call</a><ul class='methods'><li data-type='method'><a href="Call.html#close">close</a></li></ul></li><li><a href="IncomingCall.html">IncomingCall</a><ul class='methods'><li data-type='method'><a href="IncomingCall.html#accept">accept</a></li><li data-type='method'><a href="IncomingCall.html#close">close</a></li><li data-type='method'><a href="IncomingCall.html#refuse">refuse</a></li></ul></li><li><a href="OutgoingCall.html">OutgoingCall</a><ul class='methods'><li data-type='method'><a href="OutgoingCall.html#cancel">cancel</a></li><li data-type='method'><a href="OutgoingCall.html#close">close</a></li></ul></li><li><a href="WebRTCClient.html">WebRTCClient</a><ul class='methods'><li data-type='method'><a href="WebRTCClient.html#call">call</a></li><li data-type='method'><a href="WebRTCClient.html#close">close</a></li></ul></li></ul><h3>Modules</h3><ul><li><a href="module-leancloud-realtime-plugin-webrtc.html">leancloud-realtime-plugin-webrtc</a></li></ul><h3>Events</h3><ul><li><a href="Call.html#Events">Call</a><ul class='events'><a href="Call.html#event:close">close</a><a href="Call.html#event:connect">connect</a></ul></li><li><a href="IncomingCall.html#Events">IncomingCall</a><ul class='events'><a href="IncomingCall.html#event:cancel">cancel</a><a href="IncomingCall.html#event:close">close</a><a href="IncomingCall.html#event:connect">connect</a></ul></li><li><a href="OutgoingCall.html#Events">OutgoingCall</a><ul class='events'><a href="OutgoingCall.html#event:close">close</a><a href="OutgoingCall.html#event:connect">connect</a><a href="OutgoingCall.html#event:refuse">refuse</a></ul></li><li><a href="WebRTCClient.html#Events">WebRTCClient</a><ul class='events'><a href="WebRTCClient.html#event:call">call</a><a href="WebRTCClient.html#event:conflict">conflict</a></ul></li></ul><h3>Global</h3><ul><li><a href="global.html#createWebRTCClient">createWebRTCClient</a></li></ul>
+</nav>
+
+<div id="main">
+    
+    <h1 class="page-title">call/call.js</h1>
+    
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>import EventEmitter from 'eventemitter3';
+import createCallStateMachine from './call-state-machine';
+import Answer from '../signalings/answer';
+import ICECandidate from '../signalings/ice-candidate';
+import Refusal from '../signalings/refusal';
+import Cancelation from '../signalings/cancelation';
+
+export default class Call extends EventEmitter {
+  /**
+   * {@link IncomingCall} 与 {@link OutgoingCall} 的基类
+   * @abstract
+   */
+  constructor(conversation, RTCConfiguration) {
+    super();
+    this._setConversation(conversation);
+    this._peerConnection = this._createPeerConnection(RTCConfiguration);
+    this._call = createCallStateMachine();
+    this._promises = {};
+    const streamReady = new Promise((resolve) => {
+      this._promises.resolveStreamReady = resolve;
+    });
+    const accept = new Promise((resolve) => {
+      this._promises.resolveAccept = resolve;
+    });
+    Promise.all([streamReady, accept]).then(([stream]) => {
+      if (this._call.can('connect')) {
+        this._call.connect();
+        /**
+         * 通话连接成功
+         * @event Call#connect
+         * @param {MediaStream} stram 对方的媒体流
+         */
+        this.emit('connect', stream);
+      }
+    });
+  }
+
+  /**
+   * 当前通话状态
+   * （&lt;code>calling&lt;/code>, &lt;code>connected&lt;/code>, &lt;code>closed&lt;/code>,
+   * &lt;code>refused&lt;/code>, &lt;code>canceled&lt;/code>）
+   * @type {string}
+   * @readonly
+   */
+  get state() {
+    return this._call.current;
+  }
+
+  /**
+   * 结束通话
+   * @return {Promise}
+   */
+  close() {
+    return Promise.resolve().then(() => {
+      this._call.close();
+      this._destroyPeerConnection();
+      this._peerConnection.close();
+      this._destroy();
+    });
+  }
+
+  _handleCloseEvent() {
+    if (this._call.can('close')) {
+      this.close();
+      /**
+       * 通话结束，可能是对方挂断或网络中断
+       * @event Call#close
+       */
+      this.emit('close');
+    }
+  }
+
+  _setConversation(conversation) {
+    if (this._conversation) {
+      this._conversation.off('message');
+    }
+    if (conversation) {
+      this._conversation = conversation;
+      conversation.on('message', this._handleMessage.bind(this));
+    }
+  }
+
+  _destroy() {
+    this._conversation.off('message');
+  }
+
+  _createPeerConnection(RTCConfiguration) {
+    const connection = new RTCPeerConnection(RTCConfiguration);
+    connection.onicecandidate = this._handleICECandidateEvent.bind(this);
+    connection.onaddstream = this._handleAddStreamEvent.bind(this);
+    connection.onnremovestream = this._handleRemoveStreamEvent.bind(this);
+    connection.oniceconnectionstatechange = this._handleICEConnectionStateChangeEvent.bind(this);
+    connection.onsignalingstatechange = this._handleSignalingStateChangeEvent.bind(this);
+    return connection;
+  }
+
+  _destroyPeerConnection() {
+    const connection = this._peerConnection;
+    delete connection.onaddstream;
+    delete connection.onremovestream;
+    delete connection.onnicecandidate;
+    delete connection.oniceconnectionstatechange;
+    delete connection.onsignalingstatechange;
+  }
+
+  _handleMessage(message) {
+    if (message instanceof Answer) {
+      return this._handleAnswer(message);
+    }
+    if (message instanceof Refusal) {
+      return this._handleRefusal();
+    }
+    if (message instanceof Cancelation) {
+      return this._handleCancelation();
+    }
+    if (message instanceof ICECandidate) {
+      return this._handleICECandidate(message);
+    }
+    return false;
+  }
+
+  _handleICECandidate(message) {
+    const candidate = new RTCIceCandidate(message.payload);
+    if (this._peerConnection) {
+      this._peerConnection.addIceCandidate(candidate)
+        .catch(console.error.bind(console));
+    }
+  }
+
+  _handleICECandidateEvent(event) {
+    if (event.candidate &amp;&amp; this._conversation) {
+      return this._conversation.send(new ICECandidate(event.candidate))
+        .catch(console.error.bind(console));
+    }
+    return false;
+  }
+
+  _handleAddStreamEvent(event) {
+    this._promises.resolveStreamReady(event.stream);
+  }
+
+  _handleRemoveStreamEvent() {
+    this._handleCloseEvent();
+  }
+
+  _handleICEConnectionStateChangeEvent() {
+    switch (this._peerConnection.iceConnectionState) {
+      case 'closed':
+      case 'failed':
+      case 'disconnected':
+        this._handleCloseEvent();
+        break;
+      default:
+    }
+  }
+
+  _handleSignalingStateChangeEvent() {
+    switch (this._peerConnection.signalingState) {
+      case 'closed':
+        this._handleCloseEvent();
+        break;
+      default:
+    }
+  }
+  /* eslint-disable class-methods-use-this */
+  _handleAnswer() {
+    throw new Error('not implemented');
+  }
+  _handleRefusal() {
+    throw new Error('not implemented');
+  }
+  _handleCancelation() {
+    throw new Error('not implemented');
+  }
+  /* eslint-enable class-methods-use-this */
+}
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.0</a> on Wed Jan 11 2017 13:40:05 GMT+0000 (UTC) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
+</footer>
+
+<script>prettyPrint();</script>
+<script src="scripts/linenumber.js"></script>
+</body>
+</html>

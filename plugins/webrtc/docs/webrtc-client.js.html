@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>webrtc-client.js - Documentation</title>
+
+    <script src="scripts/prettify/prettify.js"></script>
+    <script src="scripts/prettify/lang-css.js"></script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc.css">
+</head>
+<body>
+
+<input type="checkbox" id="nav-trigger" class="nav-trigger" />
+<label for="nav-trigger" class="navicon-button x">
+  <div class="navicon"></div>
+</label>
+
+<label for="nav-trigger" class="overlay"></label>
+
+<nav>
+    <h2><a href="index.html">leancloud-realtime-plugin-webrtc</a> <span class='package-version'>v1.0.0-beta.3</span></h2><h3>Classes</h3><ul><li><a href="Call.html">Call</a><ul class='methods'><li data-type='method'><a href="Call.html#close">close</a></li></ul></li><li><a href="IncomingCall.html">IncomingCall</a><ul class='methods'><li data-type='method'><a href="IncomingCall.html#accept">accept</a></li><li data-type='method'><a href="IncomingCall.html#close">close</a></li><li data-type='method'><a href="IncomingCall.html#refuse">refuse</a></li></ul></li><li><a href="OutgoingCall.html">OutgoingCall</a><ul class='methods'><li data-type='method'><a href="OutgoingCall.html#cancel">cancel</a></li><li data-type='method'><a href="OutgoingCall.html#close">close</a></li></ul></li><li><a href="WebRTCClient.html">WebRTCClient</a><ul class='methods'><li data-type='method'><a href="WebRTCClient.html#call">call</a></li><li data-type='method'><a href="WebRTCClient.html#close">close</a></li></ul></li></ul><h3>Modules</h3><ul><li><a href="module-leancloud-realtime-plugin-webrtc.html">leancloud-realtime-plugin-webrtc</a></li></ul><h3>Events</h3><ul><li><a href="Call.html#Events">Call</a><ul class='events'><a href="Call.html#event:close">close</a><a href="Call.html#event:connect">connect</a></ul></li><li><a href="IncomingCall.html#Events">IncomingCall</a><ul class='events'><a href="IncomingCall.html#event:cancel">cancel</a><a href="IncomingCall.html#event:close">close</a><a href="IncomingCall.html#event:connect">connect</a></ul></li><li><a href="OutgoingCall.html#Events">OutgoingCall</a><ul class='events'><a href="OutgoingCall.html#event:close">close</a><a href="OutgoingCall.html#event:connect">connect</a><a href="OutgoingCall.html#event:refuse">refuse</a></ul></li><li><a href="WebRTCClient.html#Events">WebRTCClient</a><ul class='events'><a href="WebRTCClient.html#event:call">call</a><a href="WebRTCClient.html#event:conflict">conflict</a></ul></li></ul><h3>Global</h3><ul><li><a href="global.html#createWebRTCClient">createWebRTCClient</a></li></ul>
+</nav>
+
+<div id="main">
+    
+    <h1 class="page-title">webrtc-client.js</h1>
+    
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>import EventEmitter from 'eventemitter3';
+import OutgoingCall from './call/outgoing-call';
+import IncomingCall from './call/incoming-call';
+import Offer from './signalings/offer';
+
+const DEFAULT_RTCCONF = {
+  iceServers: [
+    {
+      urls: [
+        'stun:stun.l.google.com:19302',
+        'stun:stun1.l.google.com:19302',
+        'stun:stun2.l.google.com:19302',
+        'stun:stun3.l.google.com:19302',
+        'stun:stun4.l.google.com:19302',
+        'stun:stun.ekiga.net',
+        'stun:stun.ideasip.com',
+        'stun:stun.rixtelecom.se',
+        'stun:stun.schlund.de',
+        'stun:stun.stunprotocol.org:3478',
+        'stun:stun.voiparound.com',
+        'stun:stun.voipbuster.com',
+        'stun:stun.voipstunt.com',
+        'stun:stun.voxgratia.org',
+      ],
+    },
+  ],
+};
+
+export default class WebRTCClient extends EventEmitter {
+  /**
+   * 无法直接实例化，请使用 {@link createWebRTCClient Realtime#createWebRTCClient} 创建新的 WebRTCClient
+   */
+  constructor(id, options) {
+    if (typeof id !== 'string') {
+      throw new TypeError('id is not a string');
+    }
+    super();
+    /** @type {string}*/
+    this.id = id;
+    this.options = Object.assign({
+      RTCConfiguration: DEFAULT_RTCCONF,
+    }, options);
+  }
+
+  _open(realtime, clientOptions) {
+    return realtime.createIMClient(this.id, clientOptions, 'webrtc').then((imClient) => {
+      this._imClient = imClient;
+      this.id = imClient.id;
+      imClient.on('message', (message, conversation) => {
+        if (message instanceof Offer) {
+          return this._handleOffer(message, conversation);
+        }
+        return false;
+      });
+      /**
+       * 用户在其他客户端登录，当前客户端被服务端强行下线。详见文档「单点登录」章节。
+       * @event WebRTCClient#conflict
+       */
+      imClient.on('conflict', (...payload) => this.emit('conflict', ...payload));
+      return this;
+    });
+  }
+
+  /**
+   * 关闭客户端
+   * @return {Promise}
+   */
+  close() {
+    return this._imClient.close();
+  }
+
+  /**
+   * 呼叫另一个用户
+   * @param  {string} targetId 用户 ID
+   * @param  {MediaStream} stream 本地流媒体，参见 {@link https://developer.mozilla.org/en-US/docs/Web/API/Media_Streams_API MediaStream}
+   * @return {Promise.&lt;OutgoingCall>} 呼出通话
+   */
+  call(targetId, stream) {
+    if (typeof targetId !== 'string') {
+      throw new TypeError('target id is not a string');
+    }
+    if (!stream) {
+      throw new TypeError('a MediaStream instance is required to make a call');
+    }
+    return this._imClient.ping([targetId])
+      .then((onlineClients) => {
+        if (!onlineClients.length) {
+          throw new Error(`Call failed as ${targetId} is not online`);
+        }
+        const outgoingCall = new OutgoingCall(targetId, null, this.options.RTCConfiguration);
+        const promise = new Promise((resolve) => {
+          outgoingCall._peerConnection.onnegotiationneeded = resolve;
+        });
+        outgoingCall._peerConnection.addStream(stream);
+        return promise
+          .then(() =>
+            Promise.all([
+              this._imClient.createConversation({
+                members: [targetId],
+                unique: true,
+              }),
+              outgoingCall._peerConnection.createOffer().then((localDescription) => {
+                outgoingCall._peerConnection.setLocalDescription(localDescription);
+              }),
+            ])
+          )
+          .then(([conversation]) => {
+            outgoingCall._setConversation(conversation);
+            return conversation.send(new Offer(outgoingCall._peerConnection.localDescription));
+          })
+          .then(() => outgoingCall);
+      });
+  }
+
+  _handleOffer(offer, conversation) {
+    const incomingCall = new IncomingCall(offer, conversation, this.options.RTCConfiguration);
+    /**
+     * 收到其他用户的呼叫
+     * @event WebRTCClient#call
+     * @param {incomingCall} incomingCall 呼入通话
+     */
+    this.emit('call', incomingCall);
+  }
+}
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.0</a> on Wed Jan 11 2017 13:40:05 GMT+0000 (UTC) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
+</footer>
+
+<script>prettyPrint();</script>
+<script src="scripts/linenumber.js"></script>
+</body>
+</html>
