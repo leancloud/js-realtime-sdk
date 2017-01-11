@@ -1,3 +1,13 @@
+<a name="3.3.4"></a>
+## 3.3.4 (2017-01-11)
+
+
+### Bug Fixes
+
+* **Conversation:** 修复了 send 方法的 `options.transient` 不生效的问题 ([#502](https://github.com/leancloud/js-realtime-sdk/issues/502)) ([f8c0b49](https://github.com/leancloud/js-realtime-sdk/commit/f8c0b49))
+
+
+
 <a name="3.3.3"></a>
 ## 3.3.3 (2016-12-16)
 
