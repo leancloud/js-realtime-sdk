@@ -49,8 +49,8 @@
 * **Conversation:** `send` 方法新增参数 `options`，与消息内容无关的信息现在作为发送选项设置，可选的参数包括
   * `options.pushData`：离线推送内容
   * `options.priority`：聊天室消息的优先级
-  * `options.reciept`：是否需要送达回执
-* **Message:** 废弃了 `Message#setNeedReciept` 方法与 Message 的 `needReciept` 属性，推荐使用 `Conversation#send` 方法的 `options.reciept` 参数 ([a38c481](https://github.com/leancloud/js-realtime-sdk/commit/a38c481))
+  * `options.receipt`：是否需要送达回执
+* **Message:** 废弃了 `Message#setNeedReceipt` 方法与 Message 的 `needReceipt` 属性，推荐使用 `Conversation#send` 方法的 `options.receipt` 参数 ([a38c481](https://github.com/leancloud/js-realtime-sdk/commit/a38c481))
 * **Error:** 新增了 ErrorCode，用于判断捕获的异常 ([#353](https://github.com/leancloud/js-realtime-sdk/issues/353)) ([bbdf608](https://github.com/leancloud/js-realtime-sdk/commit/bbdf608))
 * 增加 TypeScript 定义文件 ([#373](https://github.com/leancloud/js-realtime-sdk/issues/373)) ([2e5da17](https://github.com/leancloud/js-realtime-sdk/commit/2e5da17))
 

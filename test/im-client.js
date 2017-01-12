@@ -193,6 +193,14 @@ describe('IMClient', () => {
           conversations[0].lastMessage.should.be.instanceof(Message);
         })
     );
+    it('getConversations', () =>
+      client.getConversations([NON_EXISTING_ROOM_ID, EXISTING_ROOM_ID, EXISTING_ROOM_ID])
+        .then(([nonExistingConv, existingConv1, existingConv2]) => {
+          should(nonExistingConv).be.null();
+          existingConv1.id.should.eql(EXISTING_ROOM_ID);
+          existingConv2.should.be.exactly(existingConv1);
+        })
+    );
   });
 
   describe('createConversation', () => {

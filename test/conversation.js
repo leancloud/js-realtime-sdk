@@ -1,4 +1,4 @@
-import uuid from 'uuid';
+import uuid from 'uuid/v4';
 import Realtime from '../src/realtime';
 import { tap } from '../src/utils';
 import {
@@ -16,7 +16,7 @@ import {
   CLIENT_ID,
 } from './configs';
 
-import { listen, sinon } from './test-utils';
+import { hold, listen, sinon } from './test-utils';
 
 describe('Conversation', () => {
   let realtime;
@@ -371,10 +371,11 @@ describe('Conversation', () => {
     });
   });
 
-  it('unreadmessages event and markAsRead', () => {
-    const bwangId = uuid.v4();
+  it('unreadmessages/unreadmessagescountupdate event and markAsRead', () => {
+    const bwangId = uuid();
     let bwang0;
     let conversationId;
+    let bwangRealtime;
     const message = new Message({});
     return realtime.createIMClient()
       .then(jwu =>
@@ -389,35 +390,57 @@ describe('Conversation', () => {
             conv.send(new Message({})),
           ]).then(() => conv.send(message));
         }).then(tap(() => jwu.close()))
-      ).then(() =>
-        new Realtime({
+      ).then(() => {
+        bwangRealtime = new Realtime({
           appId: APP_ID,
           region: REGION,
-        }).createIMClient(bwangId)
-      ).then((c) => {
-        bwang0 = c;
-        return listen(bwang0, 'unreadmessages').then(([payload, conv]) => {
-          payload.count.should.be.eql(3);
-          payload.lastMessageId.should.be.eql(message.id);
-          payload.lastMessageTimestamp.should.be.eql(message.timestamp);
-          conv.unreadMessagesCount.should.eql(3);
-          conv.id.should.be.eql(conversationId);
         });
+        return bwangRealtime.createIMClient(bwangId);
+      }).then((c) => {
+        bwang0 = c;
+        return Promise.all([
+          listen(bwang0, 'unreadmessages').then(([payload, conv]) => {
+            payload.count.should.be.eql(3);
+            payload.lastMessageId.should.be.eql(message.id);
+            payload.lastMessageTimestamp.should.be.eql(message.timestamp);
+            conv.unreadMessagesCount.should.eql(3);
+            conv.id.should.be.eql(conversationId);
+          }),
+          listen(bwang0, 'unreadmessagescountupdate').then(([[conv]]) => {
+            conv.unreadMessagesCount.should.eql(3);
+            conv.id.should.be.eql(conversationId);
+            conv.lastMessage.should.be.instanceof(Message);
+            conv.lastMessage.id.should.eql(message.id);
+          }),
+        ]);
+      })
+      .then(() => {
+        bwangRealtime.pause();
+        bwangRealtime.resume();
+        const updateEventCallback = sinon.spy();
+        bwang0.on('unreadmessagescountupdate', updateEventCallback);
+        return listen(bwang0, 'reconnect')
+          .then(hold(1000))
+          .then(() => {
+            updateEventCallback.should.not.be.called();
+          });
       })
       .then(() => realtime.createIMClient(bwangId))
-      .then(bwang1 => listen(bwang1, 'unreadmessages')
-        .then(([payload, conv]) => {
-          payload.count.should.be.eql(3);
+      .then(bwang1 => listen(bwang1, 'unreadmessagescountupdate')
+        .then(([[conv]]) => {
+          conv.unreadMessagesCount.should.be.eql(3);
           conv.id.should.be.eql(conversationId);
+          conv.lastMessage.id.should.eql(message.id);
           return conv.markAsRead().then((conv1) => {
             conv1.unreadMessagesCount.should.be.eql(0);
             bwang1.close();
           });
         })
-      ).then(() => listen(bwang0, 'unreadmessages')
-        .then(([payload, conv]) => {
-          payload.count.should.be.eql(0);
+      ).then(() => listen(bwang0, 'unreadmessagescountupdate')
+        .then(([[conv]]) => {
+          conv.unreadMessagesCount.should.be.eql(0);
           conv.id.should.be.eql(conversationId);
+          conv.lastMessage.id.should.eql(message.id);
         })
       ).then(() => {
         bwang0.close();

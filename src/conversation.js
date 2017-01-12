@@ -69,7 +69,7 @@ export default class Conversation extends EventEmitter {
       /**
        * 最后一条消息时间
        * @memberof Conversation#
-       * @type {Date}
+       * @type {?Date}
        */
       lastMessageAt,
       /**
@@ -119,7 +119,11 @@ export default class Conversation extends EventEmitter {
      */
     this.unreadMessagesCount = 0;
     this.members = Array.from(new Set(this.members));
-    internal(this).messagesWaitingForReciept = {};
+    Object.assign(internal(this), {
+      messagesWaitingForReceipt: {},
+      lastDeliveredAt: null,
+      lastReadAt: null,
+    });
     if (client instanceof IMClient) {
       this._client = client;
     } else {
@@ -130,6 +134,9 @@ export default class Conversation extends EventEmitter {
       'membersjoined',
       'membersleft',
       'message',
+      'receipt',
+      'lastdeliveredatupdate',
+      'lastreadatupdate',
     ].forEach(event => this.on(
       event,
       (...payload) => this._debug(`${event} event emitted. %O`, payload)
@@ -155,6 +162,48 @@ export default class Conversation extends EventEmitter {
   }
   get lastMessageAt() {
     return this._lastMessageAt;
+  }
+  /**
+   * 最后消息送达时间，常用来实现消息的「已送达」标记，可通过 {@link Conversation#fetchReceiptTimestamps} 获取或更新该属性
+   * @type {?Date}
+   * @since 3.4.0
+   */
+  get lastDeliveredAt() {
+    if (this.members.length !== 2) return null;
+    return internal(this).lastDeliveredAt;
+  }
+  _setLastDeliveredAt(value) {
+    const date = decodeDate(value);
+    if (!(date < internal(this).lastDeliveredAt)) {
+      internal(this).lastDeliveredAt = date;
+      /**
+       * 最后消息送达时间更新
+       * @event Conversation#lastdeliveredatupdate
+       * @since 3.4.0
+       */
+      this.emit('lastdeliveredatupdate');
+    }
+  }
+  /**
+   * 最后消息被阅读时间，常用来实现发送消息的「已读」标记，可通过 {@link Conversation#fetchReceiptTimestamps} 获取或更新该属性
+   * @type {?Date}
+   * @since 3.4.0
+   */
+  get lastReadAt() {
+    if (this.members.length !== 2) return null;
+    return internal(this).lastReadAt;
+  }
+  _setLastReadAt(value) {
+    const date = decodeDate(value);
+    if (!(date < internal(this).lastReadAt)) {
+      internal(this).lastReadAt = date;
+      /**
+       * 最后消息被阅读时间更新
+       * @event Conversation#lastreadatupdate
+       * @since 3.4.0
+       */
+      this.emit('lastreadatupdate');
+    }
   }
 
   /**
@@ -500,7 +549,7 @@ export default class Conversation extends EventEmitter {
    * @param  {Message} message 消息，Message 及其子类的实例
    * @param {Object} [options] 发送选项，since v3.3.0
    * @param {Boolean} [options.transient] 是否作为暂态消息发送，since v3.3.1
-   * @param {Boolean} [options.reciept] 是否需要送达回执，仅在普通对话中有效
+   * @param {Boolean} [options.receipt] 是否需要送达回执，仅在普通对话中有效
    * @param {MessagePriority} [options.priority] 消息优先级，仅在暂态对话中有效，
    * see: {@link module:leancloud-realtime.MessagePriority MessagePriority}
    * @param {Object} [options.pushData] 消息对应的离线推送内容，如果消息接收方不在线，会推送指定的内容。其结构说明参见: {@link https://url.leanapp.cn/pushData 推送消息内容}
@@ -511,22 +560,28 @@ export default class Conversation extends EventEmitter {
     if (!(message instanceof Message)) {
       throw new TypeError(`${message} is not a Message`);
     }
+    const _options = Object.assign({}, options);
+    // support typo reciept option
+    if (_options.reciept !== undefined) {
+      console.warn('DEPRECATION Conversation#send options.reciept: please use receipt option instead');
+      if (_options.receipt === undefined) _options.receipt = _options.reciept;
+    }
     const {
       transient,
-      reciept,
+      receipt,
       priority,
       pushData,
     } = Object.assign(
       // support deprecated attribute: message.needReceipt
       {
         transient: message.transient,
-        reciept: message.needReceipt,
+        receipt: message.needReceipt,
       },
       // support Message static property: sendOptions
       message.constructor.sendOptions,
-      options
+      _options
     );
-    if (reciept) {
+    if (receipt) {
       if (this.transient) {
         console.warn('receipt option is ignored as the conversation is transient.');
       } else if (transient) {
@@ -552,7 +607,7 @@ export default class Conversation extends EventEmitter {
       directMessage: new DirectCommand({
         msg,
         cid: this.id,
-        r: reciept,
+        r: receipt,
         transient,
         dt: message.id,
         pushData: JSON.stringify(pushData),
@@ -585,8 +640,8 @@ export default class Conversation extends EventEmitter {
     }
     return sendPromise.then(() => {
       message._setStatus(MessageStatus.SENT);
-      if (reciept) {
-        internal(this).messagesWaitingForReciept[message.id] = message;
+      if (receipt) {
+        internal(this).messagesWaitingForReceipt[message.id] = message;
       }
       return message;
     }, (error) => {
@@ -635,16 +690,28 @@ export default class Conversation extends EventEmitter {
         })
       ),
     })).then(resCommand =>
-      Promise.all(resCommand.logsMessage.logs.map(log =>
-        this._client._messageParser.parse(log.data).then((message) => {
+      Promise.all(resCommand.logsMessage.logs.map(({
+        msgId,
+        timestamp,
+        from,
+        ackAt,
+        readAt,
+        data,
+      }) =>
+        this._client._messageParser.parse(data).then((message) => {
           const messageProps = {
-            id: log.msgId,
+            id: msgId,
             cid: this.id,
-            timestamp: new Date(log.timestamp.toNumber()),
-            from: log.from,
+            timestamp: new Date(timestamp.toNumber()),
+            from,
+            deliveredAt: ackAt,
           };
           Object.assign(message, messageProps);
-          message._setStatus(MessageStatus.SENT);
+          let status = MessageStatus.SENT;
+          if (ackAt) status = MessageStatus.DELIVERED;
+          message._setStatus(status);
+          if (ackAt) this._setLastDeliveredAt(ackAt);
+          if (readAt) this._setLastReadAt(readAt);
           return message;
         })
       ))
@@ -713,24 +780,68 @@ export default class Conversation extends EventEmitter {
    * 将该会话标记为已读
    * @return {Promise.<Conversation>} self
    */
-  markAsRead() {
-    return this._client.markAllAsRead([this]).then(() => this);
+  read() {
+    const client = this._client;
+    if (!internal(client).readConversationsBuffer) {
+      internal(client).readConversationsBuffer = new Set();
+    }
+    internal(client).readConversationsBuffer.add(this);
+    client._doSendRead();
+    this.unreadMessagesCount = 0;
+    return Promise.resolve(this);
   }
 
-  _handleReceipt({ messageId, deliveredAt }) {
-    const { messagesWaitingForReciept } = internal(this);
-    const message = messagesWaitingForReciept[messageId];
-    delete messagesWaitingForReciept[messageId];
+  /**
+   * 将该会话标记为已读
+   * @deprecated in favor of {@link Conversation#read}
+   * @return {Promise.<Conversation>} self
+   */
+  markAsRead() {
+    console.warn('DEPRECATION Conversation#markAsRead: Use Conversation#read instead.');
+    return this.read();
+  }
+
+  _handleReceipt({ messageId, timestamp, read }) {
+    if (read) {
+      this._setLastReadAt(timestamp);
+    } else {
+      this._setLastDeliveredAt(timestamp);
+    }
+    const { messagesWaitingForReceipt } = internal(this);
+    const message = messagesWaitingForReceipt[messageId];
     if (!message) return;
     message._setStatus(MessageStatus.DELIVERED);
-    message.deliveredAt = deliveredAt;
+    message.deliveredAt = timestamp;
+    delete messagesWaitingForReceipt[messageId];
     /**
      * 消息已送达。只有在发送时设置了需要回执的情况下才会收到送达回执，该回执并不代表用户已读。
      * @event Conversation#receipt
+     * @deprecated use {@link Conversation#event:lastdeliveredatupdate}
+     * and {@link Conversation#event:lastreadatupdate} instead
      * @since 3.2.0
      * @param {Object} payload
      * @param {Message} payload.message 送达的消息
      */
     this.emit('receipt', { message });
+  }
+
+  /**
+   * 更新对话的最新回执时间戳（lastDeliveredAt、lastReadAt）
+   * @since 3.4.0
+   * @return {Promise.<Conversation>} this
+   */
+  fetchReceiptTimestamps() {
+    return this._send(new GenericCommand({
+      op: 'max_read',
+    })).then(({
+      convMessage: {
+        maxReadTimestamp,
+        maxAckTimestamp,
+      },
+    }) => {
+      this._setLastDeliveredAt(maxAckTimestamp);
+      this._setLastReadAt(maxReadTimestamp);
+      return this;
+    });
   }
 }

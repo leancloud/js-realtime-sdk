@@ -245,6 +245,25 @@ describe('Messages', () => {
         .then(() => {
           message.status.should.eql(MessageStatus.DELIVERED);
           message.deliveredAt.should.be.Date();
+          conversationZwang.lastDeliveredAt.should.be.Date();
+        });
+    });
+    it('read', () => {
+      const message = new TextMessage('message needs receipt');
+      const readPromise = listen(conversationZwang, 'lastreadatupdate');
+      conversationWchen.on('message', (msg) => {
+        if (msg.id === message.id) conversationWchen.markAsRead();
+      });
+      message.setNeedReceipt(true);
+      return conversationZwang.send(message)
+        .then(() => readPromise)
+        .then(() => {
+          conversationZwang.lastReadAt.should.be.Date();
+        })
+        .then(() => conversationZwang.fetchReceiptTimestamps())
+        .then((conv) => {
+          conv.lastDeliveredAt.should.be.Date();
+          conv.lastReadAt.should.be.Date();
         });
     });
     it('errors', () => {

@@ -26,6 +26,7 @@ const rMessageStatus = {
   [MessageStatus.SENDING]: true,
   [MessageStatus.SENT]: true,
   [MessageStatus.DELIVERED]: true,
+  [MessageStatus.READ]: true,
   [MessageStatus.FAILED]: true,
 };
 
@@ -41,7 +42,7 @@ export default class Message {
        * @type {String}
        * @memberof Message#
        */
-      id: uuid.v4(),
+      id: uuid(),
       /**
        * 消息所在的 conversation id
        * @memberof Message#
@@ -64,7 +65,7 @@ export default class Message {
        * 标记需要回执
        * @memberof Message#
        * @type {Boolean}
-       * @deprecated 指定是否需要送达回执请使用 {@link Conversation#send} 方法的 `options.reciept` 参数。
+       * @deprecated 指定是否需要送达回执请使用 {@link Conversation#send} 方法的 `options.receipt` 参数。
        */
       needReceipt: false,
       /**
@@ -81,6 +82,12 @@ export default class Message {
        * @memberof Message#
        */
       // deliveredAt,
+      /**
+       * @var readAt {?Date} 消息被阅读时间
+       * @memberof Message#
+       * @since 3.4.0
+       */
+      // readAt,
     });
     this._setStatus(MessageStatus.NONE);
   }
@@ -89,10 +96,10 @@ export default class Message {
    * 设置是否需要送达回执
    * @param {Boolean} needReceipt
    * @return {Message} self
-   * @deprecated 请使用 {@link Conversation#send} 方法的 `options.reciept` 选项代替。
+   * @deprecated 请使用 {@link Conversation#send} 方法的 `options.receipt` 选项代替。
    */
   setNeedReceipt(needReceipt) {
-    console.warn('DEPRECATION Message#setNeedReceipt: Use Conversation#send with sendOptions.reciept instead.');
+    console.warn('DEPRECATION Message#setNeedReceipt: Use Conversation#send with sendOptions.receipt instead.');
     this.needReceipt = needReceipt;
     return this;
   }
