@@ -144,18 +144,18 @@ describe('Realtime', () => {
       (() => realtime.register({})).should.throw();
     });
   });
-  describe('retry', () => {
+  describe('retry/pause/resume', () => {
     let realtime;
     before(() => {
       realtime = createRealtime();
       return realtime._open();
     });
     after(() => realtime._close());
-    it('should throw when not offline', () => {
+    it('should throw when not disconnected', () => {
       (() => createRealtime().retry()).should.throw();
       (() => realtime.retry()).should.throw();
     });
-    it('should retry when offline', () =>
+    it('should retry when disconnected', () =>
       realtime._open().then((connection) => {
         const promise = listen(realtime, 'disconnect', 'eroor');
         connection.disconnect();
@@ -163,6 +163,17 @@ describe('Realtime', () => {
       }).then(() => {
         realtime.retry();
         return listen(realtime, 'reconnect', 'eroor');
+      })
+    );
+    it('should reconnect when offline', () =>
+      realtime._open().then(() => {
+        const promises = ['disconnect', 'offline'].map(event => listen(realtime, event, 'eroor'));
+        realtime.pause();
+        return Promise.all(promises);
+      }).then(() => {
+        const promises = ['retry', 'reconnect', 'online'].map(event => listen(realtime, event, 'eroor'));
+        realtime.resume();
+        return Promise.all(promises);
       })
     );
   });

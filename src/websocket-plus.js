@@ -6,7 +6,7 @@ import StateMachine from 'javascript-state-machine';
 
 import WebSocket from 'ws';
 
-import { tryAll } from './utils';
+import { tryAll, global } from './utils';
 
 const debug = d('LC:WebSocketPlus');
 
@@ -21,7 +21,7 @@ const requireConnected = (target, name, descriptor) =>
       if (!this.is('connected')) {
         const currentState = this.current;
         console.warn(`${name} should not be called when the connection is ${currentState}`);
-        if (this.is('offline') || this.is('reconnecting')) {
+        if (this.is('disconnected') || this.is('reconnecting')) {
           console.warn('disconnect and reconnect event should be handled to avoid such calls.');
         }
         throw new Error('Connection unavailable');
@@ -32,7 +32,6 @@ const requireConnected = (target, name, descriptor) =>
 
 class WebSocketPlus extends EventEmitter {
   constructor(getUrls, protocol) {
-    debug('initializing WebSocketPlus');
     if (typeof WebSocket === 'undefined') {
       throw new Error('WebSocket is undefined. Polyfill is required in this runtime.');
     }
@@ -45,10 +44,17 @@ class WebSocketPlus extends EventEmitter {
     this._protocol = protocol;
     this.init();
     this._createWs(this._getUrls, this._protocol).then(
-      () => this.open(),
-      error => this.throw(error)
+      () => {
+        this.__postponeTimers = this._postponeTimers.bind(this);
+        if (global.addEventListener) {
+          this.__pause = () => this.pause();
+          this.__resume = () => this.resume();
+          global.addEventListener('offline', this.__pause);
+          global.addEventListener('online', this.__resume);
+        }
+        this.open();
+      }
     ).catch(this.throw.bind(this));
-    this.__postponeTimers = this._postponeTimers.bind(this);
   }
 
   _createWs(getUrls, protocol) {
@@ -89,28 +95,33 @@ class WebSocketPlus extends EventEmitter {
     ws.close();
   }
 
+  // eslint-disable-next-line class-methods-use-this
+  onbeforeevent(event, from, to, ...payload) {
+    debug(`${event}: ${from} -> ${to}`, ...payload);
+  }
   onopen() {
-    debug('open');
     this.emit('open');
   }
   onconnected() {
     this._startConnectionKeeper();
   }
-  onleaveconnected() {
+  onleaveconnected(event, from, to) {
     this._stopConnectionKeeper();
-  }
-  onbeforedisconnect() {
-    debug('disconnect');
-    this.emit('disconnect');
-  }
-  ondisconnect() {
     this._destroyWs();
+    if (to === 'offline' || to === 'disconnected') {
+      this.emit('disconnect');
+    }
+  }
+  onbeforepause() {
+    this.emit('offline');
+  }
+  onbeforeresume() {
+    this.emit('online');
   }
   onreconnect() {
-    debug('reconnect');
     this.emit('reconnect');
   }
-  onoffline(event, from, to, attempt = 0) {
+  ondisconnected(event, from, to, attempt = 0) {
     const delay = DEFAULT_RETRY_STRATEGY.call(null, attempt);
     debug(`schedule attempt=${attempt} delay=${delay}`);
     this.emit('schedule', attempt, delay);
@@ -118,28 +129,26 @@ class WebSocketPlus extends EventEmitter {
       clearTimeout(this.__scheduledRetry);
     }
     this.__scheduledRetry = setTimeout(() => {
-      if (this.is('offline')) {
+      if (this.is('disconnected')) {
         this.retry(attempt);
       }
     }, delay);
   }
   onretry(event, from, to, attempt = 0) {
-    debug(`retry attempt=${attempt}`);
     this.emit('retry', attempt);
     this._createWs(this._getUrls, this._protocol).then(
-      () => this.reconnect(),
-      () => this.fail(attempt + 1)
+      () => (this.can('reconnect') ? this.reconnect() : this._destroyWs()),
+      () => this.can('fail') && this.fail(attempt + 1)
     );
   }
-  onclose() {
-    debug('close');
-    if (this._ws) {
-      this._ws.close();
-    }
-  }
   onerror(event, from, to, error) {
-    debug('error', error);
     this.emit('error', error);
+  }
+  onclose() {
+    if (global.removeEventListener) {
+      if (this.__pause) global.removeEventListener('offline', this.__pause);
+      if (this.__resume) global.removeEventListener('online', this.__resume);
+    }
   }
 
   // jsdoc-ignore-start
@@ -183,6 +192,7 @@ class WebSocketPlus extends EventEmitter {
     debug('start connection keeper');
     const addListener = this._ws.addListener || this._ws.addEventListener;
     addListener.call(this._ws, 'message', this.__postponeTimers);
+    addListener.call(this._ws, 'pong', this.__postponeTimers);
     this._postponeTimers();
   }
   _stopConnectionKeeper() {
@@ -190,6 +200,7 @@ class WebSocketPlus extends EventEmitter {
     // websockets/ws#489
     const removeListener = this._ws.removeListener || this._ws.removeEventListener;
     removeListener.call(this._ws, 'message', this.__postponeTimers);
+    removeListener.call(this._ws, 'pong', this.__postponeTimers);
     this._clearTimers();
   }
 
@@ -236,22 +247,31 @@ StateMachine.create({
   }, {
     name: 'disconnect',
     from: 'connected',
-    to: 'offline',
+    to: 'disconnected',
   }, {
     name: 'retry',
-    from: 'offline',
+    from: 'disconnected',
     to: 'reconnecting',
   }, {
     name: 'fail',
     from: 'reconnecting',
-    to: 'offline',
+    to: 'disconnected',
   }, {
     name: 'reconnect',
     from: 'reconnecting',
     to: 'connected',
   }, {
+    name: 'pause',
+    from: ['connected', 'disconnected', 'reconnecting'],
+    to: 'offline',
+  }, {
+  }, {
+    name: 'resume',
+    from: 'offline',
+    to: 'disconnected',
+  }, {
     name: 'close',
-    from: ['connected', 'offline', 'reconnecting'],
+    from: ['connected', 'disconnected', 'reconnecting', 'offline'],
     to: 'closed',
   }, {
     name: 'throw',
