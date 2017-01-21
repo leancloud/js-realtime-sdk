@@ -54,7 +54,7 @@
     "grunt-envify": "0.1.0",
     "grunt-rollup": "^1.0.1",
     "grunt-saucelabs": "^9.0.0",
-    "husky": "^0.12.0",
+    "husky": "^0.13.0",
     "inherit": "^2.2.3",
     "jsdoc": "3.4.0",
     "jsdoc-ignore-future": "^1.1.0",
