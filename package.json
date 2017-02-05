@@ -87,6 +87,7 @@
   },
   "browser": {
     "ws": "./src/browser/ws.js",
+    "protobufjs/light": "protobufjs/dist/light/protobuf",
     "sinon": false,
     "./dist/realtime.js": "./dist/realtime.browser.js"
   },

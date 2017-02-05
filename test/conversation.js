@@ -4,6 +4,8 @@ import { tap } from '../src/utils';
 import {
   GenericCommand,
   ConvCommand,
+  CommandType,
+  OpType,
 } from '../proto/message';
 import Message, { MessageStatus } from '../src/messages/message';
 import TextMessage from '../src/messages/text-message';
@@ -264,11 +266,11 @@ describe('Conversation', () => {
       client2.on('membersjoined', clientCallback);
       const conversationCallback = sinon.spy();
       conversation2.on('membersjoined', conversationCallback);
-      return client2._dispatchMessage(new GenericCommand({
-        cmd: 'conv',
-        op: 'members_joined',
+      return client2._dispatchMessage(GenericCommand.create({
+        cmd: CommandType.conv,
+        op: OpType.members_joined,
         peerId: CLIENT_ID_2,
-        convMessage: new ConvCommand({
+        convMessage: ConvCommand.create({
           cid: conversation2.id,
           m: ['lan'],
           initBy: CLIENT_ID,
@@ -293,11 +295,11 @@ describe('Conversation', () => {
       client2.on('membersleft', clientCallback);
       const conversationCallback = sinon.spy();
       conversation2.on('membersleft', conversationCallback);
-      return client2._dispatchMessage(new GenericCommand({
-        cmd: 'conv',
-        op: 'members_left',
+      return client2._dispatchMessage(GenericCommand.create({
+        cmd: CommandType.conv,
+        op: OpType.members_left,
         peerId: CLIENT_ID_2,
-        convMessage: new ConvCommand({
+        convMessage: ConvCommand.create({
           cid: conversation2.id,
           m: ['lan'],
           initBy: CLIENT_ID,
@@ -322,11 +324,11 @@ describe('Conversation', () => {
       client2.on('kicked', clientCallback);
       const conversationCallback = sinon.spy();
       conversation2.on('kicked', conversationCallback);
-      return client2._dispatchMessage(new GenericCommand({
-        cmd: 'conv',
-        op: 'left',
+      return client2._dispatchMessage(GenericCommand.create({
+        cmd: CommandType.conv,
+        op: OpType.left,
         peerId: CLIENT_ID_2,
-        convMessage: new ConvCommand({
+        convMessage: ConvCommand.create({
           cid: conversation2.id,
           initBy: CLIENT_ID,
         }),
@@ -348,11 +350,11 @@ describe('Conversation', () => {
       client2.on('invited', callback);
       const conversationCallback = sinon.spy();
       conversation2.on('invited', conversationCallback);
-      return client2._dispatchMessage(new GenericCommand({
-        cmd: 'conv',
-        op: 'joined',
+      return client2._dispatchMessage(GenericCommand.create({
+        cmd: CommandType.conv,
+        op: OpType.joined,
         peerId: CLIENT_ID_2,
-        convMessage: new ConvCommand({
+        convMessage: ConvCommand.create({
           cid: conversation2.id,
           initBy: CLIENT_ID,
         }),

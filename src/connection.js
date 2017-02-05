@@ -1,9 +1,11 @@
 import { default as d } from 'debug';
+import protobuf from 'protobufjs/dist/light/protobuf';
 import WebSocketPlus from './websocket-plus';
 import { createError } from './error';
 import { GenericCommand, CommandType } from '../proto/message';
-import { trim, isWeapp } from './utils';
+import { trim, isWeapp, global } from './utils';
 
+const { base64 } = protobuf.util;
 const debug = d('LC:Connection');
 
 const COMMAND_TIMEOUT = 20000;
@@ -34,15 +36,14 @@ export default class Connection extends WebSocketPlus {
     debug('↑', trim(command), 'sent');
 
     let message;
+    if (!GenericCommand.encode) throw new TypeError(`${command} is not a GenericCommand`);
+    message = GenericCommand.encode(command).finish();
     if (this._protocalFormat === 'protobase64') {
-      message = command.toBase64();
-    } else if (command.toBuffer) {
-      message = command.toBuffer();
-    } else if (command.toArrayBuffer) {
-      message = command.toArrayBuffer();
-    }
-    if (!message) {
-      throw new TypeError(`${command} is not a GenericCommand`);
+      if (global.Buffer && message instanceof global.Buffer) {
+        message = message.toString('base64');
+      } else {
+        message = base64.encode(message, 0, message.length);
+      }
     }
 
     super.send(message);
@@ -69,9 +70,22 @@ export default class Connection extends WebSocketPlus {
   }
 
   handleMessage(msg) {
+    let buffer;
     let message;
     try {
-      message = GenericCommand.decode(msg);
+      if (this._protocalFormat === 'protobase64') {
+        if (global.Buffer) {
+          buffer = new Buffer(msg, 'base64');
+        } else {
+          buffer = new Uint8Array(base64.length(msg));
+          base64.decode(msg, buffer, 0);
+        }
+      } else if (global.Buffer) {
+        buffer = msg;
+      } else {
+        buffer = new Uint8Array(msg);
+      }
+      message = GenericCommand.decode(buffer);
       debug('↓', trim(message), 'received');
     } catch (e) {
       console.warn('Decode message failed', msg);
@@ -102,8 +116,8 @@ export default class Connection extends WebSocketPlus {
   }
 
   ping() {
-    return this.send(new GenericCommand({
-      cmd: 'echo',
-    })).catch(error => console.warn('ping failed:', error));
+    return this.send(GenericCommand.create({
+      cmd: CommandType.echo,
+    })).catch(error => debug('ping failed:', error));
   }
 }

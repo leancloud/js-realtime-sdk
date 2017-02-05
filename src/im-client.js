@@ -16,7 +16,7 @@ import {
   OpType,
 } from '../proto/message';
 import { ErrorCode } from './error';
-import { tap, Expirable, Cache, keyRemap, union, difference, trim, internal } from './utils';
+import { tap, Expirable, Cache, keyRemap, union, difference, trim, internal, parseDate } from './utils';
 import { applyDecorators } from './plugin';
 import runSignatureFactory from './signature-factory-runner';
 import { MessageStatus } from './messages/message';
@@ -133,7 +133,7 @@ export default class IMClient extends Client {
         .then((conversation) => {
           let timestamp;
           if (conv.timestamp) {
-            timestamp = new Date(conv.timestamp.toNumber());
+            timestamp = parseDate(conv.timestamp);
             conversation.lastMessageAt = timestamp; // eslint-disable-line no-param-reassign
           }
           conversation.unreadMessagesCount = conv.unread; // eslint-disable-line no-param-reassign
@@ -161,7 +161,7 @@ export default class IMClient extends Client {
     } = message;
     const conversationId = rcpMessage.cid;
     const messageId = rcpMessage.id;
-    const deliveredAt = new Date(rcpMessage.t.toNumber());
+    const deliveredAt = parseDate(rcpMessage.t);
     const conversation = this._conversationCache.get(conversationId);
     // conversation not cached means the client does not send the message
     // during this session
@@ -307,7 +307,7 @@ export default class IMClient extends Client {
       const messageProps = {
         id,
         cid,
-        timestamp: new Date(timestamp.toNumber()),
+        timestamp: parseDate(timestamp),
         from: fromPeerId,
         transient,
       };
@@ -360,9 +360,9 @@ export default class IMClient extends Client {
     return Promise.all(Object.keys(this._ackMessageBuffer).map((cid) => {
       const convAckMessages = this._ackMessageBuffer[cid];
       const timestamps = convAckMessages.map(message => message.timestamp);
-      const command = new GenericCommand({
-        cmd: 'ack',
-        ackMessage: new AckCommand({
+      const command = GenericCommand.create({
+        cmd: CommandType.ack,
+        ackMessage: AckCommand.create({
           cid,
           fromts: Math.min.apply(null, timestamps),
           tots: Math.max.apply(null, timestamps),
@@ -385,11 +385,11 @@ export default class IMClient extends Client {
   _open(appId, tag, deviceId, isReconnect = false) {
     this._debug('open session');
     return Promise
-      .resolve(new GenericCommand({
-        cmd: 'session',
-        op: 'open',
+      .resolve(GenericCommand.create({
+        cmd: CommandType.session,
+        op: OpType.open,
         appId,
-        sessionMessage: new SessionCommand({
+        sessionMessage: SessionCommand.create({
           ua: `js/${VERSION}`,
           r: isReconnect,
         }),
@@ -463,9 +463,9 @@ export default class IMClient extends Client {
    */
   close() {
     this._debug('close session');
-    const command = new GenericCommand({
-      cmd: 'session',
-      op: 'close',
+    const command = GenericCommand.create({
+      cmd: CommandType.session,
+      op: OpType.close,
     });
     return this._send(command).then(
       () => {
@@ -491,10 +491,10 @@ export default class IMClient extends Client {
     if (!clientIds.length) {
       return Promise.resolve([]);
     }
-    const command = new GenericCommand({
-      cmd: 'session',
-      op: 'query',
-      sessionMessage: new SessionCommand({
+    const command = GenericCommand.create({
+      cmd: CommandType.session,
+      op: OpType.query,
+      sessionMessage: SessionCommand.create({
         sessionPeerIds: clientIds,
       }),
     });
@@ -535,13 +535,13 @@ export default class IMClient extends Client {
 
   _executeQuery(query) {
     const queryJSON = query.toJSON();
-    queryJSON.where = new JsonObjectMessage({
+    queryJSON.where = JsonObjectMessage.create({
       data: JSON.stringify(queryJSON.where),
     });
-    const command = new GenericCommand({
-      cmd: 'conv',
-      op: 'query',
-      convMessage: new ConvCommand(queryJSON),
+    const command = GenericCommand.create({
+      cmd: CommandType.conv,
+      op: OpType.query,
+      convMessage: ConvCommand.create(queryJSON),
     });
     return this
       ._send(command)
@@ -654,7 +654,7 @@ export default class IMClient extends Client {
       console.warn('DEPRECATION createConversation options.attributes param: Use options[propertyName] instead. See https://url.leanapp.cn/DeprecateAttributes for more details.');
       attr.attr = attributes;
     }
-    attr = new JsonObjectMessage({
+    attr = JsonObjectMessage.create({
       data: JSON.stringify(attr),
     });
 
@@ -666,10 +666,10 @@ export default class IMClient extends Client {
     };
 
     return Promise.resolve(
-        new GenericCommand({
-          cmd: 'conv',
-          op: 'start',
-          convMessage: new ConvCommand(startCommandJson),
+        GenericCommand.create({
+          cmd: CommandType.conv,
+          op: OpType.start,
+          convMessage: ConvCommand.create(startCommandJson),
         })
       )
       .then((command) => {
@@ -726,10 +726,10 @@ export default class IMClient extends Client {
     if (!conversations.length) {
       return Promise.resolve([]);
     }
-    return this._send(new GenericCommand({
-      cmd: 'read',
-      readMessage: new ReadCommand({
-        convs: conversations.map(conversation => new ReadTuple({
+    return this._send(GenericCommand.create({
+      cmd: CommandType.read,
+      readMessage: ReadCommand.create({
+        convs: conversations.map(conversation => ReadTuple.create({
           cid: conversation.id,
           timestamp: (conversation.lastMessageAt || new Date()).getTime(),
         })),
