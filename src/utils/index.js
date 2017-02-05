@@ -105,3 +105,16 @@ export const setValue = (target, key, value) => {
 
 // eslint-disable-next-line no-undef
 export const isWeapp = typeof wx === 'object' && typeof wx.connectSocket === 'function';
+
+export const parseDate = (timestamp) => {
+  if (typeof timestamp === 'number') {
+    return new Date(timestamp);
+  }
+  if (timestamp && typeof timestamp.toNumber === 'function') {
+    return new Date(timestamp.toNumber());
+  }
+  if (timestamp instanceof Date) {
+    return timestamp;
+  }
+  throw new TypeError(`can not parse ${timestamp} to Date`);
+};

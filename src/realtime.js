@@ -98,7 +98,6 @@ export default class Realtime extends EventEmitter {
         () => this._getEndpoints(this._options),
         protocol
       );
-      connection.binaryType = 'arraybuffer';
       connection.on('open', () => resolve(connection));
       connection.on('error', reject);
       connection.on('message', this._dispatchMessage.bind(this));
@@ -358,7 +357,7 @@ export default class Realtime extends EventEmitter {
   }
 
   _dispatchMessage(message) {
-    if (message.peerId !== null) {
+    if (message.peerId.length) {
       const targetClient = this._clients[message.peerId];
       if (targetClient) {
         return Promise.resolve(targetClient)

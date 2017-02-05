@@ -1,0 +1,711 @@
+{
+  "nested": {
+    "push_server": {
+      "nested": {
+        "messages": {
+          "options": {
+            "objc_class_prefix": "AVIM"
+          },
+          "nested": {
+            "CommandType": {
+              "values": {
+                "session": 0,
+                "conv": 1,
+                "direct": 2,
+                "ack": 3,
+                "rcp": 4,
+                "unread": 5,
+                "logs": 6,
+                "error": 7,
+                "login": 8,
+                "data": 9,
+                "room": 10,
+                "read": 11,
+                "presence": 12,
+                "report": 13,
+                "echo": 14
+              }
+            },
+            "OpType": {
+              "values": {
+                "open": 1,
+                "add": 2,
+                "remove": 3,
+                "close": 4,
+                "opened": 5,
+                "closed": 6,
+                "query": 7,
+                "query_result": 8,
+                "conflict": 9,
+                "added": 10,
+                "removed": 11,
+                "start": 30,
+                "started": 31,
+                "joined": 32,
+                "members_joined": 33,
+                "left": 39,
+                "members_left": 40,
+                "results": 42,
+                "count": 43,
+                "result": 44,
+                "update": 45,
+                "updated": 46,
+                "mute": 47,
+                "unmute": 48,
+                "status": 49,
+                "members": 50,
+                "join": 80,
+                "invite": 81,
+                "leave": 82,
+                "kick": 83,
+                "reject": 84,
+                "invited": 85,
+                "kicked": 86,
+                "upload": 100,
+                "uploaded": 101
+              }
+            },
+            "StatusType": {
+              "values": {
+                "on": 1,
+                "off": 2
+              }
+            },
+            "JsonObjectMessage": {
+              "fields": {
+                "data": {
+                  "rule": "required",
+                  "type": "string",
+                  "id": 1
+                }
+              }
+            },
+            "UnreadTuple": {
+              "fields": {
+                "cid": {
+                  "rule": "required",
+                  "type": "string",
+                  "id": 1
+                },
+                "unread": {
+                  "rule": "required",
+                  "type": "int32",
+                  "id": 2
+                },
+                "mid": {
+                  "type": "string",
+                  "id": 3
+                },
+                "timestamp": {
+                  "type": "int64",
+                  "id": 4
+                }
+              }
+            },
+            "LogItem": {
+              "fields": {
+                "from": {
+                  "type": "string",
+                  "id": 1
+                },
+                "data": {
+                  "type": "string",
+                  "id": 2
+                },
+                "timestamp": {
+                  "type": "int64",
+                  "id": 3
+                },
+                "msgId": {
+                  "type": "string",
+                  "id": 4
+                },
+                "ackAt": {
+                  "type": "int64",
+                  "id": 5
+                }
+              }
+            },
+            "LoginCommand": {
+              "fields": {}
+            },
+            "DataCommand": {
+              "fields": {
+                "ids": {
+                  "rule": "repeated",
+                  "type": "string",
+                  "id": 1
+                },
+                "msg": {
+                  "rule": "repeated",
+                  "type": "JsonObjectMessage",
+                  "id": 2
+                },
+                "offline": {
+                  "type": "bool",
+                  "id": 3
+                }
+              }
+            },
+            "SessionCommand": {
+              "fields": {
+                "t": {
+                  "type": "int64",
+                  "id": 1
+                },
+                "n": {
+                  "type": "string",
+                  "id": 2
+                },
+                "s": {
+                  "type": "string",
+                  "id": 3
+                },
+                "ua": {
+                  "type": "string",
+                  "id": 4
+                },
+                "r": {
+                  "type": "bool",
+                  "id": 5
+                },
+                "tag": {
+                  "type": "string",
+                  "id": 6
+                },
+                "deviceId": {
+                  "type": "string",
+                  "id": 7
+                },
+                "sessionPeerIds": {
+                  "rule": "repeated",
+                  "type": "string",
+                  "id": 8
+                },
+                "onlineSessionPeerIds": {
+                  "rule": "repeated",
+                  "type": "string",
+                  "id": 9
+                },
+                "st": {
+                  "type": "string",
+                  "id": 10
+                },
+                "stTtl": {
+                  "type": "int32",
+                  "id": 11
+                },
+                "code": {
+                  "type": "int32",
+                  "id": 12
+                },
+                "reason": {
+                  "type": "string",
+                  "id": 13
+                },
+                "deviceToken": {
+                  "type": "string",
+                  "id": 14
+                },
+                "sp": {
+                  "type": "bool",
+                  "id": 15
+                },
+                "detail": {
+                  "type": "string",
+                  "id": 16
+                }
+              }
+            },
+            "ErrorCommand": {
+              "fields": {
+                "code": {
+                  "rule": "required",
+                  "type": "int32",
+                  "id": 1
+                },
+                "reason": {
+                  "rule": "required",
+                  "type": "string",
+                  "id": 2
+                },
+                "appCode": {
+                  "type": "int32",
+                  "id": 3
+                },
+                "detail": {
+                  "type": "string",
+                  "id": 4
+                }
+              }
+            },
+            "DirectCommand": {
+              "fields": {
+                "msg": {
+                  "type": "string",
+                  "id": 1
+                },
+                "uid": {
+                  "type": "string",
+                  "id": 2
+                },
+                "fromPeerId": {
+                  "type": "string",
+                  "id": 3
+                },
+                "timestamp": {
+                  "type": "int64",
+                  "id": 4
+                },
+                "offline": {
+                  "type": "bool",
+                  "id": 5
+                },
+                "hasMore": {
+                  "type": "bool",
+                  "id": 6
+                },
+                "toPeerIds": {
+                  "rule": "repeated",
+                  "type": "string",
+                  "id": 7
+                },
+                "r": {
+                  "type": "bool",
+                  "id": 10
+                },
+                "cid": {
+                  "type": "string",
+                  "id": 11
+                },
+                "id": {
+                  "type": "string",
+                  "id": 12
+                },
+                "transient": {
+                  "type": "bool",
+                  "id": 13
+                },
+                "dt": {
+                  "type": "string",
+                  "id": 14
+                },
+                "roomId": {
+                  "type": "string",
+                  "id": 15
+                },
+                "pushData": {
+                  "type": "string",
+                  "id": 16
+                }
+              }
+            },
+            "AckCommand": {
+              "fields": {
+                "code": {
+                  "type": "int32",
+                  "id": 1
+                },
+                "reason": {
+                  "type": "string",
+                  "id": 2
+                },
+                "mid": {
+                  "type": "string",
+                  "id": 3
+                },
+                "cid": {
+                  "type": "string",
+                  "id": 4
+                },
+                "t": {
+                  "type": "int64",
+                  "id": 5
+                },
+                "uid": {
+                  "type": "string",
+                  "id": 6
+                },
+                "fromts": {
+                  "type": "int64",
+                  "id": 7
+                },
+                "tots": {
+                  "type": "int64",
+                  "id": 8
+                },
+                "type": {
+                  "type": "string",
+                  "id": 9
+                },
+                "ids": {
+                  "rule": "repeated",
+                  "type": "string",
+                  "id": 10
+                },
+                "appCode": {
+                  "type": "int32",
+                  "id": 11
+                }
+              }
+            },
+            "UnreadCommand": {
+              "fields": {
+                "convs": {
+                  "rule": "repeated",
+                  "type": "UnreadTuple",
+                  "id": 1
+                }
+              }
+            },
+            "ConvCommand": {
+              "fields": {
+                "m": {
+                  "rule": "repeated",
+                  "type": "string",
+                  "id": 1
+                },
+                "transient": {
+                  "type": "bool",
+                  "id": 2
+                },
+                "unique": {
+                  "type": "bool",
+                  "id": 3
+                },
+                "cid": {
+                  "type": "string",
+                  "id": 4
+                },
+                "cdate": {
+                  "type": "string",
+                  "id": 5
+                },
+                "initBy": {
+                  "type": "string",
+                  "id": 6
+                },
+                "sort": {
+                  "type": "string",
+                  "id": 7
+                },
+                "limit": {
+                  "type": "int32",
+                  "id": 8
+                },
+                "skip": {
+                  "type": "int32",
+                  "id": 9
+                },
+                "flag": {
+                  "type": "int32",
+                  "id": 10
+                },
+                "count": {
+                  "type": "int32",
+                  "id": 11
+                },
+                "udate": {
+                  "type": "string",
+                  "id": 12
+                },
+                "t": {
+                  "type": "int64",
+                  "id": 13
+                },
+                "n": {
+                  "type": "string",
+                  "id": 14
+                },
+                "s": {
+                  "type": "string",
+                  "id": 15
+                },
+                "statusSub": {
+                  "type": "bool",
+                  "id": 16
+                },
+                "statusPub": {
+                  "type": "bool",
+                  "id": 17
+                },
+                "statusTTL": {
+                  "type": "int32",
+                  "id": 18
+                },
+                "members": {
+                  "rule": "repeated",
+                  "type": "string",
+                  "id": 19
+                },
+                "results": {
+                  "type": "JsonObjectMessage",
+                  "id": 100
+                },
+                "where": {
+                  "type": "JsonObjectMessage",
+                  "id": 101
+                },
+                "attr": {
+                  "type": "JsonObjectMessage",
+                  "id": 103
+                }
+              }
+            },
+            "RoomCommand": {
+              "fields": {
+                "roomId": {
+                  "type": "string",
+                  "id": 1
+                },
+                "s": {
+                  "type": "string",
+                  "id": 2
+                },
+                "t": {
+                  "type": "int64",
+                  "id": 3
+                },
+                "n": {
+                  "type": "string",
+                  "id": 4
+                },
+                "transient": {
+                  "type": "bool",
+                  "id": 5
+                },
+                "roomPeerIds": {
+                  "rule": "repeated",
+                  "type": "string",
+                  "id": 6
+                },
+                "byPeerId": {
+                  "type": "string",
+                  "id": 7
+                }
+              }
+            },
+            "LogsCommand": {
+              "fields": {
+                "cid": {
+                  "type": "string",
+                  "id": 1
+                },
+                "l": {
+                  "type": "int32",
+                  "id": 2
+                },
+                "limit": {
+                  "type": "int32",
+                  "id": 3
+                },
+                "t": {
+                  "type": "int64",
+                  "id": 4
+                },
+                "tt": {
+                  "type": "int64",
+                  "id": 5
+                },
+                "tmid": {
+                  "type": "string",
+                  "id": 6
+                },
+                "mid": {
+                  "type": "string",
+                  "id": 7
+                },
+                "checksum": {
+                  "type": "string",
+                  "id": 8
+                },
+                "stored": {
+                  "type": "bool",
+                  "id": 9
+                },
+                "logs": {
+                  "rule": "repeated",
+                  "type": "LogItem",
+                  "id": 105
+                }
+              }
+            },
+            "RcpCommand": {
+              "fields": {
+                "id": {
+                  "type": "string",
+                  "id": 1
+                },
+                "cid": {
+                  "type": "string",
+                  "id": 2
+                },
+                "t": {
+                  "type": "int64",
+                  "id": 3
+                }
+              }
+            },
+            "ReadTuple": {
+              "fields": {
+                "cid": {
+                  "rule": "required",
+                  "type": "string",
+                  "id": 1
+                },
+                "timestamp": {
+                  "type": "int64",
+                  "id": 2
+                },
+                "mid": {
+                  "type": "string",
+                  "id": 3
+                }
+              }
+            },
+            "ReadCommand": {
+              "fields": {
+                "cid": {
+                  "type": "string",
+                  "id": 1
+                },
+                "cids": {
+                  "rule": "repeated",
+                  "type": "string",
+                  "id": 2
+                },
+                "convs": {
+                  "rule": "repeated",
+                  "type": "ReadTuple",
+                  "id": 3
+                }
+              }
+            },
+            "PresenceCommand": {
+              "fields": {
+                "status": {
+                  "type": "StatusType",
+                  "id": 1
+                },
+                "sessionPeerIds": {
+                  "rule": "repeated",
+                  "type": "string",
+                  "id": 2
+                },
+                "cid": {
+                  "type": "string",
+                  "id": 3
+                }
+              }
+            },
+            "ReportCommand": {
+              "fields": {
+                "initiative": {
+                  "type": "bool",
+                  "id": 1
+                },
+                "type": {
+                  "type": "string",
+                  "id": 2
+                },
+                "data": {
+                  "type": "string",
+                  "id": 3
+                }
+              }
+            },
+            "GenericCommand": {
+              "fields": {
+                "cmd": {
+                  "rule": "required",
+                  "type": "CommandType",
+                  "id": 1
+                },
+                "op": {
+                  "type": "OpType",
+                  "id": 2
+                },
+                "appId": {
+                  "type": "string",
+                  "id": 3
+                },
+                "peerId": {
+                  "type": "string",
+                  "id": 4
+                },
+                "i": {
+                  "type": "int32",
+                  "id": 5
+                },
+                "installationId": {
+                  "type": "string",
+                  "id": 6
+                },
+                "priority": {
+                  "type": "int32",
+                  "id": 7
+                },
+                "loginMessage": {
+                  "type": "LoginCommand",
+                  "id": 100
+                },
+                "dataMessage": {
+                  "type": "DataCommand",
+                  "id": 101
+                },
+                "sessionMessage": {
+                  "type": "SessionCommand",
+                  "id": 102
+                },
+                "errorMessage": {
+                  "type": "ErrorCommand",
+                  "id": 103
+                },
+                "directMessage": {
+                  "type": "DirectCommand",
+                  "id": 104
+                },
+                "ackMessage": {
+                  "type": "AckCommand",
+                  "id": 105
+                },
+                "unreadMessage": {
+                  "type": "UnreadCommand",
+                  "id": 106
+                },
+                "readMessage": {
+                  "type": "ReadCommand",
+                  "id": 107
+                },
+                "rcpMessage": {
+                  "type": "RcpCommand",
+                  "id": 108
+                },
+                "logsMessage": {
+                  "type": "LogsCommand",
+                  "id": 109
+                },
+                "convMessage": {
+                  "type": "ConvCommand",
+                  "id": 110
+                },
+                "roomMessage": {
+                  "type": "RoomCommand",
+                  "id": 111
+                },
+                "presenceMessage": {
+                  "type": "PresenceCommand",
+                  "id": 112
+                },
+                "reportMessage": {
+                  "type": "ReportCommand",
+                  "id": 113
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

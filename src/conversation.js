@@ -3,12 +3,14 @@ import isEmpty from 'lodash/isEmpty';
 import isPlainObject from 'lodash/isPlainObject';
 import cloneDeep from 'lodash/cloneDeep';
 import { default as d } from 'debug';
-import { decodeDate, keyRemap, union, difference, internal, setValue } from './utils';
+import { decodeDate, keyRemap, union, difference, internal, setValue, parseDate } from './utils';
 import { applyDecorators } from './plugin';
 import IMClient from './im-client';
 import {
   GenericCommand,
   ConvCommand,
+  CommandType,
+  OpType,
   JsonObjectMessage,
   DirectCommand,
   LogsCommand,
@@ -293,13 +295,13 @@ export default class Conversation extends EventEmitter {
 
   _send(command, ...args) {
     /* eslint-disable no-param-reassign */
-    if (command.cmd === null) {
-      command.cmd = 'conv';
+    if (!Object.prototype.hasOwnProperty.call(command, 'cmd')) {
+      command.cmd = CommandType.conv;
     }
-    if (command.cmd === 'conv' && command.convMessage === null) {
-      command.convMessage = new ConvCommand();
+    if (command.cmd === CommandType.conv && command.convMessage === null) {
+      command.convMessage = ConvCommand.create();
     }
-    if (command.convMessage && command.convMessage.cid === null) {
+    if (command.convMessage && !Object.prototype.hasOwnProperty.call(command, 'cid')) {
       command.convMessage.cid = this.id;
     }
     /* eslint-enable no-param-reassign */
@@ -317,14 +319,14 @@ export default class Conversation extends EventEmitter {
       return Promise.resolve(this);
     }
     this._debug(`attr: ${JSON.stringify(attr)}`);
-    const convMessage = new ConvCommand({
-      attr: new JsonObjectMessage({
+    const convMessage = ConvCommand.create({
+      attr: JsonObjectMessage.create({
         data: JSON.stringify(attr),
       }),
     });
     return this
-      ._send(new GenericCommand({
-        op: 'update',
+      ._send(GenericCommand.create({
+        op: OpType.update,
         convMessage,
       }))
       .then((resCommand) => {
@@ -354,8 +356,8 @@ export default class Conversation extends EventEmitter {
    */
   mute() {
     this._debug('mute');
-    return this._send(new GenericCommand({
-      op: 'mute',
+    return this._send(GenericCommand.create({
+      op: OpType.mute,
     })).then(() => {
       if (!this.transient) {
         this.muted = true;
@@ -371,8 +373,8 @@ export default class Conversation extends EventEmitter {
    */
   unmute() {
     this._debug('unmute');
-    return this._send(new GenericCommand({
-      op: 'unmute',
+    return this._send(GenericCommand.create({
+      op: OpType.unmute,
     })).then(() => {
       if (!this.transient) {
         this.muted = false;
@@ -388,8 +390,8 @@ export default class Conversation extends EventEmitter {
    */
   count() {
     this._debug('unmute');
-    return this._send(new GenericCommand({
-      op: 'count',
+    return this._send(GenericCommand.create({
+      op: OpType.count,
     })).then(resCommand => resCommand.convMessage.count);
   }
 
@@ -403,12 +405,12 @@ export default class Conversation extends EventEmitter {
     if (typeof clientIds === 'string') {
       clientIds = [clientIds]; // eslint-disable-line no-param-reassign
     }
-    const convMessage = new ConvCommand({
+    const convMessage = ConvCommand.create({
       m: clientIds,
     });
     return Promise.resolve(
-      new GenericCommand({
-        op: 'add',
+      GenericCommand.create({
+        op: OpType.add,
         convMessage,
       })
     ).then((command) => {
@@ -445,12 +447,12 @@ export default class Conversation extends EventEmitter {
     if (typeof clientIds === 'string') {
       clientIds = [clientIds]; // eslint-disable-line no-param-reassign
     }
-    const convMessage = new ConvCommand({
+    const convMessage = ConvCommand.create({
       m: clientIds,
     });
     return Promise.resolve(
-      new GenericCommand({
-        op: 'remove',
+      GenericCommand.create({
+        op: OpType.remove,
         convMessage,
       })
     ).then((command) => {
@@ -547,9 +549,9 @@ export default class Conversation extends EventEmitter {
     if (typeof msg !== 'string') {
       msg = JSON.stringify(msg);
     }
-    let sendPromise = this._send(new GenericCommand({
-      cmd: 'direct',
-      directMessage: new DirectCommand({
+    let sendPromise = this._send(GenericCommand.create({
+      cmd: CommandType.direct,
+      directMessage: DirectCommand.create({
         msg,
         cid: this.id,
         r: reciept,
@@ -562,6 +564,7 @@ export default class Conversation extends EventEmitter {
     if (!transient) {
       sendPromise = sendPromise.then((resCommand) => {
         const {
+          ackMessage,
           ackMessage: {
             uid,
             t,
@@ -570,14 +573,14 @@ export default class Conversation extends EventEmitter {
             appCode,
             },
           } = resCommand;
-        if (code !== null) {
+        if (Object.prototype.hasOwnProperty.call(ackMessage, 'code')) {
           throw createError({
             code, reason, appCode,
           });
         }
         Object.assign(message, {
           id: uid,
-          timestamp: new Date(t.toNumber()),
+          timestamp: parseDate(t),
         });
         this.lastMessage = message;
         this.lastMessageAt = message.timestamp;
@@ -627,9 +630,9 @@ export default class Conversation extends EventEmitter {
     if (conditions.tt instanceof Date) {
       conditions.tt = conditions.tt.getTime();
     }
-    return this._send(new GenericCommand({
-      cmd: 'logs',
-      logsMessage: new LogsCommand(
+    return this._send(GenericCommand.create({
+      cmd: CommandType.logs,
+      logsMessage: LogsCommand.create(
         Object.assign(conditions, {
           cid: this.id,
         })
@@ -640,7 +643,7 @@ export default class Conversation extends EventEmitter {
           const messageProps = {
             id: log.msgId,
             cid: this.id,
-            timestamp: new Date(log.timestamp.toNumber()),
+            timestamp: parseDate(log.timestamp),
             from: log.from,
           };
           Object.assign(message, messageProps);

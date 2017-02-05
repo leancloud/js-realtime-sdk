@@ -1,4 +1,5 @@
-import messages from './message-compiled';
+import protobuf from 'protobufjs/light';
+import message from './message.json';
 
 const {
   JsonObjectMessage,
@@ -23,7 +24,8 @@ const {
   CommandType,
   OpType,
   StatusType,
-} = messages.push_server.messages;
+} = protobuf.Root.fromJSON(message)
+  .lookup('push_server.messages');
 
 export {
   JsonObjectMessage,

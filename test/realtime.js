@@ -4,7 +4,7 @@ import should from 'should/as-function';
 import Realtime from '../src/realtime';
 import Connection from '../src/connection';
 import Client from '../src/client';
-import { GenericCommand, CommandType, ConvCommand } from '../proto/message';
+import { GenericCommand, CommandType, OpType, ConvCommand } from '../proto/message';
 import TextMessage from '../src/messages/text-message';
 
 import { listen, sinon } from './test-utils';
@@ -199,26 +199,26 @@ describe('Connection', () => {
       })
   );
   it('send command error', () =>
-    connection.send(new GenericCommand({
-      cmd: 'conv',
-      op: 'update',
+    connection.send(GenericCommand.create({
+      cmd: CommandType.conv,
+      op: OpType.update,
       peerId: client.id,
-      convMessage: new ConvCommand({
+      convMessage: ConvCommand.create({
         cid: NON_EXISTING_ROOM_ID,
       }),
     })).should.be.rejectedWith('CONVERSATION_UPDATE_REJECTED')
   );
   it('message dispatch', () => {
     const clientMessageEventCallback = sinon.stub(client, '_dispatchMessage');
-    connection.emit('message', new GenericCommand({
+    connection.emit('message', GenericCommand.create({
       cmd: 1,
     }));
-    connection.emit('message', new GenericCommand({
+    connection.emit('message', GenericCommand.create({
       cmd: 1,
       peerId: 'fake clientId',
     }));
     clientMessageEventCallback.should.not.be.called();
-    const validMessage = new GenericCommand({
+    const validMessage = GenericCommand.create({
       cmd: 1,
       peerId: client.id,
     });
