@@ -1,4 +1,4 @@
-import { default as d } from 'debug';
+import d from 'debug';
 import EventEmitter from 'eventemitter3';
 import axios from 'axios';
 import uuid from 'uuid/v4';
@@ -172,7 +172,7 @@ export default class Realtime extends EventEmitter {
       // event proxy
       ['disconnect', 'reconnect', 'retry', 'schedule', 'offline', 'online'].forEach(
         event => connection.on(event, (...payload) => {
-          debug(`${event} event emitted.`, ...payload);
+          debug(`${event} event emitted. %O`, payload);
           this.emit(event, ...payload);
           if (event !== 'reconnect') {
             Object.values(this._clients).forEach((client) => {
@@ -213,7 +213,7 @@ export default class Realtime extends EventEmitter {
           tap(info => this._cache.set('endpoints', info, info.ttl * 1000))
         )
     ).then((info) => {
-      debug('endpoint info:', info);
+      debug('endpoint info: %O', info);
       return [info.server, info.secondary];
     });
   }
@@ -365,11 +365,11 @@ export default class Realtime extends EventEmitter {
           .catch(debug);
       }
       return debug(
-        '[WARN] Unexpected message received without any live client match',
+        '[WARN] Unexpected message received without any live client match: %O',
         trim(message)
       );
     }
-    return debug('[WARN] Unexpected message received without peerId', trim(message));
+    return debug('[WARN] Unexpected message received without peerId: %O', trim(message));
   }
 
   /**

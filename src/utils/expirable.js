@@ -1,4 +1,4 @@
-import { default as d } from 'debug';
+import d from 'debug';
 
 const EXPIRED = Symbol('expired');
 const debug = d('LC:Expirable');

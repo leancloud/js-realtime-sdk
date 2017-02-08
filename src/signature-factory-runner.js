@@ -1,4 +1,4 @@
-import { default as d } from 'debug';
+import d from 'debug';
 import { tap } from './utils';
 
 const debug = d('LC:SignatureFactoryRunner');
@@ -28,7 +28,7 @@ export default (signatureFactory, params) =>
       return signatureFactory(...params);
     })
     .then(
-      tap(signatureResult => debug('sign result', signatureResult)),
+      tap(signatureResult => debug('sign result %O', signatureResult)),
       (error) => {
         // eslint-disable-next-line no-param-reassign
         error.message = `sign error: ${error.message}`;

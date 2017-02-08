@@ -1,6 +1,6 @@
 // WebSocket with auto reconnecting feature, backup endpoint and EventEmitter interface.
 
-import { default as d } from 'debug';
+import d from 'debug';
 import EventEmitter from 'eventemitter3';
 import StateMachine from 'javascript-state-machine';
 
