@@ -7,7 +7,7 @@ import Conversation from '../src/conversation';
 import Message from '../src/messages/message';
 import { internal } from '../src/utils';
 
-import { sinon, listen } from './test-utils';
+import { sinon, listen, series } from './test-utils';
 
 import {
   APP_ID,
@@ -220,7 +220,7 @@ describe('IMClient', () => {
       (() => client.createConversation()).should.throw();
     });
     it('unique', () =>
-      Promise.all([0, 0].map(() => client.createConversation({
+      series([0, 0].map(() => () => client.createConversation({
         name: 'unique room',
         members: ['hjiang', 'jfeng'],
         unique: true,
