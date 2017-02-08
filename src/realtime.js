@@ -98,7 +98,6 @@ export default class Realtime extends EventEmitter {
         () => this._getEndpoints(this._options),
         protocol
       );
-      connection.binaryType = 'arraybuffer';
       connection.on('open', () => resolve(connection));
       connection.on('error', reject);
       connection.on('message', this._dispatchMessage.bind(this));
