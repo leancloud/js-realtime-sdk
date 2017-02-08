@@ -11,3 +11,8 @@ export const hold = time => result => wait(time).then(() => result);
 
 /* global window */
 export const sinon = (typeof window !== 'undefined' && window.sinon) || require('sinon');
+
+export const series = promiseGens => promiseGens.reduce(
+  (m, p) => m.then(v => Promise.all([...v, p()])),
+  Promise.resolve([])
+);
