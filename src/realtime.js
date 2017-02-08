@@ -1,7 +1,7 @@
 import { default as d } from 'debug';
 import EventEmitter from 'eventemitter3';
 import axios from 'axios';
-import uuid from 'uuid';
+import uuid from 'uuid/v4';
 import Connection from './connection';
 import { ErrorCode, createError } from './error';
 import { tap, Cache, trim, internal, ensureArray, isWeapp } from './utils';
