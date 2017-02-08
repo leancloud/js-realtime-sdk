@@ -2,7 +2,7 @@ import EventEmitter from 'eventemitter3';
 import isEmpty from 'lodash/isEmpty';
 import isPlainObject from 'lodash/isPlainObject';
 import cloneDeep from 'lodash/cloneDeep';
-import { default as d } from 'debug';
+import d from 'debug';
 import { decodeDate, keyRemap, union, difference, internal, setValue } from './utils';
 import { applyDecorators } from './plugin';
 import IMClient from './im-client';
@@ -132,7 +132,7 @@ export default class Conversation extends EventEmitter {
       'message',
     ].forEach(event => this.on(
       event,
-      (...payload) => this._debug(`${event} event emitted.`, ...payload)
+      (...payload) => this._debug(`${event} event emitted. %O`, payload)
     ));
     // onConversationCreate hook
     applyDecorators(this._client._plugins.onConversationCreate, this);
@@ -316,7 +316,7 @@ export default class Conversation extends EventEmitter {
       this._debug('nothing touched, resolve with self');
       return Promise.resolve(this);
     }
-    this._debug(`attr: ${JSON.stringify(attr)}`);
+    this._debug('attr: %O', attr);
     const convMessage = new ConvCommand({
       attr: new JsonObjectMessage({
         data: JSON.stringify(attr),
@@ -607,7 +607,7 @@ export default class Conversation extends EventEmitter {
    * @return {Promise.<Message[]>} 消息列表
    */
   queryMessages(options = {}) {
-    this._debug('query messages', options);
+    this._debug('query messages %O', options);
     if (options.beforeMessageId && !options.beforeTime) {
       throw new Error('query option beforeMessageId must be used with option beforeTime');
     }

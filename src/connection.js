@@ -1,4 +1,4 @@
-import { default as d } from 'debug';
+import d from 'debug';
 import WebSocketPlus from './websocket-plus';
 import { createError } from './error';
 import { GenericCommand, CommandType } from '../proto/message';
@@ -31,7 +31,7 @@ export default class Connection extends WebSocketPlus {
       serialId = this._serialId;
       command.i = serialId; // eslint-disable-line no-param-reassign
     }
-    debug('↑', trim(command), 'sent');
+    debug('↑ %O sent', trim(command));
 
     let message;
     if (this._protocalFormat === 'protobase64') {
@@ -58,7 +58,7 @@ export default class Connection extends WebSocketPlus {
       setTimeout(
         () => {
           if (this._commands[serialId]) {
-            debug('✗', trim(command), 'timeout');
+            debug('✗ %O timeout', trim(command));
             reject(new Error('Command Timeout.'));
             delete this._commands[serialId];
           }
@@ -72,7 +72,7 @@ export default class Connection extends WebSocketPlus {
     let message;
     try {
       message = GenericCommand.decode(msg);
-      debug('↓', trim(message), 'received');
+      debug('↓ %O received', trim(message));
     } catch (e) {
       console.warn('Decode message failed', msg);
     }

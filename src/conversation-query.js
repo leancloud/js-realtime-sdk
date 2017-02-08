@@ -1,4 +1,4 @@
-import { default as d } from 'debug';
+import d from 'debug';
 
 const debug = d('LC:ConversationQuery');
 

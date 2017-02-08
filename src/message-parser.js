@@ -1,4 +1,4 @@
-import { default as d } from 'debug';
+import d from 'debug';
 import isPlainObject from 'lodash/isPlainObject';
 import { applyMiddlewares } from './plugin';
 
@@ -57,7 +57,7 @@ export default class MessageParser {
   @applyPlugins
   // jsdoc-ignore-end
   parse(content) {
-    debug('parsing message:', content);
+    debug('parsing message: %O', content);
     // eslint-disable-next-line no-restricted-syntax
     for (const Klass of this._messageClasses) {
       const contentCopy = isPlainObject(content) ? Object.assign({}, content) : content;
@@ -79,7 +79,7 @@ export default class MessageParser {
           });
         }
         if (result !== undefined) {
-          debug('parse result:', result);
+          debug('parse result: %O', result);
           return result;
         }
       }

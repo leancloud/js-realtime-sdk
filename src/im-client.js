@@ -1,6 +1,6 @@
 import throttle from 'lodash/throttle';
 import EventEmitter from 'eventemitter3';
-import { default as d } from 'debug';
+import d from 'debug';
 import Client from './client';
 import Conversation from './conversation';
 import ConversationQuery from './conversation-query';
@@ -58,7 +58,7 @@ export default class IMClient extends Client {
       'unhandledmessage',
     ].forEach(event => this.on(
       event,
-      (...payload) => this._debug(`${event} event emitted.`, ...payload)
+      (...payload) => this._debug(`${event} event emitted. %O`, payload)
     ));
     // onIMClientCreate hook
     applyDecorators(this._plugins.onIMClientCreate, this);
@@ -336,7 +336,7 @@ export default class IMClient extends Client {
   }
 
   _sendAck(message) {
-    this._debug('send ack for', message);
+    this._debug('send ack for %O', message);
     const { cid } = message;
     if (!cid) {
       return Promise.reject(new Error('missing cid'));
@@ -356,7 +356,7 @@ export default class IMClient extends Client {
       // if not connected, just skip everything
       return Promise.resolve();
     }
-    debug('do send ack', this._ackMessageBuffer);
+    debug('do send ack %O', this._ackMessageBuffer);
     return Promise.all(Object.keys(this._ackMessageBuffer).map((cid) => {
       const convAckMessages = this._ackMessageBuffer[cid];
       const timestamps = convAckMessages.map(message => message.timestamp);

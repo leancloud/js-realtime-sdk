@@ -1,4 +1,4 @@
-import { default as d } from 'debug';
+import d from 'debug';
 import Expirable from './expirable';
 
 const debug = d('LC:Cache');
@@ -13,7 +13,7 @@ export default class Cache {
     if (cache) {
       const value = cache.value;
       if (value !== Expirable.EXPIRED) {
-        debug(`[${this.name}] hit: ${key} ${cache.value}`);
+        debug('[%s] hit: %s %O', this.name, key, cache.value);
         return cache.value;
       }
       delete this._map[key];
@@ -23,7 +23,7 @@ export default class Cache {
   }
 
   set(key, value, ttl) {
-    debug(`[${this.name}] set: ${key} ${value} ${ttl}`);
+    debug('[%s] set: %s %O %d', this.name, key, value, ttl);
     this._map[key] = new Expirable(value, ttl);
   }
 }
