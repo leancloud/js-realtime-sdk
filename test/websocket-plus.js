@@ -92,19 +92,17 @@ describe('WebSocketPlus', () => {
       if (!ws.is('closed')) ws.close();
     });
     it('should emit offline-disconnect-online-schedule in order', () => {
-      const offlineCallback = sinon.spy();
-      ws.on('offline', offlineCallback);
-      const onlineCallback = sinon.spy();
-      ws.on('online', onlineCallback);
-      const listenDisconnect = listen(ws, 'disconnect');
+      const events = [];
+      ['disconnect', 'offline', 'online', 'schedule'].forEach(event => ws.on(event, () => events.push(event)));
+      const listenOffline = listen(ws, 'offline');
       const listenSchedule = listen(ws, 'schedule');
       ws.pause();
-      return listenDisconnect.then(() => {
-        offlineCallback.should.be.calledOnce();
+      return listenOffline.then(() => {
+        events.should.eql(['disconnect', 'offline']);
         ws.resume();
         return listenSchedule;
       }).then(() => {
-        onlineCallback.should.be.calledOnce();
+        events.should.eql(['disconnect', 'offline', 'online', 'schedule']);
       });
     });
   });

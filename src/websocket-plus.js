@@ -112,7 +112,7 @@ class WebSocketPlus extends EventEmitter {
       this.emit('disconnect');
     }
   }
-  onbeforepause() {
+  onpause() {
     this.emit('offline');
   }
   onbeforeresume() {
