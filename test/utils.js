@@ -10,6 +10,7 @@ import {
   difference,
   ensureArray,
   setValue,
+  throttle,
 } from '../src/utils';
 import { wait, sinon } from './test-utils';
 
@@ -103,5 +104,62 @@ describe('Utils', () => {
     setValue(target, 'a.b.e.f', 1).should.eql({ a: { b: { c: {}, e: { f: 1 } }, d: 1 } });
     setValue(target, 'a.b', 1).should.eql({ a: { b: 1, d: 1 } });
     setValue(target, 'a', { b: 1 }).should.eql({ a: { b: 1 } });
+  });
+
+  describe('throttle', () => {
+    class Counter {
+      constructor() {
+        this.value1 = 0;
+        this.value2 = 0;
+      }
+      @throttle(100)
+      inc1() {
+        this.value1 = this.value1 + 1;
+      }
+      @throttle(200)
+      inc2() {
+        this.value2 = this.value2 + 1;
+      }
+    }
+    it('excution should be delayed', () => {
+      const counter = new Counter();
+      counter.inc1();
+      // leading call should be excuted immediatly
+      counter.value1.should.eql(1);
+      counter.inc1();
+      counter.inc1();
+      counter.value1.should.eql(1);
+      return wait(110).then(() => {
+        counter.value1.should.eql(2);
+        counter.inc1();
+        counter.value1.should.eql(2);
+        counter.inc1();
+        return wait(100);
+      }).then(() => {
+        counter.value1.should.eql(3);
+      });
+    });
+    it('should work with multi instances/properties', () => {
+      const counter = new Counter();
+      const counter2 = new Counter();
+      counter.inc1();
+      counter.inc2();
+      counter2.inc2();
+      counter.value1.should.eql(1);
+      counter.value2.should.eql(1);
+      counter2.value2.should.eql(1);
+      counter.inc1();
+      counter.inc2();
+      return wait(110).then(() => {
+        counter.value1.should.eql(2);
+        counter.value2.should.eql(1);
+        counter2.value2.should.eql(1);
+        return wait(100);
+      }).then(() => {
+        counter.value1.should.eql(2);
+        counter.value2.should.eql(2);
+        counter2.value2.should.eql(1);
+      });
+    });
   });
 });

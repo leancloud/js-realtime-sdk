@@ -13,8 +13,8 @@ export default class Cache {
     if (cache) {
       const value = cache.value;
       if (value !== Expirable.EXPIRED) {
-        debug('[%s] hit: %s %O', this.name, key, cache.value);
-        return cache.value;
+        debug('[%s] hit: %s %O', this.name, key, value);
+        return value;
       }
       delete this._map[key];
     }

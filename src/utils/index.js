@@ -24,6 +24,10 @@ export const decodeDate = (date) => {
   if (date.__type === 'Date' && date.iso) {
     return new Date(date.iso);
   }
+  // Long
+  if (typeof date.toNumber === 'function') {
+    return new Date(date.toNumber());
+  }
   return date;
 };
 
@@ -105,3 +109,41 @@ export const setValue = (target, key, value) => {
 
 // eslint-disable-next-line no-undef
 export const isWeapp = typeof wx === 'object' && typeof wx.connectSocket === 'function';
+
+// throttle decorator
+export const throttle = wait => (target, property, descriptor) => {
+  const callback = descriptor.value;
+  // very naive, internal use only
+  if (callback.length) {
+    throw new Error('throttled function should not accept any arguments');
+  }
+  return {
+    ...descriptor,
+    value() {
+      let {
+        throttleMeta,
+      } = internal(this);
+      if (!throttleMeta) throttleMeta = internal(this).throttleMeta = {};
+      let {
+        [property]: propertyMeta,
+      } = throttleMeta;
+      if (!propertyMeta) propertyMeta = throttleMeta[property] = {};
+      const {
+        previouseTimestamp = 0,
+        timeout,
+      } = propertyMeta;
+      const now = Date.now();
+      const remainingTime = wait - (now - previouseTimestamp);
+      if (remainingTime <= 0) {
+        throttleMeta[property].previouseTimestamp = now;
+        callback.apply(this);
+      } else if (!timeout) {
+        propertyMeta.timeout = setTimeout(() => {
+          propertyMeta.previouseTimestamp = Date.now();
+          delete propertyMeta.timeout;
+          callback.apply(this);
+        }, remainingTime);
+      }
+    },
+  };
+};

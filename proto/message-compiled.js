@@ -1,11 +1,13 @@
 module.exports = require("protobufjs/dist/protobuf-light").newBuilder({})['import']({
     "package": "push_server.messages",
+    "syntax": "proto2",
     "options": {
         "objc_class_prefix": "AVIM"
     },
     "messages": [
         {
             "name": "JsonObjectMessage",
+            "syntax": "proto2",
             "fields": [
                 {
                     "rule": "required",
@@ -17,6 +19,7 @@ module.exports = require("protobufjs/dist/protobuf-light").newBuilder({})['impor
         },
         {
             "name": "UnreadTuple",
+            "syntax": "proto2",
             "fields": [
                 {
                     "rule": "required",
@@ -41,11 +44,24 @@ module.exports = require("protobufjs/dist/protobuf-light").newBuilder({})['impor
                     "type": "int64",
                     "name": "timestamp",
                     "id": 4
+                },
+                {
+                    "rule": "optional",
+                    "type": "string",
+                    "name": "from",
+                    "id": 5
+                },
+                {
+                    "rule": "optional",
+                    "type": "string",
+                    "name": "data",
+                    "id": 6
                 }
             ]
         },
         {
             "name": "LogItem",
+            "syntax": "proto2",
             "fields": [
                 {
                     "rule": "optional",
@@ -76,15 +92,23 @@ module.exports = require("protobufjs/dist/protobuf-light").newBuilder({})['impor
                     "type": "int64",
                     "name": "ackAt",
                     "id": 5
+                },
+                {
+                    "rule": "optional",
+                    "type": "int64",
+                    "name": "readAt",
+                    "id": 6
                 }
             ]
         },
         {
             "name": "LoginCommand",
+            "syntax": "proto2",
             "fields": []
         },
         {
             "name": "DataCommand",
+            "syntax": "proto2",
             "fields": [
                 {
                     "rule": "repeated",
@@ -108,6 +132,7 @@ module.exports = require("protobufjs/dist/protobuf-light").newBuilder({})['impor
         },
         {
             "name": "SessionCommand",
+            "syntax": "proto2",
             "fields": [
                 {
                     "rule": "optional",
@@ -204,11 +229,18 @@ module.exports = require("protobufjs/dist/protobuf-light").newBuilder({})['impor
                     "type": "string",
                     "name": "detail",
                     "id": 16
+                },
+                {
+                    "rule": "optional",
+                    "type": "int64",
+                    "name": "lastUnreadNotifTime",
+                    "id": 17
                 }
             ]
         },
         {
             "name": "ErrorCommand",
+            "syntax": "proto2",
             "fields": [
                 {
                     "rule": "required",
@@ -238,6 +270,7 @@ module.exports = require("protobufjs/dist/protobuf-light").newBuilder({})['impor
         },
         {
             "name": "DirectCommand",
+            "syntax": "proto2",
             "fields": [
                 {
                     "rule": "optional",
@@ -322,11 +355,18 @@ module.exports = require("protobufjs/dist/protobuf-light").newBuilder({})['impor
                     "type": "string",
                     "name": "pushData",
                     "id": 16
+                },
+                {
+                    "rule": "optional",
+                    "type": "bool",
+                    "name": "will",
+                    "id": 17
                 }
             ]
         },
         {
             "name": "AckCommand",
+            "syntax": "proto2",
             "fields": [
                 {
                     "rule": "optional",
@@ -398,17 +438,25 @@ module.exports = require("protobufjs/dist/protobuf-light").newBuilder({})['impor
         },
         {
             "name": "UnreadCommand",
+            "syntax": "proto2",
             "fields": [
                 {
                     "rule": "repeated",
                     "type": "UnreadTuple",
                     "name": "convs",
                     "id": 1
+                },
+                {
+                    "rule": "optional",
+                    "type": "int64",
+                    "name": "notifTime",
+                    "id": 2
                 }
             ]
         },
         {
             "name": "ConvCommand",
+            "syntax": "proto2",
             "fields": [
                 {
                     "rule": "repeated",
@@ -519,10 +567,22 @@ module.exports = require("protobufjs/dist/protobuf-light").newBuilder({})['impor
                     "id": 18
                 },
                 {
-                    "rule": "repeated",
+                    "rule": "optional",
                     "type": "string",
-                    "name": "members",
-                    "id": 19
+                    "name": "targetClientId",
+                    "id": 20
+                },
+                {
+                    "rule": "optional",
+                    "type": "int64",
+                    "name": "maxReadTimestamp",
+                    "id": 21
+                },
+                {
+                    "rule": "optional",
+                    "type": "int64",
+                    "name": "maxAckTimestamp",
+                    "id": 22
                 },
                 {
                     "rule": "optional",
@@ -546,6 +606,7 @@ module.exports = require("protobufjs/dist/protobuf-light").newBuilder({})['impor
         },
         {
             "name": "RoomCommand",
+            "syntax": "proto2",
             "fields": [
                 {
                     "rule": "optional",
@@ -593,6 +654,7 @@ module.exports = require("protobufjs/dist/protobuf-light").newBuilder({})['impor
         },
         {
             "name": "LogsCommand",
+            "syntax": "proto2",
             "fields": [
                 {
                     "rule": "optional",
@@ -649,6 +711,12 @@ module.exports = require("protobufjs/dist/protobuf-light").newBuilder({})['impor
                     "id": 9
                 },
                 {
+                    "rule": "optional",
+                    "type": "bool",
+                    "name": "reversed",
+                    "id": 10
+                },
+                {
                     "rule": "repeated",
                     "type": "LogItem",
                     "name": "logs",
@@ -658,6 +726,7 @@ module.exports = require("protobufjs/dist/protobuf-light").newBuilder({})['impor
         },
         {
             "name": "RcpCommand",
+            "syntax": "proto2",
             "fields": [
                 {
                     "rule": "optional",
@@ -676,11 +745,18 @@ module.exports = require("protobufjs/dist/protobuf-light").newBuilder({})['impor
                     "type": "int64",
                     "name": "t",
                     "id": 3
+                },
+                {
+                    "rule": "optional",
+                    "type": "bool",
+                    "name": "read",
+                    "id": 4
                 }
             ]
         },
         {
             "name": "ReadTuple",
+            "syntax": "proto2",
             "fields": [
                 {
                     "rule": "required",
@@ -704,6 +780,7 @@ module.exports = require("protobufjs/dist/protobuf-light").newBuilder({})['impor
         },
         {
             "name": "ReadCommand",
+            "syntax": "proto2",
             "fields": [
                 {
                     "rule": "optional",
@@ -727,6 +804,7 @@ module.exports = require("protobufjs/dist/protobuf-light").newBuilder({})['impor
         },
         {
             "name": "PresenceCommand",
+            "syntax": "proto2",
             "fields": [
                 {
                     "rule": "optional",
@@ -750,6 +828,7 @@ module.exports = require("protobufjs/dist/protobuf-light").newBuilder({})['impor
         },
         {
             "name": "ReportCommand",
+            "syntax": "proto2",
             "fields": [
                 {
                     "rule": "optional",
@@ -773,6 +852,7 @@ module.exports = require("protobufjs/dist/protobuf-light").newBuilder({})['impor
         },
         {
             "name": "GenericCommand",
+            "syntax": "proto2",
             "fields": [
                 {
                     "rule": "required",
@@ -906,6 +986,7 @@ module.exports = require("protobufjs/dist/protobuf-light").newBuilder({})['impor
     "enums": [
         {
             "name": "CommandType",
+            "syntax": "proto2",
             "values": [
                 {
                     "name": "session",
@@ -971,6 +1052,7 @@ module.exports = require("protobufjs/dist/protobuf-light").newBuilder({})['impor
         },
         {
             "name": "OpType",
+            "syntax": "proto2",
             "values": [
                 {
                     "name": "open",
@@ -1077,6 +1159,10 @@ module.exports = require("protobufjs/dist/protobuf-light").newBuilder({})['impor
                     "id": 50
                 },
                 {
+                    "name": "max_read",
+                    "id": 51
+                },
+                {
                     "name": "join",
                     "id": 80
                 },
@@ -1116,6 +1202,7 @@ module.exports = require("protobufjs/dist/protobuf-light").newBuilder({})['impor
         },
         {
             "name": "StatusType",
+            "syntax": "proto2",
             "values": [
                 {
                     "name": "on",
@@ -1127,5 +1214,6 @@ module.exports = require("protobufjs/dist/protobuf-light").newBuilder({})['impor
                 }
             ]
         }
-    ]
+    ],
+    "isNamespace": true
 }).build();

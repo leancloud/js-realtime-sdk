@@ -41,8 +41,9 @@ export default class Realtime extends EventEmitter {
       pushOfflineMessages: false,
       noBinary: isWeapp,
       ssl: true,
+      server: process.env.SERVER,
     }, options);
-    this._id = uuid.v4();
+    this._id = uuid();
     this._cache = new Cache('endpoints');
     this._clients = {};
     this._plugins = ensureArray(options.plugins).reduce(

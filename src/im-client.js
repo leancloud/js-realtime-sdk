@@ -1,4 +1,3 @@
-import throttle from 'lodash/throttle';
 import EventEmitter from 'eventemitter3';
 import d from 'debug';
 import Client from './client';
@@ -16,7 +15,7 @@ import {
   OpType,
 } from '../proto/message';
 import { ErrorCode } from './error';
-import { tap, Expirable, Cache, keyRemap, union, difference, trim, internal } from './utils';
+import { tap, Expirable, Cache, keyRemap, union, difference, trim, internal, throttle } from './utils';
 import { applyDecorators } from './plugin';
 import runSignatureFactory from './signature-factory-runner';
 import { MessageStatus } from './messages/message';
@@ -53,9 +52,12 @@ export default class IMClient extends Client {
       'membersleft',
       'message',
       'unreadmessages',
+      'unreadmessagescountupdate',
       'close',
       'conflict',
       'unhandledmessage',
+      'reconnect',
+      'reconnecterror',
     ].forEach(event => this.on(
       event,
       (...payload) => this._debug(`${event} event emitted. %O`, payload)
@@ -125,48 +127,85 @@ export default class IMClient extends Client {
     }
   }
 
-  _dispatchUnreadMessage(message) {
-    const convs = message.unreadMessage.convs;
-    return Promise.all(convs.map(
-      conv => this
-        .getConversation(conv.cid)
-        .then((conversation) => {
+  _dispatchUnreadMessage({
+    unreadMessage: {
+      convs,
+      notifTime,
+    },
+  }) {
+    internal(this).lastUnreadNotifTime = notifTime;
+    // ensure all converstions are cached
+    return this.getConversations(convs.map(conv => conv.cid)).then(() =>
+      // update conversations data
+      Promise.all(convs.map(({
+          cid,
+          unread,
+          mid,
+          timestamp: ts,
+          from,
+          data,
+        }) => this.getConversation(cid).then((conversation) => {
           let timestamp;
-          if (conv.timestamp) {
-            timestamp = new Date(conv.timestamp.toNumber());
+          if (ts) {
+            timestamp = new Date(ts.toNumber());
             conversation.lastMessageAt = timestamp; // eslint-disable-line no-param-reassign
           }
-          conversation.unreadMessagesCount = conv.unread; // eslint-disable-line no-param-reassign
-          /**
-           * 未读消息数目更新
-           * @event IMClient#unreadmessages
-           * @param {Object} payload
-           * @param {Number} payload.count 未读消息数
-           * @param {String} [payload.lastMessageId] 最新一条未读消息 id
-           * @param {Date} [payload.lastMessageTimestamp] 最新一条未读消息时间戳
-           * @param {Conversation} conversation 未读消息数目有更新的对话
-           */
-          this.emit('unreadmessages', {
-            count: conv.unread,
-            lastMessageId: conv.mid,
-            lastMessageTimestamp: timestamp,
-          }, conversation);
+          conversation.unreadMessagesCount = unread; // eslint-disable-line no-param-reassign
+          return (mid ? this._messageParser.parse(data).then((message) => {
+            const messageProps = {
+              id: mid,
+              cid,
+              timestamp,
+              from,
+            };
+            Object.assign(message, messageProps);
+            conversation.lastMessage = message; // eslint-disable-line no-param-reassign
+          }) : Promise.resolve()).then(() => {
+            /**
+             * 未读消息数目更新
+             * @event IMClient#unreadmessages
+             * @deprecated 请使用新的未读消息数目批量更新事件 {@link IMClient#event:unreadmessagescountupdate}
+             * @param {Object} payload
+             * @param {Number} payload.count 未读消息数
+             * @param {String} [payload.lastMessageId] 最新一条未读消息 id
+             * @param {Date} [payload.lastMessageTimestamp] 最新一条未读消息时间戳
+             * @param {Conversation} conversation 未读消息数目有更新的对话
+             */
+            this.emit('unreadmessages', {
+              count: unread,
+              lastMessageId: mid,
+              lastMessageTimestamp: timestamp,
+            }, conversation);
+            return conversation;
+          });
         })
-    ));
+      ))
+    ).then(conversations =>
+      /**
+       * 未读消息数目更新
+       * @event IMClient#unreadmessagescountupdate
+       * @since 3.4.0
+       * @param {Conversation[]} conversations 未读消息数目有更新的对话列表
+       */
+      this.emit('unreadmessagescountupdate', conversations)
+    );
   }
 
   _dispatchRcpMessage(message) {
     const {
       rcpMessage,
+      rcpMessage: {
+        read,
+      },
     } = message;
     const conversationId = rcpMessage.cid;
     const messageId = rcpMessage.id;
-    const deliveredAt = new Date(rcpMessage.t.toNumber());
+    const timestamp = new Date(rcpMessage.t.toNumber());
     const conversation = this._conversationCache.get(conversationId);
     // conversation not cached means the client does not send the message
     // during this session
     if (!conversation) return;
-    conversation._handleReceipt({ messageId, deliveredAt });
+    conversation._handleReceipt({ messageId, timestamp, read });
   }
 
   _dispatchConvMessage(message) {
@@ -316,6 +355,9 @@ export default class IMClient extends Client {
       conversation.lastMessage = message; // eslint-disable-line no-param-reassign
       conversation.lastMessageAt = message.timestamp; // eslint-disable-line no-param-reassign
       conversation.unreadMessagesCount += 1; // eslint-disable-line no-param-reassign
+      if (!(transient || conversation.transient)) {
+        this._sendAck(message);
+      }
       /**
        * 当前用户收到消息
        * @event IMClient#message
@@ -329,9 +371,6 @@ export default class IMClient extends Client {
        * @param {Message} message
        */
       conversation.emit('message', message);
-      if (!(transient || conversation.transient)) {
-        this._sendAck(message);
-      }
     });
   }
 
@@ -339,25 +378,23 @@ export default class IMClient extends Client {
     this._debug('send ack for %O', message);
     const { cid } = message;
     if (!cid) {
-      return Promise.reject(new Error('missing cid'));
+      throw new Error('missing cid');
     }
     if (!this._ackMessageBuffer[cid]) {
       this._ackMessageBuffer[cid] = [];
     }
     this._ackMessageBuffer[cid].push(message);
-    if (!this._doSendAckThrottled) {
-      this._doSendAckThrottled = throttle(this._doSendAck.bind(this), 1000);
-    }
-    return this._doSendAckThrottled();
+    return this._doSendAck();
   }
 
+  // jsdoc-ignore-start
+  @throttle(1000)
+  // jsdoc-ignore-end
   _doSendAck() {
-    if (!this._connection.is('connected')) {
-      // if not connected, just skip everything
-      return Promise.resolve();
-    }
-    debug('do send ack %O', this._ackMessageBuffer);
-    return Promise.all(Object.keys(this._ackMessageBuffer).map((cid) => {
+    // if not connected, just skip everything
+    if (!this._connection.is('connected')) return;
+    this._debug('do send ack %O', this._ackMessageBuffer);
+    Promise.all(Object.keys(this._ackMessageBuffer).map((cid) => {
       const convAckMessages = this._ackMessageBuffer[cid];
       const timestamps = convAckMessages.map(message => message.timestamp);
       const command = new GenericCommand({
@@ -368,9 +405,11 @@ export default class IMClient extends Client {
           tots: Math.max.apply(null, timestamps),
         }),
       });
-      return this._send(command, false)
-        .then(() => delete this._ackMessageBuffer[cid])
-        .catch(error => console.warn('send ack failed:', error));
+      delete this._ackMessageBuffer[cid];
+      return this._send(command, false).catch((error) => {
+        this._debug('send ack failed: %O', error);
+        this._ackMessageBuffer[cid] = convAckMessages;
+      });
     }));
   }
 
@@ -392,6 +431,7 @@ export default class IMClient extends Client {
         sessionMessage: new SessionCommand({
           ua: `js/${VERSION}`,
           r: isReconnect,
+          lastUnreadNotifTime: internal(this).lastUnreadNotifTime,
         }),
       }))
       .then((command) => {
@@ -503,10 +543,10 @@ export default class IMClient extends Client {
   }
 
   /**
-   * 获取某个特定的 conversation
+   * 获取某个特定的对话
    * @param  {String} id 对话 id，对应 _Conversation 表中的 objectId
    * @param  {Boolean} [noCache=false] 强制不从缓存中获取
-   * @return {Promise.<Conversation>}
+   * @return {Promise.<Conversation>} 如果 id 对应的对话不存在则返回 null
    */
   getConversation(id, noCache = false) {
     if (typeof id !== 'string') {
@@ -523,6 +563,23 @@ export default class IMClient extends Client {
       .equalTo('objectId', id)
       .find()
       .then(conversations => conversations[0] || null);
+  }
+
+  /**
+   * 通过 id 批量获取某个特定的对话
+   * @since 3.4.0
+   * @param  {String[]} ids 对话 id 列表，对应 _Conversation 表中的 objectId
+   * @param  {Boolean} [noCache=false] 强制不从缓存中获取
+   * @return {Promise.<Conversation[]>} 如果 id 对应的对话不存在则返回 null
+   */
+  getConversations(ids, noCache = false) {
+    const remoteConversationIds =
+      noCache ? ids : ids.filter(id => this._conversationCache.get(id) === null);
+    return (
+      remoteConversationIds.length ?
+      this.getQuery().containedIn('objectId', remoteConversationIds).find() :
+      Promise.resolve()
+    ).then(() => ids.map(id => this._conversationCache.get(id)));
   }
 
   /**
@@ -708,14 +765,28 @@ export default class IMClient extends Client {
 
   /**
    * 将指定的所有会话标记为已读
-   *
+   * @deprecated 请遍历调用 conversations 的 {@link Conversation#read read} 方法
    * @param {Conversation[]} conversations 指定的会话列表
    * @return {Promise.<Conversation[]>} conversations 返回输入的会话列表
    */
+  // eslint-disable-next-line class-methods-use-this
   markAllAsRead(conversations) {
+    console.warn('DEPRECATION IMClient.markAllAsRead: Use Conversation#read instead.');
     if (!Array.isArray(conversations)) {
       throw new TypeError(`${conversations} is not an Array`);
     }
+    return Promise.all(conversations.map(conversation => conversation.read()));
+  }
+
+  // jsdoc-ignore-start
+  @throttle(1000)
+  // jsdoc-ignore-end
+  _doSendRead() {
+    // if not connected, just skip everything
+    if (!this._connection.is('connected')) return;
+    const buffer = internal(this).readConversationsBuffer;
+    const conversations = Array.from(buffer);
+    if (!conversations.length) return;
     const ids = conversations.map((conversation) => {
       if (!(conversation instanceof Conversation)) {
         throw new TypeError(`${conversation} is not a Conversation`);
@@ -723,21 +794,20 @@ export default class IMClient extends Client {
       return conversation.id;
     });
     this._debug(`mark [${ids}] as read`);
-    if (!conversations.length) {
-      return Promise.resolve([]);
-    }
-    return this._send(new GenericCommand({
+    buffer.clear();
+    this._send(new GenericCommand({
       cmd: 'read',
       readMessage: new ReadCommand({
         convs: conversations.map(conversation => new ReadTuple({
           cid: conversation.id,
+          mid: (conversation.lastMessage && conversation.lastMessage.from !== this.id)
+            ? conversation.lastMessage.id : undefined,
           timestamp: (conversation.lastMessageAt || new Date()).getTime(),
         })),
       }),
-    }), false).then(() => {
-      // eslint-disable-next-line no-param-reassign
-      conversations.forEach(conversation => (conversation.unreadMessagesCount = 0));
-      return conversations;
+    }), false).catch((error) => {
+      this._debug('send read failed: %O', error);
+      conversations.forEach(buffer.add.bind(buffer));
     });
   }
 }

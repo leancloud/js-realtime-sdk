@@ -59,6 +59,7 @@ enum OpType {
   unmute = 48;
   status = 49;
   members = 50;
+  max_read = 51;
 
   // room
   join = 80;
@@ -92,6 +93,8 @@ message UnreadTuple {
   required int32 unread = 2;
   optional string mid = 3;
   optional int64 timestamp = 4;
+  optional string from = 5;
+  optional string data = 6;
 }
 
 message LogItem {
@@ -100,6 +103,7 @@ message LogItem {
   optional int64 timestamp = 3;
   optional string msgId = 4;
   optional int64 ackAt = 5;
+  optional int64 readAt = 6;
 }
 
 message LoginCommand {
@@ -128,6 +132,7 @@ message SessionCommand {
   optional string deviceToken = 14;
   optional bool sp = 15;
   optional string detail = 16;
+  optional int64 lastUnreadNotifTime = 17;
 }
 
 message ErrorCommand {
@@ -152,6 +157,7 @@ message DirectCommand {
   optional string dt = 14;
   optional string roomId = 15;
   optional string pushData = 16;
+  optional bool will = 17;
 }
 
 message AckCommand {
@@ -170,6 +176,7 @@ message AckCommand {
 
 message UnreadCommand {
   repeated UnreadTuple convs = 1;
+  optional int64 notifTime = 2;
 }
 
 message ConvCommand {
@@ -193,7 +200,9 @@ message ConvCommand {
   optional bool statusPub = 17;
   optional int32 statusTTL = 18;
 
-  repeated string members = 19;
+  optional string targetClientId = 20;
+  optional int64 maxReadTimestamp = 21;
+  optional int64 maxAckTimestamp = 22;
 
   optional JsonObjectMessage results = 100;
   optional JsonObjectMessage where = 101;
@@ -220,6 +229,7 @@ message LogsCommand {
   optional string mid = 7;
   optional string checksum = 8;
   optional bool stored = 9;
+  optional bool reversed = 10;
 
   repeated LogItem logs = 105;
 }
@@ -228,6 +238,7 @@ message RcpCommand {
   optional string id = 1;
   optional string cid = 2;
   optional int64 t = 3;
+  optional bool read = 4;
 }
 
 message ReadTuple {

@@ -76,7 +76,7 @@ declare module LeanCloudRealtime {
     quit(): Promise<Conversation>;
     remove(clientIds: string[]): Promise<Conversation>;
     save(): Promise<Conversation>;
-    send(message: Message, options?: { pushData?: Object, priority?: MessagePriority, reciept?: boolean }): Promise<Message>;
+    send(message: Message, options?: { pushData?: Object, priority?: MessagePriority, receipt?: boolean }): Promise<Message>;
     set(key: string, value: any): Conversation;
     unmute(): Promise<Conversation>;
   }
