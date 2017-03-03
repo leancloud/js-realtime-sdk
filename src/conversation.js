@@ -547,9 +547,11 @@ export default class Conversation extends EventEmitter {
   /**
    * 发送消息
    * @param  {Message} message 消息，Message 及其子类的实例
-   * @param {Object} [options] 发送选项，since v3.3.0
-   * @param {Boolean} [options.transient] 是否作为暂态消息发送，since v3.3.1
+   * @param {Object} [options] since v3.3.0，发送选项
+   * @param {Boolean} [options.transient] since v3.3.1，是否作为暂态消息发送
    * @param {Boolean} [options.receipt] 是否需要送达回执，仅在普通对话中有效
+   * @param {Boolean} [options.will] since v3.4.0，是否指定该消息作为「掉线消息」发送，
+   * 「掉线消息」会延迟到当前用户掉线后发送，常用来实现「下线通知」功能
    * @param {MessagePriority} [options.priority] 消息优先级，仅在暂态对话中有效，
    * see: {@link module:leancloud-realtime.MessagePriority MessagePriority}
    * @param {Object} [options.pushData] 消息对应的离线推送内容，如果消息接收方不在线，会推送指定的内容。其结构说明参见: {@link https://url.leanapp.cn/pushData 推送消息内容}
@@ -571,6 +573,7 @@ export default class Conversation extends EventEmitter {
       receipt,
       priority,
       pushData,
+      will,
     } = Object.assign(
       // support deprecated attribute: message.needReceipt
       {
@@ -611,6 +614,7 @@ export default class Conversation extends EventEmitter {
         transient,
         dt: message.id,
         pushData: JSON.stringify(pushData),
+        will,
       }),
       priority,
     }), !transient);
