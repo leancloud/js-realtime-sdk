@@ -16,7 +16,7 @@ import {
   CLIENT_ID,
 } from './configs';
 
-import { hold, listen, sinon } from './test-utils';
+import { listen, sinon } from './test-utils';
 
 describe('Conversation', () => {
   let realtime;
@@ -413,17 +413,6 @@ describe('Conversation', () => {
             conv.lastMessage.id.should.eql(message.id);
           }),
         ]);
-      })
-      .then(() => {
-        bwangRealtime.pause();
-        bwangRealtime.resume();
-        const updateEventCallback = sinon.spy();
-        bwang0.on('unreadmessagescountupdate', updateEventCallback);
-        return listen(bwang0, 'reconnect')
-          .then(hold(1000))
-          .then(() => {
-            updateEventCallback.should.not.be.called();
-          });
       })
       .then(() => realtime.createIMClient(bwangId))
       .then(bwang1 => listen(bwang1, 'unreadmessagescountupdate')

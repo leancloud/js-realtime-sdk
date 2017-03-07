@@ -112,17 +112,12 @@ export default class Conversation extends EventEmitter {
     });
     this._attributes = attributes;
     this._reset();
-    /**
-     * 当前用户在该对话的未读消息数
-     * @memberof Conversation#
-     * @type {Number}
-     */
-    this.unreadMessagesCount = 0;
     this.members = Array.from(new Set(this.members));
     Object.assign(internal(this), {
       messagesWaitingForReceipt: {},
       lastDeliveredAt: null,
       lastReadAt: null,
+      unreadMessagesCount: 0,
     });
     if (client instanceof IMClient) {
       this._client = client;
@@ -143,6 +138,20 @@ export default class Conversation extends EventEmitter {
     ));
     // onConversationCreate hook
     applyDecorators(this._client._plugins.onConversationCreate, this);
+  }
+
+  set unreadMessagesCount(value) {
+    if (value !== this.unreadMessagesCount) {
+      internal(this).unreadMessagesCount = value;
+      this._client.emit('unreadmessagescountupdate', this);
+    }
+  }
+  /**
+   * 当前用户在该对话的未读消息数
+   * @type {Number}
+   */
+  get unreadMessagesCount() {
+    return internal(this).unreadMessagesCount;
   }
 
   set createdAt(value) {
