@@ -150,7 +150,6 @@ export default class IMClient extends Client {
             timestamp = new Date(ts.toNumber());
             conversation.lastMessageAt = timestamp; // eslint-disable-line no-param-reassign
           }
-          conversation.unreadMessagesCount = unread; // eslint-disable-line no-param-reassign
           return (mid ? this._messageParser.parse(data).then((message) => {
             const messageProps = {
               id: mid,
@@ -161,6 +160,10 @@ export default class IMClient extends Client {
             Object.assign(message, messageProps);
             conversation.lastMessage = message; // eslint-disable-line no-param-reassign
           }) : Promise.resolve()).then(() => {
+            const countNotUpdated = unread === internal(conversation).unreadMessagesCount;
+            if (countNotUpdated) return null; // to be filtered
+            // manipulate internal property directly to skip unreadmessagescountupdate event
+            internal(conversation).unreadMessagesCount = unread;
             /**
              * 未读消息数目更新
              * @event IMClient#unreadmessages
@@ -179,16 +182,19 @@ export default class IMClient extends Client {
             return conversation;
           });
         })
-      ))
-    ).then(conversations =>
-      /**
-       * 未读消息数目更新
-       * @event IMClient#unreadmessagescountupdate
-       * @since 3.4.0
-       * @param {Conversation[]} conversations 未读消息数目有更新的对话列表
-       */
-      this.emit('unreadmessagescountupdate', conversations)
-    );
+      // filter conversations without unread count update
+      )).then(conversations => conversations.filter(conversation => conversation))
+    ).then((conversations) => {
+      if (conversations.length) {
+        /**
+         * 未读消息数目更新
+         * @event IMClient#unreadmessagescountupdate
+         * @since 3.4.0
+         * @param {Conversation[]} conversations 未读消息数目有更新的对话列表
+         */
+        this.emit('unreadmessagescountupdate', conversations);
+      }
+    });
   }
 
   _dispatchRcpMessage(message) {
