@@ -360,9 +360,12 @@ export default class IMClient extends Client {
       message._setStatus(MessageStatus.SENT);
       conversation.lastMessage = message; // eslint-disable-line no-param-reassign
       conversation.lastMessageAt = message.timestamp; // eslint-disable-line no-param-reassign
-      conversation.unreadMessagesCount += 1; // eslint-disable-line no-param-reassign
-      if (!(transient || conversation.transient)) {
-        this._sendAck(message);
+      // filter outgoing message sent from another device
+      if (message.from !== this.id) {
+        conversation.unreadMessagesCount += 1; // eslint-disable-line no-param-reassign
+        if (!(transient || conversation.transient)) {
+          this._sendAck(message);
+        }
       }
       /**
        * 当前用户收到消息
