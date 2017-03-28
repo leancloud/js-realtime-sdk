@@ -1,3 +1,68 @@
+<a name="3.4.0"></a>
+# 3.4.0 (2017-04-06)
+
+
+### Highlights
+
+- **消息已读回执**：全面支持消息已读回执，包括单人聊天与多人聊天。
+- **新未读消息数更新事件**：重新设计了更精确更友好的未读消息数更新机制。
+- **掉线通知**：发送消息时可以指定其为「掉线消息」，掉线消息会延迟到该客户端掉线之后发送，从而实现「掉线通知」等需要用户在线状态的场景。
+- **网络离线状态**：SDK 增加了网络「离线」状态。与之前的「断线」状态不同的是，处于离线状态时，SDK 不会试图进行重连直到网络恢复。这个状态的引入能加快网络变化时 SDK 的响应速度并降低用户的电量消耗。
+
+### Features
+
+#### 消息已读回执
+
+为了更好的支持消息已读回执，标记会话已读的方法得到了重构，增加了 `Conversation#read` 方法，允许以任意的频率调用这个方法而无需担心达到单个客户端的每分钟命令数限额，因此用于批量标记的 `IMClient#markAllAsRead` 方法也被废弃。
+
+- 增加 `Conversation#read` 方法
+- 废弃 `Conversation#markAsRead` 方法，请使用 `Conversation#read` 方法
+- 废弃 `IMClient#markAllAsRead` 方法，请分别调用对应的 `Conversation#read` 方法
+
+SDK 内置了对单聊的已读回执支持。`Conversation` 增加了 `lastDeliveredAt` 与 `lastReadAt` 属性标记了该对话中最后一条已送达与已读的消息时间戳，可以通过 `Conversation#fetchReceiptTimestamps` 方法获取到这两个属性。对于在单聊中发送的需要回执的消息，当对方收到消息时，`lastDeliveredAt` 属性会得到更新，当对方标记会话已读时，`lastReadAt` 属性会得到更新。此外，由于 `reciept` 的含义发生了变化，我们还废弃了 `Conversation` 的 `reciept` 事件（请用 `lastdeliveredatupdate` 事件代替）。与之相关的 API 变化有：
+
+- 增加 `Conversation#fetchReceiptTimestamps` 方法
+- 增加 `Conversation` `lastDeliveredAt` 属性与 `lastdeliveredatupdate` 事件
+- 增加 `Conversation` `lastReadAt` 属性与 `lastreadatupdate` 事件
+- 废弃 `Conversation` `reciept` 事件，请使用 `lastdeliveredatupdate` 事件
+
+群聊的已读回执的支持需要使用 [leancloud-realtime-plugin-groupchat-receipts](https://www.npmjs.com/package/leancloud-realtime-plugin-groupchat-receipts) 插件，详细的使用说明请参见其 [API 文档](https://url.leanapp.cn/groupchat-receipts-apidocs)。
+
+#### 新未读消息数更新事件
+
+我们希望最大限度的减少开发者维护状态的工作量，因此我们重新设计了对话的未读消息数更新机制。我们增加了 `unreadmessagescountupdate` 事件，该事件会在任意对话的未读消息数发生变化的时候被派发，包括了：
+
+- 服务端更新了会话的未读消息数
+- 收到在线消息
+- 将会话标记未已读
+
+开发者现在只需在接到 `unreadmessagescountupdate` 事件时刷新视图中对应的会话的未读消息数即可。之前在服务端更新会话的未读消息数时派发的 `unreadmessages` 事件因为不再需要被废弃。
+
+- 增加 `IMClient` `unreadmessagescountupdate` 事件
+- 废弃 `IMClient` `unreadmessages` 事件，请使用 `unreadmessagescountupdate` 事件
+
+#### 掉线通知
+
+在一些即时互动的应用中，会话成员的在线状态是很重要的信息，用户加入或退出会话时可以主动广播自己的在线状态变化，但如果用户掉线了，会话中的其他成员将得不到及时的通知。为了解决这个问题，我们为发送消息方法增加了 `will` 发送选项指定消息为「掉线消息」，掉线消息会延迟到该客户端掉线之后自动发送。
+
+- 增加 `Conversation#send` 方法新的发送选项 `sendOptions.will`
+
+#### 网络离线状态
+
+之前，SDK 通过维持心跳包来检测是否与服务器保持连接，在网络状态变化时 SDK 可能会需要几分钟的时间才能进入「掉线」状态，并会立即开始尝试重连，同样在网络恢复之后也可能需要几分钟才会开始下一次重连。SDK 引入了新的「离线」状态，在离线状态时，SDK 不会试图进行重连直到网络恢复。
+
+在浏览器中，SDK 会通过 Network Information API 感知到网络的变化自动进入离线状态，在进入离线状态时时会派发 `offline` 事件，在恢复在线时会派发 `online` 事件。在其他环境中可以通过调用 `Realtime#pause` 与 `Realtime#resume` 方法来手动进入、离开离线状态，可以实现实时通信在 App 被切到后台挂起，切回前台恢复等功能。
+
+- `Realtime` 与 `IMClient` 增加了 `offline` 与 `online` 事件
+- 增加 `Realtime#pause` 与 `Realtime#resume` 方法
+
+#### 其他
+
+- `Conversation#send` 方法中的发送选项 `sendOption.reciept` 的拼写错误已被订正为 `sendOption.receipt`，错误的选项已被废弃。
+- 插件机制增加了 `beforeMessageDispatch` 扩展点，允许在 SDK 解析消息之后，派发消息之前，控制是否派发该消息。
+
+
+
 <a name="3.3.4"></a>
 ## 3.3.4 (2017-01-11)
 

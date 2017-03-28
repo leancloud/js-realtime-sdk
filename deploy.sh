@@ -1,5 +1,5 @@
 #!/bin/sh
-echo "Deploy demos to github pages.";
+echo "Deploy demos and docs to github pages.";
 mkdir gh_pages;
 cp -r demo gh_pages/;
 cp -r dist gh_pages/;
@@ -8,6 +8,9 @@ cp -r docs gh_pages/;
 mkdir -p gh_pages/plugins/webrtc;
 cp -r plugins/webrtc/dist gh_pages/plugins/webrtc/;
 cp -r plugins/webrtc/docs gh_pages/plugins/webrtc/;
+mkdir -p gh_pages/plugins/groupchat-receipts;
+cp -r plugins/groupchat-receipts/dist gh_pages/plugins/groupchat-receipts/;
+cp -r plugins/groupchat-receipts/docs gh_pages/plugins/groupchat-receipts/;
 mkdir -p gh_pages/plugins/typed-messages;
 cp -r plugins/typed-messages/dist gh_pages/plugins/typed-messages/;
 cp -r plugins/typed-messages/docs gh_pages/plugins/typed-messages/;

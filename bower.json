@@ -1,6 +1,6 @@
 {
   "name": "leancloud-realtime",
-  "version": "3.3.4",
+  "version": "3.4.0",
   "homepage": "https://github.com/leancloud/js-realtime-sdk/",
   "description": "LeanCloud JavaScript Realtime SDK",
   "main": "dist/realtime.browser.min.js",
@@ -14,7 +14,8 @@
   ],
   "moduleType": [
     "es6",
-    "umd",
+    "node",
+    "amd",
     "globals"
   ],
   "keywords": [

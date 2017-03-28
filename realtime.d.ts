@@ -55,11 +55,14 @@ declare module LeanCloudRealtime {
     creator: string;
     createdAt: Date;
     updatedAt: Date;
-    lastMessage: Message;
-    lastMessageAt: Date;
+    lastMessage?: Message;
+    lastMessageAt?: Date;
+    lastDeliveredAt?: Date;
+    lastReadAt?: Date;
+    unreadMessagesCount: Number;
     members: string[];
     muted: boolean;
-    mutedMembers: string[];
+    mutedMembers?: string[];
     system: boolean;
     transient: boolean;
     [key: string]: any;
@@ -70,13 +73,15 @@ declare module LeanCloudRealtime {
     fetch(): Promise<Conversation>;
     get(key: string): any;
     join(): Promise<Conversation>;
+    read(): Promise<Conversation>;
     markAsRead(): Promise<Conversation>;
+    fetchReceiptTimestamps(): Promise<Conversation>;
     mute(): Promise<Conversation>;
     queryMessages(options: { beforeTime?: Date, beforeMessageId?: string, afterTime?: Date, afterMessageId?: string, limit?: number }): Promise<Array<Message>>;
     quit(): Promise<Conversation>;
     remove(clientIds: string[]): Promise<Conversation>;
     save(): Promise<Conversation>;
-    send(message: Message, options?: { pushData?: Object, priority?: MessagePriority, receipt?: boolean }): Promise<Message>;
+    send(message: Message, options?: { pushData?: Object, priority?: MessagePriority, receipt?: boolean, transient?: boolean, will?: boolean }): Promise<Message>;
     set(key: string, value: any): Conversation;
     unmute(): Promise<Conversation>;
   }
@@ -153,6 +158,34 @@ declare module LeanCloudRealtime {
     DELIVERED,
     FAILED,
   }
+
+  export enum ErrorCode {
+    CLOSE_NORMAL,
+    CLOSE_ABNORMAL,
+    APP_NOT_AVAILABLE,
+    INVALID_LOGIN,
+    SESSION_REQUIRED,
+    READ_TIMEOUT,
+    LOGIN_TIMEOUT,
+    FRAME_TOO_LONG,
+    INVALID_ORIGIN,
+    SESSION_CONFLICT,
+    SESSION_TOKEN_EXPIRED,
+    INTERNAL_ERROR,
+    SEND_MESSAGE_TIMEOUT,
+    CONVERSATION_SIGNATURE_FAILED,
+    CONVERSATION_NOT_FOUND,
+    CONVERSATION_FULL,
+    CONVERSATION_REJECTED_BY_APP,
+    CONVERSATION_UPDATE_FAILED,
+    CONVERSATION_READ_ONLY,
+    CONVERSATION_NOT_ALLOWED,
+    INVALID_MESSAGING_TARGET,
+    MESSAGE_REJECTED_BY_APP,
+  }
+  
+  export function messageType(type: number): Function
+  export function messageField(fields: string[]): Function
 }
 
 export = LeanCloudRealtime;
