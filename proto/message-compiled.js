@@ -586,6 +586,18 @@ module.exports = require("protobufjs/dist/protobuf-light").newBuilder({})['impor
                 },
                 {
                     "rule": "optional",
+                    "type": "bool",
+                    "name": "queryAllMembers",
+                    "id": 23
+                },
+                {
+                    "rule": "repeated",
+                    "type": "MaxReadTuple",
+                    "name": "maxReadTuples",
+                    "id": 24
+                },
+                {
+                    "rule": "optional",
                     "type": "JsonObjectMessage",
                     "name": "results",
                     "id": 100
@@ -774,6 +786,30 @@ module.exports = require("protobufjs/dist/protobuf-light").newBuilder({})['impor
                     "rule": "optional",
                     "type": "string",
                     "name": "mid",
+                    "id": 3
+                }
+            ]
+        },
+        {
+            "name": "MaxReadTuple",
+            "syntax": "proto2",
+            "fields": [
+                {
+                    "rule": "optional",
+                    "type": "string",
+                    "name": "pid",
+                    "id": 1
+                },
+                {
+                    "rule": "optional",
+                    "type": "int64",
+                    "name": "maxAckTimestamp",
+                    "id": 2
+                },
+                {
+                    "rule": "optional",
+                    "type": "int64",
+                    "name": "maxReadTimestamp",
                     "id": 3
                 }
             ]

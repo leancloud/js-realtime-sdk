@@ -3,12 +3,15 @@
 /**
  * 插件接口
  *
- * 插件是由一个或多个扩展点的 Decorator 或 Middleware 组成的字典。SDK 的扩展点可以分为两类：
+ * <p>
+ * 插件是由一个或多个扩展点组成的字典。SDK 的扩展点可以分为两类：
  * <p>
  * 第一类扩展点是类实例化之后的回调，包括 <code>Realtime</code>、<code>IMClient</code> 与 <code>Conversation</code>。这些扩展点可以通过一个同步的 Decorator 进行扩展。Decorator 接受一个对应的实例并对其进行一些操作。
  * 特别的，由于注册自定义消息类这个需求特别的常用，额外定义一个 messageClasses 扩展点来做这件事情。
  * <p>
- * 第二类扩展点是在某些事件处理前、后可以注入逻辑的点。目前可扩展的点有 <code>beforeMessageParse</code>，<code>afterMessageParse</code>。这些扩展点可以通过一个异步的 Middleware 进行扩展。Middleware 接受一个对象，返回一个同类型对象或同类型对象的 Promise。
+ * 第二类扩展点是在某些事件处理前、后可以注入逻辑的点。
+ * 其中 <code>beforeMessageParse</code>，<code>afterMessageParse</code> 可以通过一个异步的 Middleware 进行扩展。Middleware 接受一个对象，返回一个同类型对象或同类型对象的 Promise。
+ * <code>beforeMessageDispatch</code> 可以通过返回一个 boolean 类型的 shouldDispatch 值来控制是否要继续派发收到的消息。
  * <p>
  * 如果使用了多个插件，这些 hook 会按照插件数组的顺序依次执行。前一个 Middleware 的返回值会作为参数传给后一个 Middleware。
  *
@@ -77,8 +80,20 @@
  * 接受一个参数为消息实例，一般是一个已注册的 Message 类或其子类的实例。
  * 该方法需要返回一个同类型的消息实例。如果这个结果是异步得到的，也可以返回一个 Promise。
  *
- * @name Plugin.beforeMessageParse
+ * @name Plugin.afterMessageParse
  * @type Function
+ */
+
+/**
+ * 在收到消息之后，派发消息之前，控制是否派发这条消息。
+ * <p>
+ * 接受参数为 message 与 conversation。
+ * 该方法需要返回 boolean 类型的值，如果返回 false 则 SDK 不再派发这条消息，后续的 beforeMessageDispatch 也不会执行。
+ * 如果这个结果是异步得到的，也可以返回一个 Promise。
+ *
+ * @name Plugin.beforeMessageDispatch
+ * @type Function
+ * @since 3.4.0
  */
 
 import { ensureArray, tap } from './utils';

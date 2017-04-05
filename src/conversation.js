@@ -721,10 +721,12 @@ export default class Conversation extends EventEmitter {
           };
           Object.assign(message, messageProps);
           let status = MessageStatus.SENT;
-          if (ackAt) status = MessageStatus.DELIVERED;
+          if (this.members.length === 2) {
+            if (ackAt) status = MessageStatus.DELIVERED;
+            if (ackAt) this._setLastDeliveredAt(ackAt);
+            if (readAt) this._setLastReadAt(readAt);
+          }
           message._setStatus(status);
-          if (ackAt) this._setLastDeliveredAt(ackAt);
-          if (readAt) this._setLastReadAt(readAt);
           return message;
         })
       ))
@@ -794,13 +796,15 @@ export default class Conversation extends EventEmitter {
    * @return {Promise.<Conversation>} self
    */
   read() {
+    this.unreadMessagesCount = 0;
+    // 跳过暂态会话、系统对话
+    if (this.transient || this.system) return Promise.resolve(this);
     const client = this._client;
     if (!internal(client).readConversationsBuffer) {
       internal(client).readConversationsBuffer = new Set();
     }
     internal(client).readConversationsBuffer.add(this);
     client._doSendRead();
-    this.unreadMessagesCount = 0;
     return Promise.resolve(this);
   }
 
@@ -856,5 +860,25 @@ export default class Conversation extends EventEmitter {
       this._setLastReadAt(maxReadTimestamp);
       return this;
     });
+  }
+
+  _fetchAllReceiptTimestamps() {
+    const convMessage = new ConvCommand({
+      queryAllMembers: true,
+    });
+    return this._send(new GenericCommand({
+      op: 'max_read',
+      convMessage,
+    })).then(({
+      convMessage: {
+        maxReadTuples,
+      },
+    }) => maxReadTuples
+      .filter(maxReadTuple => maxReadTuple.maxAckTimestamp || maxReadTuple.maxReadTimestamp)
+      .map(({ pid, maxAckTimestamp, maxReadTimestamp }) => ({
+        pid,
+        lastDeliveredAt: decodeDate(maxAckTimestamp),
+        lastReadAt: decodeDate(maxReadTimestamp),
+      })));
   }
 }

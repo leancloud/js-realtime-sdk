@@ -1,8 +1,8 @@
 {
-  "name": "leancloud-realtime-plugin-webrtc",
-  "version": "1.0.0-beta.3",
-  "description": "WebRTC for LeanCloud Realtime",
-  "main": "./dist/webrtc.js",
+  "name": "leancloud-realtime-plugin-groupchat-receipts",
+  "version": "1.0.0",
+  "description": "Enable groupchat receipts for LeanCloud Realtime",
+  "main": "./dist/groupchat-receipts.js",
   "directories": {
     "test": "test"
   },
@@ -12,8 +12,7 @@
   },
   "keywords": [
     "leancloud",
-    "realtime",
-    "webrtc"
+    "realtime"
   ],
   "license": "MIT",
   "bugs": {
@@ -21,6 +20,6 @@
   },
   "homepage": "https://github.com/leancloud/js-realtime-sdk#readme",
   "peerDependencies": {
-    "leancloud-realtime": "^3.1.0"
+    "leancloud-realtime": "^3.4.0"
   }
 }
