@@ -15,7 +15,7 @@ import {
   OpType,
 } from '../proto/message';
 import { ErrorCode } from './error';
-import { tap, Expirable, Cache, keyRemap, union, difference, trim, internal, throttle } from './utils';
+import { tap, Expirable, Cache, keyRemap, union, difference, trim, internal, throttle, ensureArray } from './utils';
 import { applyDecorators } from './plugin';
 import runSignatureFactory from './signature-factory-runner';
 import { MessageStatus } from './messages/message';
@@ -358,29 +358,46 @@ export default class IMClient extends Client {
       };
       Object.assign(message, messageProps);
       message._setStatus(MessageStatus.SENT);
-      conversation.lastMessage = message; // eslint-disable-line no-param-reassign
-      conversation.lastMessageAt = message.timestamp; // eslint-disable-line no-param-reassign
-      // filter outgoing message sent from another device
-      if (message.from !== this.id) {
-        conversation.unreadMessagesCount += 1; // eslint-disable-line no-param-reassign
-        if (!(transient || conversation.transient)) {
-          this._sendAck(message);
-        }
-      }
-      /**
-       * 当前用户收到消息
-       * @event IMClient#message
-       * @param {Message} message
-       * @param {Conversation} conversation 收到消息的对话
-       */
-      this.emit('message', message, conversation);
-      /**
-       * 当前对话收到消息
-       * @event Conversation#message
-       * @param {Message} message
-       */
-      conversation.emit('message', message);
+      return this._dispatchParsedMessage(message, conversation);
     });
+  }
+
+  _dispatchParsedMessage(message, conversation) {
+    // beforeMessageDispatch hook
+    return ensureArray(this._plugins.beforeMessageDispatch)
+      .reduce((resultPromise, hook) => resultPromise.then(shouldDispatch =>
+        (shouldDispatch === false ? false : hook(message, conversation))
+      ).catch((error) => {
+        if (hook._pluginName) {
+          // eslint-disable-next-line no-param-reassign
+          error.message += `[${hook._pluginName}]`;
+        }
+        throw error;
+      }), Promise.resolve(true)).then((shouldDispatch) => {
+        if (shouldDispatch === false) return;
+        conversation.lastMessage = message; // eslint-disable-line no-param-reassign
+        conversation.lastMessageAt = message.timestamp; // eslint-disable-line no-param-reassign
+        // filter outgoing message sent from another device
+        if (message.from !== this.id) {
+          conversation.unreadMessagesCount += 1; // eslint-disable-line no-param-reassign
+          if (!(message.transient || conversation.transient)) {
+            this._sendAck(message);
+          }
+        }
+        /**
+         * 当前用户收到消息
+         * @event IMClient#message
+         * @param {Message} message
+         * @param {Conversation} conversation 收到消息的对话
+         */
+        this.emit('message', message, conversation);
+        /**
+         * 当前对话收到消息
+         * @event Conversation#message
+         * @param {Message} message
+         */
+        conversation.emit('message', message);
+      });
   }
 
   _sendAck(message) {
@@ -804,7 +821,13 @@ export default class IMClient extends Client {
     });
     this._debug(`mark [${ids}] as read`);
     buffer.clear();
-    this._send(new GenericCommand({
+    this._sendReadCommand(conversations).catch((error) => {
+      this._debug('send read failed: %O', error);
+      conversations.forEach(buffer.add.bind(buffer));
+    });
+  }
+  _sendReadCommand(conversations) {
+    return this._send(new GenericCommand({
       cmd: 'read',
       readMessage: new ReadCommand({
         convs: conversations.map(conversation => new ReadTuple({
@@ -814,9 +837,6 @@ export default class IMClient extends Client {
           timestamp: (conversation.lastMessageAt || new Date()).getTime(),
         })),
       }),
-    }), false).catch((error) => {
-      this._debug('send read failed: %O', error);
-      conversations.forEach(buffer.add.bind(buffer));
-    });
+    }), false);
   }
 }

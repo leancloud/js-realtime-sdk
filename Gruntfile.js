@@ -159,6 +159,31 @@ var require = require || function(id) {throw new Error('Unexpected required ' + 
           },
         }
       },
+      'groupchat-receipts': {
+        dest: 'plugins/groupchat-receipts/dist/groupchat-receipts.js',
+        src: 'plugins/groupchat-receipts/src/index.js',
+        options: {
+          plugins: [
+            json(),
+            babel(Object.assign({}, babelConfigs, {
+              exclude: 'node_modules/**',
+            })),
+            nodeResolve({
+              main: true,
+            }),
+            commonjs({
+              include: ['node_modules/**'],
+            }),
+          ],
+          format: 'umd',
+          moduleName: 'AV',
+          moduleId: 'groupchat-receipts',
+          external: ['leancloud-realtime'],
+          globals: {
+            'leancloud-realtime': 'AV',
+          },
+        }
+      },
     },
     envify: {
       'test-browser': {
@@ -202,6 +227,15 @@ var require = require || function(id) {throw new Error('Unexpected required ' + 
         },
         files: {
           'plugins/webrtc/dist/webrtc.min.js': ['plugins/webrtc/dist/webrtc.js']
+        }
+      },
+      'groupchat-receipts': {
+        options: {
+          sourceMap: true,
+          sourceMapIn: 'plugins/groupchat-receipts/dist/groupchat-receipts.js.map'
+        },
+        files: {
+          'plugins/groupchat-receipts/dist/groupchat-receipts.min.js': ['plugins/groupchat-receipts/dist/groupchat-receipts.js']
         }
       },
     },
@@ -248,6 +282,8 @@ var require = require || function(id) {throw new Error('Unexpected required ' + 
     'uglify:typed-messages',
     'rollup:webrtc',
     'uglify:webrtc',
+    'rollup:groupchat-receipts',
+    'uglify:groupchat-receipts',
     'rollup:weapp',
     'uglify:weapp',
     'validate-es5',
@@ -292,6 +328,7 @@ var require = require || function(id) {throw new Error('Unexpected required ' + 
     [
       './plugins/typed-messages/dist/typed-messages.js',
       './plugins/webrtc/dist/webrtc.js',
+      './plugins/groupchat-receipts/dist/groupchat-receipts.js',
       './dist/realtime.browser.js',
       './dist/realtime.weapp.js',
     ].forEach(file => {

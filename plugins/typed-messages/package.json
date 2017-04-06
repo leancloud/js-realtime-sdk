@@ -2,7 +2,7 @@
   "name": "leancloud-realtime-plugin-typed-messages",
   "version": "1.0.0",
   "description": "TypedMessages for LeanCloud Realtime",
-  "main": "dist/typed-messages.js",
+  "main": "./dist/typed-messages.js",
   "directories": {
     "test": "test"
   },

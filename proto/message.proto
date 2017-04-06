@@ -203,6 +203,8 @@ message ConvCommand {
   optional string targetClientId = 20;
   optional int64 maxReadTimestamp = 21;
   optional int64 maxAckTimestamp = 22;
+  optional bool queryAllMembers = 23;
+  repeated MaxReadTuple maxReadTuples = 24;
 
   optional JsonObjectMessage results = 100;
   optional JsonObjectMessage where = 101;
@@ -245,6 +247,12 @@ message ReadTuple {
   required string cid = 1;
   optional int64 timestamp = 2;
   optional string mid = 3;
+}
+
+message MaxReadTuple {
+  optional string pid = 1;
+  optional int64 maxAckTimestamp = 2;
+  optional int64 maxReadTimestamp = 3;
 }
 
 message ReadCommand {

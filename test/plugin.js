@@ -42,6 +42,7 @@ describe('Plugin', () => {
             message.foo = 'bar';
             return message;
           },
+          beforeMessageDispatch: message => message.text === '1',
         }],
       });
       return realtime
@@ -53,6 +54,7 @@ describe('Plugin', () => {
 
     it('should work', () => {
       realtime.test().should.be.ok();
+      const messageHandler = sinon.spy();
       return realtime._messageParser.parse(new PluginDefinedMessage().toJSON())
         .then(message => message.should.be.instanceof(PluginDefinedMessage))
         .then(() => {
@@ -60,12 +62,20 @@ describe('Plugin', () => {
           return client.getConversation(EXISTING_ROOM_ID);
         }).then((conversation) => {
           conversation.test().should.be.ok();
+          conversation.on('message', messageHandler);
+          const message0 = new TextMessage('0');
+          message0.transient = true;
+          const message1 = new TextMessage('1');
+          message1.transient = true;
+          client._dispatchParsedMessage(message0, conversation);
+          client._dispatchParsedMessage(message1, conversation);
           return conversation.createMessagesIterator({
             limit: 1,
           }).next();
         }).then(({ value: [message] }) => {
           message.text.should.startWith('[plugin-test]');
           message.foo.should.be.eql('bar');
+          messageHandler.should.be.calledOnce();
         });
     });
   });
@@ -154,6 +164,23 @@ describe('Plugin', () => {
         }],
       })._messageParser.parse(new TextMessage('1').toJSON())
         .should.be.rejectedWith('test[ErrorPlugin]')
+    );
+    it('beforeMessageDispatch error should be reported', () =>
+      new Realtime({
+        appId: APP_ID,
+        region: REGION,
+        pushUnread: false,
+        plugins: [{
+          name: 'ErrorPlugin',
+          beforeMessageDispatch: () => {
+            throw new Error('test');
+          },
+        }],
+      }).createIMClient()
+        .then(client => client.getConversation(EXISTING_ROOM_ID)
+          .then(conversation => client._dispatchParsedMessage(new TextMessage(), conversation))
+          .should.be.rejectedWith('test[ErrorPlugin]')
+        )
     );
     it('middleware return type mismatch should trigger a warning', () => {
       const spy = sinon.spy(console, 'warn');

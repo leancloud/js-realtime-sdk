@@ -244,8 +244,8 @@ describe('Messages', () => {
         .then(() => receiptPromise)
         .then(() => {
           message.status.should.eql(MessageStatus.DELIVERED);
-          message.deliveredAt.should.be.Date();
-          conversationZwang.lastDeliveredAt.should.be.Date();
+          message.deliveredAt.should.be.a.Date();
+          conversationZwang.lastDeliveredAt.should.be.a.Date();
         });
     });
     it('read', () => {
@@ -258,12 +258,18 @@ describe('Messages', () => {
       return conversationZwang.send(message)
         .then(() => readPromise)
         .then(() => {
-          conversationZwang.lastReadAt.should.be.Date();
+          conversationZwang.lastReadAt.should.be.a.Date();
+          return Promise.all([
+            conversationZwang.fetchReceiptTimestamps(),
+            conversationZwang._fetchAllReceiptTimestamps(),
+          ]);
         })
-        .then(() => conversationZwang.fetchReceiptTimestamps())
-        .then((conv) => {
-          conv.lastDeliveredAt.should.be.Date();
-          conv.lastReadAt.should.be.Date();
+        .then(([conv, [maxReadTuples]]) => {
+          conv.lastDeliveredAt.should.be.a.Date();
+          conv.lastReadAt.should.be.a.Date();
+          maxReadTuples.pid.should.be.String();
+          maxReadTuples.lastDeliveredAt.should.be.a.Date();
+          maxReadTuples.lastReadAt.should.be.a.Date();
         });
     });
     it('errors', () => {

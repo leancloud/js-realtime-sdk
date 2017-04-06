@@ -5,7 +5,7 @@ declare module LeanCloudRealtime {
     constructor(options: { appId: string, region?: string, pushOfflineMessages?: boolean, noBinary?: boolean, ssl?: boolean, plugins?: Array<Plugin> });
     createIMClient(clientId: string, clientOptions?: { signatureFactory?: Function, conversationSignatureFactory?: Function, tag?: string }): Promise<IMClient>;
     static defineConversationProperty(prop: string, descriptor?: Object);
-    register(messageClass: Function[]);
+    register(messageClass: AVMessage[]);
     retry();
   }
 
@@ -122,14 +122,22 @@ declare module LeanCloudRealtime {
     emit(evt: string, ...args: any[]): EventEmitter;
   }
 
+  interface Middleware<T> {
+    (target: T): T
+  }
+  interface Decorator<T> {
+    (target: T): void
+  }
+
   export interface Plugin {
     name?: string;
-    beforeMessageParse?: Function;
-    afterMessageParse?: Function;
-    messageClasses?: Array<AVMessage>;
-    onConversationCreate?: Function;
-    onIMClientCreate?: Function;
-    onRealtimeCreate?: Function;
+    beforeMessageParse?: Middleware<AVMessage>;
+    afterMessageParse?: Middleware<AVMessage>;
+    beforeMessageDispatch?: (message: AVMessage) => Boolean;
+    messageClasses?: AVMessage[];
+    onConversationCreate?: Decorator<Conversation>;
+    onIMClientCreate?: Decorator<IMClient>;
+    onRealtimeCreate?: Decorator<Realtime>;
   }
 
   export enum MessagePriority {

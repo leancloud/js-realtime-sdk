@@ -16,12 +16,12 @@ v2 分支上为 2.x 版本，将仅得到安全更新，相关文档参见 [2.x 
 
 安装稳定版本：
 ```
-npm install leancloud-realtime
+npm install leancloud-realtime --save
 ```
 
 安装 v2 版本：
 ```
-npm install leancloud-realtime@2
+npm install leancloud-realtime@2 --save
 ```
 
 支持的运行环境
@@ -40,15 +40,22 @@ npm install leancloud-realtime@2
 ----
 - [安装文档](https://leancloud.cn/docs/realtime_guide-js.html#安装和初始化)
 - [使用文档](https://leancloud.cn/docs/realtime_guide-js.html)
-- API 文档
-  - [leancloud-realtime](https://leancloud.github.io/js-realtime-sdk/docs/)
-  - [leancloud-realtime-plugin-typed-messages](https://leancloud.github.io/js-realtime-sdk/plugins/typed-messages/docs/)
-  - [leancloud-realtime-plugin-webrtc](https://leancloud.github.io/js-realtime-sdk/plugins/webrtc/docs/)
+- [API 文档](https://leancloud.github.io/js-realtime-sdk/docs/)
 
 Demo
 ----
 - [Simple Chatroom](https://leancloud.github.io/js-realtime-sdk/demo/simple-chatroom/) ([src](https://github.com/leancloud/js-realtime-sdk/tree/master/demo/simple-chatroom))
+- [LeanMessage](https://leancloud.github.io/leanmessage-demo) ([src](https://github.com/leancloud/leanmessage-demo))
 - [WebRTC 视频通话](https://leancloud.github.io/js-realtime-sdk/demo/webrtc/) ([src](https://github.com/leancloud/js-realtime-sdk/tree/master/demo/webrtc))
+
+插件
+----
+package name|描述|版本|文档|
+:--|:--|:--:|:--:|
+leancloud-realtime-plugin-typed-messages|富媒体消息|[![npm](https://img.shields.io/npm/v/leancloud-realtime-plugin-typed-messages.svg?style=flat-square)](https://www.npmjs.com/package/leancloud-realtime-plugin-typed-messages)|[API docs](https://leancloud.github.io/js-realtime-sdk/plugins/typed-messages/docs/)
+leancloud-realtime-plugin-groupchat-receipts|群聊已读回执|[![npm](https://img.shields.io/npm/v/leancloud-realtime-plugin-groupchat-receipts.svg?style=flat-square)](https://www.npmjs.com/package/leancloud-realtime-plugin-groupchat-receipts)|[API docs](https://leancloud.github.io/js-realtime-sdk/plugins/groupchat-receipts/docs/)
+leancloud-realtime-plugin-webrtc|WebRTC 客户端|[![npm](https://img.shields.io/npm/v/leancloud-realtime-plugin-webrtc.svg?style=flat-square)](https://www.npmjs.com/package/leancloud-realtime-plugin-webrtc)|[API docs](https://leancloud.github.io/js-realtime-sdk/plugins/webrtc/docs/)
+
 
 支持
 ----
