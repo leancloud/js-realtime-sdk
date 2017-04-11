@@ -797,8 +797,8 @@ export default class Conversation extends EventEmitter {
    */
   read() {
     this.unreadMessagesCount = 0;
-    // 跳过暂态会话、系统对话
-    if (this.transient || this.system) return Promise.resolve(this);
+    // 跳过暂态会话
+    if (this.transient) return Promise.resolve(this);
     const client = this._client;
     if (!internal(client).readConversationsBuffer) {
       internal(client).readConversationsBuffer = new Set();

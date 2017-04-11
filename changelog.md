@@ -51,7 +51,7 @@ SDK 内置了对单聊的已读回执支持。`Conversation` 增加了 `lastDeli
 
 之前，SDK 通过维持心跳包来检测是否与服务器保持连接，在网络状态变化时 SDK 可能会需要几分钟的时间才能进入「掉线」状态，并会立即开始尝试重连，同样在网络恢复之后也可能需要几分钟才会开始下一次重连。SDK 引入了新的「离线」状态，在离线状态时，SDK 不会试图进行重连直到网络恢复。
 
-在浏览器中，SDK 会通过 Network Information API 感知到网络的变化自动进入离线状态，在进入离线状态时时会派发 `offline` 事件，在恢复在线时会派发 `online` 事件。在其他环境中可以通过调用 `Realtime#pause` 与 `Realtime#resume` 方法来手动进入、离开离线状态，可以实现实时通信在 App 被切到后台挂起，切回前台恢复等功能。
+在浏览器中，SDK 会通过 Network Information API 感知到网络的变化自动进入离线状态，在进入离线状态时会派发 `offline` 事件，在恢复在线时会派发 `online` 事件。在其他环境中可以通过调用 `Realtime#pause` 与 `Realtime#resume` 方法来手动进入或离开离线状态，可以实现实时通信在 App 被切到后台挂起、切回前台恢复等功能。
 
 - `Realtime` 与 `IMClient` 增加了 `offline` 与 `online` 事件
 - 增加 `Realtime#pause` 与 `Realtime#resume` 方法
