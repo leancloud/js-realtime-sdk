@@ -160,11 +160,13 @@ describe('Messages', () => {
       const promise = Promise.all([
         listen(conversationZwang, 'message'),
         listen(zwang, 'message'),
+        listen(zwang, 'unreadmessagescountupdate'),
         conversationWchen.send(message),
       ]).then((messages) => {
         const [
           [receivedMessage],
           [clientReceivedMessage, clientReceivedConversation],
+          [[unreadUpdatedConversation]],
           sentMessage,
         ] = messages;
         sentMessage.status.should.eql(MessageStatus.SENT);
@@ -173,6 +175,8 @@ describe('Messages', () => {
         receivedMessage.status.should.eql(MessageStatus.SENT);
         clientReceivedMessage.id.should.eql(sentMessage.id);
         clientReceivedConversation.id.should.eql(conversationWchen.id);
+        unreadUpdatedConversation.id.should.eql(conversationWchen.id);
+        unreadUpdatedConversation.unreadMessagesCount.should.eql(1);
         conversationZwang.lastMessage.content.should.eql(sentMessage.content);
         conversationWchen.lastMessage.content.should.eql(sentMessage.content);
         conversationZwang.unreadMessagesCount.should.eql(1);
