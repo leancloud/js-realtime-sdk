@@ -1,3 +1,14 @@
+<a name="3.4.1"></a>
+## 3.4.1 (2017-04-17)
+
+
+### Bug Fixes
+
+* **IMClient:** 修复了收到在线消息时 `unreadmessagescountupdate` 事件回调的 `conversations` 参数不是数组的问题 ([#547](https://github.com/leancloud/js-realtime-sdk/issues/547)) ([9df01d8](https://github.com/leancloud/js-realtime-sdk/commit/9df01d8))
+* **Read:** 修复了标记对话已读对系统消息不生效的问题 ([#544](https://github.com/leancloud/js-realtime-sdk/issues/544)) ([28dcf50](https://github.com/leancloud/js-realtime-sdk/commit/28dcf50))
+
+
+
 <a name="3.4.0"></a>
 # 3.4.0 (2017-04-06)
 
