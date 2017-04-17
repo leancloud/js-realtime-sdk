@@ -143,7 +143,7 @@ export default class Conversation extends EventEmitter {
   set unreadMessagesCount(value) {
     if (value !== this.unreadMessagesCount) {
       internal(this).unreadMessagesCount = value;
-      this._client.emit('unreadmessagescountupdate', this);
+      this._client.emit('unreadmessagescountupdate', [this]);
     }
   }
   /**
