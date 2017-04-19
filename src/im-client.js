@@ -145,6 +145,8 @@ export default class IMClient extends Client {
           from,
           data,
         }) => this.getConversation(cid).then((conversation) => {
+          // deleted conversation
+          if (!conversation) return null;
           let timestamp;
           if (ts) {
             timestamp = new Date(ts.toNumber());
@@ -349,6 +351,8 @@ export default class IMClient extends Client {
       this.getConversation(directMessage.cid),
       this._messageParser.parse(directMessage.msg),
     ]).then(([conversation, message]) => {
+      // deleted conversation
+      if (!conversation) return undefined;
       const messageProps = {
         id,
         cid,
