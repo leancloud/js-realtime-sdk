@@ -75,7 +75,7 @@
     "weapp-polyfill": "github:leancloud/weapp-polyfill#4c13db3"
   },
   "dependencies": {
-    "axios": "^0.15.0",
+    "axios": "^0.15.1",
     "babel-runtime": "^6.6.1",
     "debug": "^2.4.4",
     "eventemitter3": "^2.0.0",
