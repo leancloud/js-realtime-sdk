@@ -46,7 +46,7 @@
     "docdash": "git+https://github.com/leeyeh/docdash.git#leancloud",
     "eslint": "^3.0.0",
     "eslint-config-airbnb-base": "^9.0.0",
-    "eslint-plugin-import": "^2.0.0",
+    "eslint-plugin-import": "^2.1.0",
     "espree": "^3.1.4",
     "grunt": "^1.0.1",
     "grunt-contrib-connect": "^1.0.0",
