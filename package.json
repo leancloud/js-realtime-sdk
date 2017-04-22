@@ -47,7 +47,7 @@
     "eslint": "^3.0.0",
     "eslint-config-airbnb-base": "^9.0.0",
     "eslint-plugin-import": "^2.0.0",
-    "espree": "^3.1.4",
+    "espree": "^3.4.0",
     "grunt": "^1.0.1",
     "grunt-contrib-connect": "^1.0.0",
     "grunt-contrib-uglify": "^2.0.0",
