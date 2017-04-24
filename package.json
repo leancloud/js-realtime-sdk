@@ -35,7 +35,7 @@
   "devDependencies": {
     "babel-eslint": "^7.0.0",
     "babel-plugin-external-helpers": "^6.8.0",
-    "babel-plugin-istanbul": "^3.1.2",
+    "babel-plugin-istanbul": "^4.1.1",
     "babel-plugin-transform-decorators-legacy": "^1.3.4",
     "babel-plugin-transform-es2015-classes": "^6.5.2",
     "babel-plugin-transform-object-rest-spread": "^6.8.0",
@@ -65,17 +65,17 @@
     "qiniu": "^6.1.9",
     "rollup": "^0.41.1",
     "rollup-plugin-babel": "^2.4.0",
-    "rollup-plugin-commonjs": "^7.0.0",
+    "rollup-plugin-commonjs": "^8.0.2",
     "rollup-plugin-json": "^2.0.0",
-    "rollup-plugin-node-resolve": "^2.0.0",
+    "rollup-plugin-node-resolve": "^3.0.0",
     "should": "^11.0.0",
     "should-sinon": "0.0.5",
-    "sinon": "2.0.0-pre",
+    "sinon": "^2.1.0",
     "validate-commit-msg": "^2.10.1",
-    "weapp-polyfill": "github:leancloud/weapp-polyfill#4c13db3"
+    "weapp-polyfill": "^1.1.0"
   },
   "dependencies": {
-    "axios": "^0.15.0",
+    "axios": "^0.16.1",
     "babel-runtime": "^6.6.1",
     "debug": "^2.4.4",
     "eventemitter3": "^2.0.0",
