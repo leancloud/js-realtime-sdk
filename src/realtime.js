@@ -1,17 +1,10 @@
 import d from 'debug';
 import EventEmitter from 'eventemitter3';
 import axios from 'axios';
-import uuid from 'uuid/v4';
 import Connection from './connection';
 import { ErrorCode, createError } from './error';
 import { tap, Cache, trim, internal, ensureArray, isWeapp } from './utils';
-import { applyDecorators } from './plugin';
-import Conversation from './conversation';
-import Client from './client';
-import IMClient from './im-client';
-import MessageParser from './message-parser';
-import Message from './messages/message';
-import TextMessage from './messages/text-message';
+import { applyDecorators, applyDispatcher } from './plugin';
 
 const debug = d('LC:Realtime');
 
@@ -43,10 +36,12 @@ export default class Realtime extends EventEmitter {
       ssl: true,
       server: process.env.SERVER,
     }, options);
-    this._id = uuid();
     this._cache = new Cache('endpoints');
-    this._clients = {};
-    this._plugins = ensureArray(options.plugins).reduce(
+    internal(this).clients = new Set();
+    this._plugins = [
+      ...ensureArray(Realtime.__preRegisteredPlugins),
+      ...ensureArray(options.plugins),
+    ].reduce(
       (result, plugin) => {
         // eslint-disable-next-line no-restricted-syntax
         for (const hook in plugin) {
@@ -65,15 +60,8 @@ export default class Realtime extends EventEmitter {
       },
       {}
     );
-    this._messageParser = new MessageParser(this._plugins);
-    this.register([
-      Message,
-      TextMessage,
-    ]);
     // onRealtimeCreate hook
     applyDecorators(this._plugins.onRealtimeCreate, this);
-    // messageClasses alias
-    this.register(ensureArray(this._plugins.messageClasses));
   }
 
   _open() {
@@ -101,7 +89,7 @@ export default class Realtime extends EventEmitter {
       );
       connection.on('open', () => resolve(connection));
       connection.on('error', reject);
-      connection.on('message', this._dispatchMessage.bind(this));
+      connection.on('message', this._dispatchCommand.bind(this));
       /**
        * 连接断开。
        * 连接断开可能是因为 SDK 进入了离线状态（see {@link Realtime#event:offline}），或长时间没有收到服务器心跳。
@@ -176,7 +164,7 @@ export default class Realtime extends EventEmitter {
           debug(`${event} event emitted. %O`, payload);
           this.emit(event, ...payload);
           if (event !== 'reconnect') {
-            Object.values(this._clients).forEach((client) => {
+            internal(this).clients.forEach((client) => {
               client.emit(event, ...payload);
             });
           }
@@ -184,12 +172,11 @@ export default class Realtime extends EventEmitter {
       );
       // override handleClose
       connection.handleClose = function handleClose(event) {
-        // CAUTION: non-standard API, provided by core-js
-        const isFatal = Array.some([
+        const isFatal = [
           ErrorCode.APP_NOT_AVAILABLE,
           ErrorCode.INVALID_LOGIN,
           ErrorCode.INVALID_ORIGIN,
-        ], errorCode => errorCode === event.code);
+        ].some(errorCode => errorCode === event.code);
         if (isFatal) {
           // in these cases, SDK should throw.
           this.throw(createError(event));
@@ -335,126 +322,22 @@ export default class Realtime extends EventEmitter {
   }
 
   _register(client) {
-    if (!(client instanceof Client)) {
-      throw new TypeError(`${client} is not a Client`);
-    }
-    if (!client.id) {
-      throw new Error('Client must have an id to be registered');
-    }
-    this._clients[client.id] = client;
+    internal(this).clients.add(client);
   }
 
   _deregister(client) {
-    if (!(client instanceof Client)) {
-      throw new TypeError(`${client} is not a Client`);
-    }
-    if (!client.id) {
-      throw new Error('Client must have an id to be deregistered');
-    }
-    delete this._clients[client.id];
-    if (Object.getOwnPropertyNames(this._clients).length === 0) {
+    internal(this).clients.delete(client);
+    if (internal(this).clients.size === 0) {
       this._close();
     }
   }
 
-  _dispatchMessage(message) {
-    if (message.peerId !== null) {
-      const targetClient = this._clients[message.peerId];
-      if (targetClient) {
-        return Promise.resolve(targetClient)
-          .then(client => client._dispatchMessage(message))
-          .catch(debug);
-      }
-      return debug(
-        '[WARN] Unexpected message received without any live client match: %O',
-        trim(message)
-      );
-    }
-    return debug('[WARN] Unexpected message received without peerId: %O', trim(message));
-  }
-
-  /**
-   * 创建一个即时通讯客户端，多次创建相同 id 的客户端会返回同一个实例
-   * @param  {String} [id] 客户端 id，如果不指定，服务端会随机生成一个
-   * @param  {Object} [clientOptions] 详细参数 @see {@link IMClient}
-   * @param  {String} [tag] 客户端类型标记，以支持单点登录功能
-   * @return {Promise.<IMClient>}
-   */
-  createIMClient(id, clientOptions, tag) {
-    const idIsString = typeof id === 'string';
-    if (idIsString && this._clients[id] !== undefined) {
-      return Promise.resolve(this._clients[id]);
-    }
-    const promise = this._open().then((connection) => {
-      const client = new IMClient(id, clientOptions, connection, {
-        _messageParser: this._messageParser,
-        _plugins: this._plugins,
+  _dispatchCommand(command) {
+    return applyDispatcher(this._plugins.beforeCommandDispatch, [command, this])
+      .then((shouldDispatch) => {
+        // no plugin handled this command
+        if (shouldDispatch) return debug('[WARN] Unexpected message received: %O', trim(command));
+        return false;
       });
-      connection.on('reconnect', () =>
-        client._open(this._options.appId, tag, this._id, true)
-          /**
-           * 客户端连接恢复正常，该事件通常在 {@link Realtime#event:reconnect} 之后发生
-           * @event IMClient#reconnect
-           * @see Realtime#event:reconnect
-           * @since 3.2.0
-           */
-          /**
-           * 客户端重新登录发生错误（网络连接已恢复，但重新登录错误）
-           * @event IMClient#reconnecterror
-           * @since 3.2.0
-           */
-          .then(
-            () => client.emit('reconnect'),
-            error => client.emit('reconnecterror', error)
-          )
-      );
-      internal(client)._eventemitter.on('close', () => this._deregister(client), this);
-      return client._open(this._options.appId, tag, this._id)
-        .then(() => {
-          this._register(client);
-          return client;
-        });
-    });
-    if (idIsString) {
-      this._clients[id] = promise;
-    }
-    return promise;
-  }
-
-  /**
-   * 注册消息类
-   *
-   * 在接收消息、查询消息时，会按照消息类注册顺序的逆序依次尝试解析消息内容
-   *
-   * @param  {Function | Function[]} messageClass 消息类，需要实现 {@link AVMessage} 接口，
-   * 建议继承自 {@link TypedMessage}
-   * @throws {TypeError} 如果 messageClass 没有实现 {@link AVMessage} 接口则抛出异常
-   */
-  register(messageClass) {
-    return ensureArray(messageClass).map(this._messageParser.register.bind(this._messageParser));
-  }
-
-  /**
-   * 为 Conversation 定义一个新属性
-   * @since 3.2.0
-   * @static
-   * @param {String} prop 属性名
-   * @param {Object} [descriptor] 属性的描述符，参见 {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/getOwnPropertyDescriptor#Description getOwnPropertyDescriptor#Description - MDN}，默认为该属性名对应的 Conversation 自定义属性的 getter/setter
-   * @returns void
-   * @example
-   *
-   * conversation.get('type');
-   * conversation.set('type', 1);
-   *
-   * // equals to
-   * Realtime.defineConversationProperty('type');
-   * conversation.type;
-   * conversation.type = 1;
-   */
-  static defineConversationProperty(prop, descriptor = {
-    get() { return this.get(prop); },
-    set(value) { this.set(prop, value); },
-  }) {
-    Object.defineProperty(Conversation.prototype, prop, descriptor);
   }
 }

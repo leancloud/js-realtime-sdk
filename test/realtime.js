@@ -3,7 +3,6 @@ import 'should-sinon';
 import should from 'should/as-function';
 import Realtime from '../src/realtime';
 import Connection from '../src/connection';
-import Client from '../src/client';
 import { GenericCommand, CommandType, ConvCommand } from '../proto/message';
 import TextMessage from '../src/messages/text-message';
 
@@ -20,6 +19,8 @@ const createRealtime = options => new Realtime(Object.assign({
   region: REGION,
   pushUnread: false,
 }, options));
+
+class Client {}
 
 describe('Realtime', () => {
   describe('constructor', () => {
@@ -92,20 +93,16 @@ describe('Realtime', () => {
     const realtime = createRealtime();
     const _disconnect = sinon.spy(realtime, '_close');
     return realtime._open()
-      .then((connection) => {
-        const a = new Client('a', connection);
-        const b = new Client('b', connection);
-        const c = new Client(undefined, connection);
+      .then(() => {
+        const a = new Client();
+        const b = new Client();
         realtime._register(a);
         realtime._register(b);
-        (() => realtime._register({})).should.throw();
-        (() => realtime._register(c)).should.throw();
+        // (() => realtime._regiser({})).should.throw();
         realtime._deregister(a);
         _disconnect.should.not.be.called();
         realtime._deregister(b);
         _disconnect.should.be.calledOnce();
-        (() => realtime._deregister({})).should.throw();
-        (() => realtime._deregister(c)).should.throw();
         _disconnect.restore();
       });
   });
@@ -209,7 +206,7 @@ describe('Connection', () => {
     })).should.be.rejectedWith('CONVERSATION_UPDATE_REJECTED')
   );
   it('message dispatch', () => {
-    const clientMessageEventCallback = sinon.stub(client, '_dispatchMessage');
+    const clientMessageEventCallback = sinon.stub(client, '_dispatchCommand');
     connection.emit('message', new GenericCommand({
       cmd: 1,
     }));

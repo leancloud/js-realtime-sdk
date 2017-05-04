@@ -1,6 +1,5 @@
 import EventEmitter from 'eventemitter3';
 import d from 'debug';
-import Client from './client';
 import Conversation from './conversation';
 import ConversationQuery from './conversation-query';
 import {
@@ -15,15 +14,15 @@ import {
   OpType,
 } from '../proto/message';
 import { ErrorCode } from './error';
-import { tap, Expirable, Cache, keyRemap, union, difference, trim, internal, throttle, ensureArray } from './utils';
-import { applyDecorators } from './plugin';
+import { tap, Expirable, Cache, keyRemap, union, difference, trim, internal, throttle } from './utils';
+import { applyDecorators, applyDispatcher } from './plugin';
 import runSignatureFactory from './signature-factory-runner';
 import { MessageStatus } from './messages/message';
 import { version as VERSION } from '../package.json';
 
 const debug = d('LC:IMClient');
 
-export default class IMClient extends Client {
+export default class IMClient extends EventEmitter {
   /**
    * 无法直接实例化，请使用 {@link Realtime#createIMClient} 创建新的 IMClient。
    *
@@ -33,12 +32,21 @@ export default class IMClient extends Client {
    * @param  {Function} [options.signatureFactory] open session 时的签名方法 // TODO need details
    * @param  {Function} [options.conversationSignatureFactory] 对话创建、增减成员操作时的签名方法
    */
-  constructor(...args) {
-    /**
-     * @var id {String} 客户端 id
-     * @memberof IMClient#
-     */
-    super(...args);
+  constructor(id, options = {}, connection, props) {
+    if (!(id === undefined || typeof id === 'string')) {
+      throw new TypeError(`Client id [${id}] is not a String`);
+    }
+    super();
+    Object.assign(this, {
+      /**
+       * @var id {String} 客户端 id
+       * @memberof IMClient#
+       */
+      id,
+      _connection: connection,
+      options,
+    }, props);
+
     if (!this._messageParser) {
       throw new Error('IMClient must be initialized with a MessageParser');
     }
@@ -74,21 +82,21 @@ export default class IMClient extends Client {
    * @override
    * @private
    */
-  _dispatchMessage(message) {
-    this._debug(trim(message), 'received');
-    switch (message.cmd) {
+  _dispatchCommand(command) {
+    this._debug(trim(command), 'received');
+    switch (command.cmd) {
       case CommandType.conv:
-        return this._dispatchConvMessage(message);
+        return this._dispatchConvMessage(command);
       case CommandType.direct:
-        return this._dispatchDirectMessage(message);
+        return this._dispatchDirectMessage(command);
       case CommandType.session:
-        return this._dispatchSessionMessage(message);
+        return this._dispatchSessionMessage(command);
       case CommandType.unread:
-        return this._dispatchUnreadMessage(message);
+        return this._dispatchUnreadMessage(command);
       case CommandType.rcp:
-        return this._dispatchRcpMessage(message);
+        return this._dispatchRcpMessage(command);
       default:
-        this.emit('unhandledmessage', message);
+        this.emit('unhandledmessage', command);
         return Promise.resolve();
     }
   }
@@ -368,16 +376,8 @@ export default class IMClient extends Client {
 
   _dispatchParsedMessage(message, conversation) {
     // beforeMessageDispatch hook
-    return ensureArray(this._plugins.beforeMessageDispatch)
-      .reduce((resultPromise, hook) => resultPromise.then(shouldDispatch =>
-        (shouldDispatch === false ? false : hook(message, conversation))
-      ).catch((error) => {
-        if (hook._pluginName) {
-          // eslint-disable-next-line no-param-reassign
-          error.message += `[${hook._pluginName}]`;
-        }
-        throw error;
-      }), Promise.resolve(true)).then((shouldDispatch) => {
+    return applyDispatcher(this._plugins.beforeMessageDispatch, [message, conversation])
+      .then((shouldDispatch) => {
         if (shouldDispatch === false) return;
         conversation.lastMessage = message; // eslint-disable-line no-param-reassign
         conversation.lastMessageAt = message.timestamp; // eslint-disable-line no-param-reassign

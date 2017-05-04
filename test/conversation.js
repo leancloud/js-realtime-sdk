@@ -7,6 +7,7 @@ import {
 } from '../proto/message';
 import Message, { MessageStatus } from '../src/messages/message';
 import TextMessage from '../src/messages/text-message';
+import { defineConversationProperty } from '../src/plugin-im';
 
 import {
   APP_ID,
@@ -40,10 +41,10 @@ describe('Conversation', () => {
   after(() => client.close());
 
   it('defineConversationProperty', () => {
-    Realtime.defineConversationProperty('testProperty1');
+    defineConversationProperty('testProperty1');
     conversation.set('testProperty1', 1);
     conversation.testProperty1.should.eql(1);
-    Realtime.defineConversationProperty('testProperty2');
+    defineConversationProperty('testProperty2');
     conversation.testProperty2 = 2;
     conversation.get('testProperty2').should.eql(2);
   });
@@ -264,7 +265,7 @@ describe('Conversation', () => {
       client2.on('membersjoined', clientCallback);
       const conversationCallback = sinon.spy();
       conversation2.on('membersjoined', conversationCallback);
-      return client2._dispatchMessage(new GenericCommand({
+      return client2._dispatchCommand(new GenericCommand({
         cmd: 'conv',
         op: 'members_joined',
         peerId: CLIENT_ID_2,
@@ -293,7 +294,7 @@ describe('Conversation', () => {
       client2.on('membersleft', clientCallback);
       const conversationCallback = sinon.spy();
       conversation2.on('membersleft', conversationCallback);
-      return client2._dispatchMessage(new GenericCommand({
+      return client2._dispatchCommand(new GenericCommand({
         cmd: 'conv',
         op: 'members_left',
         peerId: CLIENT_ID_2,
@@ -322,7 +323,7 @@ describe('Conversation', () => {
       client2.on('kicked', clientCallback);
       const conversationCallback = sinon.spy();
       conversation2.on('kicked', conversationCallback);
-      return client2._dispatchMessage(new GenericCommand({
+      return client2._dispatchCommand(new GenericCommand({
         cmd: 'conv',
         op: 'left',
         peerId: CLIENT_ID_2,
@@ -348,7 +349,7 @@ describe('Conversation', () => {
       client2.on('invited', callback);
       const conversationCallback = sinon.spy();
       conversation2.on('invited', conversationCallback);
-      return client2._dispatchMessage(new GenericCommand({
+      return client2._dispatchCommand(new GenericCommand({
         cmd: 'conv',
         op: 'joined',
         peerId: CLIENT_ID_2,

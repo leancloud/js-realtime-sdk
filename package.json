@@ -40,7 +40,7 @@
     "babel-plugin-transform-es2015-classes": "^6.5.2",
     "babel-plugin-transform-object-rest-spread": "^6.8.0",
     "babel-plugin-transform-runtime": "^6.6.0",
-    "babel-preset-es2015": "^6.9.0",
+    "babel-preset-env": "^1.4.0",
     "babel-register": "^6.14.0",
     "conventional-changelog-cli": "^1.1.1",
     "docdash": "git+https://github.com/leeyeh/docdash.git#leancloud",
@@ -67,7 +67,7 @@
     "rollup-plugin-babel": "^2.4.0",
     "rollup-plugin-commonjs": "^8.0.2",
     "rollup-plugin-json": "^2.0.0",
-    "rollup-plugin-node-resolve": "^3.0.0",
+    "@leeyeh/rollup-plugin-node-resolve": "^3.0.0",
     "should": "^11.0.0",
     "should-sinon": "0.0.5",
     "sinon": "^2.1.0",
@@ -86,9 +86,15 @@
     "ws": "^2.0.0"
   },
   "browser": {
-    "ws": "./src/browser/ws.js",
+    "ws": "./src/polyfills/ws-browser.js",
     "sinon": false,
-    "./dist/realtime.js": "./dist/realtime.browser.js"
+    "./dist/realtime.js": "./dist/realtime.browser.js",
+    "./dist/realtime-core.js": "./dist/realtime-core.browser.js"
+  },
+  "weapp": {
+    "./src/polyfills/polyfills.js": "./src/polyfills/polyfills-weapp.js",
+    "./dist/realtime.js": "./dist/realtime.weapp.js",
+    "./dist/realtime-core.js": "./dist/realtime-core.weapp.js"
   },
   "nyc": {
     "require": [

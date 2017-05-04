@@ -5,6 +5,7 @@ const {
   UnreadTuple,
   LogItem,
   LoginCommand,
+  LoggedinCommand,
   DataCommand,
   SessionCommand,
   ErrorCommand,
@@ -24,6 +25,7 @@ const {
   CommandType,
   OpType,
   StatusType,
+  ExtendLoginCommandType,
 } = messages.push_server.messages;
 
 export {
@@ -31,6 +33,7 @@ export {
   UnreadTuple,
   LogItem,
   LoginCommand,
+  LoggedinCommand,
   DataCommand,
   SessionCommand,
   ErrorCommand,
@@ -50,4 +53,5 @@ export {
   CommandType,
   OpType,
   StatusType,
+  ExtendLoginCommandType,
 };

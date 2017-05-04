@@ -1,35 +1,13 @@
 /** @module leancloud-realtime */
-import Realtime from './realtime';
-import Message, { MessageStatus } from './messages/message';
-import TypedMessage from './messages/typed-message';
-import TextMessage from './messages/text-message';
-import {
-  messageType,
-  messageField,
-  IE10Compatible,
-} from './messages/helpers';
+import { Realtime } from './core';
+import { IMPlugin, defineConversationProperty } from './plugin-im';
 
-/**
- * 消息优先级枚举
- * @enum {Number}
- * @since 3.3.0
- * @memberof module:leancloud-realtime
- */
-const MessagePriority = {
-  /** 高 */
-  HIGH: 1,
-  /** 普通 */
-  NORMAL: 2,
-  /** 低 */
-  LOW: 3,
-};
-Object.freeze(MessagePriority);
+Realtime.defineConversationProperty = defineConversationProperty;
+Realtime.__preRegisteredPlugins = [IMPlugin];
+
+export * from './core';
 
 export {
-  /**
-   * @see Realtime
-   */
-  Realtime,
   /**
    * @see Message
    */
@@ -82,13 +60,4 @@ export {
   IE10Compatible,
   MessagePriority,
   MessageStatus,
-};
-
-export {
-  /**
-   * 错误码，详见 {@link https://leancloud.cn/docs/realtime_v2.html#云端错误码说明}
-   * @enum {Number}
-   * @since 3.3.0
-   */
-  ErrorCode,
-} from './error';
+} from './plugin-im';

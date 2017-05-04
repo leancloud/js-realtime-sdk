@@ -60,6 +60,7 @@ enum OpType {
   status = 49;
   members = 50;
   max_read = 51;
+  is_member = 52;
 
   // room
   join = 80;
@@ -77,6 +78,13 @@ enum OpType {
   // report
   upload = 100;
   uploaded = 101;
+}
+
+enum ExtendLoginCommandType {
+  unknown = 0;
+  loggedin = 1;
+  logout = 2;
+  loggedout = 3;
 }
 
 enum StatusType {
@@ -107,6 +115,7 @@ message LogItem {
 }
 
 message LoginCommand {
+  optional ExtendLoginCommandType extendCmd = 1;
 }
 
 message DataCommand {
@@ -199,12 +208,14 @@ message ConvCommand {
   optional bool statusSub = 16;
   optional bool statusPub = 17;
   optional int32 statusTTL = 18;
+  optional string uniqueId = 19;
 
   optional string targetClientId = 20;
   optional int64 maxReadTimestamp = 21;
   optional int64 maxAckTimestamp = 22;
   optional bool queryAllMembers = 23;
   repeated MaxReadTuple maxReadTuples = 24;
+  repeated string cids = 25;
 
   optional JsonObjectMessage results = 100;
   optional JsonObjectMessage where = 101;
@@ -282,6 +293,7 @@ message GenericCommand {
   optional int32 i = 5;
   optional string installationId = 6;
   optional int32 priority = 7;
+  optional int32 service = 8;
 
   optional LoginCommand loginMessage = 100;
   optional DataCommand dataMessage = 101;

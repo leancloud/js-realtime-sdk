@@ -48,18 +48,18 @@ describe('IMClient', () => {
           .then((client1) => {
             client1.should.be.instanceof(IMClient);
             client1.id.should.be.a.String();
-            rt._clients.should.have.properties(client1.id);
+            rt._IMClients.should.have.properties(client1.id);
           })
           .then(() => rt.createIMClient(CLIENT_ID))
           .then((client2) => {
             client2.on('close', closeCallback);
             client2.id.should.be.equal(CLIENT_ID);
-            rt._clients.should.have.properties(CLIENT_ID);
+            rt._IMClients.should.have.properties(CLIENT_ID);
             return client2.close();
           })
           .then(() => {
             closeCallback.should.be.calledOnce();
-            rt._clients.should.not.have.properties(CLIENT_ID);
+            rt._IMClients.should.not.have.properties(CLIENT_ID);
             rt._close();
           }),
       ]);

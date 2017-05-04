@@ -104,7 +104,14 @@ module.exports = require("protobufjs/dist/protobuf-light").newBuilder({})['impor
         {
             "name": "LoginCommand",
             "syntax": "proto2",
-            "fields": []
+            "fields": [
+                {
+                    "rule": "optional",
+                    "type": "ExtendLoginCommandType",
+                    "name": "extendCmd",
+                    "id": 1
+                }
+            ]
         },
         {
             "name": "DataCommand",
@@ -569,6 +576,12 @@ module.exports = require("protobufjs/dist/protobuf-light").newBuilder({})['impor
                 {
                     "rule": "optional",
                     "type": "string",
+                    "name": "uniqueId",
+                    "id": 19
+                },
+                {
+                    "rule": "optional",
+                    "type": "string",
                     "name": "targetClientId",
                     "id": 20
                 },
@@ -595,6 +608,12 @@ module.exports = require("protobufjs/dist/protobuf-light").newBuilder({})['impor
                     "type": "MaxReadTuple",
                     "name": "maxReadTuples",
                     "id": 24
+                },
+                {
+                    "rule": "repeated",
+                    "type": "string",
+                    "name": "cids",
+                    "id": 25
                 },
                 {
                     "rule": "optional",
@@ -934,6 +953,12 @@ module.exports = require("protobufjs/dist/protobuf-light").newBuilder({})['impor
                 },
                 {
                     "rule": "optional",
+                    "type": "int32",
+                    "name": "service",
+                    "id": 8
+                },
+                {
+                    "rule": "optional",
                     "type": "LoginCommand",
                     "name": "loginMessage",
                     "id": 100
@@ -1199,6 +1224,10 @@ module.exports = require("protobufjs/dist/protobuf-light").newBuilder({})['impor
                     "id": 51
                 },
                 {
+                    "name": "is_member",
+                    "id": 52
+                },
+                {
                     "name": "join",
                     "id": 80
                 },
@@ -1233,6 +1262,28 @@ module.exports = require("protobufjs/dist/protobuf-light").newBuilder({})['impor
                 {
                     "name": "uploaded",
                     "id": 101
+                }
+            ]
+        },
+        {
+            "name": "ExtendLoginCommandType",
+            "syntax": "proto2",
+            "values": [
+                {
+                    "name": "unknown",
+                    "id": 0
+                },
+                {
+                    "name": "loggedin",
+                    "id": 1
+                },
+                {
+                    "name": "logout",
+                    "id": 2
+                },
+                {
+                    "name": "loggedout",
+                    "id": 3
                 }
             ]
         },

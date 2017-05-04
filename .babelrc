@@ -1,13 +1,21 @@
 {
-  "presets": ["es2015"],
+  // workaround for https://github.com/babel/babel/issues/2877
+  "passPerPreset": true,
+  "presets": [
+    { "plugins": [ "transform-runtime" ] },
+    {
+      "passPerPreset": false,
+      "presets": [["env", {
+        "debug": true,
+        "targets": {
+          "node": "current"
+        }
+      }]]
+    }
+  ],
   "plugins": [
-    "external-helpers",
-    "transform-runtime",
     "transform-object-rest-spread",
-    "transform-decorators-legacy",
-    ["transform-es2015-classes", {
-      "loose": true
-    }]
+    "transform-decorators-legacy"
   ],
   "env": {
     "test": {

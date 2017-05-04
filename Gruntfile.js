@@ -4,7 +4,7 @@ var fs = require('fs');
 
 module.exports = function(grunt) {
   require('load-grunt-tasks')(grunt);
-  var nodeResolve = require('rollup-plugin-node-resolve');
+  var nodeResolve = require('@leeyeh/rollup-plugin-node-resolve');
   var json = require('rollup-plugin-json');
   var babel = require('rollup-plugin-babel');
   var commonjs = require('rollup-plugin-commonjs');
@@ -45,13 +45,35 @@ var require = require || function(id) {throw new Error('Unexpected required ' + 
     version: '31'
   }];
 
-  var babelrc = JSON.parse(fs.readFileSync('./.babelrc'));
-  var babelConfigs = Object.assign(babelrc, {
-    plugins: babelrc.plugins,
-    presets: [["es2015", { "modules": false }]],
+  var babelConfigs = {
+    plugins: [
+      "external-helpers",
+      "transform-runtime",
+      "transform-object-rest-spread",
+      "transform-decorators-legacy",
+      ["transform-es2015-classes", {
+        "loose": true
+      }]
+    ],
+    presets: [["env", { "modules": false }]],
     babelrc: false,
     runtimeHelpers: true,
-  });
+  };
+
+  const createRollupPluginsOptions = resolveOptions => [
+    json(),
+    nodeResolve(Object.assign({
+      main: true,
+    }, resolveOptions)),
+    commonjsGlobal(),
+    commonjs({
+      include: ['node_modules/**', 'proto/**'],
+    }),
+    babel(Object.assign({}, babelConfigs, {
+      include: ['src/**', 'test/**', 'proto/**', 'node_modules/axios/**', 'node_modules/weapp-polyfill/**'],
+    })),
+    env(),
+  ];
 
   grunt.initConfig({
     rollup: {
@@ -74,34 +96,47 @@ var require = require || function(id) {throw new Error('Unexpected required ' + 
           format: 'cjs'
         }
       },
+      'node-core': {
+        dest: 'dist/realtime-core.js',
+        src: 'src/core.js',
+        options: "<%= rollup.node.options %>",
+      },
       'browser': {
         dest: 'dist/realtime.browser.js',
         src: 'src/index.js',
         options: {
-          plugins: [
-            json(),
-            nodeResolve({
-              main: true,
-              browser: true
-            }),
-            commonjsGlobal(),
-            commonjs({
-              include: ['node_modules/**', 'proto/**'],
-            }),
-            babel(Object.assign({}, babelConfigs, {
-              include: ['src/**', 'test/**', 'proto/**', 'node_modules/axios/**', 'node_modules/weapp-polyfill/**'],
-            })),
-            env(),
-          ],
+          plugins: createRollupPluginsOptions({
+            browser: true,
+          }),
           format: 'umd',
           moduleName: 'AV',
           moduleId: 'leancloud-realtime',
         }
       },
+      'browser-core': {
+        dest: 'dist/realtime-core.browser.js',
+        src: 'src/core.js',
+        options: "<%= rollup.browser.options %>",
+      },
       'weapp': {
         dest: 'dist/realtime.weapp.js',
-        src: 'src/index-weapp.js',
-        options: '<%= rollup.browser.options %>',
+        src: 'src/index.js',
+        options: {
+          plugins: createRollupPluginsOptions({
+            browser: true,
+            customResolveOptions: {
+              aliasFields: ['weapp', 'browser'],
+            },
+          }),
+          format: 'umd',
+          moduleName: 'AV',
+          moduleId: 'leancloud-realtime',
+        },
+      },
+      'weapp-core': {
+        dest: 'dist/realtime-core.weapp.js',
+        src: 'src/core.js',
+        options: "<%= rollup.weapp.options %>",
       },
       'test-browser': {
         dest: 'test/browser/index.js',
@@ -286,6 +321,9 @@ var require = require || function(id) {throw new Error('Unexpected required ' + 
     'uglify:groupchat-receipts',
     'rollup:weapp',
     'uglify:weapp',
+    'rollup:browser-core',
+    'rollup:node-core',
+    'rollup:weapp-core',
     'validate-es5',
   ]);
   grunt.registerTask('cdn', 'Upload dist to CDN.', function() {
