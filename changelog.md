@@ -1,3 +1,18 @@
+<a name="3.5.0-beta.0"></a>
+# [3.5.0-beta.0](https://github.com/leancloud/js-realtime-sdk/compare/v3.4.1+source...v3.5.0-beta.0) (2017-05-18)
+
+
+### Bug Fixes
+
+* 修复了会话被删除后 SDK 无法正常派发未读消息数更新通知（`unreadmessagescountupdate`）的问题 ([#548](https://github.com/leancloud/js-realtime-sdk/issues/548))
+
+
+### Features
+
+* 新增对 LiveQuery 的支持
+
+
+
 <a name="3.4.1"></a>
 ## 3.4.1 (2017-04-17)
 
