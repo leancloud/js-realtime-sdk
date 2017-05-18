@@ -75,6 +75,28 @@ var require = require || function(id) {throw new Error('Unexpected required ' + 
     env(),
   ];
 
+  const pluginOptions = {
+    plugins: [
+      json(),
+      babel(Object.assign({}, babelConfigs, {
+        exclude: 'node_modules/**',
+      })),
+      nodeResolve({
+        main: true,
+      }),
+      commonjs({
+        include: ['node_modules/**'],
+      }),
+    ],
+    format: 'umd',
+    moduleName: 'AV',
+    external: ['leancloud-realtime', 'leancloud-realtime/core'],
+    globals: {
+      'leancloud-realtime': 'AV',
+      'leancloud-realtime/core': 'AV',
+    },
+  };
+
   grunt.initConfig({
     rollup: {
       options: {
@@ -172,52 +194,23 @@ var require = require || function(id) {throw new Error('Unexpected required ' + 
       'webrtc': {
         dest: 'plugins/webrtc/dist/webrtc.js',
         src: 'plugins/webrtc/src/index.js',
-        options: {
-          plugins: [
-            json(),
-            babel(Object.assign({}, babelConfigs, {
-              exclude: 'node_modules/**',
-            })),
-            nodeResolve({
-              main: true,
-            }),
-            commonjs({
-              include: ['node_modules/**'],
-            }),
-          ],
-          format: 'umd',
-          moduleName: 'AV',
+        options: Object.assign({}, pluginOptions, {
           moduleId: 'webrtc',
-          external: ['leancloud-realtime'],
-          globals: {
-            'leancloud-realtime': 'AV',
-          },
-        }
+        })
       },
       'groupchat-receipts': {
         dest: 'plugins/groupchat-receipts/dist/groupchat-receipts.js',
         src: 'plugins/groupchat-receipts/src/index.js',
-        options: {
-          plugins: [
-            json(),
-            babel(Object.assign({}, babelConfigs, {
-              exclude: 'node_modules/**',
-            })),
-            nodeResolve({
-              main: true,
-            }),
-            commonjs({
-              include: ['node_modules/**'],
-            }),
-          ],
-          format: 'umd',
-          moduleName: 'AV',
+        options: Object.assign({}, pluginOptions, {
           moduleId: 'groupchat-receipts',
-          external: ['leancloud-realtime'],
-          globals: {
-            'leancloud-realtime': 'AV',
-          },
-        }
+        })
+      },
+      'live-query': {
+        dest: 'plugins/live-query/dist/live-query.js',
+        src: 'plugins/live-query/src/index.js',
+        options: Object.assign({}, pluginOptions, {
+          moduleId: 'live-query',
+        })
       },
     },
     envify: {
@@ -273,6 +266,15 @@ var require = require || function(id) {throw new Error('Unexpected required ' + 
           'plugins/groupchat-receipts/dist/groupchat-receipts.min.js': ['plugins/groupchat-receipts/dist/groupchat-receipts.js']
         }
       },
+      'live-query': {
+        options: {
+          sourceMap: true,
+          sourceMapIn: 'plugins/live-query/dist/live-query.js.map'
+        },
+        files: {
+          'plugins/live-query/dist/live-query.min.js': ['plugins/live-query/dist/live-query.js']
+        }
+      },
     },
     connect: {
       server: {
@@ -319,6 +321,8 @@ var require = require || function(id) {throw new Error('Unexpected required ' + 
     'uglify:webrtc',
     'rollup:groupchat-receipts',
     'uglify:groupchat-receipts',
+    'rollup:live-query',
+    'uglify:live-query',
     'rollup:weapp',
     'uglify:weapp',
     'rollup:browser-core',
@@ -367,6 +371,7 @@ var require = require || function(id) {throw new Error('Unexpected required ' + 
       './plugins/typed-messages/dist/typed-messages.js',
       './plugins/webrtc/dist/webrtc.js',
       './plugins/groupchat-receipts/dist/groupchat-receipts.js',
+      './plugins/live-query/dist/live-query.js',
       './dist/realtime.browser.js',
       './dist/realtime.weapp.js',
     ].forEach(file => {

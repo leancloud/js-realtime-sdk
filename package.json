@@ -11,7 +11,7 @@
     "precommit": "validate-commit-msg",
     "lint": "eslint --ignore-path .gitignore src test plugins",
     "test": "npm run lint && npm run build && npm run docs && npm run test:node && npm run test:browser",
-    "test:node": "NODE_ENV=test nyc mocha --timeout 30000 test/index.js plugins/typed-messages/test/index.js",
+    "test:node": "NODE_ENV=test nyc mocha --timeout 30000 test/index.js plugins/**/test/index.js",
     "test:browser": "grunt test-browser --stack",
     "docs": "jsdoc src README.md package.json -d docs -c .jsdocrc.json && jsdoc plugins/typed-messages/src plugins/typed-messages/package.json src/messages/**message.js -d plugins/typed-messages/docs -c .jsdocrc.json && jsdoc plugins/webrtc/src plugins/webrtc/package.json -d plugins/webrtc/docs -c .jsdocrc.json && jsdoc plugins/groupchat-receipts/src plugins/groupchat-receipts/package.json -d plugins/groupchat-receipts/docs -c .jsdocrc.json",
     "build": "grunt build --stack",

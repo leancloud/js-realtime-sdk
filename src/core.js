@@ -4,6 +4,10 @@ import * as Protocals from '../proto/message';
 
 export { Protocals };
 
+export { default as EventEmitter } from 'eventemitter3';
+
+export { Promise };
+
 export {
   /**
    * @see Realtime

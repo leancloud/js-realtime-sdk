@@ -42,7 +42,7 @@ export {
 
 const onRealtimeCreate = (realtime) => {
   /* eslint-disable no-param-reassign */
-  const realtimeId = uuid();
+  const deviceId = uuid();
   realtime._IMClients = {};
   const messageParser = realtime._messageParser = new MessageParser(realtime._plugins);
 
@@ -82,7 +82,7 @@ const onRealtimeCreate = (realtime) => {
         _plugins: realtime._plugins,
       });
       connection.on('reconnect', () =>
-        client._open(realtime._options.appId, tag, realtimeId, true)
+        client._open(realtime._options.appId, tag, deviceId, true)
           /**
            * 客户端连接恢复正常，该事件通常在 {@link Realtime#event:reconnect} 之后发生
            * @event IMClient#reconnect
@@ -103,7 +103,7 @@ const onRealtimeCreate = (realtime) => {
         delete realtime._IMClients[client.id];
         realtime._deregister(client);
       }, realtime);
-      return client._open(realtime._options.appId, tag, realtimeId)
+      return client._open(realtime._options.appId, tag, deviceId)
         .then(() => {
           realtime._IMClients[client.id] = client;
           realtime._register(client);
