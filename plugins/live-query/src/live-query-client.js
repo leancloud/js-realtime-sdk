@@ -8,6 +8,8 @@ const {
   AckCommand,
  } = Protocals;
 
+const warn = error => console.warn(error.message);
+
 export default class LiveQueryClient extends EventEmitter {
   constructor(appId, subscriptionId, connection) {
     super();
@@ -15,6 +17,7 @@ export default class LiveQueryClient extends EventEmitter {
     this.id = subscriptionId;
     this._connection = connection;
     this._eventemitter = new EventEmitter();
+    this._querys = new Set();
   }
   _send(cmd, ...args) {
     return this._connection.send(Object.assign(cmd, {
@@ -36,6 +39,13 @@ export default class LiveQueryClient extends EventEmitter {
       }),
     })).then(() => this._eventemitter.emit('close'));
   }
+  register(liveQuery) {
+    this._querys.add(liveQuery);
+  }
+  deregister(liveQuery) {
+    this._querys.delete(liveQuery);
+    if (!this._querys.size) this.close().catch(warn);
+  }
   _dispatchCommand(command) {
     if (command.cmd !== CommandType.data) {
       this.emit('unhandledmessage', command);
@@ -56,6 +66,6 @@ export default class LiveQueryClient extends EventEmitter {
         ids,
       }),
     });
-    return this._send(command, false).catch(error => console.warn(error.message));
+    return this._send(command, false).catch(warn);
   }
 }
