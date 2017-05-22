@@ -124,7 +124,7 @@ declare module LeanCloudRealtime {
     on(evt: string, listener: Function): EventEmitter;
     once(evt: string, listener: Function): EventEmitter;
     off(evt: string, listener: Function): EventEmitter;
-    emit(evt: string, ...args: any[]): EventEmitter;
+    emit(evt: string, ...args: any[]): Boolean;
   }
 
   interface Middleware<T> {
