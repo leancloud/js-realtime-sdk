@@ -34,7 +34,7 @@ export default class Connection extends WebSocketPlus {
     debug('↑ %O sent', trim(command));
 
     let message;
-    if (this._protocalFormat === 'protobase64') {
+    if (this._protocalFormat === 'proto2base64') {
       message = command.toBase64();
     } else if (command.toBuffer) {
       message = command.toBuffer();

@@ -2,9 +2,7 @@ import { Protocals, _Promise, EventEmitter } from './realtime';
 
 const {
   CommandType,
-  ExtendLoginCommandType,
   GenericCommand,
-  LoginCommand,
   AckCommand,
  } = Protocals;
 
@@ -33,10 +31,7 @@ export default class LiveQueryClient extends EventEmitter {
   }
   close() {
     return this._send(new GenericCommand({
-      cmd: CommandType.login,
-      loginMessage: new LoginCommand({
-        extendCmd: ExtendLoginCommandType.logout,
-      }),
+      cmd: CommandType.logout,
     })).then(() => this._eventemitter.emit('close'));
   }
   register(liveQuery) {
