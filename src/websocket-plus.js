@@ -10,8 +10,8 @@ import { tryAll, global } from './utils';
 
 const debug = d('LC:WebSocketPlus');
 
-const HEARTBEAT_TIME = 60000;
-const TIMEOUT_TIME = 180000;
+const HEARTBEAT_TIME = 180000;
+const TIMEOUT_TIME = 380000;
 
 const DEFAULT_RETRY_STRATEGY = attempt => Math.min(1000 * Math.pow(2, attempt), 300000);
 
@@ -45,7 +45,7 @@ class WebSocketPlus extends EventEmitter {
     this.init();
     this._createWs(this._getUrls, this._protocol).then(
       () => {
-        this.__postponeTimers = this._postponeTimers.bind(this);
+        this.__postponeTimeoutTimer = this._postponeTimeoutTimer.bind(this);
         if (global.addEventListener) {
           this.__pause = () => this.pause();
           this.__resume = () => this.resume();
@@ -171,37 +171,37 @@ class WebSocketPlus extends EventEmitter {
     }
   }
 
-  _postponeTimers() {
-    debug('_postponeTimers');
-    this._clearTimers();
-    this._heartbeatTimer = setInterval(this._ping.bind(this), HEARTBEAT_TIME);
+  _postponeTimeoutTimer() {
+    debug('_postponeTimeoutTimer');
+    this._clearTimeoutTimers();
     this._timeoutTimer = setTimeout(() => {
       debug('timeout');
       this.disconnect();
     }, TIMEOUT_TIME);
   }
-  _clearTimers() {
-    if (this._heartbeatTimer) {
-      clearInterval(this._heartbeatTimer);
-    }
+  _clearTimeoutTimers() {
     if (this._timeoutTimer) {
       clearTimeout(this._timeoutTimer);
     }
   }
   _startConnectionKeeper() {
     debug('start connection keeper');
+    this._heartbeatTimer = setInterval(this._ping.bind(this), HEARTBEAT_TIME);
     const addListener = this._ws.addListener || this._ws.addEventListener;
-    addListener.call(this._ws, 'message', this.__postponeTimers);
-    addListener.call(this._ws, 'pong', this.__postponeTimers);
-    this._postponeTimers();
+    addListener.call(this._ws, 'message', this.__postponeTimeoutTimer);
+    addListener.call(this._ws, 'pong', this.__postponeTimeoutTimer);
+    this._postponeTimeoutTimer();
   }
   _stopConnectionKeeper() {
     debug('stop connection keeper');
     // websockets/ws#489
     const removeListener = this._ws.removeListener || this._ws.removeEventListener;
-    removeListener.call(this._ws, 'message', this.__postponeTimers);
-    removeListener.call(this._ws, 'pong', this.__postponeTimers);
-    this._clearTimers();
+    removeListener.call(this._ws, 'message', this.__postponeTimeoutTimer);
+    removeListener.call(this._ws, 'pong', this.__postponeTimeoutTimer);
+    this._clearTimeoutTimers();
+    if (this._heartbeatTimer) {
+      clearInterval(this._heartbeatTimer);
+    }
   }
 
   _handleClose(event) {
