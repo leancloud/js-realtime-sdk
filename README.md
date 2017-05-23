@@ -4,6 +4,7 @@ LeanCloud JavaScript Realtime SDK
 [![Codecov](https://img.shields.io/codecov/c/github/leancloud/js-realtime-sdk.svg?style=flat-square)](https://codecov.io/github/leancloud/js-realtime-sdk)
 [![David](https://img.shields.io/david/leancloud/js-realtime-sdk.svg?style=flat-square)](https://david-dm.org/leancloud/js-realtime-sdk)
 [![npm](https://img.shields.io/npm/v/leancloud-realtime.svg?style=flat-square)](https://www.npmjs.com/package/leancloud-realtime)
+![gzip size](http://img.badgesize.io/leancloud/js-realtime-sdk/dist/dist/realtime.browser.min.js.svg?compression=gzip&style=flat-square)
 
 为您的 JavaScript App 接入 LeanCloud 实时通讯服务。
 

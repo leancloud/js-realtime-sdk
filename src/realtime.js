@@ -67,10 +67,10 @@ export default class Realtime extends EventEmitter {
   _open() {
     if (this._openPromise) return this._openPromise;
 
-    let format = 'protobuf';
+    let format = 'protobuf2';
     if (this._options.noBinary) {
       // 不发送 binary data，fallback to base64 string
-      format = 'protobase64';
+      format = 'proto2base64';
     }
     let version = 3;
     if (this._options.pushOfflineMessages) {

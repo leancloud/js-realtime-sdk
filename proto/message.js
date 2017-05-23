@@ -25,8 +25,7 @@ const {
   CommandType,
   OpType,
   StatusType,
-  ExtendLoginCommandType,
-} = messages.push_server.messages;
+} = messages.push_server.messages2;
 
 export {
   JsonObjectMessage,
@@ -53,5 +52,4 @@ export {
   CommandType,
   OpType,
   StatusType,
-  ExtendLoginCommandType,
 };

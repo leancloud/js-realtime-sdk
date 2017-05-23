@@ -1,6 +1,6 @@
 syntax = "proto2";
 
-package push_server.messages;
+package push_server.messages2;
 
 // note that this line will be removed by out build script until we
 // finally upgraded to protobuffer 3
@@ -22,6 +22,10 @@ enum CommandType {
   presence = 12;
   report = 13;
   echo = 14;
+  loggedin = 15;
+  logout = 16;
+  loggedout = 17;
+  patch = 18;
 }
 
 enum OpType {
@@ -78,13 +82,10 @@ enum OpType {
   // report
   upload = 100;
   uploaded = 101;
-}
 
-enum ExtendLoginCommandType {
-  unknown = 0;
-  loggedin = 1;
-  logout = 2;
-  loggedout = 3;
+  // patch
+  modify = 150;
+  modified = 151;
 }
 
 enum StatusType {
@@ -114,10 +115,6 @@ message LogItem {
   optional int64 readAt = 6;
 }
 
-message LoginCommand {
-  optional ExtendLoginCommandType extendCmd = 1;
-}
-
 message DataCommand {
   repeated string ids = 1;
   repeated JsonObjectMessage msg = 2;
@@ -142,6 +139,7 @@ message SessionCommand {
   optional bool sp = 15;
   optional string detail = 16;
   optional int64 lastUnreadNotifTime = 17;
+  optional int64 lastPatchTime = 18;
 }
 
 message ErrorCommand {
@@ -284,8 +282,22 @@ message ReportCommand {
   optional string data = 3;
 }
 
+message PatchItem {
+  optional string cid = 1;
+  optional string mid = 2;
+  optional int64 timestamp = 3;
+  optional bool recall = 4;
+  optional string data = 5;
+  optional int64 patchTimestamp = 6;
+}
+
+message PatchCommand {
+  repeated PatchItem patches = 1;
+  optional int64 lastPatchTime = 2;
+}
+
 message GenericCommand {
-  required CommandType cmd = 1;
+  optional CommandType cmd = 1;
   optional OpType op = 2;
 
   optional string appId = 3;
@@ -295,7 +307,6 @@ message GenericCommand {
   optional int32 priority = 7;
   optional int32 service = 8;
 
-  optional LoginCommand loginMessage = 100;
   optional DataCommand dataMessage = 101;
   optional SessionCommand sessionMessage = 102;
   optional ErrorCommand errorMessage = 103;
@@ -309,4 +320,5 @@ message GenericCommand {
   optional RoomCommand roomMessage = 111;
   optional PresenceCommand presenceMessage = 112;
   optional ReportCommand reportMessage = 113;
+  optional PatchCommand patchMessage = 114;
 }

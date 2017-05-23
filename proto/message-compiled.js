@@ -1,5 +1,5 @@
 module.exports = require("protobufjs/dist/protobuf-light").newBuilder({})['import']({
-    "package": "push_server.messages",
+    "package": "push_server.messages2",
     "syntax": "proto2",
     "options": {
         "objc_class_prefix": "AVIM"
@@ -98,18 +98,6 @@ module.exports = require("protobufjs/dist/protobuf-light").newBuilder({})['impor
                     "type": "int64",
                     "name": "readAt",
                     "id": 6
-                }
-            ]
-        },
-        {
-            "name": "LoginCommand",
-            "syntax": "proto2",
-            "fields": [
-                {
-                    "rule": "optional",
-                    "type": "ExtendLoginCommandType",
-                    "name": "extendCmd",
-                    "id": 1
                 }
             ]
         },
@@ -242,6 +230,12 @@ module.exports = require("protobufjs/dist/protobuf-light").newBuilder({})['impor
                     "type": "int64",
                     "name": "lastUnreadNotifTime",
                     "id": 17
+                },
+                {
+                    "rule": "optional",
+                    "type": "int64",
+                    "name": "lastPatchTime",
+                    "id": 18
                 }
             ]
         },
@@ -906,11 +900,71 @@ module.exports = require("protobufjs/dist/protobuf-light").newBuilder({})['impor
             ]
         },
         {
+            "name": "PatchItem",
+            "syntax": "proto2",
+            "fields": [
+                {
+                    "rule": "optional",
+                    "type": "string",
+                    "name": "cid",
+                    "id": 1
+                },
+                {
+                    "rule": "optional",
+                    "type": "string",
+                    "name": "mid",
+                    "id": 2
+                },
+                {
+                    "rule": "optional",
+                    "type": "int64",
+                    "name": "timestamp",
+                    "id": 3
+                },
+                {
+                    "rule": "optional",
+                    "type": "bool",
+                    "name": "recall",
+                    "id": 4
+                },
+                {
+                    "rule": "optional",
+                    "type": "string",
+                    "name": "data",
+                    "id": 5
+                },
+                {
+                    "rule": "optional",
+                    "type": "int64",
+                    "name": "patchTimestamp",
+                    "id": 6
+                }
+            ]
+        },
+        {
+            "name": "PatchCommand",
+            "syntax": "proto2",
+            "fields": [
+                {
+                    "rule": "repeated",
+                    "type": "PatchItem",
+                    "name": "patches",
+                    "id": 1
+                },
+                {
+                    "rule": "optional",
+                    "type": "int64",
+                    "name": "lastPatchTime",
+                    "id": 2
+                }
+            ]
+        },
+        {
             "name": "GenericCommand",
             "syntax": "proto2",
             "fields": [
                 {
-                    "rule": "required",
+                    "rule": "optional",
                     "type": "CommandType",
                     "name": "cmd",
                     "id": 1
@@ -956,12 +1010,6 @@ module.exports = require("protobufjs/dist/protobuf-light").newBuilder({})['impor
                     "type": "int32",
                     "name": "service",
                     "id": 8
-                },
-                {
-                    "rule": "optional",
-                    "type": "LoginCommand",
-                    "name": "loginMessage",
-                    "id": 100
                 },
                 {
                     "rule": "optional",
@@ -1040,6 +1088,12 @@ module.exports = require("protobufjs/dist/protobuf-light").newBuilder({})['impor
                     "type": "ReportCommand",
                     "name": "reportMessage",
                     "id": 113
+                },
+                {
+                    "rule": "optional",
+                    "type": "PatchCommand",
+                    "name": "patchMessage",
+                    "id": 114
                 }
             ]
         }
@@ -1108,6 +1162,22 @@ module.exports = require("protobufjs/dist/protobuf-light").newBuilder({})['impor
                 {
                     "name": "echo",
                     "id": 14
+                },
+                {
+                    "name": "loggedin",
+                    "id": 15
+                },
+                {
+                    "name": "logout",
+                    "id": 16
+                },
+                {
+                    "name": "loggedout",
+                    "id": 17
+                },
+                {
+                    "name": "patch",
+                    "id": 18
                 }
             ]
         },
@@ -1262,28 +1332,14 @@ module.exports = require("protobufjs/dist/protobuf-light").newBuilder({})['impor
                 {
                     "name": "uploaded",
                     "id": 101
-                }
-            ]
-        },
-        {
-            "name": "ExtendLoginCommandType",
-            "syntax": "proto2",
-            "values": [
-                {
-                    "name": "unknown",
-                    "id": 0
                 },
                 {
-                    "name": "loggedin",
-                    "id": 1
+                    "name": "modify",
+                    "id": 150
                 },
                 {
-                    "name": "logout",
-                    "id": 2
-                },
-                {
-                    "name": "loggedout",
-                    "id": 3
+                    "name": "modified",
+                    "id": 151
                 }
             ]
         },
