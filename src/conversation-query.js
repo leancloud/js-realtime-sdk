@@ -154,6 +154,28 @@ export default class ConversationQuery {
   }
 
   /**
+   * 增加查询条件，当 conversation 存在指定的字段时即可返回
+   *
+   * @since 3.5.0
+   * @param {string} key
+   * @return {ConversationQuery} self
+   */
+  exists(key) {
+    return this._addCondition(key, '$exists', true);
+  }
+
+  /**
+   * 增加查询条件，当 conversation 不存在指定的字段时即可返回
+   *
+   * @since 3.5.0
+   * @param {string} key
+   * @return {ConversationQuery} self
+   */
+  doesNotExist(key) {
+    return this._addCondition(key, '$exists', false);
+  }
+
+  /**
    * 增加查询条件，当 conversation 的属性中对应的字段对应的值包含在指定值中时即可返回
    *
    * @param {string} key
