@@ -29,8 +29,10 @@ declare module LeanCloudRealtime {
     containsAll(key: string, values: any): ConversationQuery;
     containsMembers(peerIds: string[]): ConversationQuery;
     descending(key: string): ConversationQuery;
+    doesNotExist(key: string): ConversationQuery;
     endsWith(key: string, suffix: string): ConversationQuery;
     equalTo(key: string, value: any): ConversationQuery;
+    exists(key: string): ConversationQuery;
     find(): Promise<Array<Conversation>>;
     greaterThan(key: string, value: any): ConversationQuery;
     greaterThanOrEqualTo(key: string, value: any): ConversationQuery;

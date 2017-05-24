@@ -251,6 +251,22 @@ describe('ConversationQuery', () => {
           }),
       ])
     );
+    it('exists', () =>
+      client.getQuery().equalTo('objectId', EXISTING_ROOM_ID)
+        .exists('fakeKey')
+        .find()
+        .then((conversations) => {
+          conversations.length.should.be.equal(0);
+        })
+    );
+    it('doesNotExist', () =>
+      client.getQuery().equalTo('objectId', EXISTING_ROOM_ID)
+        .doesNotExist('createdAt')
+        .find()
+        .then((conversations) => {
+          conversations.length.should.be.equal(0);
+        })
+    );
     it('limit', () =>
       client.getQuery().equalTo('objectId', EXISTING_ROOM_ID)
         .limit(0)
