@@ -12,10 +12,15 @@ import {
   JsonObjectMessage,
   DirectCommand,
   LogsCommand,
+  PatchCommand,
+  PatchItem,
+  CommandType,
+  OpType,
 } from '../proto/message';
 import runSignatureFactory from './signature-factory-runner';
 import { createError } from './error';
 import Message, { MessageStatus } from './messages/message';
+import RecalledMessage from './messages/recalled-message';
 
 const debug = d('LC:Conversation');
 
@@ -132,6 +137,8 @@ export default class Conversation extends EventEmitter {
       'receipt',
       'lastdeliveredatupdate',
       'lastreadatupdate',
+      'messagerecall',
+      'messagemodify',
     ].forEach(event => this.on(
       event,
       (...payload) => this._debug(`${event} event emitted. %O`, payload)
@@ -661,6 +668,68 @@ export default class Conversation extends EventEmitter {
       message._setStatus(MessageStatus.FAILED);
       throw error;
     });
+  }
+
+  _modify(message, newMessage, recall) {
+    this._debug('patch %O %O %O', message, newMessage, recall);
+    if (message instanceof Message) {
+      if (message.from !== this._client.id) {
+        throw new Error('Modifying message from others is not allowed');
+      }
+      if (message.status !== MessageStatus.SENT && message.status !== MessageStatus.DELIVERED) {
+        throw new Error('Message is not sent');
+      }
+    } else if (!(message.id && message.timestamp)) {
+      throw new TypeError(`${message} is not a Message`);
+    }
+    let data = null;
+    if (!recall) {
+      data = newMessage.toJSON();
+      if (typeof data !== 'string') {
+        data = JSON.stringify(data);
+      }
+    }
+    return this._send(new GenericCommand({
+      cmd: CommandType.patch,
+      op: OpType.modify,
+      patchMessage: new PatchCommand({
+        patches: [new PatchItem({
+          cid: this.id,
+          mid: message.id,
+          timestamp: Number(message.timestamp),
+          recall,
+          data,
+        })],
+        lastPatchTime: this._client._lastPatchTime,
+      }),
+    })).then(() => {
+      const {
+        id, cid, timestamp, from, _status,
+      } = message;
+      return Object.assign(newMessage, {
+        id, cid, timestamp, from, _status,
+      });
+    });
+  }
+
+  /**
+   * 修改已发送的消息
+   * @param {AVMessage} message 要修改的消息，该消息必须是由当前用户发送的。也可以提供一个包含消息 {id, timestamp} 的对象
+   * @param {AVMessage} newMessage 新的消息
+   */
+  modify(message, newMessage) {
+    if (!(newMessage instanceof Message)) {
+      throw new TypeError(`${newMessage} is not a Message`);
+    }
+    return this._modify(message, newMessage, false);
+  }
+
+  /**
+   * 撤回已发送的消息
+   * @param {AVMessage} message 要撤回的消息，该消息必须是由当前用户发送的。也可以提供一个包含消息 {id, timestamp} 的对象
+   */
+  recall(message) {
+    return this._modify(message, new RecalledMessage(), true);
   }
 
   /**

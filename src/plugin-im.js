@@ -1,3 +1,4 @@
+/** @module leancloud-realtime */
 import d from 'debug';
 import uuid from 'uuid/v4';
 import IMClient from './im-client';
@@ -5,6 +6,7 @@ import Conversation from './conversation';
 import Message, { MessageStatus } from './messages/message';
 import TextMessage from './messages/text-message';
 import TypedMessage from './messages/typed-message';
+import RecalledMessage from './messages/recalled-message';
 import MessageParser from './message-parser';
 import { trim, internal, ensureArray } from './utils';
 
@@ -14,7 +16,6 @@ const debug = d('LC:IMPlugin');
  * 消息优先级枚举
  * @enum {Number}
  * @since 3.3.0
- * @memberof module:leancloud-realtime
  */
 const MessagePriority = {
   /** 高 */
@@ -26,16 +27,87 @@ const MessagePriority = {
 };
 Object.freeze(MessagePriority);
 
-export {
-  Message,
-  TypedMessage,
-  TextMessage,
-  MessagePriority,
-  MessageStatus,
+/**
+ * 为 Conversation 定义一个新属性
+ * @param {String} prop 属性名
+ * @param {Object} [descriptor] 属性的描述符，参见 {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/getOwnPropertyDescriptor#Description getOwnPropertyDescriptor#Description - MDN}，默认为该属性名对应的 Conversation 自定义属性的 getter/setter
+ * @returns void
+ * @example
+ *
+ * conversation.get('type');
+ * conversation.set('type', 1);
+ *
+ * // equals to
+ * defineConversationProperty('type');
+ * conversation.type;
+ * conversation.type = 1;
+ */
+const defineConversationProperty = (prop, descriptor = {
+  get() { return this.get(prop); },
+  set(value) { this.set(prop, value); },
+}) => {
+  Object.defineProperty(Conversation.prototype, prop, descriptor);
 };
 
 export {
+  /**
+   * @see Message
+   */
+  Message,
+  /**
+   * @see TypedMessage
+   */
+  TypedMessage,
+  /**
+   * @see TextMessage
+   */
+  TextMessage,
+  /**
+   * @see RecalledMessage
+   */
+  RecalledMessage,
+  MessagePriority,
+  MessageStatus,
+  defineConversationProperty,
+};
+
+export {
+  /**
+   * decorator，定义消息类的类型常量
+   * @function
+   * @param {Number} type 自定义类型请使用正整数
+   * @example @messageType(1)
+   * class CustomMessage extends TypedMessage {}
+   *
+   * // 不支持 decorator 的情况下可以这样使用
+   * class CustomMessage extends TypedMessage {
+   *   //...
+   * }
+   * messageType(1)(CustomMessage);
+   */
   messageType,
+  /**
+   * decorator，定义消息类的自定义字段
+   * @function
+   * @param {String[]} fields 自定义字段
+   * @example @messageField(['foo'])
+   * class CustomMessage extends TypedMessage {
+   *   constructor(foo) {
+   *     super();
+   *     this.foo = foo;
+   *   }
+   * }
+   *
+   * // 不支持 decorator 的情况下可以这样使用
+   * class CustomMessage extends TypedMessage {
+   *   constructor(foo) {
+   *     super();
+   *     this.foo = foo;
+   *   }
+   *   //...
+   * }
+   * messageField(['foo'])(CustomMessage);
+   */
   messageField,
   IE10Compatible,
 } from './messages/helpers';
@@ -138,30 +210,7 @@ export const IMPlugin = {
   beforeCommandDispatch,
   messageClasses: [
     Message,
+    RecalledMessage,
     TextMessage,
   ],
-};
-
-
-/**
- * 为 Conversation 定义一个新属性
- * @memberof module:leancloud-realtime
- * @param {String} prop 属性名
- * @param {Object} [descriptor] 属性的描述符，参见 {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/getOwnPropertyDescriptor#Description getOwnPropertyDescriptor#Description - MDN}，默认为该属性名对应的 Conversation 自定义属性的 getter/setter
- * @returns void
- * @example
- *
- * conversation.get('type');
- * conversation.set('type', 1);
- *
- * // equals to
- * defineConversationProperty('type');
- * conversation.type;
- * conversation.type = 1;
- */
-export const defineConversationProperty = (prop, descriptor = {
-  get() { return this.get(prop); },
-  set(value) { this.set(prop, value); },
-}) => {
-  Object.defineProperty(Conversation.prototype, prop, descriptor);
 };

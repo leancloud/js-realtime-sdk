@@ -2,13 +2,18 @@ import 'should';
 import 'should-sinon';
 import Realtime from '../src/realtime';
 import Conversation from '../src/conversation';
-import { ErrorCode, MessagePriority } from '../src';
-import Message, { MessageStatus } from '../src/messages/message';
-import TypedMessage from '../src/messages/typed-message';
-import TextMessage from '../src/messages/text-message';
+import {
+  ErrorCode,
+  MessagePriority,
+  MessageStatus,
+  Message,
+  TypedMessage,
+  TextMessage,
+  RecalledMessage,
+ } from '../src';
 import { messageType, messageField, IE10Compatible } from '../src/messages/helpers';
 
-import { listen, sinon } from './test-utils';
+import { listen, hold, sinon } from './test-utils';
 
 import {
   APP_ID,
@@ -289,6 +294,30 @@ describe('Messages', () => {
         .then(() => {
           message.status.should.eql(MessageStatus.FAILED);
         });
+    });
+    describe('patch', () => {
+      before(function prepareMessage() {
+        this.originalMessage = new Message('original');
+        this.modifiedMessage = new TextMessage('modified');
+        return conversationWchen.send(this.originalMessage).then(hold(100));
+      });
+      it('modify', function testModify() {
+        return conversationWchen.modify(this.originalMessage, this.modifiedMessage)
+          .then(() => listen(conversationZwang, 'messagemodify'))
+          .then(([message]) => {
+            message.should.be.instanceof(TextMessage);
+            message.text.should.be.eql('modified');
+            message.updatedAt.should.be.a.Date();
+          });
+      });
+      it('recall', function testRecall() {
+        return conversationWchen.recall(this.modifiedMessage)
+          .then(() => listen(conversationZwang, 'messagerecall'))
+          .then(([message]) => {
+            message.should.be.instanceof(RecalledMessage);
+            message.updatedAt.should.be.a.Date();
+          });
+      });
     });
   });
 });

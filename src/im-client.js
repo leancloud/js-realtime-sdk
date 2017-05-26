@@ -52,6 +52,7 @@ export default class IMClient extends EventEmitter {
     }
     this._conversationCache = new Cache(`client:${this.id}`);
     this._ackMessageBuffer = {};
+    internal(this).lastPatchTime = Date.now();
     internal(this)._eventemitter = new EventEmitter();
     [
       'invited',
@@ -95,6 +96,8 @@ export default class IMClient extends EventEmitter {
         return this._dispatchUnreadMessage(command);
       case CommandType.rcp:
         return this._dispatchRcpMessage(command);
+      case CommandType.patch:
+        return this._dispatchPatchMessage(command);
       default:
         this.emit('unhandledmessage', command);
         return Promise.resolve();
@@ -222,6 +225,69 @@ export default class IMClient extends EventEmitter {
     // during this session
     if (!conversation) return;
     conversation._handleReceipt({ messageId, timestamp, read });
+  }
+
+  _dispatchPatchMessage({
+      patchMessage: {
+        patches, lastPatchTime,
+      },
+    }) {
+    internal(this).lastPatchTime = lastPatchTime;
+    // ensure all converstions are cached
+    return this.getConversations(patches.map(patch => patch.cid)).then(() =>
+      Promise.all(patches.map(({
+        cid, mid, timestamp, recall, data, patchTimestamp, from,
+      }) =>
+        this.getConversation(cid).then((conversation) => {
+          // deleted conversation
+          if (!conversation) return null;
+          return this._messageParser.parse(data).then((message) => {
+            const messageProps = {
+              id: mid,
+              cid,
+              timestamp: new Date(timestamp.toNumber()),
+              updatedAt: new Date(patchTimestamp.toNumber()),
+              from,
+            };
+            Object.assign(message, messageProps);
+            message._setStatus(MessageStatus.SENT);
+            // update conversation lastMessage
+            if (conversation.lastMessage && conversation.lastMessage.id === mid) {
+              conversation.lastMessage = message; // eslint-disable-line no-param-reassign
+            }
+            if (recall) {
+              /**
+               * 消息被撤回
+               * @event IMClient#messagerecall
+               * @param {AVMessage} message 被撤回的消息
+               * @param {Conversation} conversation 消息所在的会话
+               */
+              this.emit('messagerecall', message, conversation);
+              /**
+               * 消息被撤回
+               * @event Conversation#messagerecall
+               * @param {AVMessage} message 被撤回的消息
+               */
+              conversation.emit('messagerecall', message);
+            } else {
+              /**
+               * 消息被修改
+               * @event IMClient#messagemodify
+               * @param {AVMessage} message 被修改的消息
+               * @param {Conversation} conversation 消息所在的会话
+               */
+              this.emit('messagemodify', message, conversation);
+              /**
+               * 消息被修改
+               * @event Conversation#messagemodify
+               * @param {AVMessage} message 被修改的消息
+               */
+              conversation.emit('messagemodify', message);
+            }
+          });
+        })
+      ))
+    );
   }
 
   _dispatchConvMessage(message) {
@@ -453,6 +519,10 @@ export default class IMClient extends EventEmitter {
 
   _open(appId, tag, deviceId, isReconnect = false) {
     this._debug('open session');
+    const {
+      lastUnreadNotifTime,
+      lastPatchTime,
+    } = internal(this);
     return Promise
       .resolve(new GenericCommand({
         cmd: 'session',
@@ -461,7 +531,9 @@ export default class IMClient extends EventEmitter {
         sessionMessage: new SessionCommand({
           ua: `js/${VERSION}`,
           r: isReconnect,
-          lastUnreadNotifTime: internal(this).lastUnreadNotifTime,
+          lastUnreadNotifTime,
+          lastPatchTime,
+          configBitmap: 1,
         }),
       }))
       .then((command) => {
