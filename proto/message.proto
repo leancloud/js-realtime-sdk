@@ -140,6 +140,7 @@ message SessionCommand {
   optional string detail = 16;
   optional int64 lastUnreadNotifTime = 17;
   optional int64 lastPatchTime = 18;
+  optional int64 configBitmap = 19;
 }
 
 message ErrorCommand {
@@ -289,6 +290,7 @@ message PatchItem {
   optional bool recall = 4;
   optional string data = 5;
   optional int64 patchTimestamp = 6;
+  optional string from = 7;
 }
 
 message PatchCommand {

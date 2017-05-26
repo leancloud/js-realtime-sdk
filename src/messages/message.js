@@ -83,11 +83,10 @@ export default class Message {
        */
       // deliveredAt,
       /**
-       * @var readAt {?Date} 消息被阅读时间
+       * @var updatedAt {?Date} 消息修改或撤回时间
        * @memberof Message#
-       * @since 3.4.0
        */
-      // readAt,
+      // updatedAt,
     });
     this._setStatus(MessageStatus.NONE);
   }

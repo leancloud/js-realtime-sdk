@@ -236,6 +236,12 @@ module.exports = require("protobufjs/dist/protobuf-light").newBuilder({})['impor
                     "type": "int64",
                     "name": "lastPatchTime",
                     "id": 18
+                },
+                {
+                    "rule": "optional",
+                    "type": "int64",
+                    "name": "configBitmap",
+                    "id": 19
                 }
             ]
         },
@@ -938,6 +944,12 @@ module.exports = require("protobufjs/dist/protobuf-light").newBuilder({})['impor
                     "type": "int64",
                     "name": "patchTimestamp",
                     "id": 6
+                },
+                {
+                    "rule": "optional",
+                    "type": "string",
+                    "name": "from",
+                    "id": 7
                 }
             ]
         },

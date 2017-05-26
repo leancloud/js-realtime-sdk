@@ -1,4 +1,3 @@
-/** @module leancloud-realtime */
 import './polyfills/polyfills';
 import * as Protocals from '../proto/message';
 
