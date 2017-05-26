@@ -1,5 +1,16 @@
+<a name="3.5.0-beta.1"></a>
+## 3.5.0-beta.1 (2017-05-26)
+
+
+### Features
+
+* **ConversationQuery:** 增加了 exists/doesNotExist ([54261d3](https://github.com/leancloud/js-realtime-sdk/commit/54261d3))
+* **WebSocket:** 降低了客户端心跳频率 ([9b51489](https://github.com/leancloud/js-realtime-sdk/commit/9b51489))
+
+
+
 <a name="3.5.0-beta.0"></a>
-# [3.5.0-beta.0](https://github.com/leancloud/js-realtime-sdk/compare/v3.4.1+source...v3.5.0-beta.0) (2017-05-18)
+## 3.5.0-beta.0 (2017-05-18)
 
 
 ### Bug Fixes
