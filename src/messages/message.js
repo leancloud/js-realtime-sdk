@@ -50,7 +50,7 @@ export default class Message {
        */
       cid: null,
       /**
-       * 时间戳
+       * 消息发送时间
        * @memberof Message#
        * @type {Date}
        */
@@ -82,11 +82,6 @@ export default class Message {
        * @memberof Message#
        */
       // deliveredAt,
-      /**
-       * @var updatedAt {?Date} 消息修改或撤回时间
-       * @memberof Message#
-       */
-      // updatedAt,
     });
     this._setStatus(MessageStatus.NONE);
   }
@@ -139,6 +134,17 @@ export default class Message {
       throw new Error('Invalid message status');
     }
     this._status = status;
+  }
+
+  /**
+   * @var updatedAt {Date} 消息修改或撤回时间，可以通过比较其与消息的 timestamp 是否相等判断消息是否被修改过或撤回过。
+   * @since 3.5.0
+   */
+  get updatedAt() {
+    return this._updatedAt || this.timestamp;
+  }
+  set updatedAt(value) {
+    this._updatedAt = value;
   }
 
   /**

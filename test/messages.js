@@ -178,6 +178,8 @@ describe('Messages', () => {
         receivedMessage.id.should.eql(sentMessage.id);
         receivedMessage.content.should.eql(sentMessage.content);
         receivedMessage.status.should.eql(MessageStatus.SENT);
+        receivedMessage.timestamp.should.be.a.Date();
+        receivedMessage.updatedAt.should.be.eql(receivedMessage.timestamp);
         clientReceivedMessage.id.should.eql(sentMessage.id);
         clientReceivedConversation.id.should.eql(conversationWchen.id);
         unreadUpdatedConversation.id.should.eql(conversationWchen.id);
@@ -308,6 +310,7 @@ describe('Messages', () => {
             message.should.be.instanceof(TextMessage);
             message.text.should.be.eql('modified');
             message.updatedAt.should.be.a.Date();
+            message.updatedAt.should.not.be.eql(message.timestamp);
           });
       });
       it('recall', function testRecall() {
@@ -316,6 +319,7 @@ describe('Messages', () => {
           .then(([message]) => {
             message.should.be.instanceof(RecalledMessage);
             message.updatedAt.should.be.a.Date();
+            message.updatedAt.should.not.be.eql(message.timestamp);
           });
       });
     });

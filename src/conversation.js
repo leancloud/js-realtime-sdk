@@ -775,6 +775,7 @@ export default class Conversation extends EventEmitter {
       Promise.all(resCommand.logsMessage.logs.map(({
         msgId,
         timestamp,
+        patchTimestamp,
         from,
         ackAt,
         readAt,
@@ -788,6 +789,9 @@ export default class Conversation extends EventEmitter {
             from,
             deliveredAt: ackAt,
           };
+          if (patchTimestamp) {
+            messageProps.updatedAt = new Date(patchTimestamp.toNumber());
+          }
           Object.assign(message, messageProps);
           let status = MessageStatus.SENT;
           if (this.members.length === 2) {
