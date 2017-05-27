@@ -98,6 +98,12 @@ module.exports = require("protobufjs/dist/protobuf-light").newBuilder({})['impor
                     "type": "int64",
                     "name": "readAt",
                     "id": 6
+                },
+                {
+                    "rule": "optional",
+                    "type": "int64",
+                    "name": "patchTimestamp",
+                    "id": 7
                 }
             ]
         },
@@ -368,6 +374,12 @@ module.exports = require("protobufjs/dist/protobuf-light").newBuilder({})['impor
                     "type": "bool",
                     "name": "will",
                     "id": 17
+                },
+                {
+                    "rule": "optional",
+                    "type": "int64",
+                    "name": "patchTimestamp",
+                    "id": 18
                 }
             ]
         },

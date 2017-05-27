@@ -421,7 +421,7 @@ export default class IMClient extends EventEmitter {
     const {
       directMessage,
       directMessage: {
-        id, cid, fromPeerId, timestamp, transient,
+        id, cid, fromPeerId, timestamp, transient, patchTimestamp,
       },
     } = originalMessage;
     return Promise.all([
@@ -437,6 +437,9 @@ export default class IMClient extends EventEmitter {
         from: fromPeerId,
         transient,
       };
+      if (patchTimestamp) {
+        messageProps.updatedAt = new Date(patchTimestamp.toNumber());
+      }
       Object.assign(message, messageProps);
       message._setStatus(MessageStatus.SENT);
       return this._dispatchParsedMessage(message, conversation);

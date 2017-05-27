@@ -113,6 +113,7 @@ message LogItem {
   optional string msgId = 4;
   optional int64 ackAt = 5;
   optional int64 readAt = 6;
+  optional int64 patchTimestamp = 7;
 }
 
 message DataCommand {
@@ -166,6 +167,7 @@ message DirectCommand {
   optional string roomId = 15;
   optional string pushData = 16;
   optional bool will = 17;
+  optional int64 patchTimestamp = 18;
 }
 
 message AckCommand {
