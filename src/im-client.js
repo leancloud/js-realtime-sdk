@@ -229,10 +229,9 @@ export default class IMClient extends EventEmitter {
 
   _dispatchPatchMessage({
       patchMessage: {
-        patches, lastPatchTime,
+        patches,
       },
     }) {
-    internal(this).lastPatchTime = lastPatchTime;
     // ensure all converstions are cached
     return this.getConversations(patches.map(patch => patch.cid)).then(() =>
       Promise.all(patches.map(({
@@ -242,15 +241,19 @@ export default class IMClient extends EventEmitter {
           // deleted conversation
           if (!conversation) return null;
           return this._messageParser.parse(data).then((message) => {
+            const patchTime = patchTimestamp.toNumber();
             const messageProps = {
               id: mid,
               cid,
               timestamp: new Date(timestamp.toNumber()),
-              updatedAt: new Date(patchTimestamp.toNumber()),
+              updatedAt: new Date(patchTime),
               from,
             };
             Object.assign(message, messageProps);
             message._setStatus(MessageStatus.SENT);
+            if (internal(this).lastPatchTime < patchTime) {
+              internal(this).lastPatchTime = patchTime;
+            }
             // update conversation lastMessage
             if (conversation.lastMessage && conversation.lastMessage.id === mid) {
               conversation.lastMessage = message; // eslint-disable-line no-param-reassign
