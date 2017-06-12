@@ -1,4 +1,3 @@
-import inherit from 'inherit';
 import { File } from './storage';
 import {
   TypedMessage,
@@ -6,21 +5,20 @@ import {
   messageField,
 } from './realtime';
 
-const FileMessage = inherit(TypedMessage, /** @lends FileMessage.prototype */ {
+export default class FileMessage extends TypedMessage {
   /**
-   * @constructs
    * @extends TypedMessage
    * @param  {AV.File} file LeanCloud 存储 SDK 中的 AV.File 实例，且必须是已经保存到服务端上的 File 实例
    * （如果是刚刚创建的，必须 save 后才能用于创建 FileMessage）
    */
-  __constructor(file) {
+  constructor(file) {
     if (!(file instanceof File)) {
       throw new TypeError('file must be an AV.File');
     }
     if (typeof file.id !== 'string') {
       throw new Error('file must be saved before used to create a Message');
     }
-    this.__base();
+    super();
     this._file = file;
     this._lcfile = {
       objId: file.id,
@@ -29,16 +27,26 @@ const FileMessage = inherit(TypedMessage, /** @lends FileMessage.prototype */ {
         name: file.name(),
       }),
     };
-  },
+  }
+
+  /**
+   * 在客户端需要以文本形式展示该消息时显示的文案，格式为 <code>[类型] file.name()</code>
+   * @type {String}
+   * @readonly
+   */
+  get title() {
+    return `[${this.constructor._titleType}] ${this._file.name() || ''}`.trim();
+  }
+
   /**
    * 获得 file 对象
    * @return {AV.File}
    */
   getFile() {
     return this._file;
-  },
-}, {
-  _parseFileFromRawData(data) {
+  }
+
+  static _parseFileFromRawData(data) {
     if (!(data && data._lcfile)) {
       throw new Error('malformed FileMessage content');
     }
@@ -54,13 +62,15 @@ const FileMessage = inherit(TypedMessage, /** @lends FileMessage.prototype */ {
       file._name = file.attributes.name = data._lcfile.metaData.name;
     }
     return file;
-  },
-  parse(json, message) {
-    const file = this._parseFileFromRawData(json);
-    return this.__base(json, message || new this(file));
-  },
-});
+  }
 
+  static parse(json, message) {
+    const file = this._parseFileFromRawData(json);
+    return TypedMessage.parse(json, message || new this(file));
+  }
+}
+
+FileMessage._titleType = '文件';
 
 /**
  * @name TYPE
@@ -71,5 +81,3 @@ const FileMessage = inherit(TypedMessage, /** @lends FileMessage.prototype */ {
  */
 messageType(-6)(FileMessage);
 messageField('_lcfile')(FileMessage);
-
-export { FileMessage as default };

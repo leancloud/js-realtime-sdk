@@ -116,6 +116,7 @@ declare module LeanCloudRealtime {
   export class TypedMessage extends Message {
     attributes: {};
     text: string;
+    get title(): string;
     type: number;
     getAttributes(): {};
     getText(): string;

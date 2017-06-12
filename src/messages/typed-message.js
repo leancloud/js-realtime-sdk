@@ -40,6 +40,17 @@ export default class TypedMessage extends Message {
   }
 
   /**
+   * 在客户端需要以文本形式展示该消息时显示的文案，
+   * 如 <code>[红包] 新春快乐</code>。
+   * 默认值为消息的 text。
+   * @type {String}
+   * @readonly
+   */
+  get title() {
+    return this.text;
+  }
+
+  /**
    * @param {String} text
    * @return {TypedMessage} self
    */

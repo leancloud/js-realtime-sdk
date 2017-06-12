@@ -1,13 +1,13 @@
-import inherit from 'inherit';
 import FileMessage from './file-message';
 import { messageType } from './realtime';
 
 /**
  * 构造方法参数同 {@link FileMessage}
- * @class
+ *
  * @extends FileMessage
  */
-const VideoMessage = inherit(FileMessage);
+class VideoMessage extends FileMessage {}
+VideoMessage._titleType = '视频';
 
 /**
  * @name TYPE
@@ -18,4 +18,4 @@ const VideoMessage = inherit(FileMessage);
  */
 messageType(-4)(VideoMessage);
 
-export { VideoMessage as default };
+export default VideoMessage;
