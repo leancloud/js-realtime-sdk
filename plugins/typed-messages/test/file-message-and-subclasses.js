@@ -55,6 +55,7 @@ describe('FileMessage and subclasses', () => {
           message.should.be.instanceof(FileMessage);
           message.text.should.eql('chrome');
           message.attributes.should.eql({ version: 31 });
+          message.title.should.eql(`[文件] ${FILE_NAME_1}`);
           const fileCopy = message.getFile();
           fileCopy.should.not.be.exactly(file1);
           fileCopy.should.be.instanceof(File);
@@ -88,6 +89,7 @@ describe('FileMessage and subclasses', () => {
         message.should.be.instanceof(FileMessage);
         message.text.should.eql('chrome');
         message.attributes.should.eql({ version: 31 });
+        message.title.should.eql(`[文件] ${FILE_NAME}`);
         const fileCopy = message.getFile();
         fileCopy.should.not.be.exactly(file);
         fileCopy.should.be.instanceof(File);
@@ -132,6 +134,7 @@ describe('FileMessage and subclasses', () => {
         message.should.be.instanceof(FileMessage);
         message.text.should.eql('chrome');
         message.attributes.should.eql({ version: 31 });
+        message.title.should.eql(`[图片] ${FILE_NAME}`);
         const fileCopy = message.getFile();
         fileCopy.should.not.be.exactly(file);
         fileCopy.should.be.instanceof(File);
@@ -160,6 +163,7 @@ describe('FileMessage and subclasses', () => {
       }).then((message) => {
         message.should.be.instanceof(AudioMessage);
         message.should.be.instanceof(FileMessage);
+        message.title.should.eql(`[语音] ${FILE_NAME}`);
         const fileCopy = message.getFile();
         fileCopy.should.not.be.exactly(file);
         fileCopy.should.be.instanceof(File);
@@ -183,6 +187,7 @@ describe('FileMessage and subclasses', () => {
       }).then((message) => {
         message.should.be.instanceof(VideoMessage);
         message.should.be.instanceof(FileMessage);
+        message.title.should.eql(`[视频] ${FILE_NAME}`);
         const fileCopy = message.getFile();
         fileCopy.should.not.be.exactly(file);
         fileCopy.should.be.instanceof(File);

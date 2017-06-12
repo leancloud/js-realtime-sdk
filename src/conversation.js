@@ -706,9 +706,13 @@ export default class Conversation extends EventEmitter {
       const {
         id, cid, timestamp, from, _status,
       } = message;
-      return Object.assign(newMessage, {
+      Object.assign(newMessage, {
         id, cid, timestamp, from, _status,
       });
+      if (this.lastMessage.id === newMessage.id) {
+        this.lastMessage = newMessage;
+      }
+      return newMessage;
     });
   }
 

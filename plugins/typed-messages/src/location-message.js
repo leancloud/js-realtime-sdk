@@ -1,4 +1,3 @@
-import inherit from 'inherit';
 import { GeoPoint } from './storage';
 import {
   TypedMessage,
@@ -6,35 +5,44 @@ import {
   messageField,
 } from './realtime';
 
-const LocationMessage = inherit(TypedMessage, /** @lends LocationMessage.prototype */ {
+export default class LocationMessage extends TypedMessage {
   /**
-   * @constructs
    * @extends TypedMessage
    * @param  {AV.GeoPoint} geoPoint LeanCloud 存储 SDK 中的 AV.GeoPoint 实例
    */
-  __constructor(geoPoint) {
+  constructor(geoPoint) {
     if (!(geoPoint instanceof GeoPoint)) {
       throw new TypeError('geoPoint must be an AV.GeoPoint');
     }
-    this.__base();
+    super();
     this._geoPoint = geoPoint;
     const { latitude, longitude } = geoPoint;
     this._lcloc = { latitude, longitude };
-  },
+  }
+
+  /**
+   * 在客户端需要以文本形式展示该消息时显示的文案，格式为 <code>[位置] message.text</code>
+   * @type {String}
+   * @readonly
+   */
+  get title() {
+    return `[位置] ${this.text || ''}`.trim();
+  }
+
   /**
    * 获得 geoPoint 对象
    * @return {AV.GeoPoint}
    */
   getLocation() {
     return this._geoPoint;
-  },
-}, {
-  parse(json, message) {
+  }
+
+  static parse(json, message) {
     const { latitude, longitude } = json._lcloc;
     const geoPoint = new GeoPoint({ latitude, longitude });
-    return this.__base(json, message || new this(geoPoint));
-  },
-});
+    return TypedMessage.parse(json, message || new this(geoPoint));
+  }
+}
 
 /**
  * @name TYPE
@@ -45,5 +53,3 @@ const LocationMessage = inherit(TypedMessage, /** @lends LocationMessage.prototy
  */
 messageType(-5)(LocationMessage);
 messageField('_lcloc')(LocationMessage);
-
-export { LocationMessage as default };
