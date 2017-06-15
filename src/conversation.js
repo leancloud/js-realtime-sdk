@@ -138,7 +138,7 @@ export default class Conversation extends EventEmitter {
       'lastdeliveredatupdate',
       'lastreadatupdate',
       'messagerecall',
-      'messagemodify',
+      'messageupdate',
     ].forEach(event => this.on(
       event,
       (...payload) => this._debug(`${event} event emitted. %O`, payload)
@@ -670,11 +670,11 @@ export default class Conversation extends EventEmitter {
     });
   }
 
-  _modify(message, newMessage, recall) {
+  _update(message, newMessage, recall) {
     this._debug('patch %O %O %O', message, newMessage, recall);
     if (message instanceof Message) {
       if (message.from !== this._client.id) {
-        throw new Error('Modifying message from others is not allowed');
+        throw new Error('Updating message from others is not allowed');
       }
       if (message.status !== MessageStatus.SENT && message.status !== MessageStatus.DELIVERED) {
         throw new Error('Message is not sent');
@@ -721,11 +721,11 @@ export default class Conversation extends EventEmitter {
    * @param {AVMessage} message 要修改的消息，该消息必须是由当前用户发送的。也可以提供一个包含消息 {id, timestamp} 的对象
    * @param {AVMessage} newMessage 新的消息
    */
-  modify(message, newMessage) {
+  update(message, newMessage) {
     if (!(newMessage instanceof Message)) {
       throw new TypeError(`${newMessage} is not a Message`);
     }
-    return this._modify(message, newMessage, false);
+    return this._update(message, newMessage, false);
   }
 
   /**
@@ -733,7 +733,7 @@ export default class Conversation extends EventEmitter {
    * @param {AVMessage} message 要撤回的消息，该消息必须是由当前用户发送的。也可以提供一个包含消息 {id, timestamp} 的对象
    */
   recall(message) {
-    return this._modify(message, new RecalledMessage(), true);
+    return this._update(message, new RecalledMessage(), true);
   }
 
   /**
