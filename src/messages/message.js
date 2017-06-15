@@ -137,7 +137,8 @@ export default class Message {
   }
 
   /**
-   * @var updatedAt {Date} 消息修改或撤回时间，可以通过比较其与消息的 timestamp 是否相等判断消息是否被修改过或撤回过。
+   * 消息修改或撤回时间，可以通过比较其与消息的 timestamp 是否相等判断消息是否被修改过或撤回过。
+   * @type {Date}
    * @since 3.5.0
    */
   get updatedAt() {
