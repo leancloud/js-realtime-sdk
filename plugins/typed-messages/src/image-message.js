@@ -8,7 +8,7 @@ import { messageType } from './realtime';
  * @extends FileMessage
  */
 class ImageMessage extends FileMessage {}
-ImageMessage._titleType = '图片';
+ImageMessage._summaryType = '图片';
 
 /**
  * @name TYPE

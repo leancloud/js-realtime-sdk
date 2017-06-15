@@ -46,7 +46,7 @@ export default class TypedMessage extends Message {
    * @type {String}
    * @readonly
    */
-  get title() {
+  get summary() {
     return this.text;
   }
 

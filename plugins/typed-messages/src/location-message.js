@@ -25,7 +25,7 @@ export default class LocationMessage extends TypedMessage {
    * @type {String}
    * @readonly
    */
-  get title() {
+  get summary() {
     return `[位置] ${this.text || ''}`.trim();
   }
 

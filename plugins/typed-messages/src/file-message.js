@@ -34,8 +34,8 @@ export default class FileMessage extends TypedMessage {
    * @type {String}
    * @readonly
    */
-  get title() {
-    return `[${this.constructor._titleType}] ${this._file.name() || ''}`.trim();
+  get summary() {
+    return `[${this.constructor._summaryType}] ${this._file.name() || ''}`.trim();
   }
 
   /**
@@ -70,7 +70,7 @@ export default class FileMessage extends TypedMessage {
   }
 }
 
-FileMessage._titleType = '文件';
+FileMessage._summaryType = '文件';
 
 /**
  * @name TYPE

@@ -7,7 +7,7 @@ import { messageType } from './realtime';
  * @extends FileMessage
  */
 class AudioMessage extends FileMessage {}
-AudioMessage._titleType = '语音';
+AudioMessage._summaryType = '语音';
 
 /**
  * @name TYPE
