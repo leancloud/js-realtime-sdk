@@ -15,7 +15,7 @@ class RecalledMessage extends TypedMessage {
    * @readonly
    */
   // eslint-disable-next-line class-methods-use-this
-  get title() {
+  get summary() {
     return '[该消息已撤回]';
   }
 }

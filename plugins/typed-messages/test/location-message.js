@@ -26,7 +26,7 @@ describe('LocationMessage', () => {
       },
     });
     const parsedMessage = LocationMessage.parse(json);
-    parsedMessage.title.should.eql('[位置] Jinao');
+    parsedMessage.summary.should.eql('[位置] Jinao');
     const locationCopy = parsedMessage.getLocation();
     locationCopy.should.be.instanceof(GeoPoint);
     locationCopy.should.not.be.exactly(location);

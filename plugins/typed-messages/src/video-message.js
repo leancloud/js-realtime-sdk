@@ -7,7 +7,7 @@ import { messageType } from './realtime';
  * @extends FileMessage
  */
 class VideoMessage extends FileMessage {}
-VideoMessage._titleType = '视频';
+VideoMessage._summaryType = '视频';
 
 /**
  * @name TYPE
