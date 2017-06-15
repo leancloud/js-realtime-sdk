@@ -1,26 +1,40 @@
-<a name="3.5.0-beta.1"></a>
-## 3.5.0-beta.1 (2017-05-26)
+<a name="3.5.0"></a>
+# 3.5.0 (2017-06-15)
+
+
+### Highlights
+* **消息撤回与修改**：支持用户撤回或修改已发送的消息。
+* **富媒体消息摘要**：支持在某些情况下以文字形式展示富媒体消息。
 
 
 ### Features
 
-* **ConversationQuery:** 增加了 exists/doesNotExist ([54261d3](https://github.com/leancloud/js-realtime-sdk/commit/54261d3))
-* **WebSocket:** 降低了客户端心跳频率 ([9b51489](https://github.com/leancloud/js-realtime-sdk/commit/9b51489))
+#### 消息撤回与修改
 
+现在，用户可以在客户端通过 `Conversation#recall` 与 `Conversation#update` 方法撤回或修改已发送的消息了。撤回、修改消息后，该会话中的其他用户会立即通过 `messagerecall` 或 `messageupdate` 事件得到通知。
 
+- 增加 `Conversation#recall` 与 `Conversation#update` 方法
+- 增加 `Conversation` `messagerecall` 与 `messageupdate` 事件
+- 增加 `IMClient` `messagerecall` 与 `messageupdate` 事件
 
-<a name="3.5.0-beta.0"></a>
-## 3.5.0-beta.0 (2017-05-18)
+此外，我们还提供了云引擎 hook 允许你实现撤回控制策略，例如只允许在发送消息后一段时间内撤回。
+
+#### 富媒体消息摘要
+
+富媒体消息在一些场景下需要以文本的形式展示，例如在会话列表页面显示最近一条消息时，红包消息需要显示为 `[红包] 节日快乐`。为了方便实现该功能，我们为 `TypedMessage` 增加了 `summary` 属性，视图层可以直接使用 `message.summary` 来得到字符串类型的「消息摘要」。SDK 内置的 TypedMessage 均已支持该功能。
+
+#### 其他
+
+* **ConversationQuery:** 增加了 `exists` 与 `doesNotExist` 方法
 
 
 ### Bug Fixes
-
 * 修复了会话被删除后 SDK 无法正常派发未读消息数更新通知（`unreadmessagescountupdate`）的问题 ([#548](https://github.com/leancloud/js-realtime-sdk/issues/548))
 
 
-### Features
-
-* 新增对 LiveQuery 的支持
+### Miscellanies
+* 增加了对存储 SDK LiveQuery 功能的支持
+* 降低了客户端心跳频率，SDK 更加省电
 
 
 
