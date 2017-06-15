@@ -303,9 +303,9 @@ describe('Messages', () => {
         this.modifiedMessage = new TextMessage('modified');
         return conversationWchen.send(this.originalMessage).then(hold(100));
       });
-      it('modify', function testModify() {
-        return conversationWchen.modify(this.originalMessage, this.modifiedMessage)
-          .then(() => listen(conversationZwang, 'messagemodify'))
+      it('update', function testUpdate() {
+        return conversationWchen.update(this.originalMessage, this.modifiedMessage)
+          .then(() => listen(conversationZwang, 'messageupdate'))
           .then(([message]) => {
             message.should.be.instanceof(TextMessage);
             message.text.should.be.eql('modified');

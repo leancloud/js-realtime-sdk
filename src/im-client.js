@@ -275,17 +275,17 @@ export default class IMClient extends EventEmitter {
             } else {
               /**
                * 消息被修改
-               * @event IMClient#messagemodify
+               * @event IMClient#messageupdate
                * @param {AVMessage} message 被修改的消息
                * @param {Conversation} conversation 消息所在的会话
                */
-              this.emit('messagemodify', message, conversation);
+              this.emit('messageupdate', message, conversation);
               /**
                * 消息被修改
-               * @event Conversation#messagemodify
+               * @event Conversation#messageupdate
                * @param {AVMessage} message 被修改的消息
                */
-              conversation.emit('messagemodify', message);
+              conversation.emit('messageupdate', message);
             }
           });
         })

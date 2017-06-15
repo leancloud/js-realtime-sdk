@@ -86,7 +86,7 @@ declare module LeanCloudRealtime {
     send(message: Message, options?: { pushData?: Object, priority?: MessagePriority, receipt?: boolean, transient?: boolean, will?: boolean }): Promise<Message>;
     set(key: string, value: any): Conversation;
     unmute(): Promise<Conversation>;
-    modify<T extends Message>(message: MessagePointer, newMessage: T): Promise<T>;
+    update<T extends Message>(message: MessagePointer, newMessage: T): Promise<T>;
     recall(message: MessagePointer): Promise<RecalledMessage>;
   }
 
