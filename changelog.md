@@ -1,3 +1,13 @@
+<a name="3.5.1"></a>
+## 3.5.1 (2017-06-20)
+
+
+### Bug Fixes
+
+* **Read:** 修复了在某些情况下将会话标记为已读无法成功清除其未读消息数的问题 ([89eb094](https://github.com/leancloud/js-realtime-sdk/commit/89eb094))。
+
+
+
 <a name="3.5.0"></a>
 # 3.5.0 (2017-06-15)
 
