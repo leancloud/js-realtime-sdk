@@ -174,7 +174,9 @@ export default class Conversation extends EventEmitter {
     return this._updatedAt;
   }
   set lastMessageAt(value) {
-    this._lastMessageAt = decodeDate(value);
+    const time = decodeDate(value);
+    if (time <= this._lastMessageAt) return;
+    this._lastMessageAt = time;
   }
   get lastMessageAt() {
     return this._lastMessageAt;
