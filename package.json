@@ -9,7 +9,7 @@
   },
   "scripts": {
     "precommit": "validate-commit-msg",
-    "lint": "eslint --ignore-path .gitignore src test plugins",
+    "lint": "eslint --ignore-path .gitignore src test plugins && tsc realtime.d.ts",
     "test": "npm run lint && npm run build && npm run docs && npm run test:node && npm run test:browser",
     "test:node": "NODE_ENV=test nyc mocha --timeout 30000 test/index.js plugins/**/test/index.js",
     "test:browser": "grunt test-browser --stack",
@@ -33,6 +33,7 @@
   },
   "homepage": "https://leancloud.cn/",
   "devDependencies": {
+    "@leeyeh/rollup-plugin-node-resolve": "^3.0.0",
     "babel-eslint": "^7.0.0",
     "babel-plugin-external-helpers": "^6.8.0",
     "babel-plugin-istanbul": "^4.1.1",
@@ -67,10 +68,10 @@
     "rollup-plugin-babel": "^2.4.0",
     "rollup-plugin-commonjs": "^8.0.2",
     "rollup-plugin-json": "^2.0.0",
-    "@leeyeh/rollup-plugin-node-resolve": "^3.0.0",
     "should": "^11.0.0",
     "should-sinon": "0.0.5",
     "sinon": "^2.1.0",
+    "typescript": "^2.4.1",
     "validate-commit-msg": "^2.10.1",
     "weapp-polyfill": "^1.1.0"
   },

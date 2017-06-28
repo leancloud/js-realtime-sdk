@@ -90,7 +90,7 @@ declare module LeanCloudRealtime {
     recall(message: MessagePointer): Promise<RecalledMessage>;
   }
 
-  declare type MessagePointer = Message | {id: string, timestamp: Date|number};
+  type MessagePointer = Message | {id: string, timestamp: Date|number};
 
   export interface AVMessage {
     toJSON(): any;
@@ -116,7 +116,7 @@ declare module LeanCloudRealtime {
   export class TypedMessage extends Message {
     attributes: {};
     text: string;
-    get title(): string;
+    title: string;
     type: number;
     getAttributes(): {};
     getText(): string;
@@ -134,7 +134,7 @@ declare module LeanCloudRealtime {
     on(evt: string, listener: Function): EventEmitter;
     once(evt: string, listener: Function): EventEmitter;
     off(evt: string, listener: Function): EventEmitter;
-    emit(evt: string, ...args: any[]): Boolean;
+    emit(evt: string, ...args: any[]): boolean;
   }
 
   interface Middleware<T> {
@@ -148,7 +148,7 @@ declare module LeanCloudRealtime {
     name?: string;
     beforeMessageParse?: Middleware<AVMessage>;
     afterMessageParse?: Middleware<AVMessage>;
-    beforeMessageDispatch?: (message: AVMessage) => Boolean;
+    beforeMessageDispatch?: (message: AVMessage) => boolean;
     messageClasses?: AVMessage[];
     onConversationCreate?: Decorator<Conversation>;
     onIMClientCreate?: Decorator<IMClient>;
