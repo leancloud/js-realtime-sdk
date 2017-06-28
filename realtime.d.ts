@@ -100,7 +100,7 @@ declare module LeanCloudRealtime {
     constructor(content: any);
     cid: string;
     deliveredAt?: Date;
-    updatedAt?: Date;
+    updatedAt: Date;
     from: string;
     id: string;
     status: MessageStatus;

@@ -301,7 +301,7 @@ describe('Messages', () => {
       before(function prepareMessage() {
         this.originalMessage = new Message('original');
         this.modifiedMessage = new TextMessage('modified');
-        return conversationWchen.send(this.originalMessage).then(hold(100));
+        return conversationWchen.send(this.originalMessage).then(hold(200));
       });
       it('update', function testUpdate() {
         return conversationWchen.update(this.originalMessage, this.modifiedMessage)

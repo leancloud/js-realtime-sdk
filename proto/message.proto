@@ -104,6 +104,7 @@ message UnreadTuple {
   optional int64 timestamp = 4;
   optional string from = 5;
   optional string data = 6;
+  optional int64 patchTimestamp = 7;
 }
 
 message LogItem {

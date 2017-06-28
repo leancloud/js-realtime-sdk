@@ -56,6 +56,12 @@ module.exports = require("protobufjs/dist/protobuf-light").newBuilder({})['impor
                     "type": "string",
                     "name": "data",
                     "id": 6
+                },
+                {
+                    "rule": "optional",
+                    "type": "int64",
+                    "name": "patchTimestamp",
+                    "id": 7
                 }
             ]
         },

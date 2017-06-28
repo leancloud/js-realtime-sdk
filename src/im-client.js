@@ -155,6 +155,7 @@ export default class IMClient extends EventEmitter {
           timestamp: ts,
           from,
           data,
+          patchTimestamp,
         }) => this.getConversation(cid).then((conversation) => {
           // deleted conversation
           if (!conversation) return null;
@@ -170,6 +171,9 @@ export default class IMClient extends EventEmitter {
               timestamp,
               from,
             };
+            if (patchTimestamp) {
+              messageProps.updatedAt = new Date(patchTimestamp.toNumber());
+            }
             Object.assign(message, messageProps);
             conversation.lastMessage = message; // eslint-disable-line no-param-reassign
           }) : Promise.resolve()).then(() => {
@@ -758,6 +762,7 @@ export default class IMClient extends EventEmitter {
       msg_from: 'lastMessageFrom',
       msg_mid: 'lastMessageId',
       msg_timestamp: 'lastMessageTimestamp',
+      patch_timestamp: 'lastMessagePatchTimestamp',
       m: 'members',
       tr: 'transient',
       sys: 'system',
@@ -768,14 +773,20 @@ export default class IMClient extends EventEmitter {
       if (data.lastMessage) {
         return this._messageParser.parse(data.lastMessage).then(
           (message) => {
+            /* eslint-disable no-param-reassign */
             data.lastMessage = message;
-            data.lastMessage.from = data.lastMessageFrom;
-            data.lastMessage.id = data.lastMessageId;
-            data.lastMessage.timestamp = new Date(data.lastMessageTimestamp);
-            data.lastMessage._setStatus(MessageStatus.SENT);
+            message.from = data.lastMessageFrom;
+            message.id = data.lastMessageId;
+            message.timestamp = new Date(data.lastMessageTimestamp);
+            if (data.lastMessagePatchTimestamp) {
+              message.updatedAt = new Date(data.lastMessagePatchTimestamp);
+            }
+            message._setStatus(MessageStatus.SENT);
             delete data.lastMessageFrom;
             delete data.lastMessageId;
             delete data.lastMessageTimestamp;
+            delete data.lastMessagePatchTimestamp;
+            /* eslint-enable no-param-reassign */
           }
         );
       }
