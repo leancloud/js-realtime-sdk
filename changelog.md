@@ -1,3 +1,14 @@
+<a name="3.5.2"></a>
+## 3.5.2 (2017-06-30)
+
+
+### Bug Fixes
+
+* 修复了 TypeScript 定义文件无效的问题 ([bb866f0](https://github.com/leancloud/js-realtime-sdk/commit/bb866f0))
+* 修复了在某些情况下，`Conversation` 的 `lastMessage` 被修改或撤回后 `updatedAt` 时间不准确的问题 ([6ab82db](https://github.com/leancloud/js-realtime-sdk/commit/6ab82db))
+
+
+
 <a name="3.5.1"></a>
 ## 3.5.1 (2017-06-20)
 
