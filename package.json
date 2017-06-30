@@ -57,7 +57,7 @@
     "grunt-saucelabs": "^9.0.0",
     "husky": "^0.13.1",
     "inherit": "^2.2.3",
-    "jsdoc": "3.4.0",
+    "jsdoc": "3.4.3",
     "jsdoc-ignore-future": "^1.1.0",
     "leancloud-storage": "^2.0.0",
     "load-grunt-tasks": "^3.4.1",
