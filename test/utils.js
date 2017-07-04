@@ -32,12 +32,12 @@ describe('Utils', () => {
       tryAll([reject(0), resolve(1), reject(2), resolve(3)]).then(
         (result) => {
           result.should.be.equal(1);
-        }
-      )
+        },
+      ),
     );
     it('should be rejected if non resolved', (done) => {
       tryAll([reject(0), reject(1)]).catch(
-        () => done()
+        () => done(),
       ).catch(done);
     });
     it('should be synchronized', () => {
@@ -50,7 +50,7 @@ describe('Utils', () => {
         () => {
           successCallback.should.be.calledOnce();
           failCallback.should.have.callCount(0);
-        }
+        },
       );
     });
   });

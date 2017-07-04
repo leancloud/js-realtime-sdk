@@ -120,7 +120,7 @@ describe('Plugin', () => {
           message.should.be.instanceof(TextMessage);
           message.text.should.startWith('[plugin-test]');
           message.text.should.endWith('[plugin-test]');
-        })
+        }),
     );
   });
 
@@ -149,7 +149,7 @@ describe('Plugin', () => {
             throw new Error('test');
           },
         }],
-      }).createIMClient().should.be.rejectedWith('test[ErrorPlugin]')
+      }).createIMClient().should.be.rejectedWith('test[ErrorPlugin]'),
     );
     it('middleware error should be reported', () =>
       new Realtime({
@@ -163,7 +163,7 @@ describe('Plugin', () => {
           },
         }],
       })._messageParser.parse(new TextMessage('1').toJSON())
-        .should.be.rejectedWith('test[ErrorPlugin]')
+        .should.be.rejectedWith('test[ErrorPlugin]'),
     );
     it('beforeMessageDispatch error should be reported', () =>
       new Realtime({
@@ -179,8 +179,8 @@ describe('Plugin', () => {
       }).createIMClient()
         .then(client => client.getConversation(EXISTING_ROOM_ID)
           .then(conversation => client._dispatchParsedMessage(new TextMessage(), conversation))
-          .should.be.rejectedWith('test[ErrorPlugin]')
-        )
+          .should.be.rejectedWith('test[ErrorPlugin]'),
+        ),
     );
     it('middleware return type mismatch should trigger a warning', () => {
       const spy = sinon.spy(console, 'warn');

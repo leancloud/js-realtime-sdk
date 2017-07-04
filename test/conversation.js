@@ -52,7 +52,7 @@ describe('Conversation', () => {
   it('system conversation', () =>
     client.getConversation(SYS_CONV_ID).then((conv) => {
       conv.system.should.be.equal(true);
-    })
+    }),
   );
 
   it('update', () => {
@@ -114,14 +114,14 @@ describe('Conversation', () => {
       conv.should.be.exactly(conversation);
       conv.muted.should.be.equal(true);
       conv.mutedMembers.should.containEql(CLIENT_ID);
-    })
+    }),
   );
   it('unmute', () =>
     conversation.unmute().then((conv) => {
       conv.should.be.exactly(conversation);
       conv.muted.should.be.equal(false);
       conv.mutedMembers.should.not.containEql(CLIENT_ID);
-    })
+    }),
   );
   it('count', () => conversation.count().should.be.fulfilledWith(2));
   it('add/remove', () =>
@@ -132,7 +132,7 @@ describe('Conversation', () => {
         return conv.remove('rguo');
       }).then((conv) => {
         conv.members.should.not.containEql('rguo');
-      })
+      }),
   );
   it('join/quit', () =>
     client.createConversation({ members: ['rguo'] })
@@ -142,7 +142,7 @@ describe('Conversation', () => {
         return conv.join();
       }).then((conv) => {
         conv.members.should.containEql(CLIENT_ID);
-      })
+      }),
   );
 
   describe('converastion signature', () => {
@@ -188,28 +188,28 @@ describe('Conversation', () => {
         messages.should.be.an.Array();
         messages[0].should.be.instanceof(Message);
         messages[0].status.should.be.eql(MessageStatus.SENT);
-      })
+      }),
     );
     it('with limit', () =>
       conversation.queryMessages({
         limit: 0,
       }).then((messages) => {
         messages.should.be.an.empty();
-      })
+      }),
     );
     it('beforeTime', () =>
       conversation.queryMessages({
         beforeTime: 1,
       }).then((messages) => {
         messages.should.be.an.empty();
-      })
+      }),
     );
     it('afterTime', () =>
       conversation.queryMessages({
         afterTime: new Date(),
       }).then((messages) => {
         messages.should.be.an.empty();
-      })
+      }),
     );
     describe('MessageIterator', () => {
       it('normal case', () => {
@@ -257,7 +257,7 @@ describe('Conversation', () => {
           members: ['xwang', 'csun'],
           name: 'message dispatch test conversation',
         }))
-        .then(c => (conversation2 = c))
+        .then(c => (conversation2 = c)),
     );
     after(() => client2.close());
     it('membersjoined', () => {
@@ -390,7 +390,7 @@ describe('Conversation', () => {
             conv.send(new Message({})),
             conv.send(new Message({})),
           ]).then(() => conv.send(message));
-        }).then(tap(() => jwu.close()))
+        }).then(tap(() => jwu.close())),
       ).then(() => {
         bwangRealtime = new Realtime({
           appId: APP_ID,
@@ -425,13 +425,13 @@ describe('Conversation', () => {
             conv1.unreadMessagesCount.should.be.eql(0);
             bwang1.close();
           });
-        })
+        }),
       ).then(() => listen(bwang0, 'unreadmessagescountupdate')
         .then(([[conv]]) => {
           conv.unreadMessagesCount.should.be.eql(0);
           conv.id.should.be.eql(conversationId);
           conv.lastMessage.id.should.eql(message.id);
-        })
+        }),
       ).then(() => {
         bwang0.close();
       });

@@ -21,7 +21,7 @@ describe('ConversationQuery', () => {
         pushUnread: false,
       })
         .createIMClient()
-        .then(c => (client = c))
+        .then(c => (client = c)),
     );
     after(() => client.close());
 
@@ -41,7 +41,7 @@ describe('ConversationQuery', () => {
         .then((conversations) => {
           conversations.length.should.be.equal(1);
           conversations[0].id.should.be.equal(EXISTING_ROOM_ID);
-        })
+        }),
     );
     it('containsMembers', () =>
       Promise.all([
@@ -58,7 +58,7 @@ describe('ConversationQuery', () => {
           .then((conversations) => {
             conversations.length.should.be.equal(0);
           }),
-      ])
+      ]),
     );
     it('withMembers', () =>
       Promise.all([
@@ -81,7 +81,7 @@ describe('ConversationQuery', () => {
           .then((conversations) => {
             conversations.length.should.be.equal(0);
           }),
-      ])
+      ]),
     );
     it('notEqualTo', () =>
       Promise.all([
@@ -98,7 +98,7 @@ describe('ConversationQuery', () => {
           .then((conversations) => {
             conversations.length.should.be.equal(0);
           }),
-      ])
+      ]),
     );
     it('matches', () =>
       Promise.all([
@@ -115,7 +115,7 @@ describe('ConversationQuery', () => {
           .then((conversations) => {
             conversations.length.should.be.equal(0);
           }),
-      ])
+      ]),
     );
     it('contains', () =>
       Promise.all([
@@ -132,7 +132,7 @@ describe('ConversationQuery', () => {
           .then((conversations) => {
             conversations.length.should.be.equal(0);
           }),
-      ])
+      ]),
     );
     it('startsWith', () =>
       Promise.all([
@@ -149,7 +149,7 @@ describe('ConversationQuery', () => {
           .then((conversations) => {
             conversations.length.should.be.equal(0);
           }),
-      ])
+      ]),
     );
     it('endsWith', () =>
       Promise.all([
@@ -166,7 +166,7 @@ describe('ConversationQuery', () => {
           .then((conversations) => {
             conversations.length.should.be.equal(0);
           }),
-      ])
+      ]),
     );
   });
 
@@ -179,7 +179,7 @@ describe('ConversationQuery', () => {
         pushUnread: false,
       })
         .createIMClient()
-        .then(c => (client = c))
+        .then(c => (client = c)),
     );
     after(() => client.close());
 
@@ -198,7 +198,7 @@ describe('ConversationQuery', () => {
           .then((conversations) => {
             conversations.length.should.be.equal(0);
           }),
-      ])
+      ]),
     );
     it('lessThanOrEqualTo', () =>
       Promise.all([
@@ -215,7 +215,7 @@ describe('ConversationQuery', () => {
           .then((conversations) => {
             conversations.length.should.be.equal(0);
           }),
-      ])
+      ]),
     );
     it('greaterThan', () =>
       Promise.all([
@@ -232,7 +232,7 @@ describe('ConversationQuery', () => {
           .then((conversations) => {
             conversations.length.should.be.equal(0);
           }),
-      ])
+      ]),
     );
     it('greaterThanOrEqualTo', () =>
       Promise.all([
@@ -249,7 +249,7 @@ describe('ConversationQuery', () => {
           .then((conversations) => {
             conversations.length.should.be.equal(0);
           }),
-      ])
+      ]),
     );
     it('exists', () =>
       client.getQuery().equalTo('objectId', EXISTING_ROOM_ID)
@@ -257,7 +257,7 @@ describe('ConversationQuery', () => {
         .find()
         .then((conversations) => {
           conversations.length.should.be.equal(0);
-        })
+        }),
     );
     it('doesNotExist', () =>
       client.getQuery().equalTo('objectId', EXISTING_ROOM_ID)
@@ -265,35 +265,35 @@ describe('ConversationQuery', () => {
         .find()
         .then((conversations) => {
           conversations.length.should.be.equal(0);
-        })
+        }),
     );
     it('limit', () =>
       client.getQuery().equalTo('objectId', EXISTING_ROOM_ID)
         .limit(0)
         .find()
-        .then(conversations => conversations.length.should.be.equal(0))
+        .then(conversations => conversations.length.should.be.equal(0)),
     );
     it('skip', () =>
       client.getQuery().equalTo('objectId', EXISTING_ROOM_ID)
         .skip(1)
         .find()
-        .then(conversations => conversations.length.should.be.equal(0))
+        .then(conversations => conversations.length.should.be.equal(0)),
     );
     it('ascending', () =>
       client.getQuery().limit(2).notEqualTo('objectId', '0')
         .ascending('createdAt')
         .find()
         .then(([conversation0, conversation1]) =>
-          conversation0.createdAt.should.below(conversation1.createdAt)
-        )
+          conversation0.createdAt.should.below(conversation1.createdAt),
+        ),
     );
     it('descending', () =>
       client.getQuery().limit(2).notEqualTo('objectId', '0')
         .descending('createdAt')
         .find()
         .then(([conversation0, conversation1]) =>
-          conversation0.createdAt.should.above(conversation1.createdAt)
-        )
+          conversation0.createdAt.should.above(conversation1.createdAt),
+        ),
     );
     it('addAscending & addDescending', () =>
       client.getQuery()
@@ -301,7 +301,7 @@ describe('ConversationQuery', () => {
         .addAscending('b')
         .addDescending('c')
         .addDescending('d')
-        .toJSON().sort.should.be.eql('a,b,-c,-d')
+        .toJSON().sort.should.be.eql('a,b,-c,-d'),
     );
     it('compact', () =>
       client.getQuery().equalTo('objectId', EXISTING_ROOM_ID)
@@ -310,7 +310,7 @@ describe('ConversationQuery', () => {
         .then((conversations) => {
           conversations.length.should.be.equal(1);
           conversations[0].members.length.should.be.equal(0);
-        })
+        }),
     );
     it('withLastMessagesRefreshed', () =>
       client.getQuery().equalTo('objectId', EXISTING_ROOM_ID)
@@ -324,12 +324,12 @@ describe('ConversationQuery', () => {
           message.id.should.be.ok();
           message.timestamp.should.be.ok();
           message.status.should.be.eql(MessageStatus.SENT);
-        })
+        }),
     );
     it('withLastMessages should be proxied', () => {
       const spy = sinon.spy(
         ConversationQuery.prototype,
-        'withLastMessagesRefreshed'
+        'withLastMessagesRefreshed',
       );
       client.getQuery().withLastMessages(true);
       spy.should.be.calledWith(true);
@@ -343,7 +343,7 @@ describe('ConversationQuery', () => {
           .find().then(conversations => conversations[0]),
       ]).then((conversations) => {
         conversations[0].should.be.exactly(conversations[1]);
-      })
+      }),
     );
   });
 });

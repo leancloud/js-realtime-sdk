@@ -139,18 +139,18 @@ export const applyMiddlewares = middlewares => target =>
         }
         throw error;
       }),
-    Promise.resolve(target)
+    Promise.resolve(target),
   );
 
 export const applyDispatcher = (dispatchers, payload) =>
   ensureArray(dispatchers).reduce(
     (resultPromise, dispatcher) => resultPromise.then(shouldDispatch =>
-      (shouldDispatch === false ? false : dispatcher(...payload))
+      (shouldDispatch === false ? false : dispatcher(...payload)),
     ).catch((error) => {
       if (dispatcher._pluginName) {
         // eslint-disable-next-line no-param-reassign
         error.message += `[${dispatcher._pluginName}]`;
       }
       throw error;
-    }), Promise.resolve(true)
+    }), Promise.resolve(true),
   );

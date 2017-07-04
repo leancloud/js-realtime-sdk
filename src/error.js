@@ -75,7 +75,7 @@ export const error = Object.freeze({
 export const ErrorCode = Object.freeze(
   Object.keys(error).reduce((result, code) => Object.assign(result, {
     [error[code].name]: Number(code),
-  }), {})
+  }), {}),
 );
 
 export const createError = (errorMessage) => {

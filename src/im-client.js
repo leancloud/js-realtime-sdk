@@ -69,7 +69,7 @@ export default class IMClient extends EventEmitter {
       'reconnecterror',
     ].forEach(event => this.on(
       event,
-      (...payload) => this._debug(`${event} event emitted. %O`, payload)
+      (...payload) => this._debug(`${event} event emitted. %O`, payload),
     ));
     // onIMClientCreate hook
     applyDecorators(this._plugins.onIMClientCreate, this);
@@ -198,9 +198,9 @@ export default class IMClient extends EventEmitter {
             }, conversation);
             return conversation;
           });
-        })
+        }),
         // filter conversations without unread count update
-      )).then(conversations => conversations.filter(conversation => conversation))
+      )).then(conversations => conversations.filter(conversation => conversation)),
     ).then((conversations) => {
       if (conversations.length) {
         /**
@@ -292,8 +292,8 @@ export default class IMClient extends EventEmitter {
               conversation.emit('messageupdate', message);
             }
           });
-        })
-      ))
+        }),
+      )),
     );
   }
 
@@ -714,7 +714,7 @@ export default class IMClient extends EventEmitter {
       throw new Error(`Parse query result failed: ${error.message}. Command: ${commandString}`);
     }
     conversations = await Promise.all(conversations.map(
-      this._parseConversationFromRawData.bind(this)
+      this._parseConversationFromRawData.bind(this),
     ));
     return conversations.map((fetchedConversation) => {
       let conversation = this._conversationCache.get(fetchedConversation.id);
@@ -761,7 +761,8 @@ export default class IMClient extends EventEmitter {
       mu: 'mutedMembers',
     }, rawData);
     if (data.lastMessage) {
-      const message = data.lastMessage = await this._messageParser.parse(data.lastMessage);
+      const message = await this._messageParser.parse(data.lastMessage);
+      data.lastMessage = message;
       message.from = data.lastMessageFrom;
       message.id = data.lastMessageId;
       message.timestamp = new Date(data.lastMessageTimestamp);
@@ -834,7 +835,7 @@ export default class IMClient extends EventEmitter {
       const params = [null, this.id, members, 'create'];
       const signatureResult = await runSignatureFactory(
         this.options.conversationSignatureFactory,
-        params
+        params,
       );
       Object.assign(command.convMessage, keyRemap({
         signature: 's',
@@ -873,7 +874,7 @@ export default class IMClient extends EventEmitter {
     if (!Array.isArray(conversations)) {
       throw new TypeError(`${conversations} is not an Array`);
     }
-    return await Promise.all(conversations.map(conversation => conversation.read()));
+    return Promise.all(conversations.map(conversation => conversation.read()));
   }
 
   // jsdoc-ignore-start

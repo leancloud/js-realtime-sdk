@@ -52,7 +52,7 @@ export const getStaticProperty = (klass, property) =>
 
 export const union = (a, b) => Array.from(new Set([...a, ...b]));
 export const difference = (a, b) => Array.from(
-  (bSet => new Set(a.filter(x => !bSet.has(x))))(new Set(b))
+  (bSet => new Set(a.filter(x => !bSet.has(x))))(new Set(b)),
 );
 
 const map = new WeakMap();
@@ -123,11 +123,17 @@ export const throttle = wait => (target, property, descriptor) => {
       let {
         throttleMeta,
       } = internal(this);
-      if (!throttleMeta) throttleMeta = internal(this).throttleMeta = {};
+      if (!throttleMeta) {
+        throttleMeta = {};
+        internal(this).throttleMeta = throttleMeta;
+      }
       let {
         [property]: propertyMeta,
       } = throttleMeta;
-      if (!propertyMeta) propertyMeta = throttleMeta[property] = {};
+      if (!propertyMeta) {
+        propertyMeta = {};
+        throttleMeta[property] = propertyMeta;
+      }
       const {
         previouseTimestamp = 0,
         timeout,

@@ -116,7 +116,8 @@ const onRealtimeCreate = (realtime) => {
   /* eslint-disable no-param-reassign */
   const deviceId = uuid();
   realtime._IMClients = {};
-  const messageParser = realtime._messageParser = new MessageParser(realtime._plugins);
+  const messageParser = new MessageParser(realtime._plugins);
+  realtime._messageParser = messageParser;
 
   /**
    * 注册消息类
@@ -166,8 +167,8 @@ const onRealtimeCreate = (realtime) => {
            */
           .then(
             () => client.emit('reconnect'),
-            error => client.emit('reconnecterror', error)
-          )
+            error => client.emit('reconnecterror', error),
+          ),
       );
       internal(client)._eventemitter.on('close', () => {
         delete realtime._IMClients[client.id];
@@ -183,7 +184,7 @@ const onRealtimeCreate = (realtime) => {
     if (idIsString) {
       realtime._IMClients[id] = promise;
     }
-    return await promise;
+    return promise;
   };
   Object.assign(realtime, {
     register,
@@ -200,7 +201,7 @@ const beforeCommandDispatch = (command, realtime) => {
   } else {
     debug(
       '[WARN] Unexpected message received without any live client match: %O',
-      trim(command)
+      trim(command),
     );
   }
   return false;

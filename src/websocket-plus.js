@@ -13,7 +13,7 @@ const debug = d('LC:WebSocketPlus');
 const HEARTBEAT_TIME = 180000;
 const TIMEOUT_TIME = 380000;
 
-const DEFAULT_RETRY_STRATEGY = attempt => Math.min(1000 * Math.pow(2, attempt), 300000);
+const DEFAULT_RETRY_STRATEGY = attempt => Math.min(1000 * (2 ** attempt), 300000);
 
 const requireConnected = (target, name, descriptor) =>
   Object.assign({}, descriptor, {
@@ -53,7 +53,7 @@ class WebSocketPlus extends EventEmitter {
           global.addEventListener('online', this.__resume);
         }
         this.open();
-      }
+      },
     ).catch(this.throw.bind(this));
   }
 
@@ -67,18 +67,19 @@ class WebSocketPlus extends EventEmitter {
         urls.map(url => (resolve, reject) => {
           debug(`connect [${url}] ${protocol}`);
           const ws = protocol ? new WebSocket(
-            url, protocol
+            url, protocol,
           ) : new WebSocket(url);
           ws.binaryType = this.binaryType || (global.Buffer ? 'nodebuffer' : 'arraybuffer');
           ws.onopen = () => resolve(ws);
-          ws.onerror = ws.onclose = (error) => {
+          ws.onclose = (error) => {
             if (error instanceof Error) {
               return reject(error);
             }
             // in browser, error event is useless
             return reject(new Error(`Failed to connect [${url}]`));
           };
-        })
+          ws.onerror = ws.onclose;
+        }),
       ).then((ws) => {
         this._ws = ws;
         this._ws.onclose = this._handleClose.bind(this);
@@ -90,7 +91,10 @@ class WebSocketPlus extends EventEmitter {
   _destroyWs() {
     const ws = this._ws;
     if (!ws) return;
-    ws.onopen = ws.onclose = ws.onerror = ws.onmessage = null;
+    ws.onopen = null;
+    ws.onclose = null;
+    ws.onerror = null;
+    ws.onmessage = null;
     this._ws = null;
     ws.close();
   }
@@ -138,7 +142,7 @@ class WebSocketPlus extends EventEmitter {
     this.emit('retry', attempt);
     this._createWs(this._getUrls, this._protocol).then(
       () => (this.can('reconnect') ? this.reconnect() : this._destroyWs()),
-      () => this.can('fail') && this.fail(attempt + 1)
+      () => this.can('fail') && this.fail(attempt + 1),
     );
   }
   onerror(event, from, to, error) {

@@ -13,8 +13,8 @@ const onRealtimeCreate = (realtime) => {
       connection.on('reconnect', () =>
         client._open().then(
           () => client.emit('reconnect'),
-          error => client.emit('reconnecterror', error)
-        )
+          error => client.emit('reconnecterror', error),
+        ),
       );
       client._eventemitter.on('close', () => {
         delete realtime._liveQueryClients[client.id];

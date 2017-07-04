@@ -24,7 +24,7 @@ export default class ConversationQuery {
     ].reduce(
       // eslint-disable-next-line no-bitwise
       (prev, key) => (prev << 1) + (Boolean)(options[key]),
-      0
+      0,
     );
   }
 
@@ -383,6 +383,6 @@ export default class ConversationQuery {
    * @return {Promise.<Conversation[]>}
    */
   async find() {
-    return await this._client._executeQuery(this);
+    return this._client._executeQuery(this);
   }
 }

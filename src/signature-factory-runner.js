@@ -34,6 +34,6 @@ export default (signatureFactory, params) =>
         error.message = `sign error: ${error.message}`;
         debug(error);
         throw error;
-      }
+      },
     )
     .then(_validateSignature);
