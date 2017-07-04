@@ -761,7 +761,8 @@ export default class IMClient extends EventEmitter {
       mu: 'mutedMembers',
     }, rawData);
     if (data.lastMessage) {
-      const message = data.lastMessage = await this._messageParser.parse(data.lastMessage);
+      const message = await this._messageParser.parse(data.lastMessage);
+      data.lastMessage = message;
       message.from = data.lastMessageFrom;
       message.id = data.lastMessageId;
       message.timestamp = new Date(data.lastMessageTimestamp);
@@ -873,7 +874,7 @@ export default class IMClient extends EventEmitter {
     if (!Array.isArray(conversations)) {
       throw new TypeError(`${conversations} is not an Array`);
     }
-    return await Promise.all(conversations.map(conversation => conversation.read()));
+    return Promise.all(conversations.map(conversation => conversation.read()));
   }
 
   // jsdoc-ignore-start

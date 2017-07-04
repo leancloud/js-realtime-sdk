@@ -123,11 +123,17 @@ export const throttle = wait => (target, property, descriptor) => {
       let {
         throttleMeta,
       } = internal(this);
-      if (!throttleMeta) throttleMeta = internal(this).throttleMeta = {};
+      if (!throttleMeta) {
+        throttleMeta = {};
+        internal(this).throttleMeta = throttleMeta;
+      }
       let {
         [property]: propertyMeta,
       } = throttleMeta;
-      if (!propertyMeta) propertyMeta = throttleMeta[property] = {};
+      if (!propertyMeta) {
+        propertyMeta = {};
+        throttleMeta[property] = propertyMeta;
+      }
       const {
         previouseTimestamp = 0,
         timeout,

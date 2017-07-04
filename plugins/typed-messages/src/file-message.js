@@ -56,10 +56,13 @@ export default class FileMessage extends TypedMessage {
     }
     const file = File.createWithoutData(id);
     file.attributes = file.attributes || {};
-    file._url = file.attributes.url = data._lcfile.url;
-    file._metaData = file.attributes.metaData = data._lcfile.metaData || {};
+    file._url = data._lcfile.url;
+    file.attributes.url = file._url;
+    file._metaData = data._lcfile.metaData || {};
+    file.attributes.metaData = file._metaData;
     if (data._lcfile.metaData) {
-      file._name = file.attributes.name = data._lcfile.metaData.name;
+      file._name = data._lcfile.metaData.name;
+      file.attributes.name = file._name;
     }
     return file;
   }

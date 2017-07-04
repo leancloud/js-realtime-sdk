@@ -383,6 +383,6 @@ export default class ConversationQuery {
    * @return {Promise.<Conversation[]>}
    */
   async find() {
-    return await this._client._executeQuery(this);
+    return this._client._executeQuery(this);
   }
 }

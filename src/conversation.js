@@ -529,7 +529,7 @@ export default class Conversation extends EventEmitter {
    */
   async join() {
     this._debug('join');
-    return await this.add(this._client.id);
+    return this.add(this._client.id);
   }
 
   /**
@@ -538,7 +538,7 @@ export default class Conversation extends EventEmitter {
    */
   async quit() {
     this._debug('quit');
-    return await this.remove(this._client.id);
+    return this.remove(this._client.id);
   }
 
   /**
@@ -704,7 +704,7 @@ export default class Conversation extends EventEmitter {
     if (!(newMessage instanceof Message)) {
       throw new TypeError(`${newMessage} is not a Message`);
     }
-    return await this._update(message, newMessage, false);
+    return this._update(message, newMessage, false);
   }
 
   /**
@@ -712,7 +712,7 @@ export default class Conversation extends EventEmitter {
    * @param {AVMessage} message 要撤回的消息，该消息必须是由当前用户发送的。也可以提供一个包含消息 {id, timestamp} 的对象
    */
   async recall(message) {
-    return await this._update(message, new RecalledMessage(), true);
+    return this._update(message, new RecalledMessage(), true);
   }
 
   /**
@@ -755,7 +755,7 @@ export default class Conversation extends EventEmitter {
         }),
       ),
     }));
-    return await Promise.all(resCommand.logsMessage.logs.map(async ({
+    return Promise.all(resCommand.logsMessage.logs.map(async ({
       msgId,
       timestamp,
       patchTimestamp,
@@ -869,7 +869,7 @@ export default class Conversation extends EventEmitter {
    */
   async markAsRead() {
     console.warn('DEPRECATION Conversation#markAsRead: Use Conversation#read instead.');
-    return await this.read();
+    return this.read();
   }
 
   _handleReceipt({ messageId, timestamp, read }) {
