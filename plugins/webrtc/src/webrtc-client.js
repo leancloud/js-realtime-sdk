@@ -102,7 +102,7 @@ export default class WebRTCClient extends EventEmitter {
               outgoingCall._peerConnection.createOffer().then((localDescription) => {
                 outgoingCall._peerConnection.setLocalDescription(localDescription);
               }),
-            ])
+            ]),
           )
           .then(([conversation]) => {
             outgoingCall._setConversation(conversation);

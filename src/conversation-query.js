@@ -24,7 +24,7 @@ export default class ConversationQuery {
     ].reduce(
       // eslint-disable-next-line no-bitwise
       (prev, key) => (prev << 1) + (Boolean)(options[key]),
-      0
+      0,
     );
   }
 

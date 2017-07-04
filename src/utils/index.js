@@ -52,7 +52,7 @@ export const getStaticProperty = (klass, property) =>
 
 export const union = (a, b) => Array.from(new Set([...a, ...b]));
 export const difference = (a, b) => Array.from(
-  (bSet => new Set(a.filter(x => !bSet.has(x))))(new Set(b))
+  (bSet => new Set(a.filter(x => !bSet.has(x))))(new Set(b)),
 );
 
 const map = new WeakMap();

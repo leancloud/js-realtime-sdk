@@ -141,7 +141,7 @@ export default class Conversation extends EventEmitter {
       'messageupdate',
     ].forEach(event => this.on(
       event,
-      (...payload) => this._debug(`${event} event emitted. %O`, payload)
+      (...payload) => this._debug(`${event} event emitted. %O`, payload),
     ));
     // onConversationCreate hook
     applyDecorators(this._client._plugins.onConversationCreate, this);
@@ -344,7 +344,7 @@ export default class Conversation extends EventEmitter {
     internal(this).currentAttributes = Object.keys(pendingAttributes)
       .reduce(
         (target, k) => setValue(target, k, pendingAttributes[k]),
-        cloneDeep(this._attributes)
+        cloneDeep(this._attributes),
       );
     return this;
   }
@@ -473,7 +473,7 @@ export default class Conversation extends EventEmitter {
     if (this._client.options.conversationSignatureFactory) {
       const params = [this.id, this._client.id, clientIds.sort(), 'add'];
       const signatureResult = await runSignatureFactory(
-        this._client.options.conversationSignatureFactory, params
+        this._client.options.conversationSignatureFactory, params,
       );
       Object.assign(command.convMessage, keyRemap({
         signature: 's',
@@ -508,7 +508,7 @@ export default class Conversation extends EventEmitter {
     if (this._client.options.conversationSignatureFactory) {
       const params = [this.id, this._client.id, clientIds.sort(), 'remove'];
       const signatureResult = await runSignatureFactory(
-        this._client.options.conversationSignatureFactory, params
+        this._client.options.conversationSignatureFactory, params,
       );
       Object.assign(command.convMessage, keyRemap({
         signature: 's',
@@ -579,7 +579,7 @@ export default class Conversation extends EventEmitter {
       },
       // support Message static property: sendOptions
       message.constructor.sendOptions,
-      _options
+      _options,
     );
     if (receipt) {
       if (this.transient) {
@@ -752,7 +752,7 @@ export default class Conversation extends EventEmitter {
       logsMessage: new LogsCommand(
         Object.assign(conditions, {
           cid: this.id,
-        })
+        }),
       ),
     }));
     return await Promise.all(resCommand.logsMessage.logs.map(async ({

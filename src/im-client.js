@@ -69,7 +69,7 @@ export default class IMClient extends EventEmitter {
       'reconnecterror',
     ].forEach(event => this.on(
       event,
-      (...payload) => this._debug(`${event} event emitted. %O`, payload)
+      (...payload) => this._debug(`${event} event emitted. %O`, payload),
     ));
     // onIMClientCreate hook
     applyDecorators(this._plugins.onIMClientCreate, this);
@@ -198,9 +198,9 @@ export default class IMClient extends EventEmitter {
             }, conversation);
             return conversation;
           });
-        })
+        }),
         // filter conversations without unread count update
-      )).then(conversations => conversations.filter(conversation => conversation))
+      )).then(conversations => conversations.filter(conversation => conversation)),
     ).then((conversations) => {
       if (conversations.length) {
         /**
@@ -292,8 +292,8 @@ export default class IMClient extends EventEmitter {
               conversation.emit('messageupdate', message);
             }
           });
-        })
-      ))
+        }),
+      )),
     );
   }
 
@@ -714,7 +714,7 @@ export default class IMClient extends EventEmitter {
       throw new Error(`Parse query result failed: ${error.message}. Command: ${commandString}`);
     }
     conversations = await Promise.all(conversations.map(
-      this._parseConversationFromRawData.bind(this)
+      this._parseConversationFromRawData.bind(this),
     ));
     return conversations.map((fetchedConversation) => {
       let conversation = this._conversationCache.get(fetchedConversation.id);
@@ -834,7 +834,7 @@ export default class IMClient extends EventEmitter {
       const params = [null, this.id, members, 'create'];
       const signatureResult = await runSignatureFactory(
         this.options.conversationSignatureFactory,
-        params
+        params,
       );
       Object.assign(command.convMessage, keyRemap({
         signature: 's',

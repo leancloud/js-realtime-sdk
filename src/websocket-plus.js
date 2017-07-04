@@ -53,7 +53,7 @@ class WebSocketPlus extends EventEmitter {
           global.addEventListener('online', this.__resume);
         }
         this.open();
-      }
+      },
     ).catch(this.throw.bind(this));
   }
 
@@ -67,7 +67,7 @@ class WebSocketPlus extends EventEmitter {
         urls.map(url => (resolve, reject) => {
           debug(`connect [${url}] ${protocol}`);
           const ws = protocol ? new WebSocket(
-            url, protocol
+            url, protocol,
           ) : new WebSocket(url);
           ws.binaryType = this.binaryType || (global.Buffer ? 'nodebuffer' : 'arraybuffer');
           ws.onopen = () => resolve(ws);
@@ -78,7 +78,7 @@ class WebSocketPlus extends EventEmitter {
             // in browser, error event is useless
             return reject(new Error(`Failed to connect [${url}]`));
           };
-        })
+        }),
       ).then((ws) => {
         this._ws = ws;
         this._ws.onclose = this._handleClose.bind(this);
@@ -138,7 +138,7 @@ class WebSocketPlus extends EventEmitter {
     this.emit('retry', attempt);
     this._createWs(this._getUrls, this._protocol).then(
       () => (this.can('reconnect') ? this.reconnect() : this._destroyWs()),
-      () => this.can('fail') && this.fail(attempt + 1)
+      () => this.can('fail') && this.fail(attempt + 1),
     );
   }
   onerror(event, from, to, error) {

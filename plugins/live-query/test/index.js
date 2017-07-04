@@ -11,6 +11,6 @@ const realtime = new Realtime({
 
 describe('LiveQuery', () => {
   it('login and logout', () =>
-    realtime.createLiveQueryClient(uuid()).then(client => client.close())
+    realtime.createLiveQueryClient(uuid()).then(client => client.close()),
   );
 });

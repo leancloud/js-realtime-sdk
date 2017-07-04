@@ -25,12 +25,12 @@ class Client {}
 describe('Realtime', () => {
   describe('constructor', () => {
     it('appId required', () =>
-      (() => new Realtime()).should.throw()
+      (() => new Realtime()).should.throw(),
     );
     it('normal', () =>
       (() => new Realtime({
         appId: APP_ID,
-      })).should.not.throw
+      })).should.not.throw,
     );
   });
   describe('_open/_close', () => {
@@ -68,7 +68,7 @@ describe('Realtime', () => {
       createRealtime({
         noBinary: true,
       }).createIMClient()
-        .then(client => client.close())
+        .then(client => client.close()),
     );
   });
   describe('endpoints cache', () => {
@@ -112,7 +112,7 @@ describe('Realtime', () => {
       return realtime._open()
         .then((connection) => {
           const callbackPromise = Promise.all(['retry', 'schedule', 'disconnect', 'reconnect'].map(
-            event => listen(realtime, event)
+            event => listen(realtime, event),
           ));
           connection.emit('disconnect');
           connection.emit('retry', 1, 2);
@@ -160,7 +160,7 @@ describe('Realtime', () => {
       }).then(() => {
         realtime.retry();
         return listen(realtime, 'reconnect', 'eroor');
-      })
+      }),
     );
     it('should reconnect when offline', () =>
       realtime._open().then(() => {
@@ -171,7 +171,7 @@ describe('Realtime', () => {
         const promises = ['retry', 'reconnect', 'online'].map(event => listen(realtime, event, 'eroor'));
         realtime.resume();
         return Promise.all(promises);
-      })
+      }),
     );
   });
 });
@@ -185,7 +185,7 @@ describe('Connection', () => {
         client = c;
         connection = client._connection;
         return connection.ping();
-      })
+      }),
   );
   after(() => connection.close());
 
@@ -193,7 +193,7 @@ describe('Connection', () => {
     connection.ping()
       .then((resCommand) => {
         resCommand.cmd.should.be.equal(CommandType.echo);
-      })
+      }),
   );
   it('send command error', () =>
     connection.send(new GenericCommand({
@@ -203,7 +203,7 @@ describe('Connection', () => {
       convMessage: new ConvCommand({
         cid: NON_EXISTING_ROOM_ID,
       }),
-    })).should.be.rejectedWith('CONVERSATION_UPDATE_REJECTED')
+    })).should.be.rejectedWith('CONVERSATION_UPDATE_REJECTED'),
   );
   it('message dispatch', () => {
     const clientMessageEventCallback = sinon.stub(client, '_dispatchCommand');

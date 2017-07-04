@@ -166,8 +166,8 @@ const onRealtimeCreate = (realtime) => {
            */
           .then(
             () => client.emit('reconnect'),
-            error => client.emit('reconnecterror', error)
-          )
+            error => client.emit('reconnecterror', error),
+          ),
       );
       internal(client)._eventemitter.on('close', () => {
         delete realtime._IMClients[client.id];
@@ -200,7 +200,7 @@ const beforeCommandDispatch = (command, realtime) => {
   } else {
     debug(
       '[WARN] Unexpected message received without any live client match: %O',
-      trim(command)
+      trim(command),
     );
   }
   return false;

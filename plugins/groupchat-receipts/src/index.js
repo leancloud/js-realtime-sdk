@@ -28,7 +28,7 @@ export const GroupchatReceiptsPlugin = {
       conversations.forEach((conversation) => {
         if (!conversation.transient && conversation.members.length > 2) {
           conversation.send(
-            new ReadReceipt(conversation.lastMessageAt || new Date())
+            new ReadReceipt(conversation.lastMessageAt || new Date()),
           ).catch(error => console.warn(`Sending groupchat receipt fail: ${error.message}`));
         }
       });
@@ -48,7 +48,7 @@ export const GroupchatReceiptsPlugin = {
           // eslint-disable-next-line no-param-reassign
           conversation.lastReadTimestamps = maxReadTuple.reduce(
             (result, { pid, lastReadAt }) => Object.assign(result, { [pid]: lastReadAt }),
-            {}
+            {},
           );
           conversation.emit('lastreadtimestampsupdate', conversation.lastReadTimestamps);
         }).catch(error => console.warn(`Initialize group receipts fail: ${error.message}`));

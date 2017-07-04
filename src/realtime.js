@@ -58,7 +58,7 @@ export default class Realtime extends EventEmitter {
         }
         return result;
       },
-      {}
+      {},
     );
     // onRealtimeCreate hook
     applyDecorators(this._plugins.onRealtimeCreate, this);
@@ -85,7 +85,7 @@ export default class Realtime extends EventEmitter {
       debug('No connection established, create a new one.');
       const connection = new Connection(
         () => this._getEndpoints(this._options),
-        protocol
+        protocol,
       );
       connection.on('open', () => resolve(connection));
       connection.on('error', reject);
@@ -168,7 +168,7 @@ export default class Realtime extends EventEmitter {
               client.emit(event, ...payload);
             });
           }
-        })
+        }),
       );
       // override handleClose
       connection.handleClose = function handleClose(event) {
@@ -198,8 +198,8 @@ export default class Realtime extends EventEmitter {
         .constructor
         ._fetchEndpointsInfo(options)
         .then(
-          tap(info => this._cache.set('endpoints', info, info.ttl * 1000))
-        )
+          tap(info => this._cache.set('endpoints', info, info.ttl * 1000)),
+        ),
     ).then((info) => {
       debug('endpoint info: %O', info);
       return [info.server, info.secondary];
@@ -222,7 +222,7 @@ export default class Realtime extends EventEmitter {
             timeout: 20000,
           })
           .then(
-            res => res.data
+            res => res.data,
           )
           .then(tap(debug))
           .then(
@@ -237,7 +237,7 @@ export default class Realtime extends EventEmitter {
               }
               pushRouterCache.set(appId, pushRouter, ttl * 1000);
               return pushRouter;
-            }
+            },
           )
           .catch(() => 'router-g0-push.leancloud.cn');
       }
@@ -263,8 +263,8 @@ export default class Realtime extends EventEmitter {
           },
           timeout: 20000,
         }).then(
-          res => res.data
-        ).then(tap(debug))
+          res => res.data,
+        ).then(tap(debug)),
     );
   }
 
@@ -287,7 +287,7 @@ export default class Realtime extends EventEmitter {
     }
     if (connection.cannot('retry')) {
       throw new Error(
-        `retrying not allowed when not disconnected. the connection is now ${connection.current}`
+        `retrying not allowed when not disconnected. the connection is now ${connection.current}`,
       );
     }
     return connection.retry();

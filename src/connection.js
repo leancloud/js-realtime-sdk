@@ -16,7 +16,7 @@ export default class Connection extends WebSocketPlus {
       super(getUrl, protocolString);
     } else {
       super(getUrl().then(urls => urls.map(url =>
-        `${url}${url.indexOf('?') === -1 ? '?' : '&'}subprotocol=${encodeURIComponent(protocolString)}`
+        `${url}${url.indexOf('?') === -1 ? '?' : '&'}subprotocol=${encodeURIComponent(protocolString)}`,
       )));
     }
     this._protocalFormat = format;
@@ -62,7 +62,7 @@ export default class Connection extends WebSocketPlus {
               delete this._commands[serialId];
             }
           },
-          COMMAND_TIMEOUT
+          COMMAND_TIMEOUT,
         ),
       };
     });

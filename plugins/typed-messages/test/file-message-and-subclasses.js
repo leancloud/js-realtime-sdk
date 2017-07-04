@@ -97,7 +97,7 @@ describe('FileMessage and subclasses', () => {
         fileCopy.id.should.eql(file.id);
         fileCopy.url().should.eql(file.url());
         fileCopy.metaData().should.eql(file.metaData());
-      })
+      }),
     );
     it('parser should be loose', () => {
       FileMessage.parse({ _lcfile: { url: FILE_URL } })
@@ -142,7 +142,7 @@ describe('FileMessage and subclasses', () => {
         fileCopy.id.should.eql(file.id);
         fileCopy.url().should.eql(file.url());
         fileCopy.metaData().should.eql(file.metaData());
-      })
+      }),
     );
   });
 
@@ -167,7 +167,7 @@ describe('FileMessage and subclasses', () => {
         const fileCopy = message.getFile();
         fileCopy.should.not.be.exactly(file);
         fileCopy.should.be.instanceof(File);
-      })
+      }),
     );
   });
   describe('VideoMessage', () => {
@@ -191,7 +191,7 @@ describe('FileMessage and subclasses', () => {
         const fileCopy = message.getFile();
         fileCopy.should.not.be.exactly(file);
         fileCopy.should.be.instanceof(File);
-      })
+      }),
     );
   });
 });
