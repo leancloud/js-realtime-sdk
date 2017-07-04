@@ -18,7 +18,7 @@ export default class Realtime extends EventEmitter {
    * @param  {String} [options.region='cn'] 节点 id
    * @param  {Boolean} [options.pushOfflineMessages=false] 启用推送离线消息模式（默认为发送未读消息通知模式）
    * @param  {Boolean} [options.noBinary=false] 设置 WebSocket 使用字符串格式收发消息（默认为二进制格式）。
-   *                                            适用于 WebSocket 实现不支持二进制数据格式的情况（如 React Native）
+   *                                            适用于 WebSocket 实现不支持二进制数据格式的情况（如微信小程序）
    * @param  {Boolean} [options.ssl=true] 使用 wss 进行连接
    * @param  {Plugin[]} [options.plugins] 加载插件（since 3.1.0）
    */

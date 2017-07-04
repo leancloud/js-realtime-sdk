@@ -9,6 +9,8 @@ export { Promise };
 
 export {
   /**
+   * @name Realtime
+   * @memberof module:leancloud-realtime
    * @see Realtime
    */
   default as Realtime,
@@ -17,6 +19,8 @@ export {
 export {
   /**
    * 错误码，详见 {@link https://leancloud.cn/docs/realtime_v2.html#云端错误码说明}
+   * @name ErrorCode
+   * @memberof module:leancloud-realtime
    * @enum {Number}
    * @since 3.3.0
    */

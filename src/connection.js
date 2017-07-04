@@ -54,17 +54,17 @@ export default class Connection extends WebSocketPlus {
       this._commands[serialId] = {
         resolve,
         reject,
+        timeout: setTimeout(
+          () => {
+            if (this._commands[serialId]) {
+              debug('✗ %O timeout', trim(command));
+              reject(new Error('Command Timeout.'));
+              delete this._commands[serialId];
+            }
+          },
+          COMMAND_TIMEOUT
+        ),
       };
-      setTimeout(
-        () => {
-          if (this._commands[serialId]) {
-            debug('✗ %O timeout', trim(command));
-            reject(new Error('Command Timeout.'));
-            delete this._commands[serialId];
-          }
-        },
-        COMMAND_TIMEOUT
-      );
     });
   }
 
@@ -80,6 +80,7 @@ export default class Connection extends WebSocketPlus {
     const serialId = message.i;
     if (serialId) {
       if (this._commands[serialId]) {
+        clearTimeout(this._commands[serialId].timeout);
         if (message.cmd === CommandType.error) {
           this
             ._commands[serialId]

@@ -123,19 +123,17 @@ const onRealtimeCreate = (realtime) => {
    *
    * 在接收消息、查询消息时，会按照消息类注册顺序的逆序依次尝试解析消息内容
    *
-   * @function register
    * @memberof Realtime
    * @instance
    * @param  {Function | Function[]} messageClass 消息类，需要实现 {@link AVMessage} 接口，
    * 建议继承自 {@link TypedMessage}
    * @throws {TypeError} 如果 messageClass 没有实现 {@link AVMessage} 接口则抛出异常
    */
-  realtime.register = messageClass =>
+  const register = messageClass =>
     ensureArray(messageClass).map(messageParser.register.bind(messageParser));
-  realtime.register(ensureArray(realtime._plugins.messageClasses));
+  register(ensureArray(realtime._plugins.messageClasses));
   /**
    * 创建一个即时通讯客户端，多次创建相同 id 的客户端会返回同一个实例
-   * @function createIMClient
    * @memberof Realtime
    * @instance
    * @param  {String} [id] 客户端 id，如果不指定，服务端会随机生成一个
@@ -143,10 +141,10 @@ const onRealtimeCreate = (realtime) => {
    * @param  {String} [tag] 客户端类型标记，以支持单点登录功能
    * @return {Promise.<IMClient>}
    */
-  realtime.createIMClient = (id, clientOptions, tag) => {
+  const createIMClient = async (id, clientOptions, tag) => {
     const idIsString = typeof id === 'string';
     if (idIsString && realtime._IMClients[id] !== undefined) {
-      return Promise.resolve(realtime._IMClients[id]);
+      return realtime._IMClients[id];
     }
     const promise = realtime._open().then((connection) => {
       const client = new IMClient(id, clientOptions, connection, {
@@ -185,8 +183,12 @@ const onRealtimeCreate = (realtime) => {
     if (idIsString) {
       realtime._IMClients[id] = promise;
     }
-    return promise;
+    return await promise;
   };
+  Object.assign(realtime, {
+    register,
+    createIMClient,
+  });
   /* eslint-enable no-param-reassign */
 };
 

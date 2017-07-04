@@ -283,19 +283,23 @@ describe('Messages', () => {
           maxReadTuples.lastReadAt.should.be.a.Date();
         });
     });
-    it('errors', () => {
-      (() => conversationWchen.send('1')).should.throw(/not a Message/);
-      const message = new Message('hello');
-      return wchen
-        .getConversation(EXISTING_ROOM_ID)
-        .then(conversation => conversation.send(message))
-        .should.be.rejectedWith(Error, {
-          message: 'INVALID_MESSAGING_TARGET',
-          code: ErrorCode.INVALID_MESSAGING_TARGET,
-        })
-        .then(() => {
-          message.status.should.eql(MessageStatus.FAILED);
-        });
+    describe('errors', () => {
+      it('client error', () =>
+        conversationWchen.send('1').should.be.rejectedWith(/not a Message/)
+      );
+      it('server error', () => {
+        const message = new Message('hello');
+        return wchen
+          .getConversation(EXISTING_ROOM_ID)
+          .then(conversation => conversation.send(message))
+          .should.be.rejectedWith(Error, {
+            message: 'INVALID_MESSAGING_TARGET',
+            code: ErrorCode.INVALID_MESSAGING_TARGET,
+          })
+          .then(() => {
+            message.status.should.eql(MessageStatus.FAILED);
+          });
+      });
     });
     describe('patch', () => {
       before(function prepareMessage() {

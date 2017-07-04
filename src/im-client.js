@@ -14,7 +14,7 @@ import {
   OpType,
 } from '../proto/message';
 import { ErrorCode } from './error';
-import { tap, Expirable, Cache, keyRemap, union, difference, trim, internal, throttle } from './utils';
+import { Expirable, Cache, keyRemap, union, difference, trim, internal, throttle } from './utils';
 import { applyDecorators, applyDispatcher } from './plugin';
 import runSignatureFactory from './signature-factory-runner';
 import { MessageStatus } from './messages/message';
@@ -141,7 +141,7 @@ export default class IMClient extends EventEmitter {
   _dispatchUnreadMessage({
     unreadMessage: {
       convs,
-      notifTime,
+    notifTime,
     },
   }) {
     internal(this).lastUnreadNotifTime = notifTime;
@@ -150,12 +150,12 @@ export default class IMClient extends EventEmitter {
       // update conversations data
       Promise.all(convs.map(({
           cid,
-          unread,
-          mid,
-          timestamp: ts,
-          from,
-          data,
-          patchTimestamp,
+        unread,
+        mid,
+        timestamp: ts,
+        from,
+        data,
+        patchTimestamp,
         }) => this.getConversation(cid).then((conversation) => {
           // deleted conversation
           if (!conversation) return null;
@@ -199,7 +199,7 @@ export default class IMClient extends EventEmitter {
             return conversation;
           });
         })
-      // filter conversations without unread count update
+        // filter conversations without unread count update
       )).then(conversations => conversations.filter(conversation => conversation))
     ).then((conversations) => {
       if (conversations.length) {
@@ -297,127 +297,124 @@ export default class IMClient extends EventEmitter {
     );
   }
 
-  _dispatchConvMessage(message) {
+  async _dispatchConvMessage(message) {
     const {
       convMessage,
       convMessage: {
         initBy, m,
       },
     } = message;
+    const conversation = await this.getConversation(convMessage.cid);
     switch (message.op) {
       case OpType.joined: {
-        return this.getConversation(convMessage.cid).then((conversation) => {
-          if (!conversation.transient) {
-            // eslint-disable-next-line no-param-reassign
-            conversation.members = union(conversation.members, [this.id]);
-          }
-          const payload = {
-            invitedBy: initBy,
-          };
-          /**
-           * 当前用户被添加至某个对话
-           * @event IMClient#invited
-           * @param {Object} payload
-           * @param {String} payload.invitedBy 邀请者 id
-           * @param {Conversation} conversation
-           */
-          this.emit('invited', payload, conversation);
-          /**
-           * 当前用户被添加至当前对话
-           * @event Conversation#invited
-           * @param {Object} payload
-           * @param {String} payload.invitedBy 该移除操作的发起者 id
-           */
-          conversation.emit('invited', payload);
-        });
+        if (!conversation.transient) {
+          // eslint-disable-next-line no-param-reassign
+          conversation.members = union(conversation.members, [this.id]);
+        }
+        const payload = {
+          invitedBy: initBy,
+        };
+        /**
+         * 当前用户被添加至某个对话
+         * @event IMClient#invited
+         * @param {Object} payload
+         * @param {String} payload.invitedBy 邀请者 id
+         * @param {Conversation} conversation
+         */
+        this.emit('invited', payload, conversation);
+        /**
+         * 当前用户被添加至当前对话
+         * @event Conversation#invited
+         * @param {Object} payload
+         * @param {String} payload.invitedBy 该移除操作的发起者 id
+         */
+        conversation.emit('invited', payload);
+        return;
       }
       case OpType.left: {
-        return this.getConversation(convMessage.cid).then((conversation) => {
-          if (!conversation.transient) {
-            // eslint-disable-next-line no-param-reassign
-            conversation.members = difference(conversation.members, [this.id]);
-          }
-          const payload = {
-            kickedBy: initBy,
-          };
-          /**
-           * 当前用户被从某个对话中移除
-           * @event IMClient#kicked
-           * @param {Object} payload
-           * @param {String} payload.kickedBy 该移除操作的发起者 id
-           * @param {Conversation} conversation
-           */
-          this.emit('kicked', payload, conversation);
-          /**
-           * 当前用户被从当前对话中移除
-           * @event Conversation#kicked
-           * @param {Object} payload
-           * @param {String} payload.kickedBy 该移除操作的发起者 id
-           */
-          conversation.emit('kicked', payload);
-        });
+        if (!conversation.transient) {
+          // eslint-disable-next-line no-param-reassign
+          conversation.members = difference(conversation.members, [this.id]);
+        }
+        const payload = {
+          kickedBy: initBy,
+        };
+        /**
+         * 当前用户被从某个对话中移除
+         * @event IMClient#kicked
+         * @param {Object} payload
+         * @param {String} payload.kickedBy 该移除操作的发起者 id
+         * @param {Conversation} conversation
+         */
+        this.emit('kicked', payload, conversation);
+        /**
+         * 当前用户被从当前对话中移除
+         * @event Conversation#kicked
+         * @param {Object} payload
+         * @param {String} payload.kickedBy 该移除操作的发起者 id
+         */
+        conversation.emit('kicked', payload);
+        return;
       }
       case OpType.members_joined: {
-        return this.getConversation(convMessage.cid).then((conversation) => {
-          if (!conversation.transient) {
-            // eslint-disable-next-line no-param-reassign
-            conversation.members = union(conversation.members, convMessage.m);
-          }
-          const payload = {
-            invitedBy: initBy,
-            members: m,
-          };
-          /**
-           * 有用户被添加至某个对话
-           * @event IMClient#membersjoined
-           * @param {Object} payload
-           * @param {String[]} payload.members 被添加的用户 id 列表
-           * @param {String} payload.invitedBy 邀请者 id
-           * @param {Conversation} conversation
-           */
-          this.emit('membersjoined', payload, conversation);
-          /**
-           * 有成员被添加至当前对话
-           * @event Conversation#membersjoined
-           * @param {Object} payload
-           * @param {String[]} payload.members 被添加的成员 id 列表
-           * @param {String} payload.invitedBy 邀请者 id
-           */
-          conversation.emit('membersjoined', payload);
-        });
+        if (!conversation.transient) {
+          // eslint-disable-next-line no-param-reassign
+          conversation.members = union(conversation.members, convMessage.m);
+        }
+        const payload = {
+          invitedBy: initBy,
+          members: m,
+        };
+        /**
+         * 有用户被添加至某个对话
+         * @event IMClient#membersjoined
+         * @param {Object} payload
+         * @param {String[]} payload.members 被添加的用户 id 列表
+         * @param {String} payload.invitedBy 邀请者 id
+         * @param {Conversation} conversation
+         */
+        this.emit('membersjoined', payload, conversation);
+        /**
+         * 有成员被添加至当前对话
+         * @event Conversation#membersjoined
+         * @param {Object} payload
+         * @param {String[]} payload.members 被添加的成员 id 列表
+         * @param {String} payload.invitedBy 邀请者 id
+         */
+        conversation.emit('membersjoined', payload);
+        return;
       }
       case OpType.members_left: {
-        return this.getConversation(convMessage.cid).then((conversation) => {
-          if (!conversation.transient) {
-            // eslint-disable-next-line no-param-reassign
-            conversation.members = difference(conversation.members, convMessage.m);
-          }
-          const payload = {
-            kickedBy: initBy,
-            members: m,
-          };
-          /**
-           * 有成员被从某个对话中移除
-           * @event IMClient#membersleft
-           * @param {Object} payload
-           * @param {String[]} payload.members 被移除的成员 id 列表
-           * @param {String} payload.kickedBy 该移除操作的发起者 id
-           * @param {Conversation} conversation
-           */
-          this.emit('membersleft', payload, conversation);
-          /**
-           * 有成员被从当前对话中移除
-           * @event Conversation#membersleft
-           * @param {Object} payload
-           * @param {String[]} payload.members 被移除的成员 id 列表
-           * @param {String} payload.kickedBy 该移除操作的发起者 id
-           */
-          conversation.emit('membersleft', payload);
-        });
+        if (!conversation.transient) {
+          // eslint-disable-next-line no-param-reassign
+          conversation.members = difference(conversation.members, convMessage.m);
+        }
+        const payload = {
+          kickedBy: initBy,
+          members: m,
+        };
+        /**
+         * 有成员被从某个对话中移除
+         * @event IMClient#membersleft
+         * @param {Object} payload
+         * @param {String[]} payload.members 被移除的成员 id 列表
+         * @param {String} payload.kickedBy 该移除操作的发起者 id
+         * @param {Conversation} conversation
+         */
+        this.emit('membersleft', payload, conversation);
+        /**
+         * 有成员被从当前对话中移除
+         * @event Conversation#membersleft
+         * @param {Object} payload
+         * @param {String[]} payload.members 被移除的成员 id 列表
+         * @param {String} payload.kickedBy 该移除操作的发起者 id
+         */
+        conversation.emit('membersleft', payload);
+        return;
       }
       default:
         this.emit('unhandledmessage', message);
-        return Promise.reject(new Error('Unrecognized conversation command'));
+        throw new Error('Unrecognized conversation command');
     }
   }
 
@@ -613,29 +610,26 @@ export default class IMClient extends EventEmitter {
    * 关闭客户端
    * @return {Promise}
    */
-  close() {
+  async close() {
     this._debug('close session');
     const command = new GenericCommand({
       cmd: 'session',
       op: 'close',
     });
-    return this._send(command).then(
-      () => {
-        internal(this)._eventemitter.emit('close', {
-          code: 0,
-        });
-        this.emit('close', {
-          code: 0,
-        });
-      }
-    );
+    await this._send(command);
+    internal(this)._eventemitter.emit('close', {
+      code: 0,
+    });
+    this.emit('close', {
+      code: 0,
+    });
   }
   /**
    * 获取 client 列表中在线的 client，每次查询最多 20 个 clientId，超出部分会被忽略
    * @param  {String[]} clientIds 要查询的 client ids
    * @return {Primse.<String[]>} 在线的 client ids
    */
-  ping(clientIds) {
+  async ping(clientIds) {
     this._debug('ping');
     if (!(clientIds instanceof Array)) {
       throw new TypeError(`clientIds ${clientIds} is not an Array`);
@@ -650,8 +644,8 @@ export default class IMClient extends EventEmitter {
         sessionPeerIds: clientIds,
       }),
     });
-    return this._send(command)
-      .then(resCommand => resCommand.sessionMessage.onlineSessionPeerIds);
+    const resCommand = await this._send(command);
+    return resCommand.sessionMessage.onlineSessionPeerIds;
   }
 
   /**
@@ -660,7 +654,7 @@ export default class IMClient extends EventEmitter {
    * @param  {Boolean} [noCache=false] 强制不从缓存中获取
    * @return {Promise.<Conversation>} 如果 id 对应的对话不存在则返回 null
    */
-  getConversation(id, noCache = false) {
+  async getConversation(id, noCache = false) {
     if (typeof id !== 'string') {
       throw new TypeError(`${id} is not a String`);
     }
@@ -684,14 +678,13 @@ export default class IMClient extends EventEmitter {
    * @param  {Boolean} [noCache=false] 强制不从缓存中获取
    * @return {Promise.<Conversation[]>} 如果 id 对应的对话不存在则返回 null
    */
-  getConversations(ids, noCache = false) {
+  async getConversations(ids, noCache = false) {
     const remoteConversationIds =
       noCache ? ids : ids.filter(id => this._conversationCache.get(id) === null);
-    return (
-      remoteConversationIds.length ?
-      this.getQuery().containedIn('objectId', remoteConversationIds).find() :
-      Promise.resolve()
-    ).then(() => ids.map(id => this._conversationCache.get(id)));
+    if (remoteConversationIds.length) {
+      await (this.getQuery().containedIn('objectId', remoteConversationIds)).find();
+    }
+    return ids.map(id => this._conversationCache.get(id));
   }
 
   /**
@@ -702,7 +695,7 @@ export default class IMClient extends EventEmitter {
     return new ConversationQuery(this);
   }
 
-  _executeQuery(query) {
+  async _executeQuery(query) {
     const queryJSON = query.toJSON();
     queryJSON.where = new JsonObjectMessage({
       data: JSON.stringify(queryJSON.where),
@@ -712,49 +705,47 @@ export default class IMClient extends EventEmitter {
       op: 'query',
       convMessage: new ConvCommand(queryJSON),
     });
-    return this
-      ._send(command)
-      .then((resCommand) => {
-        try {
-          return JSON.parse(resCommand.convMessage.results.data);
-        } catch (error) {
-          const commandString = JSON.stringify(trim(resCommand));
-          throw new Error(`Parse query result failed: ${error.message}. Command: ${commandString}`);
-        }
-      })
-      .then(conversations => Promise.all(conversations.map(
-        this._parseConversationFromRawData.bind(this)
-      )))
-      .then(conversations => conversations.map((fetchedConversation) => {
-        let conversation = this._conversationCache.get(fetchedConversation.id);
-        if (!conversation) {
-          conversation = fetchedConversation;
-          this._debug('no match, set cache');
-          this._conversationCache.set(fetchedConversation.id, fetchedConversation);
-        } else {
-          this._debug('update cached conversation');
-          [
-            'creator',
-            'createdAt',
-            'updatedAt',
-            'lastMessageAt',
-            'lastMessage',
-            'mutedMembers',
-            'members',
-            '_attributes',
-            'transient',
-            'muted',
-          ].forEach((key) => {
-            const value = fetchedConversation[key];
-            if (value !== undefined) conversation[key] = value;
-          });
-          conversation._reset();
-        }
-        return conversation;
-      }));
+    const resCommand = await this._send(command);
+    let conversations;
+    try {
+      conversations = JSON.parse(resCommand.convMessage.results.data);
+    } catch (error) {
+      const commandString = JSON.stringify(trim(resCommand));
+      throw new Error(`Parse query result failed: ${error.message}. Command: ${commandString}`);
+    }
+    conversations = await Promise.all(conversations.map(
+      this._parseConversationFromRawData.bind(this)
+    ));
+    return conversations.map((fetchedConversation) => {
+      let conversation = this._conversationCache.get(fetchedConversation.id);
+      if (!conversation) {
+        conversation = fetchedConversation;
+        this._debug('no match, set cache');
+        this._conversationCache.set(fetchedConversation.id, fetchedConversation);
+      } else {
+        this._debug('update cached conversation');
+        [
+          'creator',
+          'createdAt',
+          'updatedAt',
+          'lastMessageAt',
+          'lastMessage',
+          'mutedMembers',
+          'members',
+          '_attributes',
+          'transient',
+          'muted',
+        ].forEach((key) => {
+          const value = fetchedConversation[key];
+          if (value !== undefined) conversation[key] = value;
+        });
+        conversation._reset();
+      }
+      return conversation;
+    });
   }
 
-  _parseConversationFromRawData(rawData) {
+  async _parseConversationFromRawData(rawData) {
     const data = keyRemap({
       objectId: 'id',
       lm: 'lastMessageAt',
@@ -769,29 +760,21 @@ export default class IMClient extends EventEmitter {
       c: 'creator',
       mu: 'mutedMembers',
     }, rawData);
-    return Promise.resolve().then(() => {
-      if (data.lastMessage) {
-        return this._messageParser.parse(data.lastMessage).then(
-          (message) => {
-            /* eslint-disable no-param-reassign */
-            data.lastMessage = message;
-            message.from = data.lastMessageFrom;
-            message.id = data.lastMessageId;
-            message.timestamp = new Date(data.lastMessageTimestamp);
-            if (data.lastMessagePatchTimestamp) {
-              message.updatedAt = new Date(data.lastMessagePatchTimestamp);
-            }
-            message._setStatus(MessageStatus.SENT);
-            delete data.lastMessageFrom;
-            delete data.lastMessageId;
-            delete data.lastMessageTimestamp;
-            delete data.lastMessagePatchTimestamp;
-            /* eslint-enable no-param-reassign */
-          }
-        );
+    if (data.lastMessage) {
+      const message = data.lastMessage = await this._messageParser.parse(data.lastMessage);
+      message.from = data.lastMessageFrom;
+      message.id = data.lastMessageId;
+      message.timestamp = new Date(data.lastMessageTimestamp);
+      if (data.lastMessagePatchTimestamp) {
+        message.updatedAt = new Date(data.lastMessagePatchTimestamp);
       }
-      return Promise.resolve();
-    }).then(() => new Conversation(data, this));
+      message._setStatus(MessageStatus.SENT);
+      delete data.lastMessageFrom;
+      delete data.lastMessageId;
+      delete data.lastMessageTimestamp;
+      delete data.lastMessagePatchTimestamp;
+    }
+    return new Conversation(data, this);
   }
 
   /**
@@ -804,7 +787,7 @@ export default class IMClient extends EventEmitter {
    * @param {Boolean} [options.unique=false] 唯一对话，当其为 true 时，如果当前已经有相同成员的对话存在则返回该对话，否则会创建新的对话
    * @return {Promise.<Conversation>}
    */
-  createConversation(options = {}) {
+  async createConversation(options = {}) {
     const {
       members: m,
       name,
@@ -841,45 +824,41 @@ export default class IMClient extends EventEmitter {
       unique,
     };
 
-    return Promise.resolve(
-        new GenericCommand({
-          cmd: 'conv',
-          op: 'start',
-          convMessage: new ConvCommand(startCommandJson),
-        })
-      )
-      .then((command) => {
-        if (this.options.conversationSignatureFactory) {
-          const params = [null, this.id, members, 'create'];
-          return runSignatureFactory(this.options.conversationSignatureFactory, params)
-            .then((signatureResult) => {
-              Object.assign(command.convMessage, keyRemap({
-                signature: 's',
-                timestamp: 't',
-                nonce: 'n',
-              }, signatureResult));
-              return command;
-            });
-        }
-        return command;
-      })
-      .then(this._send.bind(this))
-      .then(resCommand => new Conversation({
-        name,
-        attr: attributes,
-        transient,
-        unique,
-        id: resCommand.convMessage.cid,
-        createdAt: resCommand.convMessage.cdate,
-        updatedAt: resCommand.convMessage.cdate,
-        lastMessageAt: null,
-        creator: this.id,
-        members: transient ? [] : members,
-        ...properties,
-      }, this))
-      .then(tap(conversation =>
-        this._conversationCache.set(conversation.id, conversation)
-      ));
+    const command = new GenericCommand({
+      cmd: 'conv',
+      op: 'start',
+      convMessage: new ConvCommand(startCommandJson),
+    });
+
+    if (this.options.conversationSignatureFactory) {
+      const params = [null, this.id, members, 'create'];
+      const signatureResult = await runSignatureFactory(
+        this.options.conversationSignatureFactory,
+        params
+      );
+      Object.assign(command.convMessage, keyRemap({
+        signature: 's',
+        timestamp: 't',
+        nonce: 'n',
+      }, signatureResult));
+    }
+
+    const resCommand = await this._send(command);
+    const conversation = new Conversation({
+      name,
+      attr: attributes,
+      transient,
+      unique,
+      id: resCommand.convMessage.cid,
+      createdAt: resCommand.convMessage.cdate,
+      updatedAt: resCommand.convMessage.cdate,
+      lastMessageAt: null,
+      creator: this.id,
+      members: transient ? [] : members,
+      ...properties,
+    }, this);
+    this._conversationCache.set(conversation.id, conversation);
+    return conversation;
   }
 
   /**
@@ -889,12 +868,12 @@ export default class IMClient extends EventEmitter {
    * @return {Promise.<Conversation[]>} conversations 返回输入的会话列表
    */
   // eslint-disable-next-line class-methods-use-this
-  markAllAsRead(conversations) {
+  async markAllAsRead(conversations) {
     console.warn('DEPRECATION IMClient.markAllAsRead: Use Conversation#read instead.');
     if (!Array.isArray(conversations)) {
       throw new TypeError(`${conversations} is not an Array`);
     }
-    return Promise.all(conversations.map(conversation => conversation.read()));
+    return await Promise.all(conversations.map(conversation => conversation.read()));
   }
 
   // jsdoc-ignore-start

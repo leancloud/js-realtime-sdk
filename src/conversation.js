@@ -376,12 +376,12 @@ export default class Conversation extends EventEmitter {
    * 保存当前对话的属性至服务器
    * @return {Promise.<Conversation>} self
    */
-  save() {
+  async save() {
     this._debug('save');
     const attr = internal(this).pendingAttributes;
     if (isEmpty(attr)) {
       this._debug('nothing touched, resolve with self');
-      return Promise.resolve(this);
+      return this;
     }
     this._debug('attr: %O', attr);
     const convMessage = new ConvCommand({
@@ -389,75 +389,68 @@ export default class Conversation extends EventEmitter {
         data: JSON.stringify(attr),
       }),
     });
-    return this
-      ._send(new GenericCommand({
-        op: 'update',
-        convMessage,
-      }))
-      .then((resCommand) => {
-        this.updatedAt = resCommand.convMessage.udate;
-        this._attributes = internal(this).currentAttributes;
-        internal(this).pendingAttributes = {};
-        return this;
-      });
+    const resCommand = await this._send(new GenericCommand({
+      op: 'update',
+      convMessage,
+    }));
+    this.updatedAt = resCommand.convMessage.udate;
+    this._attributes = internal(this).currentAttributes;
+    internal(this).pendingAttributes = {};
+    return this;
   }
 
   /**
    * 从服务器更新对话的属性
    * @return {Promise.<Conversation>} self
    */
-  fetch() {
-    return this
-      ._client
-      .getQuery()
-      .equalTo('objectId', this.id)
-      .find()
-      .then(() => this);
+  async fetch() {
+    const query = this._client.getQuery().equalTo('objectId', this.id);
+    await query.find();
+    return this;
   }
 
   /**
    * 静音，客户端拒绝收到服务器端的离线推送通知
    * @return {Promise.<Conversation>} self
    */
-  mute() {
+  async mute() {
     this._debug('mute');
-    return this._send(new GenericCommand({
+    await this._send(new GenericCommand({
       op: 'mute',
-    })).then(() => {
-      if (!this.transient) {
-        this.muted = true;
-        this.mutedMembers = union(this.mutedMembers, [this._client.id]);
-      }
-      return this;
-    });
+    }));
+    if (!this.transient) {
+      this.muted = true;
+      this.mutedMembers = union(this.mutedMembers, [this._client.id]);
+    }
+    return this;
   }
 
   /**
    * 取消静音
    * @return {Promise.<Conversation>} self
    */
-  unmute() {
+  async unmute() {
     this._debug('unmute');
-    return this._send(new GenericCommand({
+    await this._send(new GenericCommand({
       op: 'unmute',
-    })).then(() => {
-      if (!this.transient) {
-        this.muted = false;
-        this.mutedMembers = difference(this.mutedMembers, [this._client.id]);
-      }
-      return this;
-    });
+    }));
+    if (!this.transient) {
+      this.muted = false;
+      this.mutedMembers = difference(this.mutedMembers, [this._client.id]);
+    }
+    return this;
   }
 
   /**
    * 获取对话人数，或暂态对话的在线人数
    * @return {Promise.<Number>}
    */
-  count() {
+  async count() {
     this._debug('unmute');
-    return this._send(new GenericCommand({
+    const resCommand = await this._send(new GenericCommand({
       op: 'count',
-    })).then(resCommand => resCommand.convMessage.count);
+    }));
+    return resCommand.convMessage.count;
   }
 
   /**
@@ -465,7 +458,7 @@ export default class Conversation extends EventEmitter {
    * @param {String|String[]} clientIds 新增成员 client id
    * @return {Promise.<Conversation>} self
    */
-  add(clientIds) {
+  async add(clientIds) {
     this._debug('add', clientIds);
     if (typeof clientIds === 'string') {
       clientIds = [clientIds]; // eslint-disable-line no-param-reassign
@@ -473,33 +466,26 @@ export default class Conversation extends EventEmitter {
     const convMessage = new ConvCommand({
       m: clientIds,
     });
-    return Promise.resolve(
-      new GenericCommand({
-        op: 'add',
-        convMessage,
-      })
-    ).then((command) => {
-      if (this._client.options.conversationSignatureFactory) {
-        const params = [this.id, this._client.id, clientIds.sort(), 'add'];
-        return runSignatureFactory(this._client.options.conversationSignatureFactory, params)
-          .then((signatureResult) => {
-            Object.assign(command.convMessage, keyRemap({
-              signature: 's',
-              timestamp: 't',
-              nonce: 'n',
-            }, signatureResult));
-            return command;
-          });
-      }
-      return command;
-    }).then(
-      this._send.bind(this)
-    ).then(() => {
-      if (!this.transient && !this.system) {
-        this.members = union(this.members, clientIds);
-      }
-      return this;
+    const command = new GenericCommand({
+      op: 'add',
+      convMessage,
     });
+    if (this._client.options.conversationSignatureFactory) {
+      const params = [this.id, this._client.id, clientIds.sort(), 'add'];
+      const signatureResult = await runSignatureFactory(
+        this._client.options.conversationSignatureFactory, params
+      );
+      Object.assign(command.convMessage, keyRemap({
+        signature: 's',
+        timestamp: 't',
+        nonce: 'n',
+      }, signatureResult));
+    }
+    await this._send(command);
+    if (!this.transient && !this.system) {
+      this.members = union(this.members, clientIds);
+    }
+    return this;
   }
 
   /**
@@ -507,7 +493,7 @@ export default class Conversation extends EventEmitter {
    * @param {String|String[]} clientIds 成员 client id
    * @return {Promise.<Conversation>} self
    */
-  remove(clientIds) {
+  async remove(clientIds) {
     this._debug('remove', clientIds);
     if (typeof clientIds === 'string') {
       clientIds = [clientIds]; // eslint-disable-line no-param-reassign
@@ -515,51 +501,44 @@ export default class Conversation extends EventEmitter {
     const convMessage = new ConvCommand({
       m: clientIds,
     });
-    return Promise.resolve(
-      new GenericCommand({
-        op: 'remove',
-        convMessage,
-      })
-    ).then((command) => {
-      if (this._client.options.conversationSignatureFactory) {
-        const params = [this.id, this._client.id, clientIds.sort(), 'remove'];
-        return runSignatureFactory(this._client.options.conversationSignatureFactory, params)
-          .then((signatureResult) => {
-            Object.assign(command.convMessage, keyRemap({
-              signature: 's',
-              timestamp: 't',
-              nonce: 'n',
-            }, signatureResult));
-            return command;
-          });
-      }
-      return command;
-    }).then(
-      this._send.bind(this)
-    ).then(() => {
-      if (!this.transient && !this.system) {
-        this.members = difference(this.members, clientIds);
-      }
-      return this;
+    const command = new GenericCommand({
+      op: 'remove',
+      convMessage,
     });
+    if (this._client.options.conversationSignatureFactory) {
+      const params = [this.id, this._client.id, clientIds.sort(), 'remove'];
+      const signatureResult = await runSignatureFactory(
+        this._client.options.conversationSignatureFactory, params
+      );
+      Object.assign(command.convMessage, keyRemap({
+        signature: 's',
+        timestamp: 't',
+        nonce: 'n',
+      }, signatureResult));
+    }
+    await this._send(command);
+    if (!this.transient && !this.system) {
+      this.members = difference(this.members, clientIds);
+    }
+    return this;
   }
 
   /**
    * （当前用户）加入该对话
    * @return {Promise.<Conversation>} self
    */
-  join() {
+  async join() {
     this._debug('join');
-    return this.add(this._client.id);
+    return await this.add(this._client.id);
   }
 
   /**
    * （当前用户）退出该对话
    * @return {Promise.<Conversation>} self
    */
-  quit() {
+  async quit() {
     this._debug('quit');
-    return this.remove(this._client.id);
+    return await this.remove(this._client.id);
   }
 
   /**
@@ -575,7 +554,7 @@ export default class Conversation extends EventEmitter {
    * @param {Object} [options.pushData] 消息对应的离线推送内容，如果消息接收方不在线，会推送指定的内容。其结构说明参见: {@link https://url.leanapp.cn/pushData 推送消息内容}
    * @return {Promise.<Message>} 发送的消息
    */
-  send(message, options) {
+  async send(message, options) {
     this._debug(message, 'send');
     if (!(message instanceof Message)) {
       throw new TypeError(`${message} is not a Message`);
@@ -623,7 +602,7 @@ export default class Conversation extends EventEmitter {
     if (typeof msg !== 'string') {
       msg = JSON.stringify(msg);
     }
-    let sendPromise = this._send(new GenericCommand({
+    const command = new GenericCommand({
       cmd: 'direct',
       directMessage: new DirectCommand({
         msg,
@@ -635,9 +614,10 @@ export default class Conversation extends EventEmitter {
         will,
       }),
       priority,
-    }), !transient);
-    if (!transient) {
-      sendPromise = sendPromise.then((resCommand) => {
+    });
+    try {
+      const resCommand = await this._send(command, !transient);
+      if (!transient) {
         const {
           ackMessage: {
             uid,
@@ -658,21 +638,19 @@ export default class Conversation extends EventEmitter {
         });
         this.lastMessage = message;
         this.lastMessageAt = message.timestamp;
-      });
-    }
-    return sendPromise.then(() => {
+      }
       message._setStatus(MessageStatus.SENT);
       if (receipt) {
         internal(this).messagesWaitingForReceipt[message.id] = message;
       }
       return message;
-    }, (error) => {
+    } catch (error) {
       message._setStatus(MessageStatus.FAILED);
       throw error;
-    });
+    }
   }
 
-  _update(message, newMessage, recall) {
+  async _update(message, newMessage, recall) {
     this._debug('patch %O %O %O', message, newMessage, recall);
     if (message instanceof Message) {
       if (message.from !== this._client.id) {
@@ -691,7 +669,7 @@ export default class Conversation extends EventEmitter {
         data = JSON.stringify(data);
       }
     }
-    return this._send(new GenericCommand({
+    await this._send(new GenericCommand({
       cmd: CommandType.patch,
       op: OpType.modify,
       patchMessage: new PatchCommand({
@@ -704,18 +682,17 @@ export default class Conversation extends EventEmitter {
         })],
         lastPatchTime: this._client._lastPatchTime,
       }),
-    })).then(() => {
-      const {
-        id, cid, timestamp, from, _status,
-      } = message;
-      Object.assign(newMessage, {
-        id, cid, timestamp, from, _status,
-      });
-      if (this.lastMessage.id === newMessage.id) {
-        this.lastMessage = newMessage;
-      }
-      return newMessage;
+    }));
+    const {
+      id, cid, timestamp, from, _status,
+    } = message;
+    Object.assign(newMessage, {
+      id, cid, timestamp, from, _status,
     });
+    if (this.lastMessage.id === newMessage.id) {
+      this.lastMessage = newMessage;
+    }
+    return newMessage;
   }
 
   /**
@@ -723,19 +700,19 @@ export default class Conversation extends EventEmitter {
    * @param {AVMessage} message 要修改的消息，该消息必须是由当前用户发送的。也可以提供一个包含消息 {id, timestamp} 的对象
    * @param {AVMessage} newMessage 新的消息
    */
-  update(message, newMessage) {
+  async update(message, newMessage) {
     if (!(newMessage instanceof Message)) {
       throw new TypeError(`${newMessage} is not a Message`);
     }
-    return this._update(message, newMessage, false);
+    return await this._update(message, newMessage, false);
   }
 
   /**
    * 撤回已发送的消息
    * @param {AVMessage} message 要撤回的消息，该消息必须是由当前用户发送的。也可以提供一个包含消息 {id, timestamp} 的对象
    */
-  recall(message) {
-    return this._update(message, new RecalledMessage(), true);
+  async recall(message) {
+    return await this._update(message, new RecalledMessage(), true);
   }
 
   /**
@@ -749,7 +726,7 @@ export default class Conversation extends EventEmitter {
    * @param  {Number} [options.limit] 限制查询结果的数量，目前服务端默认为 20
    * @return {Promise.<Message[]>} 消息列表
    */
-  queryMessages(options = {}) {
+  async queryMessages(options = {}) {
     this._debug('query messages %O', options);
     if (options.beforeMessageId && !options.beforeTime) {
       throw new Error('query option beforeMessageId must be used with option beforeTime');
@@ -770,46 +747,44 @@ export default class Conversation extends EventEmitter {
     if (conditions.tt instanceof Date) {
       conditions.tt = conditions.tt.getTime();
     }
-    return this._send(new GenericCommand({
+    const resCommand = await this._send(new GenericCommand({
       cmd: 'logs',
       logsMessage: new LogsCommand(
         Object.assign(conditions, {
           cid: this.id,
         })
       ),
-    })).then(resCommand =>
-      Promise.all(resCommand.logsMessage.logs.map(({
-        msgId,
-        timestamp,
-        patchTimestamp,
+    }));
+    return await Promise.all(resCommand.logsMessage.logs.map(async ({
+      msgId,
+      timestamp,
+      patchTimestamp,
+      from,
+      ackAt,
+      readAt,
+      data,
+    }) => {
+      const message = await this._client._messageParser.parse(data);
+      const messageProps = {
+        id: msgId,
+        cid: this.id,
+        timestamp: new Date(timestamp.toNumber()),
         from,
-        ackAt,
-        readAt,
-        data,
-      }) =>
-        this._client._messageParser.parse(data).then((message) => {
-          const messageProps = {
-            id: msgId,
-            cid: this.id,
-            timestamp: new Date(timestamp.toNumber()),
-            from,
-            deliveredAt: ackAt,
-          };
-          if (patchTimestamp) {
-            messageProps.updatedAt = new Date(patchTimestamp.toNumber());
-          }
-          Object.assign(message, messageProps);
-          let status = MessageStatus.SENT;
-          if (this.members.length === 2) {
-            if (ackAt) status = MessageStatus.DELIVERED;
-            if (ackAt) this._setLastDeliveredAt(ackAt);
-            if (readAt) this._setLastReadAt(readAt);
-          }
-          message._setStatus(status);
-          return message;
-        })
-      ))
-    );
+        deliveredAt: ackAt,
+      };
+      if (patchTimestamp) {
+        messageProps.updatedAt = new Date(patchTimestamp.toNumber());
+      }
+      Object.assign(message, messageProps);
+      let status = MessageStatus.SENT;
+      if (this.members.length === 2) {
+        if (ackAt) status = MessageStatus.DELIVERED;
+        if (ackAt) this._setLastDeliveredAt(ackAt);
+        if (readAt) this._setLastReadAt(readAt);
+      }
+      message._setStatus(status);
+      return message;
+    }));
   }
 
   /**
@@ -874,17 +849,17 @@ export default class Conversation extends EventEmitter {
    * 将该会话标记为已读
    * @return {Promise.<Conversation>} self
    */
-  read() {
+  async read() {
     this.unreadMessagesCount = 0;
     // 跳过暂态会话
-    if (this.transient) return Promise.resolve(this);
+    if (this.transient) return this;
     const client = this._client;
     if (!internal(client).readConversationsBuffer) {
       internal(client).readConversationsBuffer = new Set();
     }
     internal(client).readConversationsBuffer.add(this);
     client._doSendRead();
-    return Promise.resolve(this);
+    return this;
   }
 
   /**
@@ -892,9 +867,9 @@ export default class Conversation extends EventEmitter {
    * @deprecated in favor of {@link Conversation#read}
    * @return {Promise.<Conversation>} self
    */
-  markAsRead() {
+  async markAsRead() {
     console.warn('DEPRECATION Conversation#markAsRead: Use Conversation#read instead.');
-    return this.read();
+    return await this.read();
   }
 
   _handleReceipt({ messageId, timestamp, read }) {
@@ -926,19 +901,18 @@ export default class Conversation extends EventEmitter {
    * @since 3.4.0
    * @return {Promise.<Conversation>} this
    */
-  fetchReceiptTimestamps() {
-    return this._send(new GenericCommand({
-      op: 'max_read',
-    })).then(({
+  async fetchReceiptTimestamps() {
+    const {
       convMessage: {
         maxReadTimestamp,
         maxAckTimestamp,
       },
-    }) => {
-      this._setLastDeliveredAt(maxAckTimestamp);
-      this._setLastReadAt(maxReadTimestamp);
-      return this;
-    });
+    } = await this._send(new GenericCommand({
+      op: 'max_read',
+    }));
+    this._setLastDeliveredAt(maxAckTimestamp);
+    this._setLastReadAt(maxReadTimestamp);
+    return this;
   }
 
   _fetchAllReceiptTimestamps() {
