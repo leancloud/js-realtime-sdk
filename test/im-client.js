@@ -104,9 +104,9 @@ describe('IMClient', () => {
   });
 
   describe('ping', () => {
-    it('should throw if type check failed', () => {
-      (() => client.ping('1')).should.throw();
-    });
+    it('should throw if type check failed', () =>
+      client.ping('1').should.be.rejected()
+    );
 
     it('should only return online clients', () =>
       client.ping(['non-exists-client-id', CLIENT_ID])
@@ -127,9 +127,9 @@ describe('IMClient', () => {
   });
 
   describe('getConversation', () => {
-    it('param check', () => {
-      (() => client.getConversation()).should.throw();
-      (() => client.getConversation(1)).should.throw();
+    it('param check', async () => {
+      await client.getConversation().should.be.rejected();
+      await client.getConversation(1).should.be.rejected();
     });
     it('should return null if no match', () =>
       client.getConversation(NON_EXISTING_ROOM_ID).then((conversation) => {
@@ -224,9 +224,9 @@ describe('IMClient', () => {
         conversation.get('baz').should.eql('qux');
       })
     );
-    it('members required', () => {
-      (() => client.createConversation()).should.throw();
-    });
+    it('members required', () =>
+      client.createConversation().should.be.rejected()
+    );
     it('unique', () =>
       series([0, 0].map(() => () => client.createConversation({
         name: 'unique room',
@@ -253,21 +253,22 @@ describe('IMClient', () => {
     );
   });
 
-  describe('markAllAsRead', () => {
-    let conversation;
-    before(() =>
-      client.getConversation(EXISTING_ROOM_ID)
-        .then(conv => (conversation = conv))
-    );
-    it('params check', () => {
-      (() => client.markAllAsRead(conversation)).should.throw();
-      (() => client.markAllAsRead([EXISTING_ROOM_ID])).should.throw();
-      return client.markAllAsRead([]).should.be.fulfilledWith([]);
-    });
-    it('normal case', () =>
-      client.markAllAsRead([conversation]).should.be.fulfilledWith([conversation])
-    );
-  });
+  // TO REMOVE
+  // describe('markAllAsRead', () => {
+  //   let conversation;
+  //   before(() =>
+  //     client.getConversation(EXISTING_ROOM_ID)
+  //       .then(conv => (conversation = conv))
+  //   );
+  //   it('params check', () => {
+  //     (() => client.markAllAsRead(conversation)).should.throw();
+  //     (() => client.markAllAsRead([EXISTING_ROOM_ID])).should.throw();
+  //     return client.markAllAsRead([]).should.be.fulfilledWith([]);
+  //   });
+  //   it('normal case', () =>
+  //     client.markAllAsRead([conversation]).should.be.fulfilledWith([conversation])
+  //   );
+  // });
 
   describe('session token', () => {
     beforeEach(function setupSpy() {

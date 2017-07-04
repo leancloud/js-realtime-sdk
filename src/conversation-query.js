@@ -382,7 +382,7 @@ export default class ConversationQuery {
    * 执行查询
    * @return {Promise.<Conversation[]>}
    */
-  find() {
-    return this._client._executeQuery(this);
+  async find() {
+    return await this._client._executeQuery(this);
   }
 }

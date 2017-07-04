@@ -55,7 +55,7 @@ var require = require || function(id) {throw new Error('Unexpected required ' + 
         "loose": true
       }]
     ],
-    presets: [["env", { "modules": false }]],
+    presets: [["env", { "modules": false, debug: true }]],
     babelrc: false,
     runtimeHelpers: true,
   };
