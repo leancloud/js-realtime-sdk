@@ -8,8 +8,6 @@ import {
   EXISTING_ROOM_ID,
 } from './configs';
 
-import { sinon } from './test-utils';
-
 describe('ConversationQuery', () => {
   // divided to 2 parts since there is query quota for every single client
   describe('part1', () => {
@@ -326,15 +324,6 @@ describe('ConversationQuery', () => {
           message.status.should.be.eql(MessageStatus.SENT);
         }),
     );
-    it('withLastMessages should be proxied', () => {
-      const spy = sinon.spy(
-        ConversationQuery.prototype,
-        'withLastMessagesRefreshed',
-      );
-      client.getQuery().withLastMessages(true);
-      spy.should.be.calledWith(true);
-      spy.restore();
-    });
     it('should use cache', () =>
       Promise.all([
         client.getQuery().equalTo('objectId', EXISTING_ROOM_ID)

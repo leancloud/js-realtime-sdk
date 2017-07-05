@@ -1,6 +1,5 @@
 import EventEmitter from 'eventemitter3';
 import isEmpty from 'lodash/isEmpty';
-import isPlainObject from 'lodash/isPlainObject';
 import cloneDeep from 'lodash/cloneDeep';
 import d from 'debug';
 import { decodeDate, keyRemap, union, difference, internal, setValue } from './utils';
@@ -225,51 +224,6 @@ export default class Conversation extends EventEmitter {
   }
 
   /**
-   * 对话额外属性，对应 _Conversation 表中的 attr
-   * @type {Object}
-   * @deprecated Use {@link Conversation#get conversation.get('attr')},
-   * {@link Conversation#set conversation.set('attr', value)} instead
-   */
-  get attributes() {
-    console.warn('DEPRECATION Conversation.attributes: Use conversation.get(\'attr\') instead. See https://url.leanapp.cn/DeprecateAttributes for more details.');
-    return this.get('attr');
-  }
-  set attributes(value) {
-    console.warn('DEPRECATION Conversation.attributes: Use conversation.set(\'attr\', value) instead. See https://url.leanapp.cn/DeprecateAttributes for more details.');
-    this.set('attr', value);
-  }
-  /**
-   * 设置对话额外属性
-   * @param {Object} map    key-value 对
-   * @param {Boolean} [assign=false] 使用 Object.assign 更新属性，而不是替换整个 attributes
-   * @return {Conversation} self
-   * @deprecated Use {@link Conversation#set} instead. See {@link https://url.leanapp.cn/DeprecateAttributes} for more details.
-   */
-  setAttributes(map, assign = false) {
-    console.warn('DEPRECATION Conversation#setAttributes: Use conversation.set() instead. See https://url.leanapp.cn/DeprecateAttributes for more details.');
-    this._debug(`set attributes: value=${JSON.stringify(map)}, assign=${assign}`);
-    if (!isPlainObject(map)) {
-      throw new TypeError('attributes must be a plain object');
-    }
-    if (!assign) {
-      this.set('attr', map);
-    } else {
-      Object.keys(map).forEach(key => this.setAttribute(key, map[key]));
-    }
-    return this;
-  }
-  /**
-   * 设置对话额外属性
-   * @param {String} key
-   * @param {Any} value
-   * @return {Conversation} self
-   * @deprecated Use {@link Conversation#set conversation.set('attr.key', value)} instead
-   */
-  setAttribute(key, value) {
-    console.warn('DEPRECATION Conversation#setAttribute: Use conversation.set(\'attr.key\', value) instead. See https://url.leanapp.cn/DeprecateAttributes for more details.');
-    return this.set(`attr.${key}`, value);
-  }
-  /**
    * 对话名字，对应 _Conversation 表中的 name
    * @type {String}
    */
@@ -278,16 +232,6 @@ export default class Conversation extends EventEmitter {
   }
   set name(value) {
     this.set('name', value);
-  }
-  /**
-   * 设置对话名字
-   * @param {String} value
-   * @return {Conversation} self
-   * @deprecated Use {@link Conversation#set conversation.set('name', value)} instead
-   */
-  setName(value) {
-    console.warn('DEPRECATION Conversation#setName: Use conversation.set(\'name\', value) instead. See https://url.leanapp.cn/DeprecateAttributes for more details.');
-    return this.set('name', value);
   }
 
   /**
@@ -546,7 +490,7 @@ export default class Conversation extends EventEmitter {
    * @param  {Message} message 消息，Message 及其子类的实例
    * @param {Object} [options] since v3.3.0，发送选项
    * @param {Boolean} [options.transient] since v3.3.1，是否作为暂态消息发送
-   * @param {Boolean} [options.receipt] 是否需要送达回执，仅在普通对话中有效
+   * @param {Boolean} [options.receipt] 是否需要回执，仅在普通对话中有效
    * @param {Boolean} [options.will] since v3.4.0，是否指定该消息作为「掉线消息」发送，
    * 「掉线消息」会延迟到当前用户掉线后发送，常用来实现「下线通知」功能
    * @param {MessagePriority} [options.priority] 消息优先级，仅在暂态对话中有效，
@@ -560,11 +504,6 @@ export default class Conversation extends EventEmitter {
       throw new TypeError(`${message} is not a Message`);
     }
     const _options = Object.assign({}, options);
-    // support typo reciept option
-    if (_options.reciept !== undefined) {
-      console.warn('DEPRECATION Conversation#send options.reciept: please use receipt option instead');
-      if (_options.receipt === undefined) _options.receipt = _options.reciept;
-    }
     const {
       transient,
       receipt,
@@ -572,11 +511,7 @@ export default class Conversation extends EventEmitter {
       pushData,
       will,
     } = Object.assign(
-      // support deprecated attribute: message.needReceipt
-      {
-        transient: message.transient,
-        receipt: message.needReceipt,
-      },
+      {},
       // support Message static property: sendOptions
       message.constructor.sendOptions,
       _options,
@@ -862,16 +797,6 @@ export default class Conversation extends EventEmitter {
     return this;
   }
 
-  /**
-   * 将该会话标记为已读
-   * @deprecated in favor of {@link Conversation#read}
-   * @return {Promise.<Conversation>} self
-   */
-  async markAsRead() {
-    console.warn('DEPRECATION Conversation#markAsRead: Use Conversation#read instead.');
-    return this.read();
-  }
-
   _handleReceipt({ messageId, timestamp, read }) {
     if (read) {
       this._setLastReadAt(timestamp);
@@ -884,16 +809,6 @@ export default class Conversation extends EventEmitter {
     message._setStatus(MessageStatus.DELIVERED);
     message.deliveredAt = timestamp;
     delete messagesWaitingForReceipt[messageId];
-    /**
-     * 消息已送达。只有在发送时设置了需要回执的情况下才会收到送达回执，该回执并不代表用户已读。
-     * @event Conversation#receipt
-     * @deprecated use {@link Conversation#event:lastdeliveredatupdate}
-     * and {@link Conversation#event:lastreadatupdate} instead
-     * @since 3.2.0
-     * @param {Object} payload
-     * @param {Message} payload.message 送达的消息
-     */
-    this.emit('receipt', { message });
   }
 
   /**

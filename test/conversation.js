@@ -60,38 +60,37 @@ describe('Conversation', () => {
     const name = conversation.name;
     return Promise.resolve(conversation).then((conv) => {
       conv.name = name;
-      conv.attributes = {
+      conv.set('attr', {
         timestamp,
-      };
+      });
       return conv.save();
     }).then((conv) => {
       conv.should.be.exactly(conversation);
       conv.name.should.be.equal(name);
-      conv.attributes.should.be.eql({ timestamp });
+      conv.get('attr').should.be.eql({ timestamp });
       return conv
-        .setAttributes({ lean: 'cloud' }, true)
+        .set('attr', {
+          lean: 'cloud',
+        })
         .save();
     }).then((conv) => {
       conv.name.should.be.equal(name);
-      conv.attributes.should.be.eql({
-        timestamp,
+      conv.get('attr').should.be.eql({
         lean: 'cloud',
       });
       return conv
-        .setAttribute('lee', 'yeh')
+        .set('attr.lee', 'yeh')
         .save();
     }).then((conv) => {
       conv.name.should.be.equal(name);
-      conv.attributes.should.be.eql({
-        timestamp,
+      conv.get('attr').should.be.eql({
         lean: 'cloud',
         lee: 'yeh',
       });
       return conv.fetch();
     }).then((conv) => {
       conv.name.should.be.equal(name);
-      conv.attributes.should.be.eql({
-        timestamp,
+      conv.get('attr').should.be.eql({
         lean: 'cloud',
         lee: 'yeh',
       });
@@ -372,7 +371,7 @@ describe('Conversation', () => {
     });
   });
 
-  it('unreadmessages/unreadmessagescountupdate event and markAsRead', () => {
+  it('unreadmessagescountupdate event and read', () => {
     const bwangId = uuid();
     let bwang0;
     let conversationId;
@@ -399,21 +398,12 @@ describe('Conversation', () => {
         return bwangRealtime.createIMClient(bwangId);
       }).then((c) => {
         bwang0 = c;
-        return Promise.all([
-          listen(bwang0, 'unreadmessages').then(([payload, conv]) => {
-            payload.count.should.be.eql(3);
-            payload.lastMessageId.should.be.eql(message.id);
-            payload.lastMessageTimestamp.should.be.eql(message.timestamp);
-            conv.unreadMessagesCount.should.eql(3);
-            conv.id.should.be.eql(conversationId);
-          }),
-          listen(bwang0, 'unreadmessagescountupdate').then(([[conv]]) => {
-            conv.unreadMessagesCount.should.eql(3);
-            conv.id.should.be.eql(conversationId);
-            conv.lastMessage.should.be.instanceof(Message);
-            conv.lastMessage.id.should.eql(message.id);
-          }),
-        ]);
+        return listen(bwang0, 'unreadmessagescountupdate').then(([[conv]]) => {
+          conv.unreadMessagesCount.should.eql(3);
+          conv.id.should.be.eql(conversationId);
+          conv.lastMessage.should.be.instanceof(Message);
+          conv.lastMessage.id.should.eql(message.id);
+        });
       })
       .then(() => realtime.createIMClient(bwangId))
       .then(bwang1 => listen(bwang1, 'unreadmessagescountupdate')
@@ -421,7 +411,7 @@ describe('Conversation', () => {
           conv.unreadMessagesCount.should.be.eql(3);
           conv.id.should.be.eql(conversationId);
           conv.lastMessage.id.should.eql(message.id);
-          return conv.markAsRead().then((conv1) => {
+          return conv.read().then((conv1) => {
             conv1.unreadMessagesCount.should.be.eql(0);
             bwang1.close();
           });
