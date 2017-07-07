@@ -207,10 +207,9 @@ describe('Messages', () => {
     });
     it('sending transient message', () => {
       const message = new TextMessage('transient message');
-      message.setTransient(true);
       // transient message 不返回 ack
       // 这里确保成功 resolve
-      return conversationZwang.send(message).then((msg) => {
+      return conversationZwang.send(message, { transient: true }).then((msg) => {
         msg.should.be.instanceof(Message);
         msg.status.should.eql(MessageStatus.SENT);
       });
@@ -249,9 +248,8 @@ describe('Messages', () => {
     });
     it('receipt', () => {
       const message = new TextMessage('message needs receipt');
-      const receiptPromise = listen(conversationZwang, 'receipt');
-      message.setNeedReceipt(true);
-      return conversationZwang.send(message)
+      const receiptPromise = listen(conversationZwang, 'lastdeliveredatupdate');
+      return conversationZwang.send(message, { receipt: true })
         .then(() => receiptPromise)
         .then(() => {
           message.status.should.eql(MessageStatus.DELIVERED);
@@ -263,10 +261,9 @@ describe('Messages', () => {
       const message = new TextMessage('message needs receipt');
       const readPromise = listen(conversationZwang, 'lastreadatupdate');
       conversationWchen.on('message', (msg) => {
-        if (msg.id === message.id) conversationWchen.markAsRead();
+        if (msg.id === message.id) conversationWchen.read();
       });
-      message.setNeedReceipt(true);
-      return conversationZwang.send(message)
+      return conversationZwang.send(message, { receipt: true })
         .then(() => readPromise)
         .then(() => {
           conversationZwang.lastReadAt.should.be.a.Date();
@@ -305,7 +302,7 @@ describe('Messages', () => {
       before(function prepareMessage() {
         this.originalMessage = new Message('original');
         this.modifiedMessage = new TextMessage('modified');
-        return conversationWchen.send(this.originalMessage).then(hold(200));
+        return conversationWchen.send(this.originalMessage).then(hold(400));
       });
       it('update', function testUpdate() {
         return conversationWchen.update(this.originalMessage, this.modifiedMessage)

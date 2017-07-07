@@ -358,17 +358,6 @@ export default class ConversationQuery {
   }
 
   /**
-   * @deprecated 请替换为 {@link ConversationQuery#withLastMessagesRefreshed}
-   * @param  {Boolean} [enabled=true]
-   * @return {ConversationQuery} self
-   */
-  withLastMessages(enabled) {
-    console.warn('DEPRECATION ConversationQuery#withLastMessages: ' +
-      'Use ConversationQuery#withLastMessagesRefreshed instead.');
-    return this.withLastMessagesRefreshed(enabled);
-  }
-
-  /**
    * 设置返回的 conversations 为精简模式，即不含成员列表
    * @param  {Boolean} [enabled=true]
    * @return {ConversationQuery} self

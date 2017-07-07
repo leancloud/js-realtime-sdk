@@ -76,7 +76,6 @@ declare module LeanCloudRealtime {
     get(key: string): any;
     join(): Promise<Conversation>;
     read(): Promise<Conversation>;
-    markAsRead(): Promise<Conversation>;
     fetchReceiptTimestamps(): Promise<Conversation>;
     mute(): Promise<Conversation>;
     queryMessages(options: { beforeTime?: Date, beforeMessageId?: string, afterTime?: Date, afterMessageId?: string, limit?: number }): Promise<Array<Message>>;
@@ -105,10 +104,8 @@ declare module LeanCloudRealtime {
     id: string;
     status: MessageStatus;
     timestamp: Date;
-    transient: boolean;
     static parse(json: Object, message: Message): Message;
     static validate(): boolean;
-    setTransient(transient: boolean): Message;
     toJSON(): Object;
   }
 

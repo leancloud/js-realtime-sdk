@@ -83,7 +83,7 @@ export default class IMClient extends EventEmitter {
    * @override
    * @private
    */
-  _dispatchCommand(command) {
+  async _dispatchCommand(command) {
     this._debug(trim(command), 'received');
     switch (command.cmd) {
       case CommandType.conv:
@@ -99,12 +99,11 @@ export default class IMClient extends EventEmitter {
       case CommandType.patch:
         return this._dispatchPatchMessage(command);
       default:
-        this.emit('unhandledmessage', command);
-        return Promise.resolve();
+        return this.emit('unhandledmessage', command);
     }
   }
 
-  _dispatchSessionMessage(message) {
+  async _dispatchSessionMessage(message) {
     const {
       sessionMessage: {
         code, reason,
@@ -134,7 +133,7 @@ export default class IMClient extends EventEmitter {
       }
       default:
         this.emit('unhandledmessage', message);
-        return Promise.reject(new Error('Unrecognized session command'));
+        throw new Error('Unrecognized session command');
     }
   }
 
@@ -181,21 +180,6 @@ export default class IMClient extends EventEmitter {
             if (countNotUpdated) return null; // to be filtered
             // manipulate internal property directly to skip unreadmessagescountupdate event
             internal(conversation).unreadMessagesCount = unread;
-            /**
-             * 未读消息数目更新
-             * @event IMClient#unreadmessages
-             * @deprecated 请使用新的未读消息数目批量更新事件 {@link IMClient#event:unreadmessagescountupdate}
-             * @param {Object} payload
-             * @param {Number} payload.count 未读消息数
-             * @param {String} [payload.lastMessageId] 最新一条未读消息 id
-             * @param {Date} [payload.lastMessageTimestamp] 最新一条未读消息时间戳
-             * @param {Conversation} conversation 未读消息数目有更新的对话
-             */
-            this.emit('unreadmessages', {
-              count: unread,
-              lastMessageId: mid,
-              lastMessageTimestamp: timestamp,
-            }, conversation);
             return conversation;
           });
         }),
@@ -214,7 +198,7 @@ export default class IMClient extends EventEmitter {
     });
   }
 
-  _dispatchRcpMessage(message) {
+  async _dispatchRcpMessage(message) {
     const {
       rcpMessage,
       rcpMessage: {
@@ -436,13 +420,18 @@ export default class IMClient extends EventEmitter {
         cid,
         timestamp: new Date(timestamp.toNumber()),
         from: fromPeerId,
-        transient,
       };
       if (patchTimestamp) {
         messageProps.updatedAt = new Date(patchTimestamp.toNumber());
       }
       Object.assign(message, messageProps);
       message._setStatus(MessageStatus.SENT);
+      // filter outgoing message sent from another device
+      if (message.from !== this.id) {
+        if (!(transient || conversation.transient)) {
+          this._sendAck(message);
+        }
+      }
       return this._dispatchParsedMessage(message, conversation);
     });
   }
@@ -457,9 +446,6 @@ export default class IMClient extends EventEmitter {
         // filter outgoing message sent from another device
         if (message.from !== this.id) {
           conversation.unreadMessagesCount += 1; // eslint-disable-line no-param-reassign
-          if (!(message.transient || conversation.transient)) {
-            this._sendAck(message);
-          }
         }
         /**
          * 当前用户收到消息
@@ -792,7 +778,6 @@ export default class IMClient extends EventEmitter {
     const {
       members: m,
       name,
-      attributes,
       transient,
       unique,
       ...properties
@@ -809,10 +794,6 @@ export default class IMClient extends EventEmitter {
         throw new TypeError(`conversation name ${name} is not a string`);
       }
       attr.name = name;
-    }
-    if (attributes) {
-      console.warn('DEPRECATION createConversation options.attributes param: Use options[propertyName] instead. See https://url.leanapp.cn/DeprecateAttributes for more details.');
-      attr.attr = attributes;
     }
     attr = new JsonObjectMessage({
       data: JSON.stringify(attr),
@@ -847,7 +828,6 @@ export default class IMClient extends EventEmitter {
     const resCommand = await this._send(command);
     const conversation = new Conversation({
       name,
-      attr: attributes,
       transient,
       unique,
       id: resCommand.convMessage.cid,
@@ -860,21 +840,6 @@ export default class IMClient extends EventEmitter {
     }, this);
     this._conversationCache.set(conversation.id, conversation);
     return conversation;
-  }
-
-  /**
-   * 将指定的所有会话标记为已读
-   * @deprecated 请遍历调用 conversations 的 {@link Conversation#read read} 方法
-   * @param {Conversation[]} conversations 指定的会话列表
-   * @return {Promise.<Conversation[]>} conversations 返回输入的会话列表
-   */
-  // eslint-disable-next-line class-methods-use-this
-  async markAllAsRead(conversations) {
-    console.warn('DEPRECATION IMClient.markAllAsRead: Use Conversation#read instead.');
-    if (!Array.isArray(conversations)) {
-      throw new TypeError(`${conversations} is not an Array`);
-    }
-    return Promise.all(conversations.map(conversation => conversation.read()));
   }
 
   // jsdoc-ignore-start

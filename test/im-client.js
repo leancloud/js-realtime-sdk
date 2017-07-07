@@ -162,7 +162,7 @@ describe('IMClient', () => {
           // 匿名 client 修改这个对话
           originConversation = conversation;
           return anonymousClientConversatoin
-            .setName('leancloud')
+            .set('name', 'leancloud')
             .save();
         }).then(
           // 再查询，应该返回原始对话
@@ -220,7 +220,7 @@ describe('IMClient', () => {
         conversation.updatedAt.should.be.a.Date();
         should(conversation.lastMessageAt).be.null();
         conversation.name.should.be.equal('135');
-        conversation.attributes.should.eql({ foo: 'bar' });
+        conversation.get('attributes').should.eql({ foo: 'bar' });
         conversation.get('baz').should.eql('qux');
       }),
     );
