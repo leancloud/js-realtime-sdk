@@ -204,6 +204,9 @@ const onRealtimeCreate = (realtime) => {
           realtime._IMClients[client.id] = client;
           realtime._register(client);
           return client;
+        }).catch((error) => {
+          delete realtime._IMClients[client.id];
+          throw error;
         });
     });
     if (identity) {
