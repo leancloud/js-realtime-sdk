@@ -69,7 +69,7 @@ class WebSocketPlus extends EventEmitter {
           const ws = protocol ? new WebSocket(
             url, protocol
           ) : new WebSocket(url);
-          ws.binaryType = this.binaryType || (global.Buffer ? 'nodebuffer' : 'arraybuffer');
+          ws.binaryType = this.binaryType || 'arraybuffer';
           ws.onopen = () => resolve(ws);
           ws.onerror = ws.onclose = (error) => {
             if (error instanceof Error) {
