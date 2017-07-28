@@ -180,10 +180,10 @@ const onRealtimeCreate = (realtime) => {
           realtime._IMClients[client.id] = client;
           realtime._register(client);
           return client;
-        }).catch((error) => {
-          delete realtime._IMClients[client.id];
-          throw error;
         });
+    }).catch((error) => {
+      delete realtime._IMClients[id];
+      throw error;
     });
     if (idIsString) {
       realtime._IMClients[id] = promise;

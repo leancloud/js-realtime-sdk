@@ -10,7 +10,12 @@ var roomId = '551a2847e4b04d688d73dc54';
 // 每个客户端自定义的 id
 var clientId = 'LeanCloud';
 
-var realtime;
+// 创建实时通信实例
+var realtime = new AV.Realtime({
+  appId: appId,
+  appKey: appKey,
+  plugins: AV.TypedMessagesPlugin,
+});
 var client;
 var messageIterator;
 
@@ -58,12 +63,6 @@ function main() {
     client.close();
   }
 
-  // 创建实时通信实例
-  realtime = new AV.Realtime({
-    appId: appId,
-    appKey: appKey,
-    plugins: AV.TypedMessagesPlugin,
-  });
   // 创建聊天客户端
   realtime.createIMClient(clientId)
   .then(function(c) {

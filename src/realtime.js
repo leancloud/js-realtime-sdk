@@ -186,6 +186,9 @@ export default class Realtime extends EventEmitter {
         }
       };
       internal(this).connection = connection;
+    }).catch((error) => {
+      delete this._openPromise;
+      throw error;
     });
 
     return this._openPromise;
