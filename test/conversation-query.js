@@ -4,6 +4,7 @@ import Message, { MessageStatus } from '../src/messages/message';
 
 import {
   APP_ID,
+  APP_KEY,
   REGION,
   EXISTING_ROOM_ID,
 } from './configs';
@@ -15,8 +16,8 @@ describe('ConversationQuery', () => {
     before(() =>
       new Realtime({
         appId: APP_ID,
+        appKey: APP_KEY,
         region: REGION,
-        pushUnread: false,
       })
         .createIMClient()
         .then((c) => { client = c; }),
@@ -173,8 +174,8 @@ describe('ConversationQuery', () => {
     before(() =>
       new Realtime({
         appId: APP_ID,
+        appKey: APP_KEY,
         region: REGION,
-        pushUnread: false,
       })
         .createIMClient()
         .then((c) => { client = c; }),

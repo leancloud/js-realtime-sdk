@@ -14,15 +14,22 @@
 <body>
   <h1>欢迎使用 LeanCloud 实时通信 SDK</h1>
   <div class="item">
-    <p>SDK 详细使用方法，请看官方文档</p>
     <p>
-      <a target="_blank" href="https://leancloud.cn/docs/js_realtime.html">https://leancloud.cn/docs/js_realtime.html</a>
+      <a target="_blank" href="https://leancloud.cn/docs/realtime_guide-js.html">使用文档</a> / 
+      <a target="_blank" href="https://leancloud.github.io/js-realtime-sdk/docs/">API 文档</a>
     </p>
   </div>
   <div class="item">
-    <label>您的昵称：</label>
-    <input autofocus id="input-name" type="text">
-    <div id="open-btn" class="btn">连接服务器</div>
+    <label>
+      用户名
+      <input autofocus id="input-name" type="text" value="Guest">
+    </label>
+    <label>
+      密码
+      <input autofocus id="input-password" type="password" value="Guest">
+    </label>
+    <div id="login-btn" class="btn">登录</div>
+    <div id="signup-btn" class="btn">注册</div>
   </div>
   <div class="item">
     <div id="print-wall" class="print-wall"></div>

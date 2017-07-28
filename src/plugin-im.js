@@ -119,6 +119,14 @@ const onRealtimeCreate = (realtime) => {
   const messageParser = new MessageParser(realtime._plugins);
   realtime._messageParser = messageParser;
 
+  const signAVUser = async user => realtime._request({
+    method: 'POST',
+    path: '/rtm/sign',
+    data: {
+      session_token: user.getSessionToken(),
+    },
+  });
+
   /**
    * 注册消息类
    *
@@ -137,20 +145,37 @@ const onRealtimeCreate = (realtime) => {
    * 创建一个即时通讯客户端，多次创建相同 id 的客户端会返回同一个实例
    * @memberof Realtime
    * @instance
-   * @param  {String} [id] 客户端 id，如果不指定，服务端会随机生成一个
+   * @param  {String|AV.User} [identity] 客户端 identity，如果不指定该参数，服务端会随机生成一个字符串作为 identity，
+   * 如果传入一个已登录的 AV.User，则会使用该用户的 id 作为客户端 identity 登录。
    * @param  {Object} [clientOptions] 详细参数 @see {@link IMClient}
    * @param  {String} [tag] 客户端类型标记，以支持单点登录功能
    * @return {Promise.<IMClient>}
    */
-  const createIMClient = async (id, clientOptions, tag) => {
-    const idIsString = typeof id === 'string';
-    if (idIsString && realtime._IMClients[id] !== undefined) {
-      return realtime._IMClients[id];
+  const createIMClient = async (identity, clientOptions, tag) => {
+    let id;
+    const buildinOptions = {};
+    if (identity) {
+      if (typeof identity === 'string') {
+        id = identity;
+      } else if (identity.id && identity.getSessionToken) {
+        id = identity.id;
+        const sessionToken = identity.getSessionToken();
+        if (!sessionToken) {
+          throw new Error('User must be authenticated');
+        }
+        buildinOptions.signatureFactory = signAVUser;
+      } else {
+        throw new TypeError('Identity must be a String or an AV.User');
+      }
+      if (realtime._IMClients[id] !== undefined) {
+        return realtime._IMClients[id];
+      }
     }
     const promise = realtime._open().then((connection) => {
-      const client = new IMClient(id, clientOptions, connection, {
+      const client = new IMClient(id, { ...buildinOptions, ...clientOptions }, connection, {
         _messageParser: messageParser,
         _plugins: realtime._plugins,
+        _identity: identity,
       });
       connection.on('reconnect', () =>
         client._open(realtime._options.appId, tag, deviceId, true)
@@ -181,7 +206,7 @@ const onRealtimeCreate = (realtime) => {
           return client;
         });
     });
-    if (idIsString) {
+    if (identity) {
       realtime._IMClients[id] = promise;
     }
     return promise;

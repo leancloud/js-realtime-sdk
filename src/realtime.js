@@ -8,13 +8,14 @@ import { applyDecorators, applyDispatcher } from './plugin';
 
 const debug = d('LC:Realtime');
 
-const pushRouterCache = new Cache('push-router');
+const routerCache = new Cache('push-router');
 
 export default class Realtime extends EventEmitter {
   /**
    * @extends EventEmitter
    * @param  {Object} options
    * @param  {String} options.appId
+   * @param  {String} options.appKey （since 4.0.0）
    * @param  {String} [options.region='cn'] 节点 id
    * @param  {Boolean} [options.pushOfflineMessages=false] 启用推送离线消息模式（默认为发送未读消息通知模式）
    * @param  {Boolean} [options.noBinary=false] 设置 WebSocket 使用字符串格式收发消息（默认为二进制格式）。
@@ -28,8 +29,12 @@ export default class Realtime extends EventEmitter {
     if (typeof options.appId !== 'string') {
       throw new TypeError(`appId [${options.appId}] is not a string`);
     }
+    if (typeof options.appKey !== 'string') {
+      throw new TypeError(`appKey [${options.appKey}] is not a string`);
+    }
     this._options = Object.assign({
       appId: undefined,
+      appKey: undefined,
       region: 'cn',
       pushOfflineMessages: false,
       noBinary: isWeapp,
@@ -62,6 +67,29 @@ export default class Realtime extends EventEmitter {
     );
     // onRealtimeCreate hook
     applyDecorators(this._plugins.onRealtimeCreate, this);
+  }
+
+  async _request({
+    method,
+    version = '1.1',
+    path,
+    query,
+    headers,
+    data = {},
+  }) {
+    const { appId, region } = this._options;
+    const { api } = await this.constructor._fetchAppRouter({ appId, region });
+    const url = `https://${api}/${version}${path}`;
+    return axios(url, {
+      method,
+      params: query,
+      headers: {
+        'X-LC-Id': this._options.appId,
+        'X-LC-Key': this._options.appKey,
+        ...headers,
+      },
+      data,
+    }).then(response => response.data);
   }
 
   _open() {
@@ -206,16 +234,16 @@ export default class Realtime extends EventEmitter {
     });
   }
 
-  static _fetchPushRouter({ appId, region }) {
+  static _fetchAppRouter({ appId, region }) {
     debug('fetch router');
     switch (region) {
       case 'cn': {
-        const cachedPushRouter = pushRouterCache.get(appId);
-        if (cachedPushRouter) {
-          return Promise.resolve(cachedPushRouter);
+        const cachedRouter = routerCache.get(appId);
+        if (cachedRouter) {
+          return Promise.resolve(cachedRouter);
         }
         return axios
-          .get('https://app-router.leancloud.cn/1/route', {
+          .get('https://app-router.leancloud.cn/2/route', {
             params: {
               appId,
             },
@@ -226,23 +254,35 @@ export default class Realtime extends EventEmitter {
           )
           .then(tap(debug))
           .then(
-            (route) => {
-              const pushRouter = route.push_router_server;
-              if (!pushRouter) {
-                throw new Error('push router not exists');
+            ({
+              rtm_router_server: rtmRouter,
+              api_server: api,
+              ttl = 3600,
+            }) => {
+              if (!rtmRouter) {
+                throw new Error('rtm router not exists');
               }
-              let ttl = route.ttl;
-              if (typeof ttl !== 'number') {
-                ttl = 3600;
-              }
-              pushRouterCache.set(appId, pushRouter, ttl * 1000);
-              return pushRouter;
+              const router = {
+                rtmRouter,
+                api,
+              };
+              routerCache.set(appId, router, ttl * 1000);
+              return router;
             },
           )
-          .catch(() => 'router-g0-push.leancloud.cn');
+          .catch(() => {
+            const id = appId.slice(0, 8).toLowerCase();
+            return {
+              rtmRouter: `${id}.rtm.lncld.net`,
+              api: `${id}.api.lncld.net`,
+            };
+          });
       }
       case 'us':
-        return Promise.resolve('router-a0-push.leancloud.cn');
+        return Promise.resolve({
+          rtmRouter: 'router-a0-push.leancloud.cn',
+          api: 'us-api.leancloud.cn',
+        });
       default:
         throw new Error(`Region [${region}] is not supported.`);
     }
@@ -250,10 +290,10 @@ export default class Realtime extends EventEmitter {
 
   static _fetchEndpointsInfo({ appId, region, ssl, server }) {
     debug('fetch endpoint info');
-    return this._fetchPushRouter({ appId, region })
+    return this._fetchAppRouter({ appId, region })
       .then(tap(debug))
-      .then(router =>
-        axios.get(`https://${router}/v1/route`, {
+      .then(({ rtmRouter }) =>
+        axios.get(`https://${rtmRouter}/v1/route`, {
           params: {
             appId,
             secure: ssl,

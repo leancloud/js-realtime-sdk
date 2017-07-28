@@ -9,6 +9,7 @@ import { sinon, hold } from './test-utils';
 
 import {
   APP_ID,
+  APP_KEY,
   REGION,
   EXISTING_ROOM_ID,
   CLIENT_ID,
@@ -28,8 +29,8 @@ describe('Plugin', () => {
     before(() => {
       realtime = new Realtime({
         appId: APP_ID,
+        appKey: APP_KEY,
         region: REGION,
-        pushUnread: false,
         plugins: [{
           messageClasses: [PluginDefinedMessage],
           onRealtimeCreate: patchTestFunction(),
@@ -86,8 +87,8 @@ describe('Plugin', () => {
     before(() => {
       realtime = new Realtime({
         appId: APP_ID,
+        appKey: APP_KEY,
         region: REGION,
-        pushUnread: false,
         plugins: [{
           onRealtimeCreate: patchTestFunction(1),
           beforeMessageParse: json => Object.assign({}, json, {
@@ -128,8 +129,8 @@ describe('Plugin', () => {
     it('create Realtime should throw', () => {
       (() => new Realtime({
         appId: APP_ID,
+        appKey: APP_KEY,
         region: REGION,
-        pushUnread: false,
         plugins: [{
           name: 'ErrorPlugin',
           onRealtimeCreate: () => {
@@ -141,8 +142,8 @@ describe('Plugin', () => {
     it('create IMClient should be rejected', () =>
       new Realtime({
         appId: APP_ID,
+        appKey: APP_KEY,
         region: REGION,
-        pushUnread: false,
         plugins: [{
           name: 'ErrorPlugin',
           onIMClientCreate: () => {
@@ -154,8 +155,8 @@ describe('Plugin', () => {
     it('middleware error should be reported', () =>
       new Realtime({
         appId: APP_ID,
+        appKey: APP_KEY,
         region: REGION,
-        pushUnread: false,
         plugins: [{
           name: 'ErrorPlugin',
           beforeMessageParse: () => {
@@ -168,8 +169,8 @@ describe('Plugin', () => {
     it('beforeMessageDispatch error should be reported', () =>
       new Realtime({
         appId: APP_ID,
+        appKey: APP_KEY,
         region: REGION,
-        pushUnread: false,
         plugins: [{
           name: 'ErrorPlugin',
           beforeMessageDispatch: () => {
@@ -187,8 +188,8 @@ describe('Plugin', () => {
       return Promise.all([
         new Realtime({
           appId: APP_ID,
+          appKey: APP_KEY,
           region: REGION,
-          pushUnread: false,
           plugins: [{
             name: 'ErrorPlugin',
             beforeMessageParse: () => Promise.resolve(),
@@ -196,8 +197,8 @@ describe('Plugin', () => {
         })._messageParser.parse(new TextMessage('1').toJSON()),
         new Realtime({
           appId: APP_ID,
+          appKey: APP_KEY,
           region: REGION,
-          pushUnread: false,
           plugins: [{
             name: 'ErrorPlugin',
             beforeMessageParse: () => 1,

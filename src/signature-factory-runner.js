@@ -24,7 +24,7 @@ function _validateSignature(signatureResult = {}) {
 export default (signatureFactory, params) =>
   Promise.resolve()
     .then(() => {
-      debug(`call signatureFactory with ${params}`);
+      debug('call signatureFactory with %O', params);
       return signatureFactory(...params);
     })
     .then(

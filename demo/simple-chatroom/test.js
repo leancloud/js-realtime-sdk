@@ -1,11 +1,11 @@
 // 请将 AppId 改为你自己的 AppId，否则无法本地测试
-var appId = '9p6hyhh60av3ukkni3i9z53q1l8yy3cijj6sie3cewft18vm';
-var appKey = 'nhqqc1x7r7r89kp8pggrme57i374h3vyd0ukr2z3ayojpvf4';
+var appId = 'JVcHWdgny33gWo3kEOvcUgOW-gzGzoHsz';
+var appKey = '4lTe5hwnx58HYPrFXyAea6QV';
 
 AV.initialize(appId, appKey);
 
 // 请换成你自己的一个房间的 conversation id（这是服务器端生成的）
-var roomId = '551a2847e4b04d688d73dc54';
+var roomId = '5989569dda2f6000616cfb67';
 
 // 每个客户端自定义的 id
 var clientId = 'LeanCloud';
@@ -23,10 +23,12 @@ var firstFlag = true;
 // 用来标记历史消息获取状态
 var logFlag = false;
 
-var openBtn = document.getElementById('open-btn');
+var loginBtn = document.getElementById('login-btn');
+var signUpBtn = document.getElementById('signup-btn');
 var sendBtnAsFile = document.getElementById('send-btn-as-file');
 var sendBtn = document.getElementById('send-btn');
 var inputName = document.getElementById('input-name');
+var inputPassword = document.getElementById('input-password');
 var inputSend = document.getElementById('input-send');
 var printWall = document.getElementById('print-wall');
 
@@ -34,22 +36,32 @@ var printWall = document.getElementById('print-wall');
 // 最早一条消息的时间戳
 var msgTime;
 
-bindEvent(openBtn, 'click', main);
+bindEvent(loginBtn, 'click', login);
+bindEvent(signUpBtn, 'click', signUp);
 bindEvent(sendBtn, 'click', sendMsg);
 bindEvent(sendBtnAsFile, 'click', sendMsgAsFile);
 
 bindEvent(document.body, 'keydown', function(e) {
   if (e.keyCode === 13) {
     if (firstFlag) {
-      main();
+      login();
     } else {
       sendMsg();
     }
   }
 });
 
-function main() {
-  showLog('正在连接，请等待');
+function signUp() {
+  AV.User.signUp(inputName.value, inputPassword.value).then(function(user) {
+    showLog('注册成功');
+    login();
+  }).catch(function(error) {
+    showLog('注册失败：' + error.message);
+  });
+}
+
+function login() {
+  showLog('正在登录');
   var val = inputName.value;
   if (val) {
     clientId = val;
@@ -65,8 +77,9 @@ function main() {
     plugins: AV.TypedMessagesPlugin,
   });
   // 创建聊天客户端
-  realtime.createIMClient(clientId)
-  .then(function(c) {
+  return AV.User.logIn(clientId, inputPassword.value).then(function(user) {
+    return realtime.createIMClient(user);
+  }).then(function(c) {
     showLog('连接成功');
     firstFlag = false;
     client = c;
@@ -102,32 +115,14 @@ function main() {
       showLog('不存在这个 conversation，创建一个。');
       return client.createConversation({
         name: 'LeanCloud-Conversation',
-        members: [
-          // 默认包含当前用户
-          'Wallace'
-        ],
-        // 创建暂态的聊天室（暂态聊天室支持无限人员聊天，但是不支持存储历史）
-        // transient: true,
-        // 默认的数据，可以放 conversation 属性等
-        attributes: {
-          test: 'demo2'
-        }
+        // 创建暂态的聊天室（暂态聊天室支持无限人员聊天）
+        transient: true,
       }).then(function(conversation) {
         showLog('创建新 Room 成功，id 是：', roomId);
         roomId = conversation.id;
         return conversation;
       });
     }
-  })
-  .then(function(conversation) {
-    showLog('当前 Conversation 的成员列表：', conversation.members);
-    if (conversation.members.length > 490) {
-      return conversation.remove(conversation.members[30]).then(function(conversation) {
-        showLog('人数过多，踢掉： ', conversation.members[30]);
-        return conversation;
-      });
-    }
-    return conversation;
   })
   .then(function(conversation) {
     return conversation.join();
@@ -151,6 +146,7 @@ function main() {
   })
   .catch(function(err) {
     console.error(err);
+    showLog('错误：' + err.message);
   })
 }
 
@@ -201,21 +197,41 @@ function b64EncodeUnicode(str) {
     }));
 }
 
+Usernames = {
+  _cache: {},
+  get: function(id) {
+    if (!this._cache[id]) {
+      this._cache[id] = new AV.Query(AV.User).get(id).then((user) => {
+        var username = user.getUsername();
+        this._cache[id] = username;
+        return username;
+      }).catch(() => {
+        this._cache[id] = id;
+        return id;
+      });
+    }
+    return this._cache[id];
+  }
+}
 
 // 显示接收到的信息
 function showMsg(message, isBefore) {
   var text = message.text;
-  var from = message.from;
-  if (message.from === clientId) {
-    from = '自己';
-  }
-  if (message instanceof AV.TextMessage) {
-    if (String(text).replace(/^\s+/, '').replace(/\s+$/, '')) {
-      showLog('（' + formatTime(message.timestamp) + '）  ' + encodeHTML(from) + '： ', encodeHTML(message.text), isBefore);
+  Promise.resolve().then(function() {
+    if (message.from === clientId) {
+      return '自己';
+    } else {
+      return Usernames.get(message.from);
     }
-  } else if (message instanceof AV.FileMessage) {
-    showLog('（' + formatTime(message.timestamp) + '）  ' + encodeHTML(from) + '： ', createLink(message.getFile().url()), isBefore);
-  }
+  }).then(function(from) {
+    if (message instanceof AV.TextMessage) {
+      if (String(text).replace(/^\s+/, '').replace(/\s+$/, '')) {
+        showLog('（' + formatTime(message.timestamp) + '）  ' + encodeHTML(from) + '： ', encodeHTML(message.text), isBefore);
+      }
+    } else if (message instanceof AV.FileMessage) {
+      showLog('（' + formatTime(message.timestamp) + '）  ' + encodeHTML(from) + '： ', createLink(message.getFile().url()), isBefore);
+    }
+  });
 }
 
 // 拉取历史

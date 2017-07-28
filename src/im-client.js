@@ -548,7 +548,7 @@ export default class IMClient extends EventEmitter {
           deviceId,
         }));
         if (this.options.signatureFactory) {
-          return runSignatureFactory(this.options.signatureFactory, [this.id])
+          return runSignatureFactory(this.options.signatureFactory, [this._identity])
             .then((signatureResult) => {
               Object.assign(command.sessionMessage, keyRemap({
                 signature: 's',
@@ -574,6 +574,7 @@ export default class IMClient extends EventEmitter {
           return;
         }
         this.id = peerId;
+        if (!this._identity) this._identity = peerId;
         if (token) {
           internal(this).sessionToken = new Expirable(token, tokenTTL * 1000);
         }
@@ -813,7 +814,7 @@ export default class IMClient extends EventEmitter {
     });
 
     if (this.options.conversationSignatureFactory) {
-      const params = [null, this.id, members, 'create'];
+      const params = [null, this._identity, members, 'create'];
       const signatureResult = await runSignatureFactory(
         this.options.conversationSignatureFactory,
         params,
