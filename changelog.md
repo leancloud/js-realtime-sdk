@@ -1,3 +1,14 @@
+<a name="3.5.3"></a>
+## 3.5.3 (2017-07-28)
+
+
+### Bug Fixes
+
+* **IMClient:** 修复了 createIMClient 失败后，使用相同的 id 再次创建会一直失败的问题 ([#561](https://github.com/leancloud/js-realtime-sdk/issues/561)) ([b8d7c6a](https://github.com/leancloud/js-realtime-sdk/commit/b8d7c6a))
+* **IMClient:** 修复了某些情况下 SDK 会出现 unhandled Promise rejection 的问题 ([#562](https://github.com/leancloud/js-realtime-sdk/issues/562)) ([697bf60](https://github.com/leancloud/js-realtime-sdk/commit/697bf60))
+
+
+
 <a name="3.5.2"></a>
 ## 3.5.2 (2017-06-30)
 
