@@ -1,5 +1,15 @@
+<a name="3.5.5"></a>
+## 3.5.5 (2017-07-28)
+
+
+### Bug Fixes
+
+* **IMClient:** 修复了 `getConversations` 方法在获取大量会话的时候可能会错误的返回部分 null 的问题 ([4a3d48f](https://github.com/leancloud/js-realtime-sdk/commit/4a3d48f))
+
+
+
 <a name="3.5.4"></a>
-## [3.5.4](https://github.com/leancloud/js-realtime-sdk/compare/v3.5.3+source...v3.5.4) (2017-07-28)
+## 3.5.4 (2017-07-28)
 
 
 ### Bug Fixes
