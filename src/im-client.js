@@ -689,7 +689,7 @@ export default class IMClient extends EventEmitter {
       noCache ? ids : ids.filter(id => this._conversationCache.get(id) === null);
     return (
       remoteConversationIds.length ?
-      this.getQuery().containedIn('objectId', remoteConversationIds).find() :
+      this.getQuery().containedIn('objectId', remoteConversationIds).limit(999).find() :
       Promise.resolve()
     ).then(() => ids.map(id => this._conversationCache.get(id)));
   }
