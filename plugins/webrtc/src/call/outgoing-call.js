@@ -51,5 +51,4 @@ export default class OutgoingCall extends Call {
     }
     return super.close();
   }
-
 }

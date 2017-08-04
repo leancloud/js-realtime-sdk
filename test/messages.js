@@ -10,7 +10,7 @@ import {
   TypedMessage,
   TextMessage,
   RecalledMessage,
- } from '../src';
+} from '../src';
 import { messageType, messageField, IE10Compatible } from '../src/messages/helpers';
 
 import { listen, hold, sinon } from './test-utils';

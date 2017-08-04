@@ -140,7 +140,7 @@ export default class IMClient extends EventEmitter {
   _dispatchUnreadMessage({
     unreadMessage: {
       convs,
-    notifTime,
+      notifTime,
     },
   }) {
     internal(this).lastUnreadNotifTime = notifTime;
@@ -148,41 +148,41 @@ export default class IMClient extends EventEmitter {
     return this.getConversations(convs.map(conv => conv.cid)).then(() =>
       // update conversations data
       Promise.all(convs.map(({
-          cid,
+        cid,
         unread,
         mid,
         timestamp: ts,
         from,
         data,
         patchTimestamp,
-        }) => this.getConversation(cid).then((conversation) => {
-          // deleted conversation
-          if (!conversation) return null;
-          let timestamp;
-          if (ts) {
-            timestamp = new Date(ts.toNumber());
-            conversation.lastMessageAt = timestamp; // eslint-disable-line no-param-reassign
+      }) => this.getConversation(cid).then((conversation) => {
+        // deleted conversation
+        if (!conversation) return null;
+        let timestamp;
+        if (ts) {
+          timestamp = new Date(ts.toNumber());
+          conversation.lastMessageAt = timestamp; // eslint-disable-line no-param-reassign
+        }
+        return (mid ? this._messageParser.parse(data).then((message) => {
+          const messageProps = {
+            id: mid,
+            cid,
+            timestamp,
+            from,
+          };
+          if (patchTimestamp) {
+            messageProps.updatedAt = new Date(patchTimestamp.toNumber());
           }
-          return (mid ? this._messageParser.parse(data).then((message) => {
-            const messageProps = {
-              id: mid,
-              cid,
-              timestamp,
-              from,
-            };
-            if (patchTimestamp) {
-              messageProps.updatedAt = new Date(patchTimestamp.toNumber());
-            }
-            Object.assign(message, messageProps);
-            conversation.lastMessage = message; // eslint-disable-line no-param-reassign
-          }) : Promise.resolve()).then(() => {
-            const countNotUpdated = unread === internal(conversation).unreadMessagesCount;
-            if (countNotUpdated) return null; // to be filtered
-            // manipulate internal property directly to skip unreadmessagescountupdate event
-            internal(conversation).unreadMessagesCount = unread;
-            return conversation;
-          });
-        }),
+          Object.assign(message, messageProps);
+          conversation.lastMessage = message; // eslint-disable-line no-param-reassign
+        }) : Promise.resolve()).then(() => {
+          const countNotUpdated = unread === internal(conversation).unreadMessagesCount;
+          if (countNotUpdated) return null; // to be filtered
+          // manipulate internal property directly to skip unreadmessagescountupdate event
+          internal(conversation).unreadMessagesCount = unread;
+          return conversation;
+        });
+      }),
         // filter conversations without unread count update
       )).then(conversations => conversations.filter(conversation => conversation)),
     ).then((conversations) => {
@@ -216,10 +216,10 @@ export default class IMClient extends EventEmitter {
   }
 
   _dispatchPatchMessage({
-      patchMessage: {
-        patches,
-      },
-    }) {
+    patchMessage: {
+      patches,
+    },
+  }) {
     // ensure all converstions are cached
     return this.getConversations(patches.map(patch => patch.cid)).then(() =>
       Promise.all(patches.map(({

@@ -265,7 +265,7 @@ export default class Realtime extends EventEmitter {
         }).then(
           res => res.data,
         ).then(tap(debug)),
-    );
+      );
   }
 
   _close() {

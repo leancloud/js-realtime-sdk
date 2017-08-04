@@ -560,8 +560,8 @@ export default class Conversation extends EventEmitter {
             code,
             reason,
             appCode,
-            },
-          } = resCommand;
+          },
+        } = resCommand;
         if (code !== null) {
           throw createError({
             code, reason, appCode,

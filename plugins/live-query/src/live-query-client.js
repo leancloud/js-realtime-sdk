@@ -4,7 +4,7 @@ const {
   CommandType,
   GenericCommand,
   AckCommand,
- } = Protocals;
+} = Protocals;
 
 const warn = error => console.warn(error.message);
 

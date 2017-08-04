@@ -149,33 +149,33 @@ describe('IMClient', () => {
       let anonymousClientConversatoin;
       let originConversation;
       return realtime.createIMClient().then(
-          // 使用匿名 client 创建一个对话
-          anonymousClient => anonymousClient.createConversation({
-            members: [CLIENT_ID],
-            name: 'avoscloud',
-          }),
-        ).then((conversation) => {
-          // 查询这个对话
-          anonymousClientConversatoin = conversation;
-          return client.getConversation(conversation.id);
-        }).then((conversation) => {
-          // 匿名 client 修改这个对话
-          originConversation = conversation;
-          return anonymousClientConversatoin
-            .set('name', 'leancloud')
-            .save();
-        }).then(
-          // 再查询，应该返回原始对话
-          () => client.getConversation(anonymousClientConversatoin.id),
-        ).then((conversation) => {
-          conversation.should.be.exactly(originConversation);
-          originConversation.name.should.be.eql('avoscloud');
-          // 设置 noCache 查询，应该返回更新过的原始对话
-          return client.getConversation(anonymousClientConversatoin.id, true);
-        }).then((conversation) => {
-          conversation.should.be.exactly(originConversation);
-          originConversation.name.should.be.eql('leancloud');
-        });
+        // 使用匿名 client 创建一个对话
+        anonymousClient => anonymousClient.createConversation({
+          members: [CLIENT_ID],
+          name: 'avoscloud',
+        }),
+      ).then((conversation) => {
+        // 查询这个对话
+        anonymousClientConversatoin = conversation;
+        return client.getConversation(conversation.id);
+      }).then((conversation) => {
+        // 匿名 client 修改这个对话
+        originConversation = conversation;
+        return anonymousClientConversatoin
+          .set('name', 'leancloud')
+          .save();
+      }).then(
+        // 再查询，应该返回原始对话
+        () => client.getConversation(anonymousClientConversatoin.id),
+      ).then((conversation) => {
+        conversation.should.be.exactly(originConversation);
+        originConversation.name.should.be.eql('avoscloud');
+        // 设置 noCache 查询，应该返回更新过的原始对话
+        return client.getConversation(anonymousClientConversatoin.id, true);
+      }).then((conversation) => {
+        conversation.should.be.exactly(originConversation);
+        originConversation.name.should.be.eql('leancloud');
+      });
     });
     // https://github.com/leancloud/js-realtime-sdk/issues/229
     it('should update properties', () =>
