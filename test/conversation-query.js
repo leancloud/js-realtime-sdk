@@ -19,7 +19,7 @@ describe('ConversationQuery', () => {
         pushUnread: false,
       })
         .createIMClient()
-        .then(c => (client = c)),
+        .then((c) => { client = c; }),
     );
     after(() => client.close());
 
@@ -177,7 +177,7 @@ describe('ConversationQuery', () => {
         pushUnread: false,
       })
         .createIMClient()
-        .then(c => (client = c)),
+        .then((c) => { client = c; }),
     );
     after(() => client.close());
 

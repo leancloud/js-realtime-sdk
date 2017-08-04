@@ -158,7 +158,7 @@ describe('Conversation', () => {
         return c.createConversation({
           members: ['zwang', 'dli', 'zwang'], // duplicated id should be ignored
         });
-      }).then(conv => (this.conversation = conv));
+      }).then((conv) => { this.conversation = conv; });
     });
     afterEach(function cleanup() {
       return this.ycui.close();
@@ -251,12 +251,12 @@ describe('Conversation', () => {
     before(
       () => realtime
         .createIMClient(CLIENT_ID_2)
-        .then(tap(c => (client2 = c)))
+        .then(tap((c) => { client2 = c; }))
         .then(c => c.createConversation({
           members: ['xwang', 'csun'],
           name: 'message dispatch test conversation',
         }))
-        .then(c => (conversation2 = c)),
+        .then((c) => { conversation2 = c; }),
     );
     after(() => client2.close());
     it('membersjoined', () => {

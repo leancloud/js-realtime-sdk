@@ -47,7 +47,7 @@ describe('Plugin', () => {
       });
       return realtime
         .createIMClient(CLIENT_ID)
-        .then(c => (client = c));
+        .then((c) => { client = c; });
     });
 
     after(() => client.close());
@@ -105,7 +105,7 @@ describe('Plugin', () => {
       });
       return realtime
         .createIMClient(CLIENT_ID)
-        .then(c => (client = c));
+        .then((c) => { client = c; });
     });
 
     after(() => client.close());

@@ -35,7 +35,7 @@ export default class WebRTCClient extends EventEmitter {
       throw new TypeError('id is not a string');
     }
     super();
-    /** @type {string}*/
+    /** @type {string} */
     this.id = id;
     this.options = Object.assign({
       RTCConfiguration: DEFAULT_RTCCONF,

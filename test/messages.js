@@ -82,7 +82,7 @@ describe('Messages', () => {
     it('message type should be readonly', () => {
       const message = new TextMessage('');
       message.type.should.eql(-1);
-      (() => (message.type = 0)).should.throw();
+      (() => { message.type = 0; }).should.throw();
     });
     it('parse and toJSON', () => {
       const json = {
