@@ -90,6 +90,7 @@ var require = require || function(id) {throw new Error('Unexpected required ' + 
     ],
     format: 'umd',
     moduleName: 'AV',
+    extend: true,
     external: ['leancloud-realtime', 'leancloud-realtime/core'],
     globals: {
       'leancloud-realtime': 'AV',
@@ -132,7 +133,10 @@ var require = require || function(id) {throw new Error('Unexpected required ' + 
           }),
           format: 'umd',
           moduleName: 'AV',
-          moduleId: 'leancloud-realtime',
+          extend: true,
+          amd: {
+            id: 'leancloud-realtime',
+          },
         }
       },
       'browser-core': {
@@ -152,7 +156,10 @@ var require = require || function(id) {throw new Error('Unexpected required ' + 
           }),
           format: 'umd',
           moduleName: 'AV',
-          moduleId: 'leancloud-realtime',
+          extend: true,
+          amd: {
+            id: 'leancloud-realtime',
+          },
         },
       },
       'weapp-core': {
@@ -183,7 +190,10 @@ var require = require || function(id) {throw new Error('Unexpected required ' + 
           ],
           format: 'umd',
           moduleName: 'AV',
-          moduleId: 'typed-messages',
+          extend: true,
+          amd: {
+            id: 'typed-messages',
+          },
           external: ['leancloud-realtime', 'leancloud-storage'],
           globals: {
             'leancloud-realtime': 'AV',
@@ -195,21 +205,27 @@ var require = require || function(id) {throw new Error('Unexpected required ' + 
         dest: 'plugins/webrtc/dist/webrtc.js',
         src: 'plugins/webrtc/src/index.js',
         options: Object.assign({}, pluginOptions, {
-          moduleId: 'webrtc',
+          amd: {
+            id: 'webrtc',
+          },
         })
       },
       'groupchat-receipts': {
         dest: 'plugins/groupchat-receipts/dist/groupchat-receipts.js',
         src: 'plugins/groupchat-receipts/src/index.js',
         options: Object.assign({}, pluginOptions, {
-          moduleId: 'groupchat-receipts',
+          amd: {
+            id: 'groupchat-receipts',
+          },
         })
       },
       'live-query': {
         dest: 'plugins/live-query/dist/live-query.js',
         src: 'plugins/live-query/src/index.js',
         options: Object.assign({}, pluginOptions, {
-          moduleId: 'live-query',
+          amd: {
+            id: 'live-query',
+          },
         })
       },
     },
