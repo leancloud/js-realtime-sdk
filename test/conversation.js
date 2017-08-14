@@ -11,6 +11,7 @@ import { defineConversationProperty } from '../src/plugin-im';
 
 import {
   APP_ID,
+  APP_KEY,
   REGION,
   EXISTING_ROOM_ID,
   SYS_CONV_ID,
@@ -26,6 +27,7 @@ describe('Conversation', () => {
   before(() => {
     realtime = new Realtime({
       appId: APP_ID,
+      appKey: APP_KEY,
       region: REGION,
     });
     return realtime.createIMClient(CLIENT_ID)
@@ -393,6 +395,7 @@ describe('Conversation', () => {
       ).then(() => {
         bwangRealtime = new Realtime({
           appId: APP_ID,
+          appKey: APP_KEY,
           region: REGION,
         });
         return bwangRealtime.createIMClient(bwangId);

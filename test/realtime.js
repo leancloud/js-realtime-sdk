@@ -10,14 +10,15 @@ import { listen, sinon } from './test-utils';
 
 import {
   APP_ID,
+  APP_KEY,
   REGION,
   NON_EXISTING_ROOM_ID,
 } from './configs';
 
 const createRealtime = options => new Realtime(Object.assign({
   appId: APP_ID,
+  appKey: APP_KEY,
   region: REGION,
-  pushUnread: false,
 }, options));
 
 class Client {}
@@ -30,6 +31,7 @@ describe('Realtime', () => {
     it('normal', () =>
       (() => new Realtime({
         appId: APP_ID,
+        appKey: APP_KEY,
       })).should.not.throw,
     );
   });
@@ -206,7 +208,7 @@ describe('Connection', () => {
     })).should.be.rejectedWith('CONVERSATION_UPDATE_REJECTED'),
   );
   it('message dispatch', () => {
-    const clientMessageEventCallback = sinon.stub(client, '_dispatchCommand');
+    const clientMessageEventCallback = sinon.spy(client, '_dispatchCommand');
     connection.emit('message', new GenericCommand({
       cmd: 1,
     }));
