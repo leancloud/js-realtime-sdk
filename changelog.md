@@ -1,3 +1,13 @@
+<a name="3.5.6"></a>
+## 3.5.6 (2017-08-29)
+
+
+### Bug Fixes
+
+* **WebSocketPlus:** 修复了在 Electron 的 Chromium 环境中报错的问题 ([15d16e5](https://github.com/leancloud/js-realtime-sdk/commit/5d582ac)), closes [#566](https://github.com/leancloud/js-realtime-sdk/issues/566)
+
+
+
 <a name="3.5.5"></a>
 ## 3.5.5 (2017-07-28)
 
