@@ -23,6 +23,6 @@ after_success:
       ./script/deploy.sh;
       ./script/release.sh;
     fi
-  - if [[ "$TRAVIS_BRANCH" == "next" ]] && [[ "${TRAVIS_PULL_REQUEST}" = "false" ]]; then
-      ./script/release.sh next-dist;
+  - if [[ "$TRAVIS_BRANCH" == "v3" ]] && [[ "${TRAVIS_PULL_REQUEST}" = "false" ]]; then
+      ./script/release.sh v3-dist;
     fi
