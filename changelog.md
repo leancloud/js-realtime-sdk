@@ -1,3 +1,67 @@
+<a name="4.0.0-alpha.0"></a>
+# 4.0.0-alpha.0 (2017-08-31)
+
+### BREAKING CHANGES
+
+* 初始化 `Realtime` 现在需要 `appKey` 参数。
+  <details>
+    <summary>示例</summary>
+
+    ```diff
+     const realtime = new Realtime({
+       appId: 'YOUR_APP_ID',
+    +  appKey: 'YOUR_APP_KEY',
+     });
+    ```
+
+  </details>
+* 现在所有异步 API 的异常都是以异步的方式抛出。我们还更新了 API 文档，标出了 API 的异步属性。
+  <details>
+    <summary>示例</summary>
+
+    ```javascript
+    // before
+    try {
+      conversation.send(message);
+    } catch (error) {
+      // hanlde `Connection unavailable` error
+    }
+
+    // after
+    conversation.add(members).catch(error => {
+      // hanlde `Connection unavailable` error
+    });
+    ```
+
+  </details>
+* 为了更好的隔离服务，我们为每个应用提供了独立的域名。对于小程序用户，请前往 [《小程序域名白名单配置》](https://leancloud.cn/docs/weapp-domains.html) 更新域名白名单。
+* 移除了 v3 中被标记为废弃的 API，包括：
+
+  <details>
+    <summary>移除 API 列表</summary>
+
+  * `IMClient`
+    * `#markAllAsRead` 方法
+    * `createConversation` 的 `options.attributes` 参数
+    * `unreadmessages` 事件
+  * `Conversation`
+    * `attributes` 属性
+    * `#setAttributes`、`#setAttribute`、`#setName` 与 `#markAsRead` 方法
+    * `receipt` 事件
+  * `ConversationQuery`
+    * `#withLastMessages` 方法
+  * `Message`
+    * `needReceipt` 与 `transient` 属性
+    * `#setNeedReceipt` 与 `#setTransient` 方法
+
+  </details>
+
+### Features
+
+* 支持与 LeanCloud 用户系统集成。`Realtime#createIMClient` 方法现在支持使用一个已登录的 `AV.User` 登录 IM，详见 [相关文档](https://url.leanapp.cn/im-login-with-avuser)。
+
+
+
 <a name="3.5.2"></a>
 ## 3.5.2 (2017-06-30)
 

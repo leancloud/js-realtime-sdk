@@ -1,6 +1,6 @@
 {
   "name": "leancloud-realtime",
-  "version": "3.5.2",
+  "version": "4.0.0-alpha.0",
   "description": "LeanCloud Realtime Message JavaScript SDK",
   "main": "./dist/realtime.js",
   "jsnext:main": "./src/index.js",
@@ -33,6 +33,7 @@
   },
   "homepage": "https://leancloud.cn/",
   "devDependencies": {
+    "@leeyeh/jsdoc-rtd": "^1.0.13",
     "@leeyeh/rollup-plugin-node-resolve": "^3.0.0",
     "babel-eslint": "^7.0.0",
     "babel-plugin-external-helpers": "^6.8.0",
@@ -58,7 +59,6 @@
     "inherit": "^2.2.3",
     "jsdoc": "leeyeh/jsdoc#v3.4.0",
     "jsdoc-ignore-future": "^1.1.0",
-    "jsdoc-rtd": "leeyeh/jsdoc-rtd",
     "leancloud-storage": "^2.0.0",
     "load-grunt-tasks": "^3.4.1",
     "mocha": "^3.0.0",

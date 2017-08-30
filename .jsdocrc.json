@@ -1,6 +1,6 @@
 {
   "opts": {
-    "template": "node_modules/jsdoc-rtd",
+    "template": "node_modules/@leeyeh/jsdoc-rtd",
     "recurse": true
   },
   "source": {

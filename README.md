@@ -1,28 +1,33 @@
 LeanCloud JavaScript Realtime SDK
 ====
+[![npm](https://img.shields.io/npm/v/leancloud-realtime.svg?style=flat-square)](https://www.npmjs.com/package/leancloud-realtime)
+[![npm](https://img.shields.io/npm/v/leancloud-realtime/next.svg?style=flat-square)](https://www.npmjs.com/package/leancloud-realtime)
+![gzip size](http://img.badgesize.io/leancloud/js-realtime-sdk/dist/dist/realtime.browser.min.js.svg?compression=gzip&style=flat-square)
 [![Build Status](https://img.shields.io/travis/leancloud/js-realtime-sdk.svg?style=flat-square)](https://travis-ci.org/leancloud/js-realtime-sdk)
 [![Codecov](https://img.shields.io/codecov/c/github/leancloud/js-realtime-sdk.svg?style=flat-square)](https://codecov.io/github/leancloud/js-realtime-sdk)
-[![David](https://img.shields.io/david/leancloud/js-realtime-sdk.svg?style=flat-square)](https://david-dm.org/leancloud/js-realtime-sdk)
-[![npm](https://img.shields.io/npm/v/leancloud-realtime.svg?style=flat-square)](https://www.npmjs.com/package/leancloud-realtime)
-![gzip size](http://img.badgesize.io/leancloud/js-realtime-sdk/dist/dist/realtime.browser.min.js.svg?compression=gzip&style=flat-square)
+[![Known Vulnerabilities](https://snyk.io/test/github/leancloud/js-realtime-sdk/badge.svg?style=flat-square)](https://snyk.io/test/github/leancloud/js-realtime-sdk)
 
 为您的 JavaScript App 接入 LeanCloud 实时通讯服务。
 
 版本说明
 ----
-master 分支为开发版本。
-v2 分支上为 2.x 版本，将仅得到安全更新，相关文档参见 [2.x 文档](https://leancloud.cn/docs/js_realtime.html)。
 
-自 v3 起遵循 [语义化版本](http://semver.org/lang/zh-CN/)。
+遵循 [语义化版本](http://semver.org/lang/zh-CN/)。
 
 安装稳定版本：
 ```
 npm install leancloud-realtime --save
 ```
 
-安装 v2 版本：
+安装测试版本：
 ```
-npm install leancloud-realtime@2 --save
+npm install leancloud-realtime@next --save
+```
+
+安装指定版本：
+```
+// 安装 v3 版本
+npm install leancloud-realtime@3 --save
 ```
 
 支持的运行环境
@@ -33,9 +38,10 @@ npm install leancloud-realtime@2 --save
   - Firefox latest
   - iOS 8.0+
   - Android 4.4+
-- Node.js 0.12+
-- React Native 0.26+
+- Node.js 4.0+
 - 微信小程序 latest
+- React Native 0.26+
+- Electron latest
 
 文档
 ----
@@ -60,9 +66,8 @@ leancloud-realtime-plugin-webrtc|WebRTC 客户端|[![npm](https://img.shields.io
 
 支持
 ----
-* 如果你发现了新的 bug，或者有新的 feature request，请新建一个 issue
 * 在使用过程中遇到了问题时
-  * 如果你购买了技术支持服务，请新建一个 ticket。
+  * 如果你是商用版用户，请新建一个工单。
   * 也可以在 [论坛](https://forum.leancloud.cn/) 提问、讨论。
 
 贡献

@@ -1,9 +1,11 @@
-
 declare module LeanCloudRealtime {
+  interface AVUser {
+    getSessionToken(): string;
+  }
 
   export class Realtime extends EventEmitter {
     constructor(options: { appId: string, region?: string, pushOfflineMessages?: boolean, noBinary?: boolean, ssl?: boolean, plugins?: Array<Plugin> });
-    createIMClient(clientId: string, clientOptions?: { signatureFactory?: Function, conversationSignatureFactory?: Function, tag?: string }): Promise<IMClient>;
+    createIMClient(client: string|AVUser, clientOptions?: { signatureFactory?: Function, conversationSignatureFactory?: Function, tag?: string }): Promise<IMClient>;
     static defineConversationProperty(prop: string, descriptor?: Object);
     register(messageClass: AVMessage[]);
     retry();
