@@ -215,6 +215,15 @@ describe('Messages', () => {
         msg.status.should.eql(MessageStatus.SENT);
       });
     });
+    it('mention', () => {
+      const message = new TextMessage(`@${zwang.id} @all`).setMentionList(zwang.id).mentionAll();
+      conversationWchen.send(message);
+      return listen(conversationZwang, 'message').then(([receivedMessage]) => {
+        receivedMessage.mentioned.should.eql(true);
+        receivedMessage.getMentionList().should.eql([zwang.id]);
+        receivedMessage.mentionedAll.should.eql(true);
+      });
+    });
     describe('sendOptions', () => {
       beforeEach(function () {
         this.spy = sinon.spy(Conversation.prototype, '_send');
@@ -302,7 +311,7 @@ describe('Messages', () => {
     describe('patch', () => {
       before(function prepareMessage() {
         this.originalMessage = new Message('original');
-        this.modifiedMessage = new TextMessage('modified');
+        this.modifiedMessage = new TextMessage('modified').setMentionList([zwang.id]);
         return conversationWchen.send(this.originalMessage).then(hold(400));
       });
       it('update', function testUpdate() {
@@ -313,6 +322,8 @@ describe('Messages', () => {
             message.text.should.be.eql('modified');
             message.updatedAt.should.be.a.Date();
             message.updatedAt.should.not.be.eql(message.timestamp);
+            message.mentioned.should.be.eql(true);
+            message.getMentionList().should.be.deepEqual([zwang.id]);
           });
       });
       it('recall', function testRecall() {

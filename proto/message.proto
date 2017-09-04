@@ -105,6 +105,8 @@ message UnreadTuple {
   optional string from = 5;
   optional string data = 6;
   optional int64 patchTimestamp = 7;
+  optional bool mentioned = 8;
+  optional bytes binaryMsg = 9;
 }
 
 message LogItem {
@@ -115,6 +117,9 @@ message LogItem {
   optional int64 ackAt = 5;
   optional int64 readAt = 6;
   optional int64 patchTimestamp = 7;
+  optional bool mentionAll = 8;
+  repeated string mentionPids = 9;
+  optional bool bin = 10;
 }
 
 message DataCommand {
@@ -169,6 +174,9 @@ message DirectCommand {
   optional string pushData = 16;
   optional bool will = 17;
   optional int64 patchTimestamp = 18;
+  optional bytes binaryMsg = 19;
+  repeated string mentionPids = 20;
+  optional bool mentionAll = 21;
 }
 
 message AckCommand {
@@ -244,7 +252,13 @@ message LogsCommand {
   optional string mid = 7;
   optional string checksum = 8;
   optional bool stored = 9;
-  optional bool reversed = 10;
+  enum QueryDirection {
+     OLD = 1;
+     NEW = 2;
+  }
+  optional QueryDirection direction = 10 [default = OLD];
+  optional bool tIncluded = 11;
+  optional bool ttIncluded = 12;
 
   repeated LogItem logs = 105;
 }
@@ -294,6 +308,9 @@ message PatchItem {
   optional string data = 5;
   optional int64 patchTimestamp = 6;
   optional string from = 7;
+  optional bytes binaryMsg = 8;
+  optional bool mentionAll = 9;
+  repeated string mentionPids = 10;
 }
 
 message PatchCommand {

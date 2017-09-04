@@ -1,4 +1,5 @@
 import uuid from 'uuid/v4';
+import { ensureArray } from '../utils';
 
 
 /**
@@ -66,6 +67,21 @@ export default class Message {
        * @memberof Message#
        */
       // deliveredAt,
+      /**
+       * 消息提及的用户
+       * @since 4.0.0
+       * @memberof Message#
+       * @type {String[]}
+       */
+      mentionList: [],
+      /**
+       * 消息是否提及了所有人
+       * @since 4.0.0
+       * @memberof Message#
+       * @type {Boolean}
+       */
+      mentionedAll: false,
+      _mentioned: false,
     });
     this._setStatus(MessageStatus.NONE);
   }
@@ -106,6 +122,49 @@ export default class Message {
   }
   set updatedAt(value) {
     this._updatedAt = value;
+  }
+
+  /**
+   * 当前用户是否在该消息中被提及
+   * @type {Boolean}
+   * @readonly
+   * @since 4.0.0
+   */
+  get mentioned() {
+    return this._mentioned;
+  }
+  _updateMentioned(client) {
+    this._mentioned =
+      this.from !== client &&
+      (this.mentionedAll || this.mentionList.indexOf(client) > -1);
+  }
+  /**
+   * 获取提及用户列表
+   * @since 4.0.0
+   * @return {String[]} 提及用户的 id 列表
+   */
+  getMentionList() {
+    return this.mentionList;
+  }
+  /**
+   * 设置提及用户列表
+   * @since 4.0.0
+   * @param {String[]} clients 提及用户的 id 列表
+   * @return {Message} self
+   */
+  setMentionList(clients) {
+    this.mentionList = ensureArray(clients);
+    return this;
+  }
+  /**
+   * 设置是否提及所有人
+   * @since 4.0.0
+   * @param {Boolean} [value=true]
+   * @return {Messaeg} self
+   */
+  mentionAll(value = true) {
+    this.mentionedAll = Boolean(value);
+    return this;
   }
 
   /**

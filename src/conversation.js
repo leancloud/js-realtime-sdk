@@ -40,6 +40,7 @@ export default class Conversation extends EventEmitter {
     transient = false,
     system = false,
     muted = false,
+    mentioned = false,
     // jsdoc-ignore-start
     ...attributes
     // jsdoc-ignore-end
@@ -104,7 +105,7 @@ export default class Conversation extends EventEmitter {
        * 系统对话标记
        * @memberof Conversation#
        * @type {Boolean}
-       * @since 3.3
+       * @since 3.3.0
        */
       system,
       /**
@@ -122,6 +123,7 @@ export default class Conversation extends EventEmitter {
       lastDeliveredAt: null,
       lastReadAt: null,
       unreadMessagesCount: 0,
+      mentioned,
     });
     if (client instanceof IMClient) {
       this._client = client;
@@ -144,6 +146,18 @@ export default class Conversation extends EventEmitter {
     ));
     // onConversationCreate hook
     applyDecorators(this._client._plugins.onConversationCreate, this);
+  }
+
+  /**
+   * 当前用户是否在该对话中被提及
+   * @type {Boolean}
+   * @since 4.0.0
+   */
+  get mentioned() {
+    return internal(this).mentioned;
+  }
+  _setMentioned(value) {
+    internal(this).mentioned = Boolean(value);
   }
 
   set unreadMessagesCount(value) {
@@ -503,7 +517,6 @@ export default class Conversation extends EventEmitter {
     if (!(message instanceof Message)) {
       throw new TypeError(`${message} is not a Message`);
     }
-    const _options = Object.assign({}, options);
     const {
       transient,
       receipt,
@@ -514,7 +527,9 @@ export default class Conversation extends EventEmitter {
       {},
       // support Message static property: sendOptions
       message.constructor.sendOptions,
-      _options,
+      // support Message static property: getSendOptions
+      typeof message.constructor.getSendOptions === 'function' ? message.constructor.getSendOptions(message) : {},
+      options,
     );
     if (receipt) {
       if (this.transient) {
@@ -547,6 +562,8 @@ export default class Conversation extends EventEmitter {
         dt: message.id,
         pushData: JSON.stringify(pushData),
         will,
+        mentionPids: message.mentionList,
+        mentionAll: message.mentionedAll,
       }),
       priority,
     });
@@ -614,6 +631,8 @@ export default class Conversation extends EventEmitter {
           timestamp: Number(message.timestamp),
           recall,
           data,
+          mentionPids: newMessage.mentionList,
+          mentionAll: newMessage.mentionedAll,
         })],
         lastPatchTime: this._client._lastPatchTime,
       }),
@@ -698,6 +717,8 @@ export default class Conversation extends EventEmitter {
       ackAt,
       readAt,
       data,
+      mentionAll,
+      mentionPids,
     }) => {
       const message = await this._client._messageParser.parse(data);
       const messageProps = {
@@ -706,11 +727,14 @@ export default class Conversation extends EventEmitter {
         timestamp: new Date(timestamp.toNumber()),
         from,
         deliveredAt: ackAt,
+        mentionList: mentionPids,
+        mentionedAll: mentionAll,
       };
       if (patchTimestamp) {
         messageProps.updatedAt = new Date(patchTimestamp.toNumber());
       }
       Object.assign(message, messageProps);
+      message._updateMentioned(this._client.id);
       let status = MessageStatus.SENT;
       if (this.members.length === 2) {
         if (ackAt) status = MessageStatus.DELIVERED;
@@ -786,6 +810,7 @@ export default class Conversation extends EventEmitter {
    */
   async read() {
     this.unreadMessagesCount = 0;
+    this._setMentioned(false);
     // 跳过暂态会话
     if (this.transient) return this;
     const client = this._client;
