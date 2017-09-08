@@ -197,7 +197,7 @@ const beforeCommandDispatch = (command, realtime) => {
   if (command.peerId === null) return true;
   const targetClient = realtime._IMClients[command.peerId];
   if (targetClient) {
-    Promise.resolve(targetClient._dispatchCommand(command)).catch(debug);
+    Promise.resolve(targetClient).then(client => client._dispatchCommand(command)).catch(debug);
   } else {
     debug(
       '[WARN] Unexpected message received without any live client match: %O',
