@@ -279,7 +279,7 @@ describe('IMClient', () => {
     it('reconnect with session token', function () {
       client._connection.disconnect();
       return listen(client, 'reconnect').then(() => {
-        this.spy.should.be.calledOnce();
+        this.spy.should.be.called();
       });
     });
     it('session token expiration', function () {
