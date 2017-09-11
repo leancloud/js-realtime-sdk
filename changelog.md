@@ -1,3 +1,13 @@
+<a name="3.5.7"></a>
+## [3.5.7](https://github.com/leancloud/js-realtime-sdk/compare/v3.5.5+source...v3.5.7) (2017-09-11)
+
+
+### Bug Fixes
+
+* **IM:** 修复了某些情况下登录后 `unreadmessagescountupdate` 或 `message` 等事件没有派发的问题 ([#570](https://github.com/leancloud/js-realtime-sdk/issues/570)) ([7de8432](https://github.com/leancloud/js-realtime-sdk/commit/7de8432))
+
+
+
 <a name="3.5.6"></a>
 ## 3.5.6 (2017-08-29)
 
