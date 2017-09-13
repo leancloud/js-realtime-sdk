@@ -779,7 +779,6 @@ export default class IMClient extends EventEmitter {
    * @param {Object} options 除了下列字段外的其他字段将被视为对话的自定义属性
    * @param {String[]} options.members 对话的初始成员列表，默认包含当前 client
    * @param {String} [options.name] 对话的名字
-   * @param {Object} [options.attributes] DEPRECATED: 额外属性，对应 _Conversation 表的 attr 列
    * @param {Boolean} [options.transient=false] 暂态会话
    * @param {Boolean} [options.unique=false] 唯一对话，当其为 true 时，如果当前已经有相同成员的对话存在则返回该对话，否则会创建新的对话
    * @return {Promise.<Conversation>}

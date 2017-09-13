@@ -82,6 +82,7 @@ declare module LeanCloudRealtime {
     fetchReceiptTimestamps(): Promise<Conversation>;
     mute(): Promise<Conversation>;
     queryMessages(options: { beforeTime?: Date, beforeMessageId?: string, afterTime?: Date, afterMessageId?: string, limit?: number }): Promise<Array<Message>>;
+    queryMessages(options: { startTime?: Date, startMessageId?: string, startClosed?: boolean, endTime?: Date, endMessageId?: string, endClosed?: boolean, limit?: number, direction?: MessageQueryDirection }): Promise<Array<Message>>;
     quit(): Promise<Conversation>;
     remove(clientIds: string[]): Promise<Conversation>;
     save(): Promise<Conversation>;
@@ -173,6 +174,11 @@ declare module LeanCloudRealtime {
     SENT,
     DELIVERED,
     FAILED,
+  }
+
+  export enum MessageQueryDirection {
+    NEW_TO_OLD,
+    OLD_TO_NEW,
   }
 
   export enum ErrorCode {

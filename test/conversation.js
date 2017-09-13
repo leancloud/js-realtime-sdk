@@ -5,6 +5,7 @@ import {
   GenericCommand,
   ConvCommand,
 } from '../proto/message';
+import { MessageQueryDirection } from '../src/conversation';
 import Message, { MessageStatus } from '../src/messages/message';
 import TextMessage from '../src/messages/text-message';
 import { defineConversationProperty } from '../src/plugin-im';
@@ -208,6 +209,14 @@ describe('Conversation', () => {
     it('afterTime', () =>
       conversation.queryMessages({
         afterTime: new Date(),
+      }).then((messages) => {
+        messages.should.be.an.empty();
+      }),
+    );
+    it('direction', () =>
+      conversation.queryMessages({
+        startTime: new Date(),
+        direction: MessageQueryDirection.OLD_TO_NEW,
       }).then((messages) => {
         messages.should.be.an.empty();
       }),
