@@ -1,6 +1,7 @@
 import EventEmitter from 'eventemitter3';
 import isEmpty from 'lodash/isEmpty';
 import cloneDeep from 'lodash/cloneDeep';
+import { decode as decodeBase64 } from 'base64-arraybuffer';
 import d from 'debug';
 import { decodeDate, keyRemap, union, difference, internal, setValue } from './utils';
 import { applyDecorators } from './plugin';
@@ -22,6 +23,20 @@ import Message, { MessageStatus } from './messages/message';
 import RecalledMessage from './messages/recalled-message';
 
 const debug = d('LC:Conversation');
+
+const serializeMessage = (message) => {
+  const content = message.toJSON();
+  let msg;
+  let binaryMsg;
+  if (content instanceof ArrayBuffer) {
+    binaryMsg = content;
+  } else if (typeof content !== 'string') {
+    msg = JSON.stringify(content);
+  } else {
+    msg = content;
+  }
+  return { msg, binaryMsg };
+};
 
 export default class Conversation extends EventEmitter {
   /**
@@ -548,14 +563,12 @@ export default class Conversation extends EventEmitter {
       from: this._client.id,
     });
     message._setStatus(MessageStatus.SENDING);
-    let msg = message.toJSON();
-    if (typeof msg !== 'string') {
-      msg = JSON.stringify(msg);
-    }
+    const { msg, binaryMsg } = serializeMessage(message);
     const command = new GenericCommand({
       cmd: 'direct',
       directMessage: new DirectCommand({
         msg,
+        binaryMsg,
         cid: this.id,
         r: receipt,
         transient,
@@ -614,12 +627,12 @@ export default class Conversation extends EventEmitter {
     } else if (!(message.id && message.timestamp)) {
       throw new TypeError(`${message} is not a Message`);
     }
-    let data = null;
+    let msg;
+    let binaryMsg;
     if (!recall) {
-      data = newMessage.toJSON();
-      if (typeof data !== 'string') {
-        data = JSON.stringify(data);
-      }
+      const content = serializeMessage(newMessage);
+      msg = content.msg;
+      binaryMsg = content.binaryMsg;
     }
     await this._send(new GenericCommand({
       cmd: CommandType.patch,
@@ -630,7 +643,8 @@ export default class Conversation extends EventEmitter {
           mid: message.id,
           timestamp: Number(message.timestamp),
           recall,
-          data,
+          data: msg,
+          binaryMsg,
           mentionPids: newMessage.mentionList,
           mentionAll: newMessage.mentionedAll,
         })],
@@ -719,8 +733,10 @@ export default class Conversation extends EventEmitter {
       data,
       mentionAll,
       mentionPids,
+      bin,
     }) => {
-      const message = await this._client._messageParser.parse(data);
+      const content = bin ? decodeBase64(data) : data;
+      const message = await this._client._messageParser.parse(content);
       const messageProps = {
         id: msgId,
         cid: this.id,

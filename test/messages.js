@@ -10,6 +10,7 @@ import {
   TypedMessage,
   TextMessage,
   RecalledMessage,
+  BinaryMessage,
 } from '../src';
 import { messageType, messageField, IE10Compatible } from '../src/messages/helpers';
 
@@ -204,6 +205,16 @@ describe('Messages', () => {
         receivedMessage.id.should.be.equal(sentMessage.id);
         receivedMessage.getText().should.eql(sentMessage.getText());
         receivedMessage.getAttributes().should.eql(sentMessage.getAttributes());
+      });
+    });
+    it('sending binary message', () => {
+      const receivePromise = listen(conversationZwang, 'message');
+      const sendPromise = conversationWchen.send(new BinaryMessage(new ArrayBuffer(10)));
+      return Promise.all([receivePromise, sendPromise]).then((messages) => {
+        const [[receivedMessage], sentMessage] = messages;
+        receivedMessage.id.should.be.equal(sentMessage.id);
+        receivedMessage.buffer.should.be.instanceof(ArrayBuffer);
+        receivedMessage.buffer.byteLength.should.be.eql(10);
       });
     });
     it('sending transient message', () => {

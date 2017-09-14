@@ -4,6 +4,7 @@ import uuid from 'uuid/v4';
 import IMClient from './im-client';
 import Conversation from './conversation';
 import Message, { MessageStatus } from './messages/message';
+import BinaryMessage from './messages/binary-message';
 import TextMessage from './messages/text-message';
 import TypedMessage from './messages/typed-message';
 import RecalledMessage from './messages/recalled-message';
@@ -54,6 +55,10 @@ export {
    * @see Message
    */
   Message,
+  /**
+   * @see BinaryMessage
+   */
+  BinaryMessage,
   /**
    * @see TypedMessage
    */
@@ -241,6 +246,7 @@ export const IMPlugin = {
   beforeCommandDispatch,
   messageClasses: [
     Message,
+    BinaryMessage,
     RecalledMessage,
     TextMessage,
   ],
