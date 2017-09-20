@@ -1,3 +1,33 @@
+<a name="4.0.0-alpha.1"></a>
+# 4.0.0-alpha.1 (2017-09-20)
+
+
+### Bug Fixes
+
+* 修复了某些情况下登录后 `unreadmessagescountupdate` 或 `message` 等事件没有派发的问题。
+* 修复了被服务端踢下线后链接没有正确断开的问题。
+
+
+### Features
+
+* 消息支持提及（@）对话中的成员。
+  - 增加了 `Message#setMentionList` 与 `Message#mentionAll` 方法用于指定消息提及的对话成员。
+  - 在收到消息时可以通过 `Message#mentioned` 属性判断当前用户时候被提及，通过 `Message#mentionList` 与 `Message#mentionedAll` 属性获取详细的信息。
+  - 增加了 `Conversation#mentioned` 属性指示当前用户是否在对话中被提及。该属性会在 `unreadmessagescountupdate` 事件发生时被更新，调用 `Conversation#read` 方法会重置该属性。
+* 支持发送接收二进制消息。
+  - 增加了 `BinaryMessage`，可以通过 `ArrayBuffer` 构造。
+* 查询历史消息接口（`Conversation#queryMessage`）现在支持按照从旧到新的方向查询，可以实现弹幕等需求。
+  - 增加了 `direction` 选项，其值为 `MessageQueryDirection.NEW_TO_OLD` 或 `MessageQueryDirection.OLD_TO_NEW`。
+  - 增加了方向的概念后，原先指定查询区间的参数会产生歧义，这些参数因此被重新命名了：
+    - `beforeTime` -> `startTime`
+    - `beforeMessageId` -> `startMessageId`
+    - `afterTime` -> `endTime`
+    - `afterMessageId` -> `endMessageId`
+  - 增加了 `startClosed` 与 `endMessageId` 用于用于指定查询区间的开闭。
+
+
+
+
 <a name="4.0.0-alpha.0"></a>
 # 4.0.0-alpha.0 (2017-08-31)
 
