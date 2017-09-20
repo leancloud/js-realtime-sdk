@@ -35,7 +35,7 @@ export { MessageStatus };
 export default class Message {
   /**
    * @implements AVMessage
-   * @param  {Object|String} content 消息内容
+   * @param  {Object|String|ArrayBuffer} content 消息内容
    */
   constructor(content) {
     Object.assign(this, { content }, {

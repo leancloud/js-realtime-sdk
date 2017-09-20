@@ -154,6 +154,7 @@ export default class IMClient extends EventEmitter {
         timestamp: ts,
         from,
         data,
+        binaryMsg,
         patchTimestamp,
         mentioned,
       }) => this.getConversation(cid).then((conversation) => {
@@ -164,7 +165,7 @@ export default class IMClient extends EventEmitter {
           timestamp = new Date(ts.toNumber());
           conversation.lastMessageAt = timestamp; // eslint-disable-line no-param-reassign
         }
-        return (mid ? this._messageParser.parse(data).then((message) => {
+        return (mid ? this._messageParser.parse(binaryMsg || data).then((message) => {
           const messageProps = {
             id: mid,
             cid,
@@ -225,12 +226,12 @@ export default class IMClient extends EventEmitter {
     // ensure all converstions are cached
     return this.getConversations(patches.map(patch => patch.cid)).then(() =>
       Promise.all(patches.map(({
-        cid, mid, timestamp, recall, data, patchTimestamp, from, mentionAll, mentionPids,
+        cid, mid, timestamp, recall, data, patchTimestamp, from, binaryMsg, mentionAll, mentionPids,
       }) =>
         this.getConversation(cid).then((conversation) => {
           // deleted conversation
           if (!conversation) return null;
-          return this._messageParser.parse(data).then((message) => {
+          return this._messageParser.parse(binaryMsg || data).then((message) => {
             const patchTime = patchTimestamp.toNumber();
             const messageProps = {
               id: mid,
@@ -412,11 +413,13 @@ export default class IMClient extends EventEmitter {
       directMessage,
       directMessage: {
         id, cid, fromPeerId, timestamp, transient, patchTimestamp, mentionPids, mentionAll,
+        binaryMsg, msg,
       },
     } = originalMessage;
+    const content = binaryMsg ? binaryMsg.toArrayBuffer() : msg;
     return Promise.all([
       this.getConversation(directMessage.cid),
-      this._messageParser.parse(directMessage.msg),
+      this._messageParser.parse(content),
     ]).then(([conversation, message]) => {
       // deleted conversation
       if (!conversation) return undefined;

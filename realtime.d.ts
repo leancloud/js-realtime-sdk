@@ -118,6 +118,12 @@ declare module LeanCloudRealtime {
     mentionAll(): Message;
   }
 
+  // 二进制消息
+  export class BinaryMessage extends Message {
+    constructor(buffer: ArrayBuffer);
+    buffer: ArrayBuffer;
+  }
+
   // 富媒体消息
   export class TypedMessage extends Message {
     attributes: {};
