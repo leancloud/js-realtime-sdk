@@ -1,0 +1,30 @@
+import Message from './message';
+
+export default class BinaryMessage extends Message {
+  /**
+   * 二进制消息
+   * @extends Message
+   * @param {ArrayBuffer} buffer
+   * @since 4.0.0
+   */
+  constructor(buffer) {
+    if (!(buffer instanceof ArrayBuffer)) {
+      throw new TypeError(`${buffer} is not an ArrayBuffer`);
+    }
+    super(buffer);
+  }
+
+  /**
+   * @type ArrayBuffer
+   */
+  get buffer() {
+    return this.content;
+  }
+  set buffer(buffer) {
+    this.content = buffer;
+  }
+
+  static validate(target) {
+    return target instanceof ArrayBuffer;
+  }
+}
