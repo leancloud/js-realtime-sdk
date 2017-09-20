@@ -69,6 +69,7 @@ declare module LeanCloudRealtime {
     mutedMembers?: string[];
     system: boolean;
     transient: boolean;
+    readonly mentioned: Boolean;
     [key: string]: any;
     // constructor();
     add(members: string[]): Promise<Conversation>;
@@ -106,9 +107,15 @@ declare module LeanCloudRealtime {
     id: string;
     status: MessageStatus;
     timestamp: Date;
+    readonly mentioned: Boolean;
+    mentionList: string[];
+    mentionedAll: Boolean;
     static parse(json: Object, message: Message): Message;
     static validate(): boolean;
     toJSON(): Object;
+    setMentionList(mentionList: string[]): Message;
+    getMentionList(): string[];
+    mentionAll(): Message;
   }
 
   // 富媒体消息

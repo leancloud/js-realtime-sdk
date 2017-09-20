@@ -379,6 +379,7 @@ describe('Conversation', () => {
     let conversationId;
     let bwangRealtime;
     const message = new Message({});
+    message.setMentionList(bwangId).mentionAll();
     return realtime.createIMClient()
       .then(jwu =>
         jwu.createConversation({
@@ -388,8 +389,8 @@ describe('Conversation', () => {
           // 这里连续发 3 条消息，conv.lm 可能不会被更新为最后一条消息
           // 发送 read 命令时如果用 conv.lm 可能会导致漏标消息
           return Promise.all([
-            conv.send(new Message({})),
-            conv.send(new Message({})),
+            conv.send(new Message({}).setMentionList(bwangId)),
+            conv.send(new Message({}).mentionAll()),
           ]).then(() => conv.send(message));
         }).then(tap(() => jwu.close())),
       ).then(() => {
@@ -403,6 +404,7 @@ describe('Conversation', () => {
         bwang0 = c;
         return listen(bwang0, 'unreadmessagescountupdate').then(([[conv]]) => {
           conv.unreadMessagesCount.should.eql(3);
+          conv.mentioned.should.eql(true);
           conv.id.should.be.eql(conversationId);
           conv.lastMessage.should.be.instanceof(Message);
           conv.lastMessage.id.should.eql(message.id);
@@ -412,6 +414,7 @@ describe('Conversation', () => {
       .then(bwang1 => listen(bwang1, 'unreadmessagescountupdate')
         .then(([[conv]]) => {
           conv.unreadMessagesCount.should.be.eql(3);
+          conv.mentioned.should.eql(true);
           conv.id.should.be.eql(conversationId);
           conv.lastMessage.id.should.eql(message.id);
           return conv.read().then((conv1) => {
@@ -422,6 +425,7 @@ describe('Conversation', () => {
       ).then(() => listen(bwang0, 'unreadmessagescountupdate')
         .then(([[conv]]) => {
           conv.unreadMessagesCount.should.be.eql(0);
+          conv.mentioned.should.eql(false);
           conv.id.should.be.eql(conversationId);
           conv.lastMessage.id.should.eql(message.id);
         }),

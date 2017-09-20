@@ -155,6 +155,7 @@ export default class IMClient extends EventEmitter {
         from,
         data,
         patchTimestamp,
+        mentioned,
       }) => this.getConversation(cid).then((conversation) => {
         // deleted conversation
         if (!conversation) return null;
@@ -176,6 +177,7 @@ export default class IMClient extends EventEmitter {
           Object.assign(message, messageProps);
           conversation.lastMessage = message; // eslint-disable-line no-param-reassign
         }) : Promise.resolve()).then(() => {
+          conversation._setMentioned(mentioned);
           const countNotUpdated = unread === internal(conversation).unreadMessagesCount;
           if (countNotUpdated) return null; // to be filtered
           // manipulate internal property directly to skip unreadmessagescountupdate event
@@ -223,7 +225,7 @@ export default class IMClient extends EventEmitter {
     // ensure all converstions are cached
     return this.getConversations(patches.map(patch => patch.cid)).then(() =>
       Promise.all(patches.map(({
-        cid, mid, timestamp, recall, data, patchTimestamp, from,
+        cid, mid, timestamp, recall, data, patchTimestamp, from, mentionAll, mentionPids,
       }) =>
         this.getConversation(cid).then((conversation) => {
           // deleted conversation
@@ -236,9 +238,12 @@ export default class IMClient extends EventEmitter {
               timestamp: new Date(timestamp.toNumber()),
               updatedAt: new Date(patchTime),
               from,
+              mentionList: mentionPids,
+              mentionedAll: mentionAll,
             };
             Object.assign(message, messageProps);
             message._setStatus(MessageStatus.SENT);
+            message._updateMentioned(this.id);
             if (internal(this).lastPatchTime < patchTime) {
               internal(this).lastPatchTime = patchTime;
             }
@@ -406,7 +411,7 @@ export default class IMClient extends EventEmitter {
     const {
       directMessage,
       directMessage: {
-        id, cid, fromPeerId, timestamp, transient, patchTimestamp,
+        id, cid, fromPeerId, timestamp, transient, patchTimestamp, mentionPids, mentionAll,
       },
     } = originalMessage;
     return Promise.all([
@@ -420,11 +425,14 @@ export default class IMClient extends EventEmitter {
         cid,
         timestamp: new Date(timestamp.toNumber()),
         from: fromPeerId,
+        mentionList: mentionPids,
+        mentionedAll: mentionAll,
       };
       if (patchTimestamp) {
         messageProps.updatedAt = new Date(patchTimestamp.toNumber());
       }
       Object.assign(message, messageProps);
+      message._updateMentioned(this.id);
       message._setStatus(MessageStatus.SENT);
       // filter outgoing message sent from another device
       if (message.from !== this.id) {
@@ -446,6 +454,7 @@ export default class IMClient extends EventEmitter {
         // filter outgoing message sent from another device
         if (message.from !== this.id) {
           conversation.unreadMessagesCount += 1; // eslint-disable-line no-param-reassign
+          if (message.mentioned) conversation._setMentioned(true);
         }
         /**
          * 当前用户收到消息

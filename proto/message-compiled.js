@@ -62,6 +62,18 @@ module.exports = require("protobufjs/dist/protobuf-light").newBuilder({})['impor
                     "type": "int64",
                     "name": "patchTimestamp",
                     "id": 7
+                },
+                {
+                    "rule": "optional",
+                    "type": "bool",
+                    "name": "mentioned",
+                    "id": 8
+                },
+                {
+                    "rule": "optional",
+                    "type": "bytes",
+                    "name": "binaryMsg",
+                    "id": 9
                 }
             ]
         },
@@ -110,6 +122,24 @@ module.exports = require("protobufjs/dist/protobuf-light").newBuilder({})['impor
                     "type": "int64",
                     "name": "patchTimestamp",
                     "id": 7
+                },
+                {
+                    "rule": "optional",
+                    "type": "bool",
+                    "name": "mentionAll",
+                    "id": 8
+                },
+                {
+                    "rule": "repeated",
+                    "type": "string",
+                    "name": "mentionPids",
+                    "id": 9
+                },
+                {
+                    "rule": "optional",
+                    "type": "bool",
+                    "name": "bin",
+                    "id": 10
                 }
             ]
         },
@@ -386,6 +416,24 @@ module.exports = require("protobufjs/dist/protobuf-light").newBuilder({})['impor
                     "type": "int64",
                     "name": "patchTimestamp",
                     "id": 18
+                },
+                {
+                    "rule": "optional",
+                    "type": "bytes",
+                    "name": "binaryMsg",
+                    "id": 19
+                },
+                {
+                    "rule": "repeated",
+                    "type": "string",
+                    "name": "mentionPids",
+                    "id": 20
+                },
+                {
+                    "rule": "optional",
+                    "type": "bool",
+                    "name": "mentionAll",
+                    "id": 21
                 }
             ]
         },
@@ -761,15 +809,46 @@ module.exports = require("protobufjs/dist/protobuf-light").newBuilder({})['impor
                 },
                 {
                     "rule": "optional",
+                    "type": "QueryDirection",
+                    "name": "direction",
+                    "id": 10,
+                    "options": {
+                        "default": "OLD"
+                    }
+                },
+                {
+                    "rule": "optional",
                     "type": "bool",
-                    "name": "reversed",
-                    "id": 10
+                    "name": "tIncluded",
+                    "id": 11
+                },
+                {
+                    "rule": "optional",
+                    "type": "bool",
+                    "name": "ttIncluded",
+                    "id": 12
                 },
                 {
                     "rule": "repeated",
                     "type": "LogItem",
                     "name": "logs",
                     "id": 105
+                }
+            ],
+            "enums": [
+                {
+                    "name": "QueryDirection",
+                    "syntax": "proto2",
+                    "values": [
+                        {
+                            "name": "OLD",
+                            "id": 1
+                        },
+                        {
+                            "name": "NEW",
+                            "id": 2
+                        }
+                    ]
                 }
             ]
         },
@@ -968,6 +1047,24 @@ module.exports = require("protobufjs/dist/protobuf-light").newBuilder({})['impor
                     "type": "string",
                     "name": "from",
                     "id": 7
+                },
+                {
+                    "rule": "optional",
+                    "type": "bytes",
+                    "name": "binaryMsg",
+                    "id": 8
+                },
+                {
+                    "rule": "optional",
+                    "type": "bool",
+                    "name": "mentionAll",
+                    "id": 9
+                },
+                {
+                    "rule": "repeated",
+                    "type": "string",
+                    "name": "mentionPids",
+                    "id": 10
                 }
             ]
         },
