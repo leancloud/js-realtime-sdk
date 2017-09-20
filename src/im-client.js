@@ -13,7 +13,7 @@ import {
   CommandType,
   OpType,
 } from '../proto/message';
-import { ErrorCode } from './error';
+import { ErrorCode, createError } from './error';
 import { Expirable, Cache, keyRemap, union, difference, trim, internal, throttle } from './utils';
 import { applyDecorators, applyDispatcher } from './plugin';
 import runSignatureFactory from './signature-factory-runner';
@@ -111,6 +111,7 @@ export default class IMClient extends EventEmitter {
     } = message;
     switch (message.op) {
       case OpType.closed: {
+        internal(this)._eventemitter.emit('close');
         if (code === ErrorCode.SESSION_CONFLICT) {
           /**
            * 用户在其他客户端登录，当前客户端被服务端强行下线。详见文档「单点登录」章节。
@@ -573,11 +574,16 @@ export default class IMClient extends EventEmitter {
       .then((resCommand) => {
         const {
           peerId,
+          sessionMessage,
           sessionMessage: {
             st: token,
             stTtl: tokenTTL,
+            code,
           },
         } = resCommand;
+        if (code) {
+          throw createError(sessionMessage);
+        }
         if (!peerId) {
           console.warn('Unexpected session opened without peerId.');
           return;
@@ -587,7 +593,8 @@ export default class IMClient extends EventEmitter {
         if (token) {
           internal(this).sessionToken = new Expirable(token, tokenTTL * 1000);
         }
-      }, (error) => {
+      })
+      .catch((error) => {
         if (error.code === ErrorCode.SESSION_TOKEN_EXPIRED) {
           if (internal(this).sessionToken === undefined) {
             // let it fail if sessoinToken not cached but command rejected as token expired
@@ -613,9 +620,7 @@ export default class IMClient extends EventEmitter {
       op: 'close',
     });
     await this._send(command);
-    internal(this)._eventemitter.emit('close', {
-      code: 0,
-    });
+    internal(this)._eventemitter.emit('close');
     this.emit('close', {
       code: 0,
     });
