@@ -6,7 +6,7 @@ import Connection from '../src/connection';
 import { GenericCommand, CommandType, ConvCommand } from '../proto/message';
 import TextMessage from '../src/messages/text-message';
 
-import { listen, sinon } from './test-utils';
+import { listen, sinon, wait } from './test-utils';
 
 import {
   APP_ID,
@@ -222,7 +222,7 @@ describe('Connection', () => {
       peerId: client.id,
     });
     connection.emit('message', validMessage);
-    return Promise.resolve().then(() => {
+    return wait(0).then(() => {
       clientMessageEventCallback.should.be.calledOnce();
       clientMessageEventCallback.should.be.calledWith(validMessage);
       clientMessageEventCallback.restore();
