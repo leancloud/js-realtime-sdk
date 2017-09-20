@@ -38,6 +38,27 @@ const serializeMessage = (message) => {
   return { msg, binaryMsg };
 };
 
+const {
+  NEW,
+  OLD,
+} = LogsCommand.QueryDirection;
+
+/**
+ * 历史消息查询方向枚举
+ * @enum {Number}
+ * @since 4.0.0
+ * @memberof module:leancloud-realtime
+ */
+const MessageQueryDirection = {
+  /** 从后向前 */
+  NEW_TO_OLD: OLD,
+  /** 从前向后 */
+  OLD_TO_NEW: NEW,
+};
+Object.freeze(MessageQueryDirection);
+
+export { MessageQueryDirection };
+
 export default class Conversation extends EventEmitter {
   /**
    * 无法直接实例化，请使用 {@link IMClient#createConversation} 创建新的对话
@@ -685,35 +706,81 @@ export default class Conversation extends EventEmitter {
 
   /**
    * 查询消息记录
-   * 如果仅需实现消息记录翻页查询需求，建议使用 {@link Conversation#createMessagesIterator}
+   * 如果仅需实现消息向前记录翻页查询需求，建议使用 {@link Conversation#createMessagesIterator}。
+   * 不论何种方向，获得的消息都是按照时间升序排列的。
+   * startClosed 与 endClosed 用于指定查询区间的开闭。
+   * 
    * @param  {Object} [options]
-   * @param  {Date}   [options.beforeTime] 限制查询结果为小于这个该时间之前的消息，不传则为当前时间
-   * @param  {String} [options.beforeMessageId] 限制查询结果为该消息之前的消息，需要与 beforeTime 同时使用，为防止某时刻有重复消息
-   * @param  {Date}   [options.afterTime] 限制查询结果为大于这个该时间之前的消息
-   * @param  {String} [options.afterMessageId] 限制查询结果为该消息之后的消息，需要与 afterTime 同时使用，为防止某时刻有重复消息
    * @param  {Number} [options.limit] 限制查询结果的数量，目前服务端默认为 20
+   * @param  {MessageQueryDirection} [options.direction] 查询的方向。
+   * 在不指定的情况下如果 startTime 大于 endTime，则为从新到旧查询，可以实现加载聊天记录等场景。
+   * 如果 startTime 小于 endTime，则为从旧到新查询，可以实现弹幕等场景。
+   * @param  {Date}   [options.startTime] 从该时间开始查询，不传则从当前时间开始查询
+   * @param  {String} [options.startMessageId] 从该消息之前开始查询，需要与 startTime 同时使用，为防止某时刻有重复消息
+   * @param  {Boolean}[options.startClosed] 指定查询范围是否包括开始的时间点，默认不包括
+   * @param  {Date}   [options.endTime] 查询到该时间为止，不传则查询最早消息为止
+   * @param  {String} [options.endMessageId] 查询到该消息为止，需要与 endTime 同时使用，为防止某时刻有重复消息
+   * @param  {Boolean}[options.endClosed] 指定查询范围是否包括结束的时间点，默认不包括
+   * 
+   * @param  {Date}   [options.beforeTime] DEPRECATED: 使用 startTime 代替。限制查询结果为小于该时间之前的消息，不传则为当前时间
+   * @param  {String} [options.beforeMessageId] DEPRECATED: 使用 startMessageId 代替。
+   * 限制查询结果为该消息之前的消息，需要与 beforeTime 同时使用，为防止某时刻有重复消息
+   * @param  {Date}   [options.afterTime] DEPRECATED: 使用 endTime 代替。限制查询结果为大于该时间之前的消息
+   * @param  {String} [options.afterMessageId] DEPRECATED: 使用 endMessageId 代替。
+   * 限制查询结果为该消息之后的消息，需要与 afterTime 同时使用，为防止某时刻有重复消息
    * @return {Promise.<Message[]>} 消息列表
    */
   async queryMessages(options = {}) {
     this._debug('query messages %O', options);
-    if (options.beforeMessageId && !options.beforeTime) {
-      throw new Error('query option beforeMessageId must be used with option beforeTime');
+    const {
+      beforeTime,
+      beforeMessageId,
+      afterTime,
+      afterMessageId,
+      limit,
+      direction,
+      startTime,
+      startMessageId,
+      startClosed,
+      endTime,
+      endMessageId,
+      endClosed,
+    } = options;
+    if (beforeMessageId || beforeTime || afterMessageId || afterTime) {
+      console.log('DEPRECATION: queryMessages options beforeTime, beforeMessageId, afterTime and afterMessageId are deprecated in favor of startTime, startMessageId, endTime and endMessageId.');
+      return this.queryMessages({
+        startTime: beforeTime,
+        startMessageId: beforeMessageId,
+        endTime: afterTime,
+        endMessageId: afterMessageId,
+        limit,
+      });
     }
-    if (options.afterMessageId && !options.afterTime) {
-      throw new Error('query option afterMessageId must be used with option afterTime');
+    if (startMessageId && !startTime) {
+      throw new Error('query option startMessageId must be used with option startTime');
     }
-    const conditions = keyRemap({
-      beforeTime: 't',
-      beforeMessageId: 'mid',
-      afterTime: 'tt',
-      afterMessageId: 'tmid',
-      limit: 'l',
-    }, options);
+    if (endMessageId && !endTime) {
+      throw new Error('query option endMessageId must be used with option endTime');
+    }
+    const conditions = {
+      t: startTime,
+      mid: startMessageId,
+      tIncluded: startClosed,
+      tt: endTime,
+      tmid: endMessageId,
+      ttIncluded: endClosed,
+      l: limit,
+    };
     if (conditions.t instanceof Date) {
       conditions.t = conditions.t.getTime();
     }
     if (conditions.tt instanceof Date) {
       conditions.tt = conditions.tt.getTime();
+    }
+    if (direction !== undefined) {
+      conditions.direction = direction;
+    } else if (conditions.tt > conditions.t) {
+      conditions.direction = MessageQueryDirection.OLD_TO_NEW;
     }
     const resCommand = await this._send(new GenericCommand({
       cmd: 'logs',
@@ -765,7 +832,7 @@ export default class Conversation extends EventEmitter {
   /**
    * 获取消息翻页迭代器
    * @param  {Object} [options]
-   * @param  {Date}   [options.beforeTime] 限制起始查询结果为小于这个该时间之前的消息，不传则为当前时间
+   * @param  {Date}   [options.beforeTime] 限制起始查询结果为小于该时间之前的消息，不传则为当前时间
    * @param  {String} [options.beforeMessageId] 限制起始查询结果为该消息之前的消息，需要与 beforeTime 同时使用，为防止某时刻有重复消息
    * @param  {Number} [options.limit] 限制每页查询结果的数量，目前服务端默认为 20
    * @return {AsyncIterater.<Promise.<IteratorResult<Message[]>>>} [AsyncIterator]{@link https://github.com/tc39/proposal-async-iteration}，调用其 next 方法返回获取下一页消息的 Promise
@@ -796,8 +863,8 @@ export default class Conversation extends EventEmitter {
           // first call
           promise = this.queryMessages({
             limit,
-            beforeTime,
-            beforeMessageId,
+            startTime: beforeTime,
+            startMessageId: beforeMessageId,
           });
         } else {
           promise = promise.then((prevMessages) => {
@@ -806,8 +873,8 @@ export default class Conversation extends EventEmitter {
               return [];
             }
             return this.queryMessages({
-              beforeTime: prevMessages[0].timestamp,
-              beforeMessageId: prevMessages[0].id,
+              startTime: prevMessages[0].timestamp,
+              startMessageId: prevMessages[0].id,
               limit,
             });
           });

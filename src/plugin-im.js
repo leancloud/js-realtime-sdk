@@ -2,7 +2,7 @@
 import d from 'debug';
 import uuid from 'uuid/v4';
 import IMClient from './im-client';
-import Conversation from './conversation';
+import Conversation, { MessageQueryDirection } from './conversation';
 import Message, { MessageStatus } from './messages/message';
 import BinaryMessage from './messages/binary-message';
 import TextMessage from './messages/text-message';
@@ -73,6 +73,7 @@ export {
   RecalledMessage,
   MessagePriority,
   MessageStatus,
+  MessageQueryDirection,
   defineConversationProperty,
 };
 
