@@ -1,3 +1,13 @@
+<a name="4.0.0-alpha.2"></a>
+# 4.0.0-alpha.2 (2017-09-22)
+
+
+### Features
+
+* 重命名 `Conversation#mentioned` 属性为 `Conversation#unreadMessagesMentioned`。
+
+
+
 <a name="4.0.0-alpha.1"></a>
 # 4.0.0-alpha.1 (2017-09-20)
 
