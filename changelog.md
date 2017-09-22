@@ -13,7 +13,7 @@
 * 消息支持提及（@）对话中的成员。
   - 增加了 `Message#setMentionList` 与 `Message#mentionAll` 方法用于指定消息提及的对话成员。
   - 在收到消息时可以通过 `Message#mentioned` 属性判断当前用户是否被提及，通过 `Message#mentionList` 与 `Message#mentionedAll` 属性获取详细的信息。
-  - 增加了 `Conversation#mentioned` 属性指示当前用户是否在对话中被提及。该属性会在 `unreadmessagescountupdate` 事件发生时被更新，调用 `Conversation#read` 方法会重置该属性。
+  - 增加了 `Conversation#mentioned` 属性（已在 alpha.2 中改为 `unreadMessagesMentioned`）指示当前用户是否在对话中被提及。该属性会在 `unreadmessagescountupdate` 事件发生时被更新，调用 `Conversation#read` 方法会重置该属性。
 * 支持发送接收二进制消息。
   - 增加了 `BinaryMessage`，可以通过 `ArrayBuffer` 构造。
 * 查询历史消息接口（`Conversation#queryMessage`）现在支持按照从旧到新的方向查询，可以实现弹幕等需求。

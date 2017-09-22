@@ -185,15 +185,15 @@ export default class Conversation extends EventEmitter {
   }
 
   /**
-   * 当前用户是否在该对话中被提及
+   * 当前用户是否在该对话的未读消息中被提及
    * @type {Boolean}
    * @since 4.0.0
    */
-  get mentioned() {
-    return internal(this).mentioned;
+  get unreadMessagesMentioned() {
+    return internal(this).unreadMessagesMentioned;
   }
-  _setMentioned(value) {
-    internal(this).mentioned = Boolean(value);
+  _setUnreadMessagesMentioned(value) {
+    internal(this).unreadMessagesMentioned = Boolean(value);
   }
 
   set unreadMessagesCount(value) {
@@ -893,7 +893,7 @@ export default class Conversation extends EventEmitter {
    */
   async read() {
     this.unreadMessagesCount = 0;
-    this._setMentioned(false);
+    this._setUnreadMessagesMentioned(false);
     // 跳过暂态会话
     if (this.transient) return this;
     const client = this._client;

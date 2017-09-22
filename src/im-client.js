@@ -179,7 +179,7 @@ export default class IMClient extends EventEmitter {
           Object.assign(message, messageProps);
           conversation.lastMessage = message; // eslint-disable-line no-param-reassign
         }) : Promise.resolve()).then(() => {
-          conversation._setMentioned(mentioned);
+          conversation._setUnreadMessagesMentioned(mentioned);
           const countNotUpdated = unread === internal(conversation).unreadMessagesCount;
           if (countNotUpdated) return null; // to be filtered
           // manipulate internal property directly to skip unreadmessagescountupdate event
@@ -458,7 +458,7 @@ export default class IMClient extends EventEmitter {
         // filter outgoing message sent from another device
         if (message.from !== this.id) {
           conversation.unreadMessagesCount += 1; // eslint-disable-line no-param-reassign
-          if (message.mentioned) conversation._setMentioned(true);
+          if (message.mentioned) conversation._setUnreadMessagesMentioned(true);
         }
         /**
          * 当前用户收到消息

@@ -69,7 +69,7 @@ declare module LeanCloudRealtime {
     mutedMembers?: string[];
     system: boolean;
     transient: boolean;
-    readonly mentioned: Boolean;
+    readonly unreadMessagesMentioned: Boolean;
     [key: string]: any;
     // constructor();
     add(members: string[]): Promise<Conversation>;

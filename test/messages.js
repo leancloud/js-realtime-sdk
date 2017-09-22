@@ -233,6 +233,7 @@ describe('Messages', () => {
         receivedMessage.mentioned.should.eql(true);
         receivedMessage.getMentionList().should.eql([zwang.id]);
         receivedMessage.mentionedAll.should.eql(true);
+        conversationZwang.unreadMessagesMentioned.should.eql(true);
       });
     });
     describe('sendOptions', () => {

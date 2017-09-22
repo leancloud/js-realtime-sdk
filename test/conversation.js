@@ -413,7 +413,7 @@ describe('Conversation', () => {
         bwang0 = c;
         return listen(bwang0, 'unreadmessagescountupdate').then(([[conv]]) => {
           conv.unreadMessagesCount.should.eql(3);
-          conv.mentioned.should.eql(true);
+          conv.unreadMessagesMentioned.should.eql(true);
           conv.id.should.be.eql(conversationId);
           conv.lastMessage.should.be.instanceof(Message);
           conv.lastMessage.id.should.eql(message.id);
@@ -423,7 +423,7 @@ describe('Conversation', () => {
       .then(bwang1 => listen(bwang1, 'unreadmessagescountupdate')
         .then(([[conv]]) => {
           conv.unreadMessagesCount.should.be.eql(3);
-          conv.mentioned.should.eql(true);
+          conv.unreadMessagesMentioned.should.eql(true);
           conv.id.should.be.eql(conversationId);
           conv.lastMessage.id.should.eql(message.id);
           return conv.read().then((conv1) => {
@@ -434,7 +434,7 @@ describe('Conversation', () => {
       ).then(() => listen(bwang0, 'unreadmessagescountupdate')
         .then(([[conv]]) => {
           conv.unreadMessagesCount.should.be.eql(0);
-          conv.mentioned.should.eql(false);
+          conv.unreadMessagesMentioned.should.eql(false);
           conv.id.should.be.eql(conversationId);
           conv.lastMessage.id.should.eql(message.id);
         }),
