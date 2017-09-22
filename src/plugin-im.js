@@ -164,7 +164,7 @@ const onRealtimeCreate = (realtime) => {
       if (typeof identity === 'string') {
         id = identity;
       } else if (identity.id && identity.getSessionToken) {
-        id = identity.id;
+        ({ id } = identity);
         const sessionToken = identity.getSessionToken();
         if (!sessionToken) {
           throw new Error('User must be authenticated');
@@ -199,8 +199,7 @@ const onRealtimeCreate = (realtime) => {
           .then(
             () => client.emit('reconnect'),
             error => client.emit('reconnecterror', error),
-          ),
-      );
+          ));
       internal(client)._eventemitter.on('close', () => {
         delete realtime._IMClients[client.id];
         realtime._deregister(client);

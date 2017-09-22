@@ -55,12 +55,11 @@ describe('Conversation', () => {
   it('system conversation', () =>
     client.getConversation(SYS_CONV_ID).then((conv) => {
       conv.system.should.be.equal(true);
-    }),
-  );
+    }));
 
   it('update', () => {
     const timestamp = Date.now();
-    const name = conversation.name;
+    const { name } = conversation;
     return Promise.resolve(conversation).then((conv) => {
       conv.name = name;
       conv.set('attr', {
@@ -116,15 +115,13 @@ describe('Conversation', () => {
       conv.should.be.exactly(conversation);
       conv.muted.should.be.equal(true);
       conv.mutedMembers.should.containEql(CLIENT_ID);
-    }),
-  );
+    }));
   it('unmute', () =>
     conversation.unmute().then((conv) => {
       conv.should.be.exactly(conversation);
       conv.muted.should.be.equal(false);
       conv.mutedMembers.should.not.containEql(CLIENT_ID);
-    }),
-  );
+    }));
   it('count', () => conversation.count().should.be.fulfilledWith(2));
   it('add/remove', () =>
     client.createConversation({ members: ['nsun'] })
@@ -134,8 +131,7 @@ describe('Conversation', () => {
         return conv.remove('rguo');
       }).then((conv) => {
         conv.members.should.not.containEql('rguo');
-      }),
-  );
+      }));
   it('join/quit', () =>
     client.createConversation({ members: ['rguo'] })
       .then(conv => conv.quit())
@@ -144,8 +140,7 @@ describe('Conversation', () => {
         return conv.join();
       }).then((conv) => {
         conv.members.should.containEql(CLIENT_ID);
-      }),
-  );
+      }));
 
   describe('converastion signature', () => {
     beforeEach(function setupConversation() {
@@ -190,37 +185,32 @@ describe('Conversation', () => {
         messages.should.be.an.Array();
         messages[0].should.be.instanceof(Message);
         messages[0].status.should.be.eql(MessageStatus.SENT);
-      }),
-    );
+      }));
     it('with limit', () =>
       conversation.queryMessages({
         limit: 0,
       }).then((messages) => {
         messages.should.be.an.empty();
-      }),
-    );
+      }));
     it('beforeTime', () =>
       conversation.queryMessages({
         beforeTime: 1,
       }).then((messages) => {
         messages.should.be.an.empty();
-      }),
-    );
+      }));
     it('afterTime', () =>
       conversation.queryMessages({
         afterTime: new Date(),
       }).then((messages) => {
         messages.should.be.an.empty();
-      }),
-    );
+      }));
     it('direction', () =>
       conversation.queryMessages({
         startTime: new Date(),
         direction: MessageQueryDirection.OLD_TO_NEW,
       }).then((messages) => {
         messages.should.be.an.empty();
-      }),
-    );
+      }));
     describe('MessageIterator', () => {
       it('normal case', () => {
         const iterator = conversation.createMessagesIterator({
@@ -259,16 +249,14 @@ describe('Conversation', () => {
     let client2;
     let conversation2;
     const CLIENT_ID_2 = Date.now().toString();
-    before(
-      () => realtime
-        .createIMClient(CLIENT_ID_2)
-        .then(tap((c) => { client2 = c; }))
-        .then(c => c.createConversation({
-          members: ['xwang', 'csun'],
-          name: 'message dispatch test conversation',
-        }))
-        .then((c) => { conversation2 = c; }),
-    );
+    before(() => realtime
+      .createIMClient(CLIENT_ID_2)
+      .then(tap((c) => { client2 = c; }))
+      .then(c => c.createConversation({
+        members: ['xwang', 'csun'],
+        name: 'message dispatch test conversation',
+      }))
+      .then((c) => { conversation2 = c; }));
     after(() => client2.close());
     it('membersjoined', () => {
       const clientCallback = sinon.spy();
@@ -401,8 +389,7 @@ describe('Conversation', () => {
             conv.send(new Message({}).setMentionList(bwangId)),
             conv.send(new Message({}).mentionAll()),
           ]).then(() => conv.send(message));
-        }).then(tap(() => jwu.close())),
-      ).then(() => {
+        }).then(tap(() => jwu.close()))).then(() => {
         bwangRealtime = new Realtime({
           appId: APP_ID,
           appKey: APP_KEY,
@@ -430,15 +417,13 @@ describe('Conversation', () => {
             conv1.unreadMessagesCount.should.be.eql(0);
             bwang1.close();
           });
-        }),
-      ).then(() => listen(bwang0, 'unreadmessagescountupdate')
+        })).then(() => listen(bwang0, 'unreadmessagescountupdate')
         .then(([[conv]]) => {
           conv.unreadMessagesCount.should.be.eql(0);
           conv.unreadMessagesMentioned.should.eql(false);
           conv.id.should.be.eql(conversationId);
           conv.lastMessage.id.should.eql(message.id);
-        }),
-      ).then(() => {
+        })).then(() => {
         bwang0.close();
       });
   });

@@ -186,20 +186,19 @@ export default class IMClient extends EventEmitter {
           internal(conversation).unreadMessagesCount = unread;
           return conversation;
         });
-      }),
-        // filter conversations without unread count update
-      )).then(conversations => conversations.filter(conversation => conversation)),
-    ).then((conversations) => {
-      if (conversations.length) {
-        /**
-         * 未读消息数目更新
-         * @event IMClient#unreadmessagescountupdate
-         * @since 3.4.0
-         * @param {Conversation[]} conversations 未读消息数目有更新的对话列表
-         */
-        this.emit('unreadmessagescountupdate', conversations);
-      }
-    });
+      // filter conversations without unread count update
+      }))).then(conversations => conversations.filter(conversation => conversation)))
+      .then((conversations) => {
+        if (conversations.length) {
+          /**
+           * 未读消息数目更新
+           * @event IMClient#unreadmessagescountupdate
+           * @since 3.4.0
+           * @param {Conversation[]} conversations 未读消息数目有更新的对话列表
+           */
+          this.emit('unreadmessagescountupdate', conversations);
+        }
+      });
   }
 
   async _dispatchRcpMessage(message) {
@@ -283,9 +282,7 @@ export default class IMClient extends EventEmitter {
               conversation.emit('messageupdate', message);
             }
           });
-        }),
-      )),
-    );
+        }))));
   }
 
   async _dispatchConvMessage(message) {
@@ -545,9 +542,9 @@ export default class IMClient extends EventEmitter {
       .then((command) => {
         if (isReconnect) {
           // if sessionToken is not expired, skip signature/tag/deviceId
-          const sessionToken = internal(this).sessionToken;
+          const { sessionToken } = internal(this);
           if (sessionToken) {
-            const value = sessionToken.value;
+            const { value } = sessionToken;
             if (value && value !== Expirable.EXPIRED) {
               Object.assign(command.sessionMessage, {
                 st: value,
@@ -717,9 +714,8 @@ export default class IMClient extends EventEmitter {
       const commandString = JSON.stringify(trim(resCommand));
       throw new Error(`Parse query result failed: ${error.message}. Command: ${commandString}`);
     }
-    conversations = await Promise.all(conversations.map(
-      this._parseConversationFromRawData.bind(this),
-    ));
+    conversations =
+      await Promise.all(conversations.map(this._parseConversationFromRawData.bind(this)));
     return conversations.map((fetchedConversation) => {
       let conversation = this._conversationCache.get(fetchedConversation.id);
       if (!conversation) {

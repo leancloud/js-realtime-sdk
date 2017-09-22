@@ -18,11 +18,9 @@ describe('Run SignatureFactory', () => {
   });
   it('malformed signature', () =>
     runSignatureFactory(() => undefined, [])
-      .should.be.rejectedWith('malformed signature'),
-  );
+      .should.be.rejectedWith('malformed signature'));
   it('signatureFactory throws', () =>
     runSignatureFactory(() => {
       throw new Error('error message');
-    }, []).should.be.rejectedWith('sign error: error message'),
-  );
+    }, []).should.be.rejectedWith('sign error: error message'));
 });

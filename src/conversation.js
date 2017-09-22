@@ -312,7 +312,7 @@ export default class Conversation extends EventEmitter {
    */
   set(key, value) {
     this._debug(`set [${key}]: ${value}`);
-    const pendingAttributes = internal(this).pendingAttributes;
+    const { pendingAttributes } = internal(this);
     const pendingKeys = Object.keys(pendingAttributes);
     // suppose pendingAttributes = { 'a.b': {} }
     // set 'a' or 'a.b': delete 'a.b'
@@ -467,7 +467,8 @@ export default class Conversation extends EventEmitter {
     if (this._client.options.conversationSignatureFactory) {
       const params = [this.id, this._client.id, clientIds.sort(), 'add'];
       const signatureResult = await runSignatureFactory(
-        this._client.options.conversationSignatureFactory, params,
+        this._client.options.conversationSignatureFactory,
+        params,
       );
       Object.assign(command.convMessage, keyRemap({
         signature: 's',
@@ -502,7 +503,8 @@ export default class Conversation extends EventEmitter {
     if (this._client.options.conversationSignatureFactory) {
       const params = [this.id, this._client.id, clientIds.sort(), 'remove'];
       const signatureResult = await runSignatureFactory(
-        this._client.options.conversationSignatureFactory, params,
+        this._client.options.conversationSignatureFactory,
+        params,
       );
       Object.assign(command.convMessage, keyRemap({
         signature: 's',
@@ -652,8 +654,7 @@ export default class Conversation extends EventEmitter {
     let binaryMsg;
     if (!recall) {
       const content = serializeMessage(newMessage);
-      msg = content.msg;
-      binaryMsg = content.binaryMsg;
+      ({ msg, binaryMsg } = content);
     }
     await this._send(new GenericCommand({
       cmd: CommandType.patch,
@@ -709,7 +710,7 @@ export default class Conversation extends EventEmitter {
    * 如果仅需实现消息向前记录翻页查询需求，建议使用 {@link Conversation#createMessagesIterator}。
    * 不论何种方向，获得的消息都是按照时间升序排列的。
    * startClosed 与 endClosed 用于指定查询区间的开闭。
-   * 
+   *
    * @param  {Object} [options]
    * @param  {Number} [options.limit] 限制查询结果的数量，目前服务端默认为 20
    * @param  {MessageQueryDirection} [options.direction] 查询的方向。
@@ -721,7 +722,7 @@ export default class Conversation extends EventEmitter {
    * @param  {Date}   [options.endTime] 查询到该时间为止，不传则查询最早消息为止
    * @param  {String} [options.endMessageId] 查询到该消息为止，需要与 endTime 同时使用，为防止某时刻有重复消息
    * @param  {Boolean}[options.endClosed] 指定查询范围是否包括结束的时间点，默认不包括
-   * 
+   *
    * @param  {Date}   [options.beforeTime] DEPRECATED: 使用 startTime 代替。限制查询结果为小于该时间之前的消息，不传则为当前时间
    * @param  {String} [options.beforeMessageId] DEPRECATED: 使用 startMessageId 代替。
    * 限制查询结果为该消息之前的消息，需要与 beforeTime 同时使用，为防止某时刻有重复消息
@@ -784,11 +785,9 @@ export default class Conversation extends EventEmitter {
     }
     const resCommand = await this._send(new GenericCommand({
       cmd: 'logs',
-      logsMessage: new LogsCommand(
-        Object.assign(conditions, {
-          cid: this.id,
-        }),
-      ),
+      logsMessage: new LogsCommand(Object.assign(conditions, {
+        cid: this.id,
+      })),
     }));
     return Promise.all(resCommand.logsMessage.logs.map(async ({
       msgId,

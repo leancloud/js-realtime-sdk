@@ -195,11 +195,9 @@ describe('Messages', () => {
     });
     it('sending typed message', () => {
       const receivePromise = listen(conversationZwang, 'message');
-      const sendPromise = conversationWchen.send(
-        new TextMessage('hello').setAttributes({
-          leancloud: 'rocks',
-        }),
-      );
+      const sendPromise = conversationWchen.send(new TextMessage('hello').setAttributes({
+        leancloud: 'rocks',
+      }));
       return Promise.all([receivePromise, sendPromise]).then((messages) => {
         const [[receivedMessage], sentMessage] = messages;
         receivedMessage.id.should.be.equal(sentMessage.id);
@@ -304,8 +302,7 @@ describe('Messages', () => {
     });
     describe('errors', () => {
       it('client error', () =>
-        conversationWchen.send('1').should.be.rejectedWith(/not a Message/),
-      );
+        conversationWchen.send('1').should.be.rejectedWith(/not a Message/));
       it('server error', () => {
         const message = new Message('hello');
         return wchen

@@ -67,10 +67,7 @@ describe('IMClient', () => {
     });
 
     it('should be singleton', () =>
-      realtime.createIMClient(CLIENT_ID).then(
-        client1 => client1.should.be.exactly(client),
-      ),
-    );
+      realtime.createIMClient(CLIENT_ID).then(client1 => client1.should.be.exactly(client)));
 
     describe('with signatureFactory', () => {
       it('normal case', () => {
@@ -106,15 +103,13 @@ describe('IMClient', () => {
 
   describe('ping', () => {
     it('should throw if type check failed', () =>
-      client.ping('1').should.be.rejected(),
-    );
+      client.ping('1').should.be.rejected());
 
     it('should only return online clients', () =>
       client.ping(['non-exists-client-id', CLIENT_ID])
         .then((ids) => {
           ids.should.eql([CLIENT_ID]);
-        }),
-    );
+        }));
 
     it('should not request if get an empty ids list', () => {
       const send = sinon.spy(IMClient.prototype, '_send');
@@ -135,8 +130,7 @@ describe('IMClient', () => {
     it('should return null if no match', () =>
       client.getConversation(NON_EXISTING_ROOM_ID).then((conversation) => {
         should(conversation).be.null();
-      }),
-    );
+      }));
     it('should match one conversation', () =>
       client.getConversation(EXISTING_ROOM_ID).then((conversation) => {
         conversation.should.be.instanceof(Conversation);
@@ -144,18 +138,16 @@ describe('IMClient', () => {
         conversation.createdAt.should.be.a.Date();
         conversation.updatedAt.should.be.a.Date();
         conversation.lastMessageAt.should.be.a.Date();
-      }),
-    );
+      }));
     it('should always return the same conversation instance', () => {
       let anonymousClientConversatoin;
       let originConversation;
-      return realtime.createIMClient().then(
+      return realtime.createIMClient().then(anonymousClient =>
         // 使用匿名 client 创建一个对话
-        anonymousClient => anonymousClient.createConversation({
+        anonymousClient.createConversation({
           members: [CLIENT_ID],
           name: 'avoscloud',
-        }),
-      ).then((conversation) => {
+        })).then((conversation) => {
         // 查询这个对话
         anonymousClientConversatoin = conversation;
         return client.getConversation(conversation.id);
@@ -165,10 +157,9 @@ describe('IMClient', () => {
         return anonymousClientConversatoin
           .set('name', 'leancloud')
           .save();
-      }).then(
+      }).then(() =>
         // 再查询，应该返回原始对话
-        () => client.getConversation(anonymousClientConversatoin.id),
-      ).then((conversation) => {
+        client.getConversation(anonymousClientConversatoin.id)).then((conversation) => {
         conversation.should.be.exactly(originConversation);
         originConversation.name.should.be.eql('avoscloud');
         // 设置 noCache 查询，应该返回更新过的原始对话
@@ -192,16 +183,14 @@ describe('IMClient', () => {
             .find();
         }).then((conversations) => {
           conversations[0].lastMessage.should.be.instanceof(Message);
-        }),
-    );
+        }));
     it('getConversations', () =>
       client.getConversations([NON_EXISTING_ROOM_ID, EXISTING_ROOM_ID, EXISTING_ROOM_ID])
         .then(([nonExistingConv, existingConv1, existingConv2]) => {
           should(nonExistingConv).be.null();
           existingConv1.id.should.eql(EXISTING_ROOM_ID);
           existingConv2.should.be.exactly(existingConv1);
-        }),
-    );
+        }));
   });
 
   describe('createConversation', () => {
@@ -223,11 +212,9 @@ describe('IMClient', () => {
         conversation.name.should.be.equal('135');
         conversation.get('attributes').should.eql({ foo: 'bar' });
         conversation.get('baz').should.eql('qux');
-      }),
-    );
+      }));
     it('members required', () =>
-      client.createConversation().should.be.rejected(),
-    );
+      client.createConversation().should.be.rejected());
     it('unique', () =>
       series([0, 0].map(() => () => client.createConversation({
         name: 'unique room',
@@ -235,8 +222,7 @@ describe('IMClient', () => {
         unique: true,
       }))).then((conversations) => {
         conversations[0].id.should.be.exactly(conversations[1].id);
-      }),
-    );
+      }));
     it('transient', () =>
       client.createConversation({
         name: 'transient room',
@@ -244,14 +230,12 @@ describe('IMClient', () => {
         transient: true,
       }).then((conversation) => {
         conversation.members.should.be.empty();
-      }),
-    );
+      }));
     it('members optional if transient', () =>
       client.createConversation({
         name: 'transient room',
         transient: true,
-      }),
-    );
+      }));
   });
 
   // TO REMOVE

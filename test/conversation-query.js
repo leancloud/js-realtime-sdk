@@ -20,8 +20,7 @@ describe('ConversationQuery', () => {
         region: REGION,
       })
         .createIMClient()
-        .then((c) => { client = c; }),
-    );
+        .then((c) => { client = c; }));
     after(() => client.close());
 
     it('_calculateFlag', () => {
@@ -40,8 +39,7 @@ describe('ConversationQuery', () => {
         .then((conversations) => {
           conversations.length.should.be.equal(1);
           conversations[0].id.should.be.equal(EXISTING_ROOM_ID);
-        }),
-    );
+        }));
     it('containsMembers', () =>
       Promise.all([
         client.getQuery().equalTo('objectId', EXISTING_ROOM_ID)
@@ -57,8 +55,7 @@ describe('ConversationQuery', () => {
           .then((conversations) => {
             conversations.length.should.be.equal(0);
           }),
-      ]),
-    );
+      ]));
     it('withMembers', () =>
       Promise.all([
         client.getQuery().equalTo('objectId', EXISTING_ROOM_ID)
@@ -80,8 +77,7 @@ describe('ConversationQuery', () => {
           .then((conversations) => {
             conversations.length.should.be.equal(0);
           }),
-      ]),
-    );
+      ]));
     it('notEqualTo', () =>
       Promise.all([
         client.getQuery().equalTo('objectId', EXISTING_ROOM_ID)
@@ -97,8 +93,7 @@ describe('ConversationQuery', () => {
           .then((conversations) => {
             conversations.length.should.be.equal(0);
           }),
-      ]),
-    );
+      ]));
     it('matches', () =>
       Promise.all([
         client.getQuery().equalTo('objectId', EXISTING_ROOM_ID)
@@ -114,8 +109,7 @@ describe('ConversationQuery', () => {
           .then((conversations) => {
             conversations.length.should.be.equal(0);
           }),
-      ]),
-    );
+      ]));
     it('contains', () =>
       Promise.all([
         client.getQuery().equalTo('objectId', EXISTING_ROOM_ID)
@@ -131,8 +125,7 @@ describe('ConversationQuery', () => {
           .then((conversations) => {
             conversations.length.should.be.equal(0);
           }),
-      ]),
-    );
+      ]));
     it('startsWith', () =>
       Promise.all([
         client.getQuery().equalTo('objectId', EXISTING_ROOM_ID)
@@ -148,8 +141,7 @@ describe('ConversationQuery', () => {
           .then((conversations) => {
             conversations.length.should.be.equal(0);
           }),
-      ]),
-    );
+      ]));
     it('endsWith', () =>
       Promise.all([
         client.getQuery().equalTo('objectId', EXISTING_ROOM_ID)
@@ -165,8 +157,7 @@ describe('ConversationQuery', () => {
           .then((conversations) => {
             conversations.length.should.be.equal(0);
           }),
-      ]),
-    );
+      ]));
   });
 
   describe('part2', () => {
@@ -178,8 +169,7 @@ describe('ConversationQuery', () => {
         region: REGION,
       })
         .createIMClient()
-        .then((c) => { client = c; }),
-    );
+        .then((c) => { client = c; }));
     after(() => client.close());
 
     it('lessThan', () =>
@@ -197,8 +187,7 @@ describe('ConversationQuery', () => {
           .then((conversations) => {
             conversations.length.should.be.equal(0);
           }),
-      ]),
-    );
+      ]));
     it('lessThanOrEqualTo', () =>
       Promise.all([
         client.getQuery().equalTo('objectId', EXISTING_ROOM_ID)
@@ -214,8 +203,7 @@ describe('ConversationQuery', () => {
           .then((conversations) => {
             conversations.length.should.be.equal(0);
           }),
-      ]),
-    );
+      ]));
     it('greaterThan', () =>
       Promise.all([
         client.getQuery().equalTo('objectId', EXISTING_ROOM_ID)
@@ -231,8 +219,7 @@ describe('ConversationQuery', () => {
           .then((conversations) => {
             conversations.length.should.be.equal(0);
           }),
-      ]),
-    );
+      ]));
     it('greaterThanOrEqualTo', () =>
       Promise.all([
         client.getQuery().equalTo('objectId', EXISTING_ROOM_ID)
@@ -248,60 +235,50 @@ describe('ConversationQuery', () => {
           .then((conversations) => {
             conversations.length.should.be.equal(0);
           }),
-      ]),
-    );
+      ]));
     it('exists', () =>
       client.getQuery().equalTo('objectId', EXISTING_ROOM_ID)
         .exists('fakeKey')
         .find()
         .then((conversations) => {
           conversations.length.should.be.equal(0);
-        }),
-    );
+        }));
     it('doesNotExist', () =>
       client.getQuery().equalTo('objectId', EXISTING_ROOM_ID)
         .doesNotExist('createdAt')
         .find()
         .then((conversations) => {
           conversations.length.should.be.equal(0);
-        }),
-    );
+        }));
     it('limit', () =>
       client.getQuery().equalTo('objectId', EXISTING_ROOM_ID)
         .limit(0)
         .find()
-        .then(conversations => conversations.length.should.be.equal(0)),
-    );
+        .then(conversations => conversations.length.should.be.equal(0)));
     it('skip', () =>
       client.getQuery().equalTo('objectId', EXISTING_ROOM_ID)
         .skip(1)
         .find()
-        .then(conversations => conversations.length.should.be.equal(0)),
-    );
+        .then(conversations => conversations.length.should.be.equal(0)));
     it('ascending', () =>
       client.getQuery().limit(2).notEqualTo('objectId', '0')
         .ascending('createdAt')
         .find()
         .then(([conversation0, conversation1]) =>
-          conversation0.createdAt.should.below(conversation1.createdAt),
-        ),
-    );
+          conversation0.createdAt.should.below(conversation1.createdAt)));
     it('descending', () =>
       client.getQuery().limit(2).notEqualTo('objectId', '0')
         .descending('createdAt')
         .find()
         .then(([conversation0, conversation1]) =>
-          conversation0.createdAt.should.above(conversation1.createdAt),
-        ),
-    );
+          conversation0.createdAt.should.above(conversation1.createdAt)));
     it('addAscending & addDescending', () =>
       client.getQuery()
         .addAscending('a')
         .addAscending('b')
         .addDescending('c')
         .addDescending('d')
-        .toJSON().sort.should.be.eql('a,b,-c,-d'),
-    );
+        .toJSON().sort.should.be.eql('a,b,-c,-d'));
     it('compact', () =>
       client.getQuery().equalTo('objectId', EXISTING_ROOM_ID)
         .compact(true)
@@ -309,8 +286,7 @@ describe('ConversationQuery', () => {
         .then((conversations) => {
           conversations.length.should.be.equal(1);
           conversations[0].members.length.should.be.equal(0);
-        }),
-    );
+        }));
     it('withLastMessagesRefreshed', () =>
       client.getQuery().equalTo('objectId', EXISTING_ROOM_ID)
         .withLastMessagesRefreshed()
@@ -323,8 +299,7 @@ describe('ConversationQuery', () => {
           message.id.should.be.ok();
           message.timestamp.should.be.ok();
           message.status.should.be.eql(MessageStatus.SENT);
-        }),
-    );
+        }));
     it('should use cache', () =>
       Promise.all([
         client.getQuery().equalTo('objectId', EXISTING_ROOM_ID)
@@ -333,7 +308,6 @@ describe('ConversationQuery', () => {
           .find().then(conversations => conversations[0]),
       ]).then((conversations) => {
         conversations[0].should.be.exactly(conversations[1]);
-      }),
-    );
+      }));
   });
 });

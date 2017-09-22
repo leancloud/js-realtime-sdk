@@ -43,18 +43,16 @@ class WebSocketPlus extends EventEmitter {
     }
     this._protocol = protocol;
     this.init();
-    this._createWs(this._getUrls, this._protocol).then(
-      () => {
-        this.__postponeTimeoutTimer = this._postponeTimeoutTimer.bind(this);
-        if (global.addEventListener) {
-          this.__pause = () => this.pause();
-          this.__resume = () => this.resume();
-          global.addEventListener('offline', this.__pause);
-          global.addEventListener('online', this.__resume);
-        }
-        this.open();
-      },
-    ).catch(this.throw.bind(this));
+    this._createWs(this._getUrls, this._protocol).then(() => {
+      this.__postponeTimeoutTimer = this._postponeTimeoutTimer.bind(this);
+      if (global.addEventListener) {
+        this.__pause = () => this.pause();
+        this.__resume = () => this.resume();
+        global.addEventListener('offline', this.__pause);
+        global.addEventListener('online', this.__resume);
+      }
+      this.open();
+    }).catch(this.throw.bind(this));
   }
 
   _createWs(getUrls, protocol) {
@@ -63,24 +61,20 @@ class WebSocketPlus extends EventEmitter {
       if (!(urls instanceof Array)) {
         urls = [urls];
       }
-      return tryAll(
-        urls.map(url => (resolve, reject) => {
-          debug(`connect [${url}] ${protocol}`);
-          const ws = protocol ? new WebSocket(
-            url, protocol,
-          ) : new WebSocket(url);
-          ws.binaryType = this.binaryType || 'arraybuffer';
-          ws.onopen = () => resolve(ws);
-          ws.onclose = (error) => {
-            if (error instanceof Error) {
-              return reject(error);
-            }
-            // in browser, error event is useless
-            return reject(new Error(`Failed to connect [${url}]`));
-          };
-          ws.onerror = ws.onclose;
-        }),
-      ).then((ws) => {
+      return tryAll(urls.map(url => (resolve, reject) => {
+        debug(`connect [${url}] ${protocol}`);
+        const ws = protocol ? new WebSocket(url, protocol) : new WebSocket(url);
+        ws.binaryType = this.binaryType || 'arraybuffer';
+        ws.onopen = () => resolve(ws);
+        ws.onclose = (error) => {
+          if (error instanceof Error) {
+            return reject(error);
+          }
+          // in browser, error event is useless
+          return reject(new Error(`Failed to connect [${url}]`));
+        };
+        ws.onerror = ws.onclose;
+      })).then((ws) => {
         this._ws = ws;
         this._ws.onclose = this._handleClose.bind(this);
         this._ws.onmessage = this._handleMessage.bind(this);

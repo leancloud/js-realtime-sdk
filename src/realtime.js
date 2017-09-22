@@ -187,17 +187,15 @@ export default class Realtime extends EventEmitter {
        */
 
       // event proxy
-      ['disconnect', 'reconnect', 'retry', 'schedule', 'offline', 'online'].forEach(
-        event => connection.on(event, (...payload) => {
-          debug(`${event} event emitted. %O`, payload);
-          this.emit(event, ...payload);
-          if (event !== 'reconnect') {
-            internal(this).clients.forEach((client) => {
-              client.emit(event, ...payload);
-            });
-          }
-        }),
-      );
+      ['disconnect', 'reconnect', 'retry', 'schedule', 'offline', 'online'].forEach(event => connection.on(event, (...payload) => {
+        debug(`${event} event emitted. %O`, payload);
+        this.emit(event, ...payload);
+        if (event !== 'reconnect') {
+          internal(this).clients.forEach((client) => {
+            client.emit(event, ...payload);
+          });
+        }
+      }));
       // override handleClose
       connection.handleClose = function handleClose(event) {
         const isFatal = [
@@ -220,15 +218,11 @@ export default class Realtime extends EventEmitter {
   }
 
   _getEndpoints(options) {
-    return Promise.resolve(
-      this._cache.get('endpoints') ||
+    return Promise.resolve(this._cache.get('endpoints') ||
       this
         .constructor
         ._fetchEndpointsInfo(options)
-        .then(
-          tap(info => this._cache.set('endpoints', info, info.ttl * 1000)),
-        ),
-    ).then((info) => {
+        .then(tap(info => this._cache.set('endpoints', info, info.ttl * 1000)))).then((info) => {
       debug('endpoint info: %O', info);
       return [info.server, info.secondary];
     });
@@ -249,27 +243,23 @@ export default class Realtime extends EventEmitter {
             },
             timeout: 20000,
           })
-          .then(
-            res => res.data,
-          )
+          .then(res => res.data)
           .then(tap(debug))
-          .then(
-            ({
-              rtm_router_server: rtmRouter,
-              api_server: api,
-              ttl = 3600,
-            }) => {
-              if (!rtmRouter) {
-                throw new Error('rtm router not exists');
-              }
-              const router = {
-                rtmRouter,
-                api,
-              };
-              routerCache.set(appId, router, ttl * 1000);
-              return router;
-            },
-          )
+          .then(({
+            rtm_router_server: rtmRouter,
+            api_server: api,
+            ttl = 3600,
+          }) => {
+            if (!rtmRouter) {
+              throw new Error('rtm router not exists');
+            }
+            const router = {
+              rtmRouter,
+              api,
+            };
+            routerCache.set(appId, router, ttl * 1000);
+            return router;
+          })
           .catch(() => {
             const id = appId.slice(0, 8).toLowerCase();
             return {
@@ -288,7 +278,9 @@ export default class Realtime extends EventEmitter {
     }
   }
 
-  static _fetchEndpointsInfo({ appId, region, ssl, server }) {
+  static _fetchEndpointsInfo({
+    appId, region, ssl, server,
+  }) {
     debug('fetch endpoint info');
     return this._fetchAppRouter({ appId, region })
       .then(tap(debug))
@@ -302,10 +294,7 @@ export default class Realtime extends EventEmitter {
             _t: Date.now(),
           },
           timeout: 20000,
-        }).then(
-          res => res.data,
-        ).then(tap(debug)),
-      );
+        }).then(res => res.data).then(tap(debug)));
   }
 
   _close() {
@@ -321,14 +310,12 @@ export default class Realtime extends EventEmitter {
    * 只能在 `schedule` 事件之后，`retry` 事件之前调用，如果当前网络正常或者正在进行重连，调用该方法会抛异常。
    */
   retry() {
-    const connection = internal(this).connection;
+    const { connection } = internal(this);
     if (!connection) {
       throw new Error('no connection established');
     }
     if (connection.cannot('retry')) {
-      throw new Error(
-        `retrying not allowed when not disconnected. the connection is now ${connection.current}`,
-      );
+      throw new Error(`retrying not allowed when not disconnected. the connection is now ${connection.current}`);
     }
     return connection.retry();
   }
@@ -343,7 +330,7 @@ export default class Realtime extends EventEmitter {
   pause() {
     // 这个方法常常在网络断开、进入后台时被调用，此时 connection 可能没有建立或者已经 close。
     // 因此不像 retry，这个方法应该尽可能 loose
-    const connection = internal(this).connection;
+    const { connection } = internal(this);
     if (!connection) return;
     if (connection.can('pause')) connection.pause();
   }
@@ -356,7 +343,7 @@ export default class Realtime extends EventEmitter {
    */
   resume() {
     // 与 pause 一样，这个方法应该尽可能 loose
-    const connection = internal(this).connection;
+    const { connection } = internal(this);
     if (!connection) return;
     if (connection.can('resume')) connection.resume();
   }

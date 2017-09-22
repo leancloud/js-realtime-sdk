@@ -27,9 +27,7 @@ export const GroupchatReceiptsPlugin = {
     client._sendReadCommand = (conversations, ...args) => {
       conversations.forEach((conversation) => {
         if (!conversation.transient && conversation.members.length > 2) {
-          conversation.send(
-            new ReadReceipt(conversation.lastMessageAt || new Date()),
-          ).catch(error => console.warn(`Sending groupchat receipt fail: ${error.message}`));
+          conversation.send(new ReadReceipt(conversation.lastMessageAt || new Date())).catch(error => console.warn(`Sending groupchat receipt fail: ${error.message}`));
         }
       });
       return originalSendReadCommand.call(client, conversations, ...args);

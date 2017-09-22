@@ -11,7 +11,7 @@ export default class Cache {
   get(key) {
     const cache = this._map[key];
     if (cache) {
-      const value = cache.value;
+      const { value } = cache;
       if (value !== Expirable.EXPIRED) {
         debug('[%s] hit: %s %O', this.name, key, value);
         return value;
