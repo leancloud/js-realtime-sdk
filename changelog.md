@@ -195,12 +195,12 @@
 - 废弃 `Conversation#markAsRead` 方法，请使用 `Conversation#read` 方法
 - 废弃 `IMClient#markAllAsRead` 方法，请分别调用对应的 `Conversation#read` 方法
 
-SDK 内置了对单聊的已读回执支持。`Conversation` 增加了 `lastDeliveredAt` 与 `lastReadAt` 属性标记了该对话中最后一条已送达与已读的消息时间戳，可以通过 `Conversation#fetchReceiptTimestamps` 方法获取到这两个属性。对于在单聊中发送的需要回执的消息，当对方收到消息时，`lastDeliveredAt` 属性会得到更新，当对方标记会话已读时，`lastReadAt` 属性会得到更新。此外，由于 `reciept` 的含义发生了变化，我们还废弃了 `Conversation` 的 `reciept` 事件（请用 `lastdeliveredatupdate` 事件代替）。与之相关的 API 变化有：
+SDK 内置了对单聊的已读回执支持。`Conversation` 增加了 `lastDeliveredAt` 与 `lastReadAt` 属性标记了该对话中最后一条已送达与已读的消息时间戳，可以通过 `Conversation#fetchReceiptTimestamps` 方法获取到这两个属性。对于在单聊中发送的需要回执的消息，当对方收到消息时，`lastDeliveredAt` 属性会得到更新，当对方标记会话已读时，`lastReadAt` 属性会得到更新。此外，由于 `receipt` 的含义发生了变化，我们还废弃了 `Conversation` 的 `receipt` 事件（请用 `lastdeliveredatupdate` 事件代替）。与之相关的 API 变化有：
 
 - 增加 `Conversation#fetchReceiptTimestamps` 方法
 - 增加 `Conversation` `lastDeliveredAt` 属性与 `lastdeliveredatupdate` 事件
 - 增加 `Conversation` `lastReadAt` 属性与 `lastreadatupdate` 事件
-- 废弃 `Conversation` `reciept` 事件，请使用 `lastdeliveredatupdate` 事件
+- 废弃 `Conversation` `receipt` 事件，请使用 `lastdeliveredatupdate` 事件
 
 群聊的已读回执的支持需要使用 [leancloud-realtime-plugin-groupchat-receipts](https://www.npmjs.com/package/leancloud-realtime-plugin-groupchat-receipts) 插件，详细的使用说明请参见其 [API 文档](https://url.leanapp.cn/groupchat-receipts-apidocs)。
 
