@@ -67,7 +67,7 @@
 /**
  * 在对消息进行 parse 之前，对原始消息进行修改。
  * <p>
- * 接受一个参数为原始消息，是某个消息 JSON 化（<code>message.toJSON()</code>）的返回值，一般是一个 JSON 对象。
+ * 接受一个参数为原始消息，是某个消息的内容，一般是一个 JSON 对象。
  * 该方法需要返回一个 JSON 对象。如果这个结果是异步得到的，也可以返回一个 Promise(fulfilled with a JSON)。
  *
  * @name Plugin.beforeMessageParse

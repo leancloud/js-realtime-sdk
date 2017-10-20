@@ -19,6 +19,8 @@ declare module LeanCloudRealtime {
     getQuery(): ConversationQuery;
     markAllAsRead(conversations: Conversation[]): Promise<Array<Conversation>>;
     ping(clientIds: string[]): Promise<Array<string>>;
+    parseMessage(json: Object): Promise<AVMessage>;
+    parseConversation(json: Object): Promise<Conversation>;
   }
 
   class ConversationQuery {
@@ -91,12 +93,14 @@ declare module LeanCloudRealtime {
     unmute(): Promise<Conversation>;
     update<T extends Message>(message: MessagePointer, newMessage: T): Promise<T>;
     recall(message: MessagePointer): Promise<RecalledMessage>;
+    toJSON(): Object;
+    toFullJSON(): Object;
   }
 
   type MessagePointer = Message | {id: string, timestamp: Date|number};
 
   export interface AVMessage {
-    toJSON(): any;
+    getPayload(): Object | String | ArrayBuffer;
   }
 
   export class Message implements AVMessage {
@@ -113,7 +117,9 @@ declare module LeanCloudRealtime {
     mentionedAll: Boolean;
     static parse(json: Object, message: Message): Message;
     static validate(): boolean;
+    getPayload(): Object | String | ArrayBuffer;
     toJSON(): Object;
+    toFullJSON(): Object;
     setMentionList(mentionList: string[]): Message;
     getMentionList(): string[];
     mentionAll(): Message;

@@ -11,6 +11,8 @@ import {
   ensureArray,
   setValue,
   throttle,
+  encode,
+  decode,
 } from '../src/utils';
 import { wait, sinon } from './test-utils';
 
@@ -80,6 +82,26 @@ describe('Utils', () => {
     const b = [2, 3, 4, 2];
     it('union', () => union(a, b).should.be.eql([1, 2, 3, 4]));
     it('difference', () => difference(a, b).should.be.eql([1]));
+  });
+
+  describe('encode/decode', () => {
+    it('falsy', () => {
+      should(encode()).eql(undefined);
+      should(decode()).eql(undefined);
+    });
+    it('Date', () => {
+      const json = { a: { b: new Date(0) } };
+      const encoded = encode(json);
+      encoded.should.eql({
+        a: {
+          b: {
+            __type: 'Date',
+            iso: '1970-01-01T00:00:00.000Z',
+          },
+        },
+      });
+      decode(encoded).should.eql(json);
+    });
   });
 
   it('ensureArray', () => {

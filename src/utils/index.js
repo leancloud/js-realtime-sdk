@@ -16,9 +16,14 @@ export const tap = interceptor => value => ((interceptor(value), value));
 export { default as Expirable } from './expirable';
 export { default as Cache } from './cache';
 
+/**
+ * 将对象转换为 Date，支持 string、number、ProtoBuf Long 以及 LeanCloud 的 Date 类型，
+ * 其他情况下（包括对象为 falsy）返回原值。
+ * @private
+ */
 export const decodeDate = (date) => {
   if (!date) return date;
-  if (typeof date === 'string') {
+  if (typeof date === 'string' || typeof date === 'number') {
     return new Date(date);
   }
   if (date.__type === 'Date' && date.iso) {
@@ -29,6 +34,45 @@ export const decodeDate = (date) => {
     return new Date(date.toNumber());
   }
   return date;
+};
+/**
+ * 获取 Date 的毫秒数，如果不是一个 Date 返回 undefined。
+ * @private
+ */
+export const getTime = date => ((date && date.getTime) ? date.getTime() : undefined);
+
+/**
+ * 解码对象中的 LeanCloud 数据结构。
+ * 目前仅会处理 Date 类型。
+ * @private
+ */
+export const decode = (value) => {
+  if (!value) return value;
+  if (value.__type === 'Date' && value.iso) {
+    return new Date(value.iso);
+  }
+  if (isPlainObject(value)) {
+    return Object.keys(value).reduce((result, key) => ({
+      ...result,
+      [key]: decode(value[key]),
+    }), {});
+  }
+  return value;
+};
+/**
+ * 将对象中的特殊类型编码为 LeanCloud 数据结构。
+ * 目前仅会处理 Date 类型。
+ * @private
+ */
+export const encode = (value) => {
+  if (value instanceof Date) return { __type: 'Date', iso: value.toJSON() };
+  if (isPlainObject(value)) {
+    return Object.keys(value).reduce((result, key) => ({
+      ...result,
+      [key]: encode(value[key]),
+    }), {});
+  }
+  return value;
 };
 
 export const keyRemap = (keymap, obj) =>
@@ -64,23 +108,25 @@ export const internal = (object) => {
   return map.get(object);
 };
 
-// debug utility
-const removeNull = (obj) => {
+export const compact = (obj, filter) => {
   if (!isPlainObject(obj)) return obj;
   const object = Object.assign({}, obj);
   // eslint-disable-next-line no-restricted-syntax
   for (const prop in object) {
     if ({}.hasOwnProperty.call(object, prop)) {
       const value = object[prop];
-      if (value === null) {
+      if (value === filter) {
         delete object[prop];
       } else {
-        object[prop] = removeNull(value);
+        object[prop] = compact(value, filter);
       }
     }
   }
   return object;
 };
+
+// debug utility
+const removeNull = obj => compact(obj, null);
 export const trim = message => removeNull(JSON.parse(JSON.stringify(message)));
 
 export const ensureArray = (target) => {

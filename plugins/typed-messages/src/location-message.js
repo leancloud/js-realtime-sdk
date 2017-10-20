@@ -37,6 +37,13 @@ export default class LocationMessage extends TypedMessage {
     return this._geoPoint;
   }
 
+  toJSON() {
+    return {
+      ...super.toJSON(),
+      location: this.getLocation().toJSON(),
+    };
+  }
+
   static parse(json, message) {
     const { latitude, longitude } = json._lcloc;
     const geoPoint = new GeoPoint({ latitude, longitude });

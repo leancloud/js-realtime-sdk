@@ -46,6 +46,13 @@ export default class FileMessage extends TypedMessage {
     return this._file;
   }
 
+  toJSON() {
+    return {
+      ...super.toJSON(),
+      file: this.getFile().toJSON(),
+    };
+  }
+
   static _parseFileFromRawData(data) {
     if (!(data && data._lcfile)) {
       throw new Error('malformed FileMessage content');

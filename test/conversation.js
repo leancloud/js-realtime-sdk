@@ -52,6 +52,13 @@ describe('Conversation', () => {
     conversation.get('testProperty2').should.eql(2);
   });
 
+  it('serialize and parse', async () => {
+    const json = conversation.toFullJSON();
+    const parsedConversation =
+      await client.parseConversation(JSON.parse(JSON.stringify(json)));
+    parsedConversation.toFullJSON().should.eql(json);
+  });
+
   it('system conversation', () =>
     client.getConversation(SYS_CONV_ID).then((conv) => {
       conv.system.should.be.equal(true);

@@ -1,3 +1,4 @@
+import { encode as encodeBase64 } from 'base64-arraybuffer';
 import Message from './message';
 
 export default class BinaryMessage extends Message {
@@ -26,5 +27,20 @@ export default class BinaryMessage extends Message {
 
   static validate(target) {
     return target instanceof ArrayBuffer;
+  }
+
+  toJSON() {
+    return {
+      ...super._toJSON(),
+      data: encodeBase64(this.content),
+    };
+  }
+
+  toFullJSON() {
+    return {
+      ...super.toFullJSON(),
+      bin: true,
+      data: encodeBase64(this.content),
+    };
   }
 }

@@ -41,13 +41,13 @@
  */
 
 /**
- * 将当前消息序列化为 JSON 对象 （AVMessage -> JSON)
+ * 获取当前消息的内容，与 parse 相对 （AVMessage -> JSON)
  * <p>
- * 在这个方法中，应该先调用父类的 toJSON 方法，得到 JSON 对象，
+ * 在这个方法中，应该先调用父类的 getPayload 方法，得到 JSON 对象，
  * 然后，将当前消息实例的信息修改 JSON 对象后返回
  * （当然，你也可以不管父类返回的 JSON）。
  *
  * @function
- * @name AVMessage#toJSON
+ * @name AVMessage#getPayload
  * @return {Object} JSON 格式的消息内容
  */

@@ -1,9 +1,8 @@
 import EventEmitter from 'eventemitter3';
 import isEmpty from 'lodash/isEmpty';
 import cloneDeep from 'lodash/cloneDeep';
-import { decode as decodeBase64 } from 'base64-arraybuffer';
 import d from 'debug';
-import { decodeDate, keyRemap, union, difference, internal, setValue } from './utils';
+import { decodeDate, decode, encode, getTime, keyRemap, union, difference, internal, setValue } from './utils';
 import { applyDecorators } from './plugin';
 import IMClient from './im-client';
 import {
@@ -25,7 +24,7 @@ import RecalledMessage from './messages/recalled-message';
 const debug = d('LC:Conversation');
 
 const serializeMessage = (message) => {
-  const content = message.toJSON();
+  const content = message.getPayload();
   let msg;
   let binaryMsg;
   if (content instanceof ArrayBuffer) {
@@ -71,6 +70,9 @@ export default class Conversation extends EventEmitter {
     updatedAt,
     lastMessageAt,
     lastMessage,
+    lastDeliveredAt,
+    lastReadAt,
+    unreadMessagesCount = 0,
     mutedMembers = [],
     members = [],
     transient = false,
@@ -151,14 +153,14 @@ export default class Conversation extends EventEmitter {
        */
       muted,
     });
-    this._attributes = attributes;
+    this._attributes = decode(attributes);
     this._reset();
     this.members = Array.from(new Set(this.members));
     Object.assign(internal(this), {
       messagesWaitingForReceipt: {},
-      lastDeliveredAt: null,
-      lastReadAt: null,
-      unreadMessagesCount: 0,
+      lastDeliveredAt,
+      lastReadAt,
+      unreadMessagesCount,
       mentioned,
     });
     if (client instanceof IMClient) {
@@ -343,6 +345,69 @@ export default class Conversation extends EventEmitter {
     return this;
   }
 
+  /**
+   * 返回 JSON 格式的对话，与 toJSON 不同的是，该对象包含了完整的信息，可以通过 {@link IMClient#parseConversation} 反序列化。
+   * @return {Object} 返回值是一个 plain Object
+   * @since 4.0.0
+   */
+  toFullJSON() {
+    const {
+      id, name, members, creator, system, transient,
+      createdAt, updatedAt, lastMessageAt, lastDeliveredAt, lastReadAt,
+      lastMessage, unreadMessagesCount,
+      _attributes,
+    } = this;
+    return {
+      id,
+      name,
+      members,
+      creator,
+      system,
+      transient,
+      createdAt: getTime(createdAt),
+      updatedAt: getTime(updatedAt),
+      lastMessageAt: getTime(lastMessageAt),
+      lastDeliveredAt: getTime(lastDeliveredAt),
+      lastReadAt: getTime(lastReadAt),
+      lastMessage: lastMessage ? lastMessage.toFullJSON() : undefined,
+      unreadMessagesCount,
+      ..._attributes,
+    };
+  }
+
+  /**
+   * 返回 JSON 格式的对话
+   * @return {Object} 返回值是一个 plain Object
+   * @since 4.0.0
+   */
+  toJSON() {
+    const {
+      id, name, members, creator, system, transient, muted, mutedMembers,
+      createdAt, updatedAt, lastMessageAt, lastDeliveredAt, lastReadAt,
+      lastMessage, unreadMessagesCount, unreadMessagesMentioned,
+      _attributes,
+    } = this;
+    return {
+      id,
+      name,
+      members,
+      creator,
+      system,
+      transient,
+      muted,
+      mutedMembers,
+      createdAt,
+      updatedAt,
+      lastMessageAt,
+      lastDeliveredAt,
+      lastReadAt,
+      lastMessage: lastMessage ? lastMessage.toJSON() : undefined,
+      unreadMessagesCount,
+      unreadMessagesMentioned,
+      ..._attributes,
+    };
+  }
+
   _reset() {
     internal(this).pendingAttributes = {};
     internal(this).currentAttributes = this._attributes;
@@ -380,7 +445,7 @@ export default class Conversation extends EventEmitter {
     this._debug('attr: %O', attr);
     const convMessage = new ConvCommand({
       attr: new JsonObjectMessage({
-        data: JSON.stringify(attr),
+        data: JSON.stringify(encode(attr)),
       }),
     });
     const resCommand = await this._send(new GenericCommand({
@@ -622,7 +687,7 @@ export default class Conversation extends EventEmitter {
         }
         Object.assign(message, {
           id: uid,
-          timestamp: new Date(t.toNumber()),
+          timestamp: t,
         });
         this.lastMessage = message;
         this.lastMessageAt = message.timestamp;
@@ -801,22 +866,19 @@ export default class Conversation extends EventEmitter {
       mentionPids,
       bin,
     }) => {
-      const content = bin ? decodeBase64(data) : data;
-      const message = await this._client._messageParser.parse(content);
-      const messageProps = {
+      const messageData = {
+        data,
+        bin,
         id: msgId,
         cid: this.id,
-        timestamp: new Date(timestamp.toNumber()),
+        timestamp,
         from,
         deliveredAt: ackAt,
+        updatedAt: patchTimestamp,
         mentionList: mentionPids,
         mentionedAll: mentionAll,
       };
-      if (patchTimestamp) {
-        messageProps.updatedAt = new Date(patchTimestamp.toNumber());
-      }
-      Object.assign(message, messageProps);
-      message._updateMentioned(this._client.id);
+      const message = await this._client.parseMessage(messageData);
       let status = MessageStatus.SENT;
       if (this.members.length === 2) {
         if (ackAt) status = MessageStatus.DELIVERED;

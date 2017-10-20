@@ -1,20 +1,15 @@
 import Message from './message';
 import { messageField } from './helpers';
-import { getStaticProperty, isIE10 } from '../utils';
+import { getStaticProperty, isIE10, compact } from '../utils';
 
 // jsdoc-ignore-start
 @messageField(['_lctext', '_lcattrs'])
 // jsdoc-ignore-end
-export default class TypedMessage extends Message {
-  /**
-   * 所有内置的富媒体消息均继承自本类
-   * @extends Message
-   */
-  constructor() {
-    super();
-    this._ = {};
-  }
-
+/**
+ * 所有内置的富媒体消息均继承自本类
+ * @extends Message
+ */
+class TypedMessage extends Message {
   /**
    * @type {Number}
    * @readonly
@@ -96,11 +91,34 @@ export default class TypedMessage extends Message {
   }
   /* eslint-enable class-methods-use-this */
 
-  toJSON() {
-    return Object.assign({
+  getPayload() {
+    return compact(Object.assign({
       _lctext: this.getText(),
       _lcattrs: this.getAttributes(),
-    }, this._getCustomFields(), this._getType());
+    }, this._getCustomFields(), this._getType()));
+  }
+
+  toJSON() {
+    const {
+      type,
+      text,
+      attributes,
+      summary,
+    } = this;
+    return {
+      ...super._toJSON(),
+      type,
+      text,
+      attributes,
+      summary,
+    };
+  }
+
+  toFullJSON() {
+    return {
+      ...super.toFullJSON(),
+      data: this.getPayload(),
+    };
   }
 
   /**
@@ -129,3 +147,5 @@ export default class TypedMessage extends Message {
     return super.parse(json, message);
   }
 }
+
+export default TypedMessage;

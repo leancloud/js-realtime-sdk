@@ -86,7 +86,7 @@ describe('Messages', () => {
       message.type.should.eql(-1);
       (() => { message.type = 0; }).should.throw();
     });
-    it('parse and toJSON', () => {
+    it('parse and getPayload', () => {
       const json = {
         _lctext: 'leancloud',
         _lcattrs: {
@@ -96,17 +96,17 @@ describe('Messages', () => {
       };
       const message = new TextMessage(json._lctext)
         .setAttributes(json._lcattrs);
-      message.toJSON().should.eql(json);
+      message.getPayload().should.eql(json);
       const parsedMessage = TextMessage.parse(json);
       parsedMessage.should.be.instanceof(TextMessage);
       parsedMessage.getText().should.eql(json._lctext);
       parsedMessage.getAttributes().should.eql(json._lcattrs);
-      parsedMessage.toJSON().should.eql(json);
+      parsedMessage.getPayload().should.eql(json);
     });
   });
 
   describe('CustomMessage', () => {
-    it('parse and toJSON', () => {
+    it('parse and getPayload', () => {
       const json = {
         _lctext: 'leancloud',
         _lcattrs: {
@@ -118,13 +118,13 @@ describe('Messages', () => {
       const message = new CustomMessage(json.foo)
         .setText('leancloud')
         .setAttributes(json._lcattrs);
-      message.toJSON().should.eql(json);
+      message.getPayload().should.eql(json);
       const parsedMessage = CustomMessage.parse(json);
       parsedMessage.should.be.instanceof(CustomMessage);
       parsedMessage.getText().should.eql(json._lctext);
       parsedMessage.getAttributes().should.eql(json._lcattrs);
       parsedMessage.foo.should.eql(json.foo);
-      parsedMessage.toJSON().should.eql(json);
+      parsedMessage.getPayload().should.eql(json);
     });
   });
 
