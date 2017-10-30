@@ -1,5 +1,5 @@
 import uuid from 'uuid/v4';
-import { ensureArray } from '../utils';
+import { ensureArray, decodeDate, compact } from '../utils';
 
 
 /**
@@ -63,11 +63,6 @@ export default class Message {
        */
       from: undefined,
       /**
-       * @var deliveredAt {?Date} 消息送达时间
-       * @memberof Message#
-       */
-      // deliveredAt,
-      /**
        * 消息提及的用户
        * @since 4.0.0
        * @memberof Message#
@@ -87,12 +82,78 @@ export default class Message {
   }
 
   /**
-   * 将当前消息序列化为 JSON 对象
-   * @protected
+   * 将当前消息的内容序列化为 JSON 对象
+   * @private
    * @return {Object}
    */
-  toJSON() {
+  getPayload() {
     return this.content;
+  }
+
+  _toJSON() {
+    const {
+      id,
+      cid,
+      from,
+      timestamp,
+      deliveredAt,
+      updatedAt,
+      mentionList,
+      mentionedAll,
+      mentioned,
+    } = this;
+    return {
+      id,
+      cid,
+      from,
+      timestamp,
+      deliveredAt,
+      updatedAt,
+      mentionList,
+      mentionedAll,
+      mentioned,
+    };
+  }
+
+  /**
+   * 返回 JSON 格式的消息
+   * @return {Object} 返回值是一个 plain Object
+   */
+  toJSON() {
+    return {
+      ...this._toJSON(),
+      data: this.content,
+    };
+  }
+
+  /**
+   * 返回 JSON 格式的消息，与 toJSON 不同的是，该对象包含了完整的信息，可以通过 {@link IMClient#parseMessage} 反序列化。
+   * @return {Object} 返回值是一个 plain Object
+   * @since 4.0.0
+   */
+  toFullJSON() {
+    const {
+      content,
+      id,
+      cid,
+      from,
+      timestamp,
+      deliveredAt,
+      _updatedAt,
+      mentionList,
+      mentionedAll,
+    } = this;
+    return compact({
+      data: content,
+      id,
+      cid,
+      from,
+      timestamp,
+      deliveredAt,
+      updatedAt: _updatedAt,
+      mentionList,
+      mentionedAll,
+    });
   }
 
   /**
@@ -112,6 +173,24 @@ export default class Message {
     this._status = status;
   }
 
+  get timestamp() {
+    return this._timestamp;
+  }
+  set timestamp(value) {
+    this._timestamp = decodeDate(value);
+  }
+
+  /**
+   * 消息送达时间
+   * @type {?Date}
+   */
+  get deliveredAt() {
+    return this._deliveredAt;
+  }
+  set deliveredAt(value) {
+    this._deliveredAt = decodeDate(value);
+  }
+
   /**
    * 消息修改或撤回时间，可以通过比较其与消息的 timestamp 是否相等判断消息是否被修改过或撤回过。
    * @type {Date}
@@ -121,7 +200,7 @@ export default class Message {
     return this._updatedAt || this.timestamp;
   }
   set updatedAt(value) {
-    this._updatedAt = value;
+    this._updatedAt = decodeDate(value);
   }
 
   /**
@@ -170,7 +249,7 @@ export default class Message {
   /**
    * 判断给定的内容是否是有效的 Message，
    * 该方法始终返回 true
-   * @protected
+   * @private
    * @returns {Boolean}
    * @implements AVMessage.validate
    */
@@ -183,7 +262,7 @@ export default class Message {
    * <pre>
    * 如果子类提供了 message，返回该 message
    * 如果没有提供，将 json 作为 content 实例化一个 Message
-   * @protected
+   * @private
    * @param  {Object}  json    json 格式的消息内容
    * @param  {Message} message 子类提供的 message
    * @return {Message}

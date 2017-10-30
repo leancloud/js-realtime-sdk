@@ -56,7 +56,7 @@ describe('Plugin', () => {
     it('should work', () => {
       realtime.test().should.be.ok();
       const messageHandler = sinon.spy();
-      return realtime._messageParser.parse(new PluginDefinedMessage().toJSON())
+      return realtime._messageParser.parse(new PluginDefinedMessage().getPayload())
         .then(message => message.should.be.instanceof(PluginDefinedMessage))
         .then(() => {
           client.test().should.be.ok();
@@ -116,7 +116,7 @@ describe('Plugin', () => {
       realtime.test2().should.be.eql(1);
     });
     it('all middlewares should be applied', () =>
-      realtime._messageParser.parse(new TextMessage('1').toJSON())
+      realtime._messageParser.parse(new TextMessage('1').getPayload())
         .then((message) => {
           message.should.be.instanceof(TextMessage);
           message.text.should.startWith('[plugin-test]');
@@ -161,7 +161,7 @@ describe('Plugin', () => {
             throw new Error('test');
           },
         }],
-      })._messageParser.parse(new TextMessage('1').toJSON())
+      })._messageParser.parse(new TextMessage('1').getPayload())
         .should.be.rejectedWith('test[ErrorPlugin]'));
     it('beforeMessageDispatch error should be reported', () =>
       new Realtime({
@@ -189,7 +189,7 @@ describe('Plugin', () => {
             name: 'ErrorPlugin',
             beforeMessageParse: () => Promise.resolve(),
           }],
-        })._messageParser.parse(new TextMessage('1').toJSON()),
+        })._messageParser.parse(new TextMessage('1').getPayload()),
         new Realtime({
           appId: APP_ID,
           appKey: APP_KEY,
@@ -198,7 +198,7 @@ describe('Plugin', () => {
             name: 'ErrorPlugin',
             beforeMessageParse: () => 1,
           }],
-        })._messageParser.parse(new TextMessage('1').toJSON()),
+        })._messageParser.parse(new TextMessage('1').getPayload()),
       ]).then(() => {
         spy.should.be.calledTwice();
         spy.restore();

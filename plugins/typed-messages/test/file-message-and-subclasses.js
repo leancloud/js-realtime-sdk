@@ -1,12 +1,26 @@
 import 'should';
 import 'should-sinon';
+import isPlainObject from 'lodash/isPlainObject';
 import { File } from 'leancloud-storage';
 import {
   FileMessage,
   ImageMessage,
   AudioMessage,
   VideoMessage,
+  TypedMessagesPlugin,
 } from '../src/';
+import { Realtime } from '../../../src';
+import IMClient from '../../../src/im-client';
+
+const realtime = new Realtime({
+  appId: '',
+  appKey: '',
+  plugins: TypedMessagesPlugin,
+});
+const client = new IMClient('test', undefined, undefined, {
+  _messageParser: realtime._messageParser,
+  _plugins: realtime._plugins,
+});
 
 describe('FileMessage and subclasses', () => {
   let file;
@@ -35,7 +49,7 @@ describe('FileMessage and subclasses', () => {
           message.setText('chrome');
           message.setAttributes({ version: 31 });
           message.getFile().should.be.exactly(file1);
-          const json = message.toJSON();
+          const json = message.getPayload();
           json.should.containDeep({
             _lctype: -6,
             _lctext: 'chrome',
@@ -70,7 +84,7 @@ describe('FileMessage and subclasses', () => {
         message.setText('chrome');
         message.setAttributes({ version: 31 });
         message.getFile().should.be.exactly(file);
-        const json = message.toJSON();
+        const json = message.getPayload();
         json.should.containDeep({
           _lctype: -6,
           _lctext: 'chrome',
@@ -102,6 +116,21 @@ describe('FileMessage and subclasses', () => {
       FileMessage.parse({ _lcfile: { url: FILE_URL } })
         .should.be.instanceof(FileMessage);
     });
+    it('toJSON', () => {
+      const message = new FileMessage(file);
+      const json = message.toJSON();
+      json.file.should.be.ok();
+      isPlainObject(json.file).should.be.ok();
+    });
+    it('serialize and parse', async () => {
+      const message = new FileMessage(file);
+      message.setAttributes({ foo: 'bar' });
+      const json = message.toFullJSON();
+      const parsedMessage =
+        await client.parseMessage(JSON.parse(JSON.stringify(json)));
+      parsedMessage.should.be.instanceof(FileMessage);
+      parsedMessage.toFullJSON().should.eql(json);
+    });
   });
 
   describe('ImageMessage', () => {
@@ -113,7 +142,7 @@ describe('FileMessage and subclasses', () => {
         message.setText('chrome');
         message.setAttributes({ version: 31 });
         message.getFile().should.be.exactly(file);
-        const json = message.toJSON();
+        const json = message.getPayload();
         json.should.containDeep({
           _lctype: -2,
           _lctext: 'chrome',
@@ -153,7 +182,7 @@ describe('FileMessage and subclasses', () => {
         message.setText('chrome');
         message.setAttributes({ version: 31 });
         message.getFile().should.be.exactly(file);
-        const json = message.toJSON();
+        const json = message.getPayload();
         json.should.containDeep({
           _lctype: -3,
         });
@@ -176,7 +205,7 @@ describe('FileMessage and subclasses', () => {
         message.setText('chrome');
         message.setAttributes({ version: 31 });
         message.getFile().should.be.exactly(file);
-        const json = message.toJSON();
+        const json = message.getPayload();
         json.should.containDeep({
           _lctype: -4,
         });

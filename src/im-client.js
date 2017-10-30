@@ -1,4 +1,5 @@
 import EventEmitter from 'eventemitter3';
+import { decode as decodeBase64 } from 'base64-arraybuffer';
 import d from 'debug';
 import Conversation from './conversation';
 import ConversationQuery from './conversation-query';
@@ -14,13 +15,14 @@ import {
   OpType,
 } from '../proto/message';
 import { ErrorCode, createError } from './error';
-import { Expirable, Cache, keyRemap, union, difference, trim, internal, throttle } from './utils';
+import { Expirable, Cache, keyRemap, union, difference, trim, internal, throttle, encode, decode } from './utils';
 import { applyDecorators, applyDispatcher } from './plugin';
 import runSignatureFactory from './signature-factory-runner';
 import { MessageStatus } from './messages/message';
 import { version as VERSION } from '../package.json';
 
 const debug = d('LC:IMClient');
+
 
 export default class IMClient extends EventEmitter {
   /**
@@ -171,11 +173,9 @@ export default class IMClient extends EventEmitter {
             id: mid,
             cid,
             timestamp,
+            updatedAt: patchTimestamp,
             from,
           };
-          if (patchTimestamp) {
-            messageProps.updatedAt = new Date(patchTimestamp.toNumber());
-          }
           Object.assign(message, messageProps);
           conversation.lastMessage = message; // eslint-disable-line no-param-reassign
         }) : Promise.resolve()).then(() => {
@@ -236,8 +236,8 @@ export default class IMClient extends EventEmitter {
             const messageProps = {
               id: mid,
               cid,
-              timestamp: new Date(timestamp.toNumber()),
-              updatedAt: new Date(patchTime),
+              timestamp,
+              updatedAt: patchTime,
               from,
               mentionList: mentionPids,
               mentionedAll: mentionAll,
@@ -424,14 +424,12 @@ export default class IMClient extends EventEmitter {
       const messageProps = {
         id,
         cid,
-        timestamp: new Date(timestamp.toNumber()),
+        timestamp,
+        updatedAt: patchTimestamp,
         from: fromPeerId,
         mentionList: mentionPids,
         mentionedAll: mentionAll,
       };
-      if (patchTimestamp) {
-        messageProps.updatedAt = new Date(patchTimestamp.toNumber());
-      }
       Object.assign(message, messageProps);
       message._updateMentioned(this.id);
       message._setStatus(MessageStatus.SENT);
@@ -699,7 +697,7 @@ export default class IMClient extends EventEmitter {
   async _executeQuery(query) {
     const queryJSON = query.toJSON();
     queryJSON.where = new JsonObjectMessage({
-      data: JSON.stringify(queryJSON.where),
+      data: JSON.stringify(encode(queryJSON.where)),
     });
     const command = new GenericCommand({
       cmd: 'conv',
@@ -709,7 +707,7 @@ export default class IMClient extends EventEmitter {
     const resCommand = await this._send(command);
     let conversations;
     try {
-      conversations = JSON.parse(resCommand.convMessage.results.data);
+      conversations = JSON.parse(decode(resCommand.convMessage.results.data));
     } catch (error) {
       const commandString = JSON.stringify(trim(resCommand));
       throw new Error(`Parse query result failed: ${error.message}. Command: ${commandString}`);
@@ -745,6 +743,39 @@ export default class IMClient extends EventEmitter {
     });
   }
 
+  /**
+   * 反序列化消息，与 {@link Message#toFullJSON} 相对。
+   * @param {Object}
+   * @return {AVMessage} 解析后的消息
+   * @since 4.0.0
+   */
+  async parseMessage({
+    data,
+    bin = false,
+    ...properties
+  }) {
+    const content = bin ? decodeBase64(data) : data;
+    const message = await this._messageParser.parse(content);
+    Object.assign(message, properties);
+    message._updateMentioned(this.id);
+    return message;
+  }
+
+  /**
+   * 反序列化对话，与 {@link Conversation#toFullJSON} 相对。
+   * @param {Object}
+   * @return {Conversation} 解析后的对话
+   * @since 4.0.0
+   */
+  async parseConversation(json) {
+    const data = { ...json };
+    if (data.lastMessage) {
+      data.lastMessage = await this.parseMessage(data.lastMessage);
+    }
+    const conversation = new Conversation(data, this);
+    return conversation;
+  }
+
   async _parseConversationFromRawData(rawData) {
     const data = keyRemap({
       objectId: 'id',
@@ -761,14 +792,15 @@ export default class IMClient extends EventEmitter {
       mu: 'mutedMembers',
     }, rawData);
     if (data.lastMessage) {
+      if (data.bin) {
+        data.lastMessage = decodeBase64(data.lastMessage);
+      }
       const message = await this._messageParser.parse(data.lastMessage);
       data.lastMessage = message;
       message.from = data.lastMessageFrom;
       message.id = data.lastMessageId;
-      message.timestamp = new Date(data.lastMessageTimestamp);
-      if (data.lastMessagePatchTimestamp) {
-        message.updatedAt = new Date(data.lastMessagePatchTimestamp);
-      }
+      message.timestamp = data.lastMessageTimestamp;
+      message.updatedAt = data.lastMessagePatchTimestamp;
       message._setStatus(MessageStatus.SENT);
       delete data.lastMessageFrom;
       delete data.lastMessageId;
@@ -809,7 +841,7 @@ export default class IMClient extends EventEmitter {
       attr.name = name;
     }
     attr = new JsonObjectMessage({
-      data: JSON.stringify(attr),
+      data: JSON.stringify(encode(attr)),
     });
 
     const startCommandJson = {

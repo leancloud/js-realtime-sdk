@@ -1,21 +1,35 @@
 import 'should';
 import 'should-sinon';
+import isPlainObject from 'lodash/isPlainObject';
 import { GeoPoint } from 'leancloud-storage';
-import { LocationMessage } from '../src/';
+import { LocationMessage, TypedMessagesPlugin } from '../src/';
+import { Realtime } from '../../../src';
+import IMClient from '../../../src/im-client';
+
+const realtime = new Realtime({
+  appId: '',
+  appKey: '',
+  plugins: TypedMessagesPlugin,
+});
+const client = new IMClient('test', undefined, undefined, {
+  _messageParser: realtime._messageParser,
+  _plugins: realtime._plugins,
+});
+
+const LATITUDE = 39.9704503;
+const LONGITUDE = 116.3783714;
+const location = new GeoPoint(LATITUDE, LONGITUDE);
 
 describe('LocationMessage', () => {
   it('param check', () => {
     (() => new LocationMessage('1')).should.throw();
   });
-  it('parse and toJSON', () => {
-    const LATITUDE = 39.9704503;
-    const LONGITUDE = 116.3783714;
-    const location = new GeoPoint(LATITUDE, LONGITUDE);
+  it('parse and getPayload', () => {
     const message = new LocationMessage(location);
     message.setText('Jinao');
     message.setAttributes({ district: 'Haidian' });
     message.getLocation().should.be.exactly(location);
-    const json = message.toJSON();
+    const json = message.getPayload();
     json.should.eql({
       _lctype: -5,
       _lctext: 'Jinao',
@@ -32,5 +46,19 @@ describe('LocationMessage', () => {
     locationCopy.should.not.be.exactly(location);
     locationCopy.latitude.should.eql(LATITUDE);
     locationCopy.longitude.should.be.eql(LONGITUDE);
+  });
+  it('toJSON', () => {
+    const message = new LocationMessage(location);
+    const json = message.toJSON();
+    json.location.should.be.ok();
+    isPlainObject(json.location).should.be.ok();
+  });
+  it('serialize and parse', async () => {
+    const message = new LocationMessage(location);
+    const json = message.toFullJSON();
+    const parsedMessage =
+      await client.parseMessage(JSON.parse(JSON.stringify(json)));
+    parsedMessage.should.be.instanceof(LocationMessage);
+    parsedMessage.toFullJSON().should.eql(json);
   });
 });
