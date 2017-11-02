@@ -1,6 +1,6 @@
 {
   "name": "leancloud-realtime-plugin-typed-messages",
-  "version": "2.0.0",
+  "version": "3.0.0",
   "description": "TypedMessages for LeanCloud Realtime",
   "main": "./dist/typed-messages.js",
   "directories": {
@@ -24,6 +24,6 @@
   "homepage": "https://github.com/leancloud/js-realtime-sdk#readme",
   "peerDependencies": {
     "leancloud-storage": "^2.0.0 || ^3.0.0",
-    "leancloud-realtime": "^3.1.0"
+    "leancloud-realtime": "^4.0.0-alpha.3"
   }
 }

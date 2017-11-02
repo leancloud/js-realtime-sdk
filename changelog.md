@@ -1,3 +1,18 @@
+<a name="4.0.0-alpha.3"></a>
+# 4.0.0-alpha.3 (2017-11-02)
+
+
+### BREAKING CHANGES
+
+* 重新设计了对话与消息的序列化方法。现在在小程序中能够直接将 Conversation 与 Message 实例作为 data 设置给视图层使用了。
+  * `AVMessage` 接口原有的用来获取消息内容的 `toJSON` 方法现在改名为 `getPayload`。内置的 `Message` 类及其子类均已更新，如果使用富文本消息插件（leancloud-realtime-plugin-typed-messages），需要更新插件至 v3.0.0。
+  * `Message` 类及其子类重新实现了 `toJSON` 方法用于获取该消息的有效信息。
+  * `Conversation` 类增加了 `toJSON` 方法用于获取该对话的有效信息。
+
+### Bug Fixes
+* 解决了与序列化 Conversation 抛循环引用异常相关的问题，包括小程序中无法 `console.log` Conversation 的问题。
+
+
 <a name="4.0.0-alpha.2"></a>
 # 4.0.0-alpha.2 (2017-09-22)
 
