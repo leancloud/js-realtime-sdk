@@ -196,7 +196,7 @@ describe('Connection', () => {
       convMessage: new ConvCommand({
         cid: NON_EXISTING_ROOM_ID,
       }),
-    })).should.be.rejectedWith('CONVERSATION_UPDATE_REJECTED'));
+    })).should.be.rejectedWith('CONVERSATION_NOT_FOUND'));
   it('message dispatch', () => {
     const clientMessageEventCallback = sinon.spy(client, '_dispatchCommand');
     connection.emit('message', new GenericCommand({

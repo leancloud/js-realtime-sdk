@@ -8,7 +8,7 @@
     "test": "test"
   },
   "scripts": {
-    "precommit": "validate-commit-msg",
+    "commitmsg": "commitlint -e $GIT_PARAMS",
     "lint": "eslint --ignore-path .gitignore src test plugins && tsc realtime.d.ts",
     "test": "npm run lint && npm run build && npm run docs && npm run test:node && npm run test:browser",
     "test:node": "NODE_ENV=test nyc mocha --timeout 30000 test/index.js plugins/**/test/index.js",
@@ -70,10 +70,11 @@
     "should-sinon": "0.0.5",
     "sinon": "^3.3.0",
     "typescript": "^2.4.1",
-    "validate-commit-msg": "^2.10.1",
     "weapp-polyfill": "^1.1.0"
   },
   "dependencies": {
+    "@commitlint/cli": "^4.2.2",
+    "@commitlint/config-angular": "^4.2.1",
     "axios": "^0.16.1",
     "babel-runtime": "^6.6.1",
     "base64-arraybuffer": "^0.1.5",
@@ -110,6 +111,9 @@
     ],
     "sourceMap": false,
     "instrument": false
+  },
+  "commitlint": {
+    "extends": ["@commitlint/config-angular"]
   },
   "types": "./realtime.d.ts",
   "typings": "./realtime.d.ts"
