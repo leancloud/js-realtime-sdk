@@ -197,25 +197,36 @@ describe('Connection', () => {
         cid: NON_EXISTING_ROOM_ID,
       }),
     })).should.be.rejectedWith('CONVERSATION_NOT_FOUND'));
-  it('message dispatch', () => {
-    const clientMessageEventCallback = sinon.spy(client, '_dispatchCommand');
+  it('message dispatch', async () => {
+    let clientMessageEventCallback = sinon.spy(client, '_dispatchCommand');
     connection.emit('message', new GenericCommand({
       cmd: 1,
+      service: 0,
     }));
     connection.emit('message', new GenericCommand({
       cmd: 1,
       peerId: 'fake clientId',
     }));
+    await wait(0);
     clientMessageEventCallback.should.not.be.called();
     const validMessage = new GenericCommand({
       cmd: 1,
       peerId: client.id,
     });
     connection.emit('message', validMessage);
-    return wait(0).then(() => {
-      clientMessageEventCallback.should.be.calledOnce();
-      clientMessageEventCallback.should.be.calledWith(validMessage);
-      clientMessageEventCallback.restore();
+    await wait(0);
+    clientMessageEventCallback.should.be.calledOnce();
+    clientMessageEventCallback.should.be.calledWith(validMessage);
+    clientMessageEventCallback.restore();
+    clientMessageEventCallback = sinon.spy(client, '_dispatchCommand');
+    const omitPeerIdMessage = new GenericCommand({
+      cmd: 1,
+      service: 2,
     });
+    connection.emit('message', omitPeerIdMessage);
+    await wait(0);
+    clientMessageEventCallback.should.be.calledOnce();
+    clientMessageEventCallback.should.be.calledWith(omitPeerIdMessage);
+    clientMessageEventCallback.restore();
   });
 });
