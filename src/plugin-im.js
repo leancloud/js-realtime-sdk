@@ -122,6 +122,7 @@ const onRealtimeCreate = (realtime) => {
   /* eslint-disable no-param-reassign */
   const deviceId = uuid();
   realtime._IMClients = {};
+  realtime._IMClientsCreationCount = 0;
   const messageParser = new MessageParser(realtime._plugins);
   realtime._messageParser = messageParser;
 
@@ -207,6 +208,13 @@ const onRealtimeCreate = (realtime) => {
       return client._open(realtime._options.appId, tag, deviceId)
         .then(() => {
           realtime._IMClients[client.id] = client;
+          realtime._IMClientsCreationCount += 1;
+          if (realtime._IMClientsCreationCount === 1) {
+            client._omitPeerId(true);
+            realtime._firstIMClient = client;
+          } else if (realtime._IMClientsCreationCount > 1 && realtime._firstIMClient) {
+            realtime._firstIMClient._omitPeerId(false);
+          }
           realtime._register(client);
           return client;
         }).catch((error) => {
@@ -227,8 +235,11 @@ const onRealtimeCreate = (realtime) => {
 };
 
 const beforeCommandDispatch = (command, realtime) => {
-  if (command.peerId === null) return true;
-  const targetClient = realtime._IMClients[command.peerId];
+  const isIMCommand = command.service === null || command.service === 2;
+  if (!isIMCommand) return true;
+  const targetClient = command.peerId ?
+    realtime._IMClients[command.peerId] :
+    realtime._firstIMClient;
   if (targetClient) {
     Promise.resolve(targetClient).then(client => client._dispatchCommand(command)).catch(debug);
   } else {

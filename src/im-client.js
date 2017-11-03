@@ -496,6 +496,7 @@ export default class IMClient extends EventEmitter {
       const timestamps = convAckMessages.map(message => message.timestamp);
       const command = new GenericCommand({
         cmd: 'ack',
+        peerId: this.id,
         ackMessage: new AckCommand({
           cid,
           fromts: Math.min.apply(null, timestamps),
@@ -510,9 +511,13 @@ export default class IMClient extends EventEmitter {
     }));
   }
 
+  _omitPeerId(value) {
+    internal(this).peerIdOmittable = value;
+  }
+
   _send(cmd, ...args) {
     const command = cmd;
-    if (this.id) {
+    if (!internal(this).peerIdOmittable && this.id) {
       command.peerId = this.id;
     }
     return this._connection.send(command, ...args);
