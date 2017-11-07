@@ -13,49 +13,50 @@ declare module LeanCloudRealtime {
 
   class IMClient extends EventEmitter {
     id: string;
-    close(): Promise<any>;
-    createConversation(options: { members?: string[], name?: string, transient?: boolean, unique?: boolean, [key: string]: any }): Promise<Conversation>;
-    getConversation(id: string, noCache?: boolean): Promise<Conversation>;
+    close(): Promise<void>;
+    createConversation(options: { members?: string[], name?: string, transient?: boolean, unique?: boolean, [key: string]: any }): Promise<ConversationBase>;
+    createChatRoom(options: { name?: string, [key: string]: any }): Promise<ChatRoom>;
+    getConversation(id: string, noCache?: boolean): Promise<ConversationBase>;
     getQuery(): ConversationQuery;
-    markAllAsRead(conversations: Conversation[]): Promise<Array<Conversation>>;
+    markAllAsRead(conversations: ConversationBase[]): Promise<Array<ConversationBase>>;
     ping(clientIds: string[]): Promise<Array<string>>;
     parseMessage(json: Object): Promise<AVMessage>;
-    parseConversation(json: Object): Promise<Conversation>;
+    parseConversation(json: Object): Promise<ConversationBase>;
   }
 
   class ConversationQuery {
-    addAscending(key: string): ConversationQuery;
-    addDescending(key: string): ConversationQuery;
-    ascending(key: string): ConversationQuery;
-    compact(enabled?: boolean): ConversationQuery;
-    containedIn(key: string, values: any): ConversationQuery;
-    contains(key: string, subString: string): ConversationQuery;
-    containsAll(key: string, values: any): ConversationQuery;
-    containsMembers(peerIds: string[]): ConversationQuery;
-    descending(key: string): ConversationQuery;
-    doesNotExist(key: string): ConversationQuery;
-    endsWith(key: string, suffix: string): ConversationQuery;
-    equalTo(key: string, value: any): ConversationQuery;
-    exists(key: string): ConversationQuery;
-    find(): Promise<Array<Conversation>>;
-    greaterThan(key: string, value: any): ConversationQuery;
-    greaterThanOrEqualTo(key: string, value: any): ConversationQuery;
-    lessThan(key: string, value: any): ConversationQuery;
-    lessThanOrEqualTo(key: string, value: any): ConversationQuery;
-    limit(limit: number): ConversationQuery;
-    matches(key: string, regex: string): ConversationQuery;
-    notContainsIn(key: string, values: any): ConversationQuery;
-    notEqualTo(key: string, value: any): ConversationQuery;
-    sizeEqualTo(key: string, length: number): ConversationQuery;
-    skip(skip: number): ConversationQuery;
-    startsWith(key: string, prefix: string): ConversationQuery;
-    withLastMessagesRefreshed(enabled?: boolean): ConversationQuery;
-    withMembers(peerIds: string[], includeSelf: boolean): ConversationQuery;
+    addAscending(key: string): this;
+    addDescending(key: string): this;
+    ascending(key: string): this;
+    compact(enabled?: boolean): this;
+    containedIn(key: string, values: any): this;
+    contains(key: string, subString: string): this;
+    containsAll(key: string, values: any): this;
+    containsMembers(peerIds: string[]): this;
+    descending(key: string): this;
+    doesNotExist(key: string): this;
+    endsWith(key: string, suffix: string): this;
+    equalTo(key: string, value: any): this;
+    exists(key: string): this;
+    find(): Promise<Array<ConversationBase>>;
+    greaterThan(key: string, value: any): this;
+    greaterThanOrEqualTo(key: string, value: any): this;
+    lessThan(key: string, value: any): this;
+    lessThanOrEqualTo(key: string, value: any): this;
+    limit(limit: number): this;
+    matches(key: string, regex: string): this;
+    notContainsIn(key: string, values: any): this;
+    notEqualTo(key: string, value: any): this;
+    sizeEqualTo(key: string, length: number): this;
+    skip(skip: number): this;
+    startsWith(key: string, prefix: string): this;
+    withLastMessagesRefreshed(enabled?: boolean): this;
+    withMembers(peerIds: string[], includeSelf: boolean): this;
   }
   /**
   *  对话
   */
-  class Conversation extends EventEmitter {
+  class ConversationBase extends EventEmitter {
     id: string;
     name: string;
     creator: string;
@@ -74,33 +75,39 @@ declare module LeanCloudRealtime {
     readonly unreadMessagesMentioned: Boolean;
     [key: string]: any;
     // constructor();
-    add(members: string[]): Promise<Conversation>;
+    add(members: string[]): Promise<this>;
     count(): Promise<number>;
     createMessagesIterator(option: { limit?: number, beforeTime?: Date, beforeMessageId?: string });
-    fetch(): Promise<Conversation>;
+    fetch(): Promise<this>;
     get(key: string): any;
-    join(): Promise<Conversation>;
-    read(): Promise<Conversation>;
-    fetchReceiptTimestamps(): Promise<Conversation>;
-    mute(): Promise<Conversation>;
+    join(): Promise<this>;
+    read(): Promise<this>;
+    fetchReceiptTimestamps(): Promise<this>;
+    mute(): Promise<this>;
     queryMessages(options: { beforeTime?: Date, beforeMessageId?: string, afterTime?: Date, afterMessageId?: string, limit?: number }): Promise<Array<Message>>;
     queryMessages(options: { startTime?: Date, startMessageId?: string, startClosed?: boolean, endTime?: Date, endMessageId?: string, endClosed?: boolean, limit?: number, direction?: MessageQueryDirection }): Promise<Array<Message>>;
-    quit(): Promise<Conversation>;
-    remove(clientIds: string[]): Promise<Conversation>;
-    save(): Promise<Conversation>;
-    send(message: Message, options?: { pushData?: Object, priority?: MessagePriority, receipt?: boolean, transient?: boolean, will?: boolean }): Promise<Message>;
-    set(key: string, value: any): Conversation;
-    unmute(): Promise<Conversation>;
+    quit(): Promise<this>;
+    remove(clientIds: string[]): Promise<this>;
+    save(): Promise<this>;
+    send<T extends Message>(message: T, options?: { pushData?: Object, priority?: MessagePriority, receipt?: boolean, transient?: boolean, will?: boolean }): Promise<T>;
+    set(key: string, value: any): this;
+    unmute(): Promise<this>;
     update<T extends Message>(message: MessagePointer, newMessage: T): Promise<T>;
     recall(message: MessagePointer): Promise<RecalledMessage>;
     toJSON(): Object;
     toFullJSON(): Object;
   }
 
+  export class Conversation extends ConversationBase {}
+  export class ChatRoom extends ConversationBase {}
+  export class ServiceConversation extends ConversationBase {}
+
   type MessagePointer = Message | {id: string, timestamp: Date|number};
 
+  type Payload = Object | String | ArrayBuffer;
+
   export interface AVMessage {
-    getPayload(): Object | String | ArrayBuffer;
+    getPayload(): Payload;
   }
 
   export class Message implements AVMessage {
@@ -117,12 +124,12 @@ declare module LeanCloudRealtime {
     mentionedAll: Boolean;
     static parse(json: Object, message: Message): Message;
     static validate(): boolean;
-    getPayload(): Object | String | ArrayBuffer;
+    getPayload(): Payload;
     toJSON(): Object;
     toFullJSON(): Object;
-    setMentionList(mentionList: string[]): Message;
+    setMentionList(mentionList: string[]): this;
     getMentionList(): string[];
-    mentionAll(): Message;
+    mentionAll(): this;
   }
 
   // 二进制消息
@@ -139,7 +146,7 @@ declare module LeanCloudRealtime {
     type: number;
     getAttributes(): {};
     getText(): string;
-    setAttributes(attributes: {}): TypedMessage;
+    setAttributes(attributes: {}): this;
   }
 
   // 内置文本消息类
@@ -150,9 +157,9 @@ declare module LeanCloudRealtime {
   export class RecalledMessage extends TypedMessage {}
 
   class EventEmitter {
-    on(evt: string, listener: Function): EventEmitter;
-    once(evt: string, listener: Function): EventEmitter;
-    off(evt: string, listener: Function): EventEmitter;
+    on(evt: string, listener: Function): this;
+    once(evt: string, listener: Function): this;
+    off(evt: string, listener: Function): this;
     emit(evt: string, ...args: any[]): boolean;
   }
 
@@ -169,7 +176,7 @@ declare module LeanCloudRealtime {
     afterMessageParse?: Middleware<AVMessage>;
     beforeMessageDispatch?: (message: AVMessage) => boolean;
     messageClasses?: AVMessage[];
-    onConversationCreate?: Decorator<Conversation>;
+    onConversationCreate?: Decorator<ConversationBase>;
     onIMClientCreate?: Decorator<IMClient>;
     onRealtimeCreate?: Decorator<Realtime>;
   }

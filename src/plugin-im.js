@@ -2,7 +2,8 @@
 import d from 'debug';
 import uuid from 'uuid/v4';
 import IMClient from './im-client';
-import Conversation, { MessageQueryDirection } from './conversation';
+import { Conversation } from './conversations';
+import { MessageQueryDirection } from './conversations/conversation-base';
 import Message, { MessageStatus } from './messages/message';
 import BinaryMessage from './messages/binary-message';
 import TextMessage from './messages/text-message';
@@ -117,6 +118,21 @@ export {
   messageField,
   IE10Compatible,
 } from './messages/helpers';
+
+export {
+  /**
+   * @see Conversation
+   */
+  Conversation,
+  /**
+   * @see ChatRoom
+   */
+  ChatRoom,
+  /**
+   * @see ServiceConversation
+   */
+  ServiceConversation,
+} from './conversations';
 
 const onRealtimeCreate = (realtime) => {
   /* eslint-disable no-param-reassign */

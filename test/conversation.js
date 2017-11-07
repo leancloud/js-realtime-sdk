@@ -5,7 +5,10 @@ import {
   GenericCommand,
   ConvCommand,
 } from '../proto/message';
-import { MessageQueryDirection } from '../src/conversation';
+import {
+  ServiceConversation,
+} from '../src/conversations';
+import { MessageQueryDirection } from '../src/conversations/conversation-base';
 import Message, { MessageStatus } from '../src/messages/message';
 import TextMessage from '../src/messages/text-message';
 import { defineConversationProperty } from '../src/plugin-im';
@@ -61,6 +64,7 @@ describe('Conversation', () => {
 
   it('system conversation', () =>
     client.getConversation(SYS_CONV_ID).then((conv) => {
+      conv.should.be.instanceof(ServiceConversation);
       conv.system.should.be.equal(true);
     }));
 

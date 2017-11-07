@@ -1,7 +1,11 @@
 import EventEmitter from 'eventemitter3';
 import { decode as decodeBase64 } from 'base64-arraybuffer';
 import d from 'debug';
-import Conversation from './conversation';
+import {
+  Conversation,
+  ChatRoom,
+  ServiceConversation,
+} from './conversations';
 import ConversationQuery from './conversation-query';
 import {
   GenericCommand,
@@ -257,7 +261,7 @@ export default class IMClient extends EventEmitter {
                * 消息被撤回
                * @event IMClient#messagerecall
                * @param {AVMessage} message 被撤回的消息
-               * @param {Conversation} conversation 消息所在的会话
+               * @param {ConversationBase} conversation 消息所在的会话
                */
               this.emit('messagerecall', message, conversation);
               /**
@@ -271,7 +275,7 @@ export default class IMClient extends EventEmitter {
                * 消息被修改
                * @event IMClient#messageupdate
                * @param {AVMessage} message 被修改的消息
-               * @param {Conversation} conversation 消息所在的会话
+               * @param {ConversationBase} conversation 消息所在的会话
                */
               this.emit('messageupdate', message, conversation);
               /**
@@ -307,7 +311,7 @@ export default class IMClient extends EventEmitter {
          * @event IMClient#invited
          * @param {Object} payload
          * @param {String} payload.invitedBy 邀请者 id
-         * @param {Conversation} conversation
+         * @param {ConversationBase} conversation
          */
         this.emit('invited', payload, conversation);
         /**
@@ -332,7 +336,7 @@ export default class IMClient extends EventEmitter {
          * @event IMClient#kicked
          * @param {Object} payload
          * @param {String} payload.kickedBy 该移除操作的发起者 id
-         * @param {Conversation} conversation
+         * @param {ConversationBase} conversation
          */
         this.emit('kicked', payload, conversation);
         /**
@@ -359,7 +363,7 @@ export default class IMClient extends EventEmitter {
          * @param {Object} payload
          * @param {String[]} payload.members 被添加的用户 id 列表
          * @param {String} payload.invitedBy 邀请者 id
-         * @param {Conversation} conversation
+         * @param {ConversationBase} conversation
          */
         this.emit('membersjoined', payload, conversation);
         /**
@@ -387,7 +391,7 @@ export default class IMClient extends EventEmitter {
          * @param {Object} payload
          * @param {String[]} payload.members 被移除的成员 id 列表
          * @param {String} payload.kickedBy 该移除操作的发起者 id
-         * @param {Conversation} conversation
+         * @param {ConversationBase} conversation
          */
         this.emit('membersleft', payload, conversation);
         /**
@@ -459,7 +463,7 @@ export default class IMClient extends EventEmitter {
          * 当前用户收到消息
          * @event IMClient#message
          * @param {Message} message
-         * @param {Conversation} conversation 收到消息的对话
+         * @param {ConversationBase} conversation 收到消息的对话
          */
         this.emit('message', message, conversation);
         /**
@@ -656,7 +660,7 @@ export default class IMClient extends EventEmitter {
    * 获取某个特定的对话
    * @param  {String} id 对话 id，对应 _Conversation 表中的 objectId
    * @param  {Boolean} [noCache=false] 强制不从缓存中获取
-   * @return {Promise.<Conversation>} 如果 id 对应的对话不存在则返回 null
+   * @return {Promise.<ConversationBase>} 如果 id 对应的对话不存在则返回 null
    */
   async getConversation(id, noCache = false) {
     if (typeof id !== 'string') {
@@ -680,7 +684,7 @@ export default class IMClient extends EventEmitter {
    * @since 3.4.0
    * @param  {String[]} ids 对话 id 列表，对应 _Conversation 表中的 objectId
    * @param  {Boolean} [noCache=false] 强制不从缓存中获取
-   * @return {Promise.<Conversation[]>} 如果 id 对应的对话不存在则返回 null
+   * @return {Promise.<ConversationBase[]>} 如果 id 对应的对话不存在则返回 null
    */
   async getConversations(ids, noCache = false) {
     const remoteConversationIds =
@@ -720,6 +724,9 @@ export default class IMClient extends EventEmitter {
     conversations =
       await Promise.all(conversations.map(this._parseConversationFromRawData.bind(this)));
     return conversations.map((fetchedConversation) => {
+      if (fetchedConversation.lastMessage) {
+        fetchedConversation.lastMessage._setStatus(MessageStatus.SENT);
+      }
       let conversation = this._conversationCache.get(fetchedConversation.id);
       if (!conversation) {
         conversation = fetchedConversation;
@@ -769,69 +776,66 @@ export default class IMClient extends EventEmitter {
   /**
    * 反序列化对话，与 {@link Conversation#toFullJSON} 相对。
    * @param {Object}
-   * @return {Conversation} 解析后的对话
+   * @return {ConversationBase} 解析后的对话
    * @since 4.0.0
    */
   async parseConversation(json) {
+    const {
+      lastMessage,
+      transient,
+      system,
+    } = json;
     const data = { ...json };
-    if (data.lastMessage) {
-      data.lastMessage = await this.parseMessage(data.lastMessage);
+    if (lastMessage) {
+      data.lastMessage = await this.parseMessage(lastMessage);
     }
-    const conversation = new Conversation(data, this);
-    return conversation;
+    if (transient) return new ChatRoom(data, this);
+    if (system) return new ServiceConversation(data, this);
+    return new Conversation(data, this);
   }
 
   async _parseConversationFromRawData(rawData) {
     const data = keyRemap({
       objectId: 'id',
       lm: 'lastMessageAt',
-      msg: 'lastMessage',
-      msg_from: 'lastMessageFrom',
-      msg_mid: 'lastMessageId',
-      msg_timestamp: 'lastMessageTimestamp',
-      patch_timestamp: 'lastMessagePatchTimestamp',
       m: 'members',
       tr: 'transient',
       sys: 'system',
       c: 'creator',
       mu: 'mutedMembers',
     }, rawData);
-    if (data.lastMessage) {
-      if (data.bin) {
-        data.lastMessage = decodeBase64(data.lastMessage);
-      }
-      const message = await this._messageParser.parse(data.lastMessage);
-      data.lastMessage = message;
-      message.from = data.lastMessageFrom;
-      message.id = data.lastMessageId;
-      message.timestamp = data.lastMessageTimestamp;
-      message.updatedAt = data.lastMessagePatchTimestamp;
-      message._setStatus(MessageStatus.SENT);
+    if (data.msg) {
+      data.lastMessage = {
+        data: data.msg,
+        bin: data.bin,
+        from: data.msg_from,
+        id: data.msg_mid,
+        timestamp: data.msg_timestamp,
+        updatedAt: data.patch_timestamp,
+      };
       delete data.lastMessageFrom;
       delete data.lastMessageId;
       delete data.lastMessageTimestamp;
       delete data.lastMessagePatchTimestamp;
     }
-    return new Conversation(data, this);
+    return this.parseConversation(data);
   }
 
   /**
-   * 创建一个 conversation
+   * 创建一个对话
    * @param {Object} options 除了下列字段外的其他字段将被视为对话的自定义属性
    * @param {String[]} options.members 对话的初始成员列表，默认包含当前 client
    * @param {String} [options.name] 对话的名字
-   * @param {Boolean} [options.transient=false] 暂态会话
    * @param {Boolean} [options.unique=false] 唯一对话，当其为 true 时，如果当前已经有相同成员的对话存在则返回该对话，否则会创建新的对话
    * @return {Promise.<Conversation>}
    */
-  async createConversation(options = {}) {
-    const {
-      members: m,
-      name,
-      transient,
-      unique,
-      ...properties
-    } = options;
+  async createConversation({
+    members: m,
+    name,
+    transient,
+    unique,
+    ...properties
+  } = {}) {
     if (!(transient || Array.isArray(m))) {
       throw new TypeError(`conversation members ${m} is not an array`);
     }
@@ -876,7 +880,7 @@ export default class IMClient extends EventEmitter {
     }
 
     const resCommand = await this._send(command);
-    const conversation = new Conversation({
+    const conversation = await this.parseConversation({
       name,
       transient,
       unique,
@@ -887,9 +891,24 @@ export default class IMClient extends EventEmitter {
       creator: this.id,
       members: transient ? [] : members,
       ...properties,
-    }, this);
+    });
     this._conversationCache.set(conversation.id, conversation);
     return conversation;
+  }
+
+  /**
+   * 创建一个聊天室
+   * @param {Object} options 除了下列字段外的其他字段将被视为对话的自定义属性
+   * @param {String} [options.name] 对话的名字
+   * @return {Promise.<ChatRoom>}
+   */
+  async createChatRoom(param) {
+    return this.createConversation({
+      ...param,
+      transient: true,
+      members: null,
+      unique: false,
+    });
   }
 
   // jsdoc-ignore-start
