@@ -1,7 +1,7 @@
 import 'should';
 import 'should-sinon';
 import Realtime from '../src/realtime';
-import Conversation from '../src/conversation';
+import { Conversation } from '../src/conversations';
 import {
   ErrorCode,
   MessagePriority,

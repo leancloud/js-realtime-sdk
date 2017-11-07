@@ -2,9 +2,9 @@ import EventEmitter from 'eventemitter3';
 import isEmpty from 'lodash/isEmpty';
 import cloneDeep from 'lodash/cloneDeep';
 import d from 'debug';
-import { decodeDate, decode, encode, getTime, keyRemap, union, difference, internal, setValue } from './utils';
-import { applyDecorators } from './plugin';
-import IMClient from './im-client';
+import { decodeDate, decode, encode, getTime, keyRemap, union, difference, internal, setValue } from '../utils';
+import { applyDecorators } from '../plugin';
+import IMClient from '../im-client';
 import {
   GenericCommand,
   ConvCommand,
@@ -15,11 +15,11 @@ import {
   PatchItem,
   CommandType,
   OpType,
-} from '../proto/message';
-import runSignatureFactory from './signature-factory-runner';
-import { createError } from './error';
-import Message, { MessageStatus } from './messages/message';
-import RecalledMessage from './messages/recalled-message';
+} from '../../proto/message';
+import runSignatureFactory from '../signature-factory-runner';
+import { createError } from '../error';
+import Message, { MessageStatus } from '../messages/message';
+import RecalledMessage from '../messages/recalled-message';
 
 const debug = d('LC:Conversation');
 
@@ -58,10 +58,11 @@ Object.freeze(MessageQueryDirection);
 
 export { MessageQueryDirection };
 
-export default class Conversation extends EventEmitter {
+export default class ConversationBase extends EventEmitter {
   /**
    * 无法直接实例化，请使用 {@link IMClient#createConversation} 创建新的对话
    * @extends EventEmitter
+   * @private
    */
   constructor({
     id,
@@ -79,76 +80,74 @@ export default class Conversation extends EventEmitter {
     system = false,
     muted = false,
     mentioned = false,
-    // jsdoc-ignore-start
     ...attributes
-    // jsdoc-ignore-end
   }, client) {
     super();
     Object.assign(this, {
       /**
        * 对话 id，对应 _Conversation 表中的 objectId
-       * @memberof Conversation#
+       * @memberof ConversationBase#
        * @type {String}
        */
       id,
       /**
        * 对话创建者
-       * @memberof Conversation#
+       * @memberof ConversationBase#
        * @type {String}
        */
       creator,
       /**
        * 对话创建时间
-       * @memberof Conversation#
+       * @memberof ConversationBase#
        * @type {Date}
        */
       createdAt,
       /**
        * 对话更新时间
-       * @memberof Conversation#
+       * @memberof ConversationBase#
        * @type {Date}
        */
       updatedAt,
       /**
        * 最后一条消息时间
-       * @memberof Conversation#
+       * @memberof ConversationBase#
        * @type {?Date}
        */
       lastMessageAt,
       /**
        * 最后一条消息
-       * @memberof Conversation#
+       * @memberof ConversationBase#
        * @type {?Message}
        */
       lastMessage,
       /**
        * 对该对话设置了静音的用户列表
-       * @memberof Conversation#
+       * @memberof ConversationBase#
        * @type {?String[]}
        */
       mutedMembers,
       /**
        * 参与该对话的用户列表
-       * @memberof Conversation#
+       * @memberof ConversationBase#
        * @type {String[]}
        */
       members,
       /**
        * 暂态对话标记
-       * @memberof Conversation#
+       * @memberof ConversationBase#
        * @type {Boolean}
        */
       transient,
       /**
        * 系统对话标记
-       * @memberof Conversation#
+       * @memberof ConversationBase#
        * @type {Boolean}
        * @since 3.3.0
        */
       system,
       /**
        * 当前用户静音该对话标记
-       * @memberof Conversation#
+       * @memberof ConversationBase#
        * @type {Boolean}
        */
       muted,
@@ -301,7 +300,7 @@ export default class Conversation extends EventEmitter {
    * @since 3.2.0
    * @param {String} key 属性的键名，'x' 对应 Conversation 表中的 x 列，支持使用 'x.y.z' 来修改对象的部分字段。
    * @param {Any} value 属性的值
-   * @return {Conversation} self
+   * @return {ConversationBase} self
    * @example
    *
    * // 设置对话的 color 属性
@@ -433,7 +432,7 @@ export default class Conversation extends EventEmitter {
   }
   /**
    * 保存当前对话的属性至服务器
-   * @return {Promise.<Conversation>} self
+   * @return {Promise.<ConversationBase>} self
    */
   async save() {
     this._debug('save');
@@ -460,7 +459,7 @@ export default class Conversation extends EventEmitter {
 
   /**
    * 从服务器更新对话的属性
-   * @return {Promise.<Conversation>} self
+   * @return {Promise.<ConversationBase>} self
    */
   async fetch() {
     const query = this._client.getQuery().equalTo('objectId', this.id);
@@ -470,7 +469,7 @@ export default class Conversation extends EventEmitter {
 
   /**
    * 静音，客户端拒绝收到服务器端的离线推送通知
-   * @return {Promise.<Conversation>} self
+   * @return {Promise.<ConversationBase>} self
    */
   async mute() {
     this._debug('mute');
@@ -486,7 +485,7 @@ export default class Conversation extends EventEmitter {
 
   /**
    * 取消静音
-   * @return {Promise.<Conversation>} self
+   * @return {Promise.<ConversationBase>} self
    */
   async unmute() {
     this._debug('unmute');
@@ -515,7 +514,7 @@ export default class Conversation extends EventEmitter {
   /**
    * 增加成员
    * @param {String|String[]} clientIds 新增成员 client id
-   * @return {Promise.<Conversation>} self
+   * @return {Promise.<ConversationBase>} self
    */
   async add(clientIds) {
     this._debug('add', clientIds);
@@ -551,7 +550,7 @@ export default class Conversation extends EventEmitter {
   /**
    * 剔除成员
    * @param {String|String[]} clientIds 成员 client id
-   * @return {Promise.<Conversation>} self
+   * @return {Promise.<ConversationBase>} self
    */
   async remove(clientIds) {
     this._debug('remove', clientIds);
@@ -586,7 +585,7 @@ export default class Conversation extends EventEmitter {
 
   /**
    * （当前用户）加入该对话
-   * @return {Promise.<Conversation>} self
+   * @return {Promise.<ConversationBase>} self
    */
   async join() {
     this._debug('join');
@@ -595,7 +594,7 @@ export default class Conversation extends EventEmitter {
 
   /**
    * （当前用户）退出该对话
-   * @return {Promise.<Conversation>} self
+   * @return {Promise.<ConversationBase>} self
    */
   async quit() {
     this._debug('quit');
@@ -950,7 +949,7 @@ export default class Conversation extends EventEmitter {
 
   /**
    * 将该会话标记为已读
-   * @return {Promise.<Conversation>} self
+   * @return {Promise.<ConversationBase>} self
    */
   async read() {
     this.unreadMessagesCount = 0;
@@ -983,7 +982,7 @@ export default class Conversation extends EventEmitter {
   /**
    * 更新对话的最新回执时间戳（lastDeliveredAt、lastReadAt）
    * @since 3.4.0
-   * @return {Promise.<Conversation>} this
+   * @return {Promise.<ConversationBase>} this
    */
   async fetchReceiptTimestamps() {
     const {

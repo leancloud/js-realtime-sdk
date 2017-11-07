@@ -3,7 +3,7 @@ import 'should-sinon';
 import should from 'should/as-function';
 import Realtime from '../src/realtime';
 import IMClient from '../src/im-client';
-import Conversation from '../src/conversation';
+import { Conversation, ChatRoom } from '../src/conversations';
 import Message from '../src/messages/message';
 import { internal } from '../src/utils';
 
@@ -224,17 +224,19 @@ describe('IMClient', () => {
         conversations[0].id.should.be.exactly(conversations[1].id);
       }));
     it('transient', () =>
-      client.createConversation({
+      client.createChatRoom({
         name: 'transient room',
-        members: ['hjiang', 'jfeng'],
-        transient: true,
       }).then((conversation) => {
+        conversation.should.be.instanceof(ChatRoom);
         conversation.members.should.be.empty();
       }));
-    it('members optional if transient', () =>
+    it('createConversation with transient option ', () =>
       client.createConversation({
         name: 'transient room',
         transient: true,
+      }).then((conversation) => {
+        conversation.should.be.instanceof(ChatRoom);
+        conversation.members.should.be.empty();
       }));
   });
 
