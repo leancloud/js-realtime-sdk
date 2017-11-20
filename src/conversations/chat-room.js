@@ -1,10 +1,11 @@
-import ConversationBase from './conversation-base';
+import PersistentConversation from './persistent-conversation';
 
 /**
  * 普通对话
- * @extends ConversationBase
+ * @since 4.0.0
+ * @extends PersistentConversation
  * @public
  */
-class ChatRoom extends ConversationBase {}
+class ChatRoom extends PersistentConversation {}
 
 export default ChatRoom;

@@ -14,7 +14,7 @@
  * @param {String|Symbol} event The event name.
  * @param {Function} listener The listener function.
  * @param {Mixed} [context=this] The context to invoke the listener with.
- * @returns {EventEmitter} self.
+ * @returns {this} self.
  */
 
 /**
@@ -25,7 +25,7 @@
  * @param {String|Symbol} event The event name.
  * @param {Function} listener The listener function.
  * @param {Mixed} [context=this] The context to invoke the listener with.
- * @returns {EventEmitter} self.
+ * @returns {this} self.
  */
 
 /**
@@ -37,7 +37,7 @@
  * @param {Function} [listener] Only remove the listeners that match this function.
  * @param {Mixed} [context] Only remove the listeners that have this context.
  * @param {Boolean} [once] Only remove one-time listeners.
- * @returns {EventEmitter} self.
+ * @returns {this} self.
  */
 
 /**

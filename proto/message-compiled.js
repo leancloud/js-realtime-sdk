@@ -144,6 +144,30 @@ module.exports = require("protobufjs/dist/protobuf-light").newBuilder({})['impor
             ]
         },
         {
+            "name": "ConvProperty",
+            "syntax": "proto2",
+            "fields": [
+                {
+                    "rule": "optional",
+                    "type": "string",
+                    "name": "pid",
+                    "id": 1
+                },
+                {
+                    "rule": "optional",
+                    "type": "string",
+                    "name": "role",
+                    "id": 2
+                },
+                {
+                    "rule": "optional",
+                    "type": "string",
+                    "name": "propertyId",
+                    "id": 3
+                }
+            ]
+        },
+        {
             "name": "DataCommand",
             "syntax": "proto2",
             "fields": [
@@ -683,6 +707,48 @@ module.exports = require("protobufjs/dist/protobuf-light").newBuilder({})['impor
                 },
                 {
                     "rule": "optional",
+                    "type": "ConvProperty",
+                    "name": "property",
+                    "id": 26
+                },
+                {
+                    "rule": "optional",
+                    "type": "bool",
+                    "name": "tempConv",
+                    "id": 27
+                },
+                {
+                    "rule": "optional",
+                    "type": "int32",
+                    "name": "tempConvTTL",
+                    "id": 28
+                },
+                {
+                    "rule": "optional",
+                    "type": "string",
+                    "name": "tempConvId",
+                    "id": 29
+                },
+                {
+                    "rule": "repeated",
+                    "type": "string",
+                    "name": "convBlockedPids",
+                    "id": 30
+                },
+                {
+                    "rule": "repeated",
+                    "type": "string",
+                    "name": "clientBlockedPids",
+                    "id": 31
+                },
+                {
+                    "rule": "repeated",
+                    "type": "string",
+                    "name": "allowedPids",
+                    "id": 32
+                },
+                {
+                    "rule": "optional",
                     "type": "JsonObjectMessage",
                     "name": "results",
                     "id": 100
@@ -879,6 +945,12 @@ module.exports = require("protobufjs/dist/protobuf-light").newBuilder({})['impor
                     "type": "bool",
                     "name": "read",
                     "id": 4
+                },
+                {
+                    "rule": "optional",
+                    "type": "string",
+                    "name": "from",
+                    "id": 5
                 }
             ]
         },
@@ -1087,6 +1159,120 @@ module.exports = require("protobufjs/dist/protobuf-light").newBuilder({})['impor
             ]
         },
         {
+            "name": "PubsubCommand",
+            "syntax": "proto2",
+            "fields": [
+                {
+                    "rule": "optional",
+                    "type": "string",
+                    "name": "cid",
+                    "id": 1
+                },
+                {
+                    "rule": "repeated",
+                    "type": "string",
+                    "name": "cids",
+                    "id": 2
+                },
+                {
+                    "rule": "optional",
+                    "type": "string",
+                    "name": "topic",
+                    "id": 3
+                },
+                {
+                    "rule": "optional",
+                    "type": "string",
+                    "name": "subtopic",
+                    "id": 4
+                },
+                {
+                    "rule": "repeated",
+                    "type": "string",
+                    "name": "topics",
+                    "id": 5
+                },
+                {
+                    "rule": "repeated",
+                    "type": "string",
+                    "name": "subtopics",
+                    "id": 6
+                },
+                {
+                    "rule": "optional",
+                    "type": "JsonObjectMessage",
+                    "name": "results",
+                    "id": 7
+                }
+            ]
+        },
+        {
+            "name": "BlacklistCommand",
+            "syntax": "proto2",
+            "fields": [
+                {
+                    "rule": "optional",
+                    "type": "string",
+                    "name": "srcCid",
+                    "id": 1
+                },
+                {
+                    "rule": "repeated",
+                    "type": "string",
+                    "name": "toPids",
+                    "id": 2
+                },
+                {
+                    "rule": "optional",
+                    "type": "string",
+                    "name": "srcPid",
+                    "id": 3
+                },
+                {
+                    "rule": "repeated",
+                    "type": "string",
+                    "name": "toCids",
+                    "id": 4
+                },
+                {
+                    "rule": "optional",
+                    "type": "int32",
+                    "name": "limit",
+                    "id": 5,
+                    "options": {
+                        "default": 100
+                    }
+                },
+                {
+                    "rule": "optional",
+                    "type": "int32",
+                    "name": "offset",
+                    "id": 6,
+                    "options": {
+                        "default": 0
+                    }
+                },
+                {
+                    "rule": "optional",
+                    "type": "string",
+                    "name": "lastRk",
+                    "id": 7
+                },
+                {
+                    "rule": "repeated",
+                    "type": "string",
+                    "name": "blockedPids",
+                    "id": 8
+                },
+                {
+                    "rule": "repeated",
+                    "type": "string",
+                    "name": "blockedCids",
+                    "id": 9
+                }
+            ]
+        },
+        {
             "name": "GenericCommand",
             "syntax": "proto2",
             "fields": [
@@ -1221,6 +1407,18 @@ module.exports = require("protobufjs/dist/protobuf-light").newBuilder({})['impor
                     "type": "PatchCommand",
                     "name": "patchMessage",
                     "id": 114
+                },
+                {
+                    "rule": "optional",
+                    "type": "PubsubCommand",
+                    "name": "pubsubMessage",
+                    "id": 115
+                },
+                {
+                    "rule": "optional",
+                    "type": "BlacklistCommand",
+                    "name": "blacklistMessage",
+                    "id": 116
                 }
             ]
         }
@@ -1305,6 +1503,14 @@ module.exports = require("protobufjs/dist/protobuf-light").newBuilder({})['impor
                 {
                     "name": "patch",
                     "id": 18
+                },
+                {
+                    "name": "pubsub",
+                    "id": 19
+                },
+                {
+                    "name": "blacklist",
+                    "id": 20
                 }
             ]
         },
@@ -1355,6 +1561,14 @@ module.exports = require("protobufjs/dist/protobuf-light").newBuilder({})['impor
                 {
                     "name": "removed",
                     "id": 11
+                },
+                {
+                    "name": "refresh",
+                    "id": 12
+                },
+                {
+                    "name": "refreshed",
+                    "id": 13
                 },
                 {
                     "name": "start",
@@ -1425,6 +1639,18 @@ module.exports = require("protobufjs/dist/protobuf-light").newBuilder({})['impor
                     "id": 52
                 },
                 {
+                    "name": "property_update",
+                    "id": 53
+                },
+                {
+                    "name": "property_updated",
+                    "id": 54
+                },
+                {
+                    "name": "property_changed",
+                    "id": 55
+                },
+                {
                     "name": "join",
                     "id": 80
                 },
@@ -1461,12 +1687,40 @@ module.exports = require("protobufjs/dist/protobuf-light").newBuilder({})['impor
                     "id": 101
                 },
                 {
+                    "name": "subscribe",
+                    "id": 120
+                },
+                {
+                    "name": "subscribed",
+                    "id": 121
+                },
+                {
+                    "name": "unsubscribe",
+                    "id": 122
+                },
+                {
+                    "name": "unsubscribed",
+                    "id": 123
+                },
+                {
+                    "name": "is_subscribed",
+                    "id": 124
+                },
+                {
                     "name": "modify",
                     "id": 150
                 },
                 {
                     "name": "modified",
                     "id": 151
+                },
+                {
+                    "name": "block",
+                    "id": 170
+                },
+                {
+                    "name": "unblock",
+                    "id": 171
                 }
             ]
         },
