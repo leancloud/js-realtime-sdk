@@ -1,10 +1,10 @@
-import ConversationBase from './conversation-base';
+import PersistentConversation from './persistent-conversation';
 
 /**
  * 普通对话
- * @extends ConversationBase
+ * @extends PersistentConversation
  * @public
  */
-class Conversation extends ConversationBase {}
+class Conversation extends PersistentConversation {}
 
 export default Conversation;

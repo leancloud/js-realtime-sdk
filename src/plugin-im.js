@@ -132,6 +132,10 @@ export {
    * @see ServiceConversation
    */
   ServiceConversation,
+  /**
+   * @see TemporaryConversation
+   */
+  TemporaryConversation,
 } from './conversations';
 
 const onRealtimeCreate = (realtime) => {

@@ -1,14 +1,11 @@
 import EventEmitter from 'eventemitter3';
-import isEmpty from 'lodash/isEmpty';
-import cloneDeep from 'lodash/cloneDeep';
 import d from 'debug';
-import { decodeDate, decode, encode, getTime, keyRemap, union, difference, internal, setValue } from '../utils';
+import { decodeDate, getTime, internal } from '../utils';
 import { applyDecorators } from '../plugin';
 import IMClient from '../im-client';
 import {
   GenericCommand,
   ConvCommand,
-  JsonObjectMessage,
   DirectCommand,
   LogsCommand,
   PatchCommand,
@@ -16,7 +13,6 @@ import {
   CommandType,
   OpType,
 } from '../../proto/message';
-import runSignatureFactory from '../signature-factory-runner';
 import { createError } from '../error';
 import Message, { MessageStatus } from '../messages/message';
 import RecalledMessage from '../messages/recalled-message';
@@ -63,24 +59,18 @@ export default class ConversationBase extends EventEmitter {
    * 无法直接实例化，请使用 {@link IMClient#createConversation} 创建新的对话
    * @extends EventEmitter
    * @private
+   * @abstract
    */
   constructor({
     id,
-    creator,
-    createdAt,
-    updatedAt,
     lastMessageAt,
     lastMessage,
     lastDeliveredAt,
     lastReadAt,
     unreadMessagesCount = 0,
-    mutedMembers = [],
     members = [],
-    transient = false,
-    system = false,
-    muted = false,
     mentioned = false,
-    ...attributes
+    ...properties
   }, client) {
     super();
     Object.assign(this, {
@@ -90,24 +80,6 @@ export default class ConversationBase extends EventEmitter {
        * @type {String}
        */
       id,
-      /**
-       * 对话创建者
-       * @memberof ConversationBase#
-       * @type {String}
-       */
-      creator,
-      /**
-       * 对话创建时间
-       * @memberof ConversationBase#
-       * @type {Date}
-       */
-      createdAt,
-      /**
-       * 对话更新时间
-       * @memberof ConversationBase#
-       * @type {Date}
-       */
-      updatedAt,
       /**
        * 最后一条消息时间
        * @memberof ConversationBase#
@@ -121,39 +93,14 @@ export default class ConversationBase extends EventEmitter {
        */
       lastMessage,
       /**
-       * 对该对话设置了静音的用户列表
-       * @memberof ConversationBase#
-       * @type {?String[]}
-       */
-      mutedMembers,
-      /**
        * 参与该对话的用户列表
        * @memberof ConversationBase#
        * @type {String[]}
        */
       members,
-      /**
-       * 暂态对话标记
-       * @memberof ConversationBase#
-       * @type {Boolean}
-       */
-      transient,
-      /**
-       * 系统对话标记
-       * @memberof ConversationBase#
-       * @type {Boolean}
-       * @since 3.3.0
-       */
-      system,
-      /**
-       * 当前用户静音该对话标记
-       * @memberof ConversationBase#
-       * @type {Boolean}
-       */
-      muted,
+      // other properties provided by subclasses
+      ...properties,
     });
-    this._attributes = decode(attributes);
-    this._reset();
     this.members = Array.from(new Set(this.members));
     Object.assign(internal(this), {
       messagesWaitingForReceipt: {},
@@ -211,18 +158,6 @@ export default class ConversationBase extends EventEmitter {
     return internal(this).unreadMessagesCount;
   }
 
-  set createdAt(value) {
-    this._createdAt = decodeDate(value);
-  }
-  get createdAt() {
-    return this._createdAt;
-  }
-  set updatedAt(value) {
-    this._updatedAt = decodeDate(value);
-  }
-  get updatedAt() {
-    return this._updatedAt;
-  }
   set lastMessageAt(value) {
     const time = decodeDate(value);
     if (time <= this._lastMessageAt) return;
@@ -275,102 +210,24 @@ export default class ConversationBase extends EventEmitter {
   }
 
   /**
-   * 对话名字，对应 _Conversation 表中的 name
-   * @type {String}
-   */
-  get name() {
-    return this.get('name');
-  }
-  set name(value) {
-    this.set('name', value);
-  }
-
-  /**
-   * 获取对话的自定义属性
-   * @since 3.2.0
-   * @param  {String} key key 属性的键名，'x' 对应 Conversation 表中的 x 列
-   * @return {Any} 属性的值
-   */
-  get(key) {
-    return internal(this).currentAttributes[key];
-  }
-
-  /**
-   * 设置对话的自定义属性
-   * @since 3.2.0
-   * @param {String} key 属性的键名，'x' 对应 Conversation 表中的 x 列，支持使用 'x.y.z' 来修改对象的部分字段。
-   * @param {Any} value 属性的值
-   * @return {ConversationBase} self
-   * @example
-   *
-   * // 设置对话的 color 属性
-   * conversation.set('color', {
-   *   text: '#000',
-   *   background: '#DDD',
-   * });
-   * // 设置对话的 color.text 属性
-   * conversation.set('color.text', '#333');
-   */
-  set(key, value) {
-    this._debug(`set [${key}]: ${value}`);
-    const { pendingAttributes } = internal(this);
-    const pendingKeys = Object.keys(pendingAttributes);
-    // suppose pendingAttributes = { 'a.b': {} }
-    // set 'a' or 'a.b': delete 'a.b'
-    const re = new RegExp(`^${key}`);
-    const childKeys = pendingKeys.filter(re.test.bind(re));
-    childKeys.forEach((k) => {
-      delete pendingAttributes[k];
-    });
-    if (childKeys.length) {
-      pendingAttributes[key] = value;
-    } else {
-      // set 'a.c': nothing to do
-      // set 'a.b.c.d': assign c: { d: {} } to 'a.b'
-      // CAUTION: non-standard API, provided by core-js
-      const parentKey = Array.find(pendingKeys, k => key.indexOf(k) === 0); // 'a.b'
-      if (parentKey) {
-        setValue(pendingAttributes[parentKey], key.slice(parentKey.length + 1), value);
-      } else {
-        pendingAttributes[key] = value;
-      }
-    }
-    // build currentAttributes
-    internal(this).currentAttributes = Object.keys(pendingAttributes)
-      .reduce(
-        (target, k) => setValue(target, k, pendingAttributes[k]),
-        cloneDeep(this._attributes),
-      );
-    return this;
-  }
-
-  /**
    * 返回 JSON 格式的对话，与 toJSON 不同的是，该对象包含了完整的信息，可以通过 {@link IMClient#parseConversation} 反序列化。
    * @return {Object} 返回值是一个 plain Object
    * @since 4.0.0
    */
   toFullJSON() {
     const {
-      id, name, members, creator, system, transient,
-      createdAt, updatedAt, lastMessageAt, lastDeliveredAt, lastReadAt,
+      id, members,
+      lastMessageAt, lastDeliveredAt, lastReadAt,
       lastMessage, unreadMessagesCount,
-      _attributes,
     } = this;
     return {
       id,
-      name,
       members,
-      creator,
-      system,
-      transient,
-      createdAt: getTime(createdAt),
-      updatedAt: getTime(updatedAt),
       lastMessageAt: getTime(lastMessageAt),
       lastDeliveredAt: getTime(lastDeliveredAt),
       lastReadAt: getTime(lastReadAt),
       lastMessage: lastMessage ? lastMessage.toFullJSON() : undefined,
       unreadMessagesCount,
-      ..._attributes,
     };
   }
 
@@ -381,35 +238,20 @@ export default class ConversationBase extends EventEmitter {
    */
   toJSON() {
     const {
-      id, name, members, creator, system, transient, muted, mutedMembers,
-      createdAt, updatedAt, lastMessageAt, lastDeliveredAt, lastReadAt,
+      id, members,
+      lastMessageAt, lastDeliveredAt, lastReadAt,
       lastMessage, unreadMessagesCount, unreadMessagesMentioned,
-      _attributes,
     } = this;
     return {
       id,
-      name,
       members,
-      creator,
-      system,
-      transient,
-      muted,
-      mutedMembers,
-      createdAt,
-      updatedAt,
       lastMessageAt,
       lastDeliveredAt,
       lastReadAt,
       lastMessage: lastMessage ? lastMessage.toJSON() : undefined,
       unreadMessagesCount,
       unreadMessagesMentioned,
-      ..._attributes,
     };
-  }
-
-  _reset() {
-    internal(this).pendingAttributes = {};
-    internal(this).currentAttributes = this._attributes;
   }
 
   _debug(...params) {
@@ -429,176 +271,6 @@ export default class ConversationBase extends EventEmitter {
     }
     /* eslint-enable no-param-reassign */
     return this._client._send(command, ...args);
-  }
-  /**
-   * 保存当前对话的属性至服务器
-   * @return {Promise.<ConversationBase>} self
-   */
-  async save() {
-    this._debug('save');
-    const attr = internal(this).pendingAttributes;
-    if (isEmpty(attr)) {
-      this._debug('nothing touched, resolve with self');
-      return this;
-    }
-    this._debug('attr: %O', attr);
-    const convMessage = new ConvCommand({
-      attr: new JsonObjectMessage({
-        data: JSON.stringify(encode(attr)),
-      }),
-    });
-    const resCommand = await this._send(new GenericCommand({
-      op: 'update',
-      convMessage,
-    }));
-    this.updatedAt = resCommand.convMessage.udate;
-    this._attributes = internal(this).currentAttributes;
-    internal(this).pendingAttributes = {};
-    return this;
-  }
-
-  /**
-   * 从服务器更新对话的属性
-   * @return {Promise.<ConversationBase>} self
-   */
-  async fetch() {
-    const query = this._client.getQuery().equalTo('objectId', this.id);
-    await query.find();
-    return this;
-  }
-
-  /**
-   * 静音，客户端拒绝收到服务器端的离线推送通知
-   * @return {Promise.<ConversationBase>} self
-   */
-  async mute() {
-    this._debug('mute');
-    await this._send(new GenericCommand({
-      op: 'mute',
-    }));
-    if (!this.transient) {
-      this.muted = true;
-      this.mutedMembers = union(this.mutedMembers, [this._client.id]);
-    }
-    return this;
-  }
-
-  /**
-   * 取消静音
-   * @return {Promise.<ConversationBase>} self
-   */
-  async unmute() {
-    this._debug('unmute');
-    await this._send(new GenericCommand({
-      op: 'unmute',
-    }));
-    if (!this.transient) {
-      this.muted = false;
-      this.mutedMembers = difference(this.mutedMembers, [this._client.id]);
-    }
-    return this;
-  }
-
-  /**
-   * 获取对话人数，或暂态对话的在线人数
-   * @return {Promise.<Number>}
-   */
-  async count() {
-    this._debug('unmute');
-    const resCommand = await this._send(new GenericCommand({
-      op: 'count',
-    }));
-    return resCommand.convMessage.count;
-  }
-
-  /**
-   * 增加成员
-   * @param {String|String[]} clientIds 新增成员 client id
-   * @return {Promise.<ConversationBase>} self
-   */
-  async add(clientIds) {
-    this._debug('add', clientIds);
-    if (typeof clientIds === 'string') {
-      clientIds = [clientIds]; // eslint-disable-line no-param-reassign
-    }
-    const convMessage = new ConvCommand({
-      m: clientIds,
-    });
-    const command = new GenericCommand({
-      op: 'add',
-      convMessage,
-    });
-    if (this._client.options.conversationSignatureFactory) {
-      const params = [this.id, this._client.id, clientIds.sort(), 'add'];
-      const signatureResult = await runSignatureFactory(
-        this._client.options.conversationSignatureFactory,
-        params,
-      );
-      Object.assign(command.convMessage, keyRemap({
-        signature: 's',
-        timestamp: 't',
-        nonce: 'n',
-      }, signatureResult));
-    }
-    await this._send(command);
-    if (!this.transient && !this.system) {
-      this.members = union(this.members, clientIds);
-    }
-    return this;
-  }
-
-  /**
-   * 剔除成员
-   * @param {String|String[]} clientIds 成员 client id
-   * @return {Promise.<ConversationBase>} self
-   */
-  async remove(clientIds) {
-    this._debug('remove', clientIds);
-    if (typeof clientIds === 'string') {
-      clientIds = [clientIds]; // eslint-disable-line no-param-reassign
-    }
-    const convMessage = new ConvCommand({
-      m: clientIds,
-    });
-    const command = new GenericCommand({
-      op: 'remove',
-      convMessage,
-    });
-    if (this._client.options.conversationSignatureFactory) {
-      const params = [this.id, this._client.id, clientIds.sort(), 'remove'];
-      const signatureResult = await runSignatureFactory(
-        this._client.options.conversationSignatureFactory,
-        params,
-      );
-      Object.assign(command.convMessage, keyRemap({
-        signature: 's',
-        timestamp: 't',
-        nonce: 'n',
-      }, signatureResult));
-    }
-    await this._send(command);
-    if (!this.transient && !this.system) {
-      this.members = difference(this.members, clientIds);
-    }
-    return this;
-  }
-
-  /**
-   * （当前用户）加入该对话
-   * @return {Promise.<ConversationBase>} self
-   */
-  async join() {
-    this._debug('join');
-    return this.add(this._client.id);
-  }
-
-  /**
-   * （当前用户）退出该对话
-   * @return {Promise.<ConversationBase>} self
-   */
-  async quit() {
-    this._debug('quit');
-    return this.remove(this._client.id);
   }
 
   /**
@@ -753,6 +425,7 @@ export default class ConversationBase extends EventEmitter {
    * 修改已发送的消息
    * @param {AVMessage} message 要修改的消息，该消息必须是由当前用户发送的。也可以提供一个包含消息 {id, timestamp} 的对象
    * @param {AVMessage} newMessage 新的消息
+   * @return {Promise.<AVMessage>} 更新后的消息
    */
   async update(message, newMessage) {
     if (!(newMessage instanceof Message)) {
@@ -764,6 +437,7 @@ export default class ConversationBase extends EventEmitter {
   /**
    * 撤回已发送的消息
    * @param {AVMessage} message 要撤回的消息，该消息必须是由当前用户发送的。也可以提供一个包含消息 {id, timestamp} 的对象
+   * @return {Promise.<RecalledMessage>} 一条已撤回的消息
    */
   async recall(message) {
     return this._update(message, new RecalledMessage(), true);
@@ -949,7 +623,7 @@ export default class ConversationBase extends EventEmitter {
 
   /**
    * 将该会话标记为已读
-   * @return {Promise.<ConversationBase>} self
+   * @return {Promise.<this>} self
    */
   async read() {
     this.unreadMessagesCount = 0;
@@ -982,7 +656,7 @@ export default class ConversationBase extends EventEmitter {
   /**
    * 更新对话的最新回执时间戳（lastDeliveredAt、lastReadAt）
    * @since 3.4.0
-   * @return {Promise.<ConversationBase>} this
+   * @return {Promise.<this>} this
    */
   async fetchReceiptTimestamps() {
     const {

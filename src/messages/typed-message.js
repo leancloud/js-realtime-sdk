@@ -47,7 +47,7 @@ class TypedMessage extends Message {
 
   /**
    * @param {String} text
-   * @return {TypedMessage} self
+   * @return {this} self
    */
   setText(text) {
     this._lctext = text;
@@ -62,7 +62,7 @@ class TypedMessage extends Message {
 
   /**
    * @param {Object} attributes
-   * @return {TypedMessage} self
+   * @return {this} self
    */
   setAttributes(attributes) {
     this._lcattrs = attributes;

@@ -1,10 +1,12 @@
 import EventEmitter from 'eventemitter3';
 import { decode as decodeBase64 } from 'base64-arraybuffer';
+import remove from 'lodash/remove';
 import d from 'debug';
 import {
   Conversation,
   ChatRoom,
   ServiceConversation,
+  TemporaryConversation,
 } from './conversations';
 import ConversationQuery from './conversation-query';
 import {
@@ -27,6 +29,7 @@ import { version as VERSION } from '../package.json';
 
 const debug = d('LC:IMClient');
 
+const isTemporaryConversatrionId = id => /^_tmp:/.test(id);
 
 export default class IMClient extends EventEmitter {
   /**
@@ -164,7 +167,8 @@ export default class IMClient extends EventEmitter {
         binaryMsg,
         patchTimestamp,
         mentioned,
-      }) => this.getConversation(cid).then((conversation) => {
+      }) => {
+        const conversation = this._conversationCache.get(cid);
         // deleted conversation
         if (!conversation) return null;
         let timestamp;
@@ -191,7 +195,7 @@ export default class IMClient extends EventEmitter {
           return conversation;
         });
       // filter conversations without unread count update
-      }))).then(conversations => conversations.filter(conversation => conversation)))
+      })).then(conversations => conversations.filter(conversation => conversation)))
       .then((conversations) => {
         if (conversations.length) {
           /**
@@ -231,62 +235,62 @@ export default class IMClient extends EventEmitter {
     return this.getConversations(patches.map(patch => patch.cid)).then(() =>
       Promise.all(patches.map(({
         cid, mid, timestamp, recall, data, patchTimestamp, from, binaryMsg, mentionAll, mentionPids,
-      }) =>
-        this.getConversation(cid).then((conversation) => {
-          // deleted conversation
-          if (!conversation) return null;
-          return this._messageParser.parse(binaryMsg || data).then((message) => {
-            const patchTime = patchTimestamp.toNumber();
-            const messageProps = {
-              id: mid,
-              cid,
-              timestamp,
-              updatedAt: patchTime,
-              from,
-              mentionList: mentionPids,
-              mentionedAll: mentionAll,
-            };
-            Object.assign(message, messageProps);
-            message._setStatus(MessageStatus.SENT);
-            message._updateMentioned(this.id);
-            if (internal(this).lastPatchTime < patchTime) {
-              internal(this).lastPatchTime = patchTime;
-            }
-            // update conversation lastMessage
-            if (conversation.lastMessage && conversation.lastMessage.id === mid) {
-              conversation.lastMessage = message; // eslint-disable-line no-param-reassign
-            }
-            if (recall) {
-              /**
-               * 消息被撤回
-               * @event IMClient#messagerecall
-               * @param {AVMessage} message 被撤回的消息
-               * @param {ConversationBase} conversation 消息所在的会话
-               */
-              this.emit('messagerecall', message, conversation);
-              /**
-               * 消息被撤回
-               * @event Conversation#messagerecall
-               * @param {AVMessage} message 被撤回的消息
-               */
-              conversation.emit('messagerecall', message);
-            } else {
-              /**
-               * 消息被修改
-               * @event IMClient#messageupdate
-               * @param {AVMessage} message 被修改的消息
-               * @param {ConversationBase} conversation 消息所在的会话
-               */
-              this.emit('messageupdate', message, conversation);
-              /**
-               * 消息被修改
-               * @event Conversation#messageupdate
-               * @param {AVMessage} message 被修改的消息
-               */
-              conversation.emit('messageupdate', message);
-            }
-          });
-        }))));
+      }) => {
+        const conversation = this._conversationCache.get(cid);
+        // deleted conversation
+        if (!conversation) return null;
+        return this._messageParser.parse(binaryMsg || data).then((message) => {
+          const patchTime = patchTimestamp.toNumber();
+          const messageProps = {
+            id: mid,
+            cid,
+            timestamp,
+            updatedAt: patchTime,
+            from,
+            mentionList: mentionPids,
+            mentionedAll: mentionAll,
+          };
+          Object.assign(message, messageProps);
+          message._setStatus(MessageStatus.SENT);
+          message._updateMentioned(this.id);
+          if (internal(this).lastPatchTime < patchTime) {
+            internal(this).lastPatchTime = patchTime;
+          }
+          // update conversation lastMessage
+          if (conversation.lastMessage && conversation.lastMessage.id === mid) {
+            conversation.lastMessage = message; // eslint-disable-line no-param-reassign
+          }
+          if (recall) {
+            /**
+             * 消息被撤回
+             * @event IMClient#messagerecall
+             * @param {AVMessage} message 被撤回的消息
+             * @param {ConversationBase} conversation 消息所在的会话
+             */
+            this.emit('messagerecall', message, conversation);
+            /**
+             * 消息被撤回
+             * @event Conversation#messagerecall
+             * @param {AVMessage} message 被撤回的消息
+             */
+            conversation.emit('messagerecall', message);
+          } else {
+            /**
+             * 消息被修改
+             * @event IMClient#messageupdate
+             * @param {AVMessage} message 被修改的消息
+             * @param {ConversationBase} conversation 消息所在的会话
+             */
+            this.emit('messageupdate', message, conversation);
+            /**
+             * 消息被修改
+             * @event Conversation#messageupdate
+             * @param {AVMessage} message 被修改的消息
+             */
+            conversation.emit('messageupdate', message);
+          }
+        });
+      })));
   }
 
   async _dispatchConvMessage(message) {
@@ -669,8 +673,11 @@ export default class IMClient extends EventEmitter {
     if (!noCache) {
       const cachedConversation = this._conversationCache.get(id);
       if (cachedConversation) {
-        return Promise.resolve(cachedConversation);
+        return cachedConversation;
       }
+    }
+    if (isTemporaryConversatrionId(id)) {
+      return this._getTemporaryConversations([id]);
     }
     return this
       .getQuery()
@@ -690,9 +697,30 @@ export default class IMClient extends EventEmitter {
     const remoteConversationIds =
       noCache ? ids : ids.filter(id => this._conversationCache.get(id) === null);
     if (remoteConversationIds.length) {
-      await (this.getQuery().containedIn('objectId', remoteConversationIds).limit(999)).find();
+      const remoteTemporaryConversationIds =
+        remove(remoteConversationIds, isTemporaryConversatrionId);
+      const query = [];
+      if (remoteConversationIds.length) {
+        query.push(this.getQuery().containedIn('objectId', remoteConversationIds).limit(999).find());
+      }
+      if (remoteTemporaryConversationIds.length) {
+        query.push(this._getTemporaryConversations(remoteTemporaryConversationIds));
+      }
+      await Promise.all(query);
     }
     return ids.map(id => this._conversationCache.get(id));
+  }
+
+  async _getTemporaryConversations(ids) {
+    const command = new GenericCommand({
+      cmd: 'conv',
+      op: 'query',
+      convMessage: new ConvCommand({
+        tempConvId: ids,
+      }),
+    });
+    const resCommand = await this._send(command);
+    return this._handleQueryResults(resCommand);
   }
 
   /**
@@ -714,6 +742,10 @@ export default class IMClient extends EventEmitter {
       convMessage: new ConvCommand(queryJSON),
     });
     const resCommand = await this._send(command);
+    return this._handleQueryResults(resCommand);
+  }
+
+  async _handleQueryResults(resCommand) {
     let conversations;
     try {
       conversations = JSON.parse(decode(resCommand.convMessage.results.data));
@@ -779,19 +811,40 @@ export default class IMClient extends EventEmitter {
    * @return {ConversationBase} 解析后的对话
    * @since 4.0.0
    */
-  async parseConversation(json) {
-    const {
+  async parseConversation({
+    id,
+    lastMessageAt,
+    lastMessage,
+    lastDeliveredAt,
+    lastReadAt,
+    unreadMessagesCount,
+    members,
+    mentioned,
+    ...properties
+  }) {
+    const conversationData = {
+      id,
+      lastMessageAt,
       lastMessage,
+      lastDeliveredAt,
+      lastReadAt,
+      unreadMessagesCount,
+      members,
+      mentioned,
+    };
+    if (lastMessage) {
+      conversationData.lastMessage = await this.parseMessage(lastMessage);
+    }
+    const {
       transient,
       system,
-    } = json;
-    const data = { ...json };
-    if (lastMessage) {
-      data.lastMessage = await this.parseMessage(lastMessage);
-    }
-    if (transient) return new ChatRoom(data, this);
-    if (system) return new ServiceConversation(data, this);
-    return new Conversation(data, this);
+      expiredAt,
+    } = properties;
+    if (isTemporaryConversatrionId(id)) return new TemporaryConversation(conversationData, this);
+    if (transient) return new ChatRoom(conversationData, properties, this);
+    if (system) return new ServiceConversation(conversationData, properties, this);
+    if (expiredAt) return new TemporaryConversation(conversationData, { expiredAt }, this);
+    return new Conversation(conversationData, properties, this);
   }
 
   async _parseConversationFromRawData(rawData) {
@@ -818,6 +871,8 @@ export default class IMClient extends EventEmitter {
       delete data.lastMessageTimestamp;
       delete data.lastMessagePatchTimestamp;
     }
+    const { ttl } = data;
+    if (ttl) data.expiredAt = Date.now() + (ttl * 1000);
     return this.parseConversation(data);
   }
 
@@ -834,6 +889,8 @@ export default class IMClient extends EventEmitter {
     name,
     transient,
     unique,
+    _tempConv: tempConv,
+    _tempConvTTL: tempConvTTL,
     ...properties
   } = {}) {
     if (!(transient || Array.isArray(m))) {
@@ -858,6 +915,8 @@ export default class IMClient extends EventEmitter {
       attr,
       transient,
       unique,
+      tempConv,
+      tempConvTTL,
     };
 
     const command = new GenericCommand({
@@ -879,25 +938,32 @@ export default class IMClient extends EventEmitter {
       }, signatureResult));
     }
 
-    const resCommand = await this._send(command);
-    const conversation = await this.parseConversation({
+    const {
+      convMessage: {
+        cid, cdate, tempConvTTL: ttl,
+      },
+    } = await this._send(command);
+    const data = {
       name,
       transient,
       unique,
-      id: resCommand.convMessage.cid,
-      createdAt: resCommand.convMessage.cdate,
-      updatedAt: resCommand.convMessage.cdate,
+      id: cid,
+      createdAt: cdate,
+      updatedAt: cdate,
       lastMessageAt: null,
       creator: this.id,
       members: transient ? [] : members,
       ...properties,
-    });
+    };
+    if (ttl) data.expiredAt = Date.now() + (ttl * 1000);
+    const conversation = await this.parseConversation(data);
     this._conversationCache.set(conversation.id, conversation);
     return conversation;
   }
 
   /**
    * 创建一个聊天室
+   * @since 4.0.0
    * @param {Object} options 除了下列字段外的其他字段将被视为对话的自定义属性
    * @param {String} [options.name] 对话的名字
    * @return {Promise.<ChatRoom>}
@@ -908,6 +974,27 @@ export default class IMClient extends EventEmitter {
       transient: true,
       members: null,
       unique: false,
+    });
+  }
+
+  /**
+   * 创建一个临时对话
+   * @since 4.0.0
+   * @param {Object} options
+   * @param {String[]} options.members 对话的初始成员列表，默认包含当前 client
+   * @param {String} [options.ttl] 对话存在时间，单位为秒，最大值与默认值均为 86400（一天），过期后该对话不再可用。
+   * @return {Promise.<TemporaryConversation>}
+   */
+  async createTemporaryConversation({
+    ttl: _tempConvTTL,
+    ...param
+  }) {
+    return this.createConversation({
+      ...param,
+      transient: false,
+      unique: false,
+      _tempConv: true,
+      _tempConvTTL,
     });
   }
 

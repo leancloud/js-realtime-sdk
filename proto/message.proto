@@ -26,6 +26,8 @@ enum CommandType {
   logout = 16;
   loggedout = 17;
   patch = 18;
+  pubsub = 19;
+  blacklist = 20;
 }
 
 enum OpType {
@@ -41,6 +43,8 @@ enum OpType {
   conflict = 9;
   added = 10;
   removed = 11;
+  refresh = 12;
+  refreshed = 13;
 
   // conv
   start = 30;
@@ -65,6 +69,9 @@ enum OpType {
   members = 50;
   max_read = 51;
   is_member = 52;
+  property_update = 53;
+  property_updated = 54;
+  property_changed = 55;
 
   // room
   join = 80;
@@ -83,9 +90,20 @@ enum OpType {
   upload = 100;
   uploaded = 101;
 
+  // pubsub
+  subscribe = 120;
+  subscribed = 121;
+  unsubscribe = 122;
+  unsubscribed = 123;
+  is_subscribed = 124;
+
   // patch
   modify = 150;
   modified = 151;
+
+  // blacklist, query, query_result defined with 7, 8
+  block = 170;
+  unblock = 171;
 }
 
 enum StatusType {
@@ -120,6 +138,12 @@ message LogItem {
   optional bool mentionAll = 8;
   repeated string mentionPids = 9;
   optional bool bin = 10;
+}
+
+message ConvProperty {
+  optional string pid = 1;
+  optional string role = 2;
+  optional string propertyId = 3;
 }
 
 message DataCommand {
@@ -227,6 +251,16 @@ message ConvCommand {
   repeated MaxReadTuple maxReadTuples = 24;
   repeated string cids = 25;
 
+  optional ConvProperty property = 26;
+
+  optional bool tempConv = 27;
+  optional int32 tempConvTTL = 28;
+  optional string tempConvId = 29;
+
+  repeated string convBlockedPids = 30;
+  repeated string clientBlockedPids = 31;
+  repeated string allowedPids = 32;
+
   optional JsonObjectMessage results = 100;
   optional JsonObjectMessage where = 101;
   optional JsonObjectMessage attr = 103;
@@ -268,6 +302,7 @@ message RcpCommand {
   optional string cid = 2;
   optional int64 t = 3;
   optional bool read = 4;
+  optional string from = 5;
 }
 
 message ReadTuple {
@@ -318,6 +353,29 @@ message PatchCommand {
   optional int64 lastPatchTime = 2;
 }
 
+message PubsubCommand {
+  optional string cid = 1;
+  repeated string cids = 2;
+  optional string topic = 3;
+  optional string subtopic = 4;
+  repeated string topics = 5;
+  repeated string subtopics = 6;
+  optional JsonObjectMessage results = 7;
+}
+
+message BlacklistCommand {
+  optional string srcCid      = 1;
+  repeated string toPids      = 2;
+  optional string srcPid      = 3;
+  repeated string toCids      = 4;
+  optional int32 limit        = 5 [default = 100];
+  optional int32 offset       = 6 [default = 0];
+  optional string lastRk      = 7;
+
+  repeated string blockedPids = 8;
+  repeated string blockedCids = 9;
+}
+
 message GenericCommand {
   optional CommandType cmd = 1;
   optional OpType op = 2;
@@ -343,4 +401,6 @@ message GenericCommand {
   optional PresenceCommand presenceMessage = 112;
   optional ReportCommand reportMessage = 113;
   optional PatchCommand patchMessage = 114;
+  optional PubsubCommand pubsubMessage = 115;
+  optional BlacklistCommand blacklistMessage = 116;
 }

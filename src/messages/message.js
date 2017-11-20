@@ -229,7 +229,7 @@ export default class Message {
    * 设置提及用户列表
    * @since 4.0.0
    * @param {String[]} clients 提及用户的 id 列表
-   * @return {Message} self
+   * @return {this} self
    */
   setMentionList(clients) {
     this.mentionList = ensureArray(clients);
@@ -239,7 +239,7 @@ export default class Message {
    * 设置是否提及所有人
    * @since 4.0.0
    * @param {Boolean} [value=true]
-   * @return {Messaeg} self
+   * @return {this} self
    */
   mentionAll(value = true) {
     this.mentionedAll = Boolean(value);

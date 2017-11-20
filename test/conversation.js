@@ -6,6 +6,7 @@ import {
   ConvCommand,
 } from '../proto/message';
 import {
+  Conversation,
   ServiceConversation,
 } from '../src/conversations';
 import { MessageQueryDirection } from '../src/conversations/conversation-base';
@@ -59,14 +60,20 @@ describe('Conversation', () => {
     const json = conversation.toFullJSON();
     const parsedConversation =
       await client.parseConversation(JSON.parse(JSON.stringify(json)));
+    parsedConversation.should.be.instanceof(Conversation);
     parsedConversation.toFullJSON().should.eql(json);
   });
 
-  it('system conversation', () =>
-    client.getConversation(SYS_CONV_ID).then((conv) => {
-      conv.should.be.instanceof(ServiceConversation);
-      conv.system.should.be.equal(true);
-    }));
+  it('system conversation', async () => {
+    const conv = await client.getConversation(SYS_CONV_ID);
+    conv.should.be.instanceof(ServiceConversation);
+    conv.system.should.be.equal(true);
+    const json = conv.toFullJSON();
+    const parsedConversation =
+      await client.parseConversation(JSON.parse(JSON.stringify(json)));
+    parsedConversation.should.be.instanceof(ServiceConversation);
+    parsedConversation.toFullJSON().should.eql(json);
+  });
 
   it('update', () => {
     const timestamp = Date.now();
