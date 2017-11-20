@@ -6,7 +6,7 @@ import StateMachine from 'javascript-state-machine';
 
 import WebSocket from 'ws';
 
-import { tryAll, global } from './utils';
+import { ensureArray, tryAll, global } from './utils';
 
 const debug = d('LC:WebSocketPlus');
 
@@ -56,31 +56,25 @@ class WebSocketPlus extends EventEmitter {
   }
 
   _createWs(getUrls, protocol) {
-    return getUrls().then((wsUrls) => {
-      let urls = wsUrls;
-      if (!(urls instanceof Array)) {
-        urls = [urls];
-      }
-      return tryAll(urls.map(url => (resolve, reject) => {
-        debug(`connect [${url}] ${protocol}`);
-        const ws = protocol ? new WebSocket(url, protocol) : new WebSocket(url);
-        ws.binaryType = this.binaryType || 'arraybuffer';
-        ws.onopen = () => resolve(ws);
-        ws.onclose = (error) => {
-          if (error instanceof Error) {
-            return reject(error);
-          }
-          // in browser, error event is useless
-          return reject(new Error(`Failed to connect [${url}]`));
-        };
-        ws.onerror = ws.onclose;
-      })).then((ws) => {
-        this._ws = ws;
-        this._ws.onclose = this._handleClose.bind(this);
-        this._ws.onmessage = this._handleMessage.bind(this);
-        return ws;
-      });
-    });
+    return getUrls().then(urls => tryAll(ensureArray(urls).map(url => (resolve, reject) => {
+      debug(`connect [${url}] ${protocol}`);
+      const ws = protocol ? new WebSocket(url, protocol) : new WebSocket(url);
+      ws.binaryType = this.binaryType || 'arraybuffer';
+      ws.onopen = () => resolve(ws);
+      ws.onclose = (error) => {
+        if (error instanceof Error) {
+          return reject(error);
+        }
+        // in browser, error event is useless
+        return reject(new Error(`Failed to connect [${url}]`));
+      };
+      ws.onerror = ws.onclose;
+    })).then((ws) => {
+      this._ws = ws;
+      this._ws.onclose = this._handleClose.bind(this);
+      this._ws.onmessage = this._handleMessage.bind(this);
+      return ws;
+    }));
   }
   _destroyWs() {
     const ws = this._ws;
