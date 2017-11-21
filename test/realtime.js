@@ -70,22 +70,23 @@ describe('Realtime', () => {
       }).createIMClient()
         .then(client => client.close()));
   });
-  describe('endpoints cache', () => {
-    it('_getEndpoints should use cache', () => {
-      const _fetchEndpointsInfo =
-        sinon.stub(Realtime, '_fetchEndpointsInfo').returns(Promise.resolve({
+  describe('RTMServers cache', () => {
+    it('_getRTMServers should use cache', async () => {
+      const _fetchRTMServers =
+        sinon.stub(Realtime, '_fetchRTMServers').returns(Promise.resolve({
           ttl: 1000,
         }));
-      const realtime = createRealtime();
-      return realtime._getEndpoints(realtime._options)
-        .then(() => {
-          _fetchEndpointsInfo.should.be.calledOnce();
-        })
-        .then(() => realtime._getEndpoints(realtime._options))
-        .then(() => {
-          _fetchEndpointsInfo.should.be.calledOnce();
-          _fetchEndpointsInfo.restore();
-        });
+      let realtime = createRealtime();
+      await realtime._getRTMServers(realtime._options);
+      _fetchRTMServers.should.be.calledOnce();
+      await realtime._getRTMServers(realtime._options);
+      _fetchRTMServers.should.be.calledOnce();
+      const RTM_SERVER = 'testservers';
+      realtime = createRealtime({ RTMServers: RTM_SERVER });
+      const RTMServers = await realtime._getRTMServers(realtime._options);
+      RTMServers.should.eql([RTM_SERVER]);
+      _fetchRTMServers.should.be.calledOnce();
+      _fetchRTMServers.restore();
     });
   });
   it('_register/_deregister clients', () => {

@@ -1,6 +1,7 @@
 import d from 'debug';
 import EventEmitter from 'eventemitter3';
 import axios from 'axios';
+import shuffle from 'lodash/shuffle';
 import Connection from './connection';
 import { ErrorCode, createError } from './error';
 import { tap, Cache, trim, internal, ensureArray, isWeapp } from './utils';
@@ -21,6 +22,8 @@ export default class Realtime extends EventEmitter {
    * @param  {Boolean} [options.noBinary=false] 设置 WebSocket 使用字符串格式收发消息（默认为二进制格式）。
    *                                            适用于 WebSocket 实现不支持二进制数据格式的情况（如微信小程序）
    * @param  {Boolean} [options.ssl=true] 使用 wss 进行连接
+   * @param  {String} [options.server] 指定私有部署的服务器（since 4.0.0）
+   * @param  {Boolean} [options.RTMServers] 指定私有部署的 RTM 服务器（since 4.0.0）
    * @param  {Plugin[]} [options.plugins] 加载插件（since 3.1.0）
    */
   constructor(options) {
@@ -39,7 +42,7 @@ export default class Realtime extends EventEmitter {
       pushOfflineMessages: false,
       noBinary: isWeapp,
       ssl: true,
-      server: process.env.SERVER,
+      RTMServerName: process.env.RTM_SERVER_NAME, // undocumented on purpose, internal use only
     }, options);
     this._cache = new Cache('endpoints');
     internal(this).clients = new Set();
@@ -78,7 +81,7 @@ export default class Realtime extends EventEmitter {
     data = {},
   }) {
     const { appId, region } = this._options;
-    const { api } = await this.constructor._fetchAppRouter({ appId, region });
+    const { api } = await this.constructor._getServerUrls({ appId, region });
     const url = `https://${api}/${version}${path}`;
     return axios(url, {
       method,
@@ -112,7 +115,7 @@ export default class Realtime extends EventEmitter {
     this._openPromise = new Promise((resolve, reject) => {
       debug('No connection established, create a new one.');
       const connection = new Connection(
-        () => this._getEndpoints(this._options),
+        () => this._getRTMServers(this._options),
         protocol,
       );
       connection.on('open', () => resolve(connection));
@@ -217,25 +220,33 @@ export default class Realtime extends EventEmitter {
     return this._openPromise;
   }
 
-  _getEndpoints(options) {
-    return Promise.resolve(this._cache.get('endpoints') ||
-      this
-        .constructor
-        ._fetchEndpointsInfo(options)
-        .then(tap(info => this._cache.set('endpoints', info, info.ttl * 1000)))).then((info) => {
-      debug('endpoint info: %O', info);
-      return [info.server, info.secondary];
-    });
+  async _getRTMServers(options) {
+    if (options.RTMServers) return shuffle(ensureArray(options.RTMServers));
+    let info;
+    const cachedEndPoints = this._cache.get('endpoints');
+    if (cachedEndPoints) {
+      info = await cachedEndPoints;
+    } else {
+      info = await this.constructor._fetchRTMServers(options);
+      this._cache.set('endpoints', info, info.ttl * 1000);
+    }
+    debug('endpoint info: %O', info);
+    return [info.server, info.secondary];
   }
 
-  static _fetchAppRouter({ appId, region }) {
-    debug('fetch router');
+  static async _getServerUrls({ appId, region, server }) {
+    debug('fetch server urls');
+    if (server) {
+      if (typeof server !== 'string') return server;
+      return {
+        RTMRouter: server,
+        api: server,
+      };
+    }
     switch (region) {
       case 'cn': {
         const cachedRouter = routerCache.get(appId);
-        if (cachedRouter) {
-          return Promise.resolve(cachedRouter);
-        }
+        if (cachedRouter) return cachedRouter;
         return axios
           .get('https://app-router.leancloud.cn/2/route', {
             params: {
@@ -246,51 +257,51 @@ export default class Realtime extends EventEmitter {
           .then(res => res.data)
           .then(tap(debug))
           .then(({
-            rtm_router_server: rtmRouter,
+            rtm_router_server: RTMRouter,
             api_server: api,
             ttl = 3600,
           }) => {
-            if (!rtmRouter) {
+            if (!RTMRouter) {
               throw new Error('rtm router not exists');
             }
-            const router = {
-              rtmRouter,
+            const serverUrls = {
+              RTMRouter,
               api,
             };
-            routerCache.set(appId, router, ttl * 1000);
-            return router;
+            routerCache.set(appId, serverUrls, ttl * 1000);
+            return serverUrls;
           })
           .catch(() => {
             const id = appId.slice(0, 8).toLowerCase();
             return {
-              rtmRouter: `${id}.rtm.lncld.net`,
+              RTMRouter: `${id}.rtm.lncld.net`,
               api: `${id}.api.lncld.net`,
             };
           });
       }
       case 'us':
-        return Promise.resolve({
-          rtmRouter: 'router-a0-push.leancloud.cn',
+        return {
+          RTMRouter: 'router-a0-push.leancloud.cn',
           api: 'us-api.leancloud.cn',
-        });
+        };
       default:
         throw new Error(`Region [${region}] is not supported.`);
     }
   }
 
-  static _fetchEndpointsInfo({
-    appId, region, ssl, server,
+  static _fetchRTMServers({
+    appId, region, ssl, server, RTMServerName,
   }) {
     debug('fetch endpoint info');
-    return this._fetchAppRouter({ appId, region })
+    return this._getServerUrls({ appId, region, server })
       .then(tap(debug))
-      .then(({ rtmRouter }) =>
-        axios.get(`https://${rtmRouter}/v1/route`, {
+      .then(({ RTMRouter }) =>
+        axios.get(`https://${RTMRouter}/v1/route`, {
           params: {
             appId,
             secure: ssl,
             features: isWeapp ? 'wechat' : undefined,
-            server,
+            server: RTMServerName,
             _t: Date.now(),
           },
           timeout: 20000,
