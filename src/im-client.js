@@ -755,36 +755,35 @@ export default class IMClient extends EventEmitter {
     }
     conversations =
       await Promise.all(conversations.map(this._parseConversationFromRawData.bind(this)));
-    return conversations.map((fetchedConversation) => {
-      if (fetchedConversation.lastMessage) {
-        fetchedConversation.lastMessage._setStatus(MessageStatus.SENT);
-      }
-      let conversation = this._conversationCache.get(fetchedConversation.id);
-      if (!conversation) {
-        conversation = fetchedConversation;
-        this._debug('no match, set cache');
-        this._conversationCache.set(fetchedConversation.id, fetchedConversation);
-      } else {
-        this._debug('update cached conversation');
-        [
-          'creator',
-          'createdAt',
-          'updatedAt',
-          'lastMessageAt',
-          'lastMessage',
-          'mutedMembers',
-          'members',
-          '_attributes',
-          'transient',
-          'muted',
-        ].forEach((key) => {
-          const value = fetchedConversation[key];
-          if (value !== undefined) conversation[key] = value;
-        });
-        conversation._reset();
-      }
-      return conversation;
-    });
+    return conversations.map(this._upsertConversationToCache.bind(this));
+  }
+
+  _upsertConversationToCache(fetchedConversation) {
+    let conversation = this._conversationCache.get(fetchedConversation.id);
+    if (!conversation) {
+      conversation = fetchedConversation;
+      this._debug('no match, set cache');
+      this._conversationCache.set(fetchedConversation.id, fetchedConversation);
+    } else {
+      this._debug('update cached conversation');
+      [
+        'creator',
+        'createdAt',
+        'updatedAt',
+        'lastMessageAt',
+        'lastMessage',
+        'mutedMembers',
+        'members',
+        '_attributes',
+        'transient',
+        'muted',
+      ].forEach((key) => {
+        const value = fetchedConversation[key];
+        if (value !== undefined) conversation[key] = value;
+      });
+      conversation._reset();
+    }
+    return conversation;
   }
 
   /**
@@ -834,6 +833,7 @@ export default class IMClient extends EventEmitter {
     };
     if (lastMessage) {
       conversationData.lastMessage = await this.parseMessage(lastMessage);
+      conversationData.lastMessage._setStatus(MessageStatus.SENT);
     }
     const {
       transient,
@@ -957,8 +957,7 @@ export default class IMClient extends EventEmitter {
     };
     if (ttl) data.expiredAt = Date.now() + (ttl * 1000);
     const conversation = await this.parseConversation(data);
-    this._conversationCache.set(conversation.id, conversation);
-    return conversation;
+    return this._upsertConversationToCache(conversation);
   }
 
   /**

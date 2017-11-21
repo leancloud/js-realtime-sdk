@@ -221,7 +221,7 @@ describe('IMClient', () => {
         members: ['hjiang', 'jfeng'],
         unique: true,
       }))).then((conversations) => {
-        conversations[0].id.should.be.exactly(conversations[1].id);
+        conversations[0].should.be.exactly(conversations[1]);
       }));
     it('transient', () =>
       client.createChatRoom({
