@@ -677,7 +677,7 @@ export default class IMClient extends EventEmitter {
       }
     }
     if (isTemporaryConversatrionId(id)) {
-      return this._getTemporaryConversations([id]);
+      return this._getTemporaryConversations(id);
     }
     return this
       .getQuery()
@@ -704,7 +704,9 @@ export default class IMClient extends EventEmitter {
         query.push(this.getQuery().containedIn('objectId', remoteConversationIds).limit(999).find());
       }
       if (remoteTemporaryConversationIds.length) {
-        query.push(this._getTemporaryConversations(remoteTemporaryConversationIds));
+        const remoteTemporaryConversationsPromise =
+          remoteTemporaryConversationIds.map(this._getTemporaryConversations.bind(this));
+        query.push(...remoteTemporaryConversationsPromise);
       }
       await Promise.all(query);
     }
@@ -781,7 +783,7 @@ export default class IMClient extends EventEmitter {
         const value = fetchedConversation[key];
         if (value !== undefined) conversation[key] = value;
       });
-      conversation._reset();
+      if (conversation._reset) conversation._reset();
     }
     return conversation;
   }
@@ -840,10 +842,11 @@ export default class IMClient extends EventEmitter {
       system,
       expiredAt,
     } = properties;
-    if (isTemporaryConversatrionId(id)) return new TemporaryConversation(conversationData, this);
     if (transient) return new ChatRoom(conversationData, properties, this);
     if (system) return new ServiceConversation(conversationData, properties, this);
-    if (expiredAt) return new TemporaryConversation(conversationData, { expiredAt }, this);
+    if (expiredAt || isTemporaryConversatrionId(id)) {
+      return new TemporaryConversation(conversationData, { expiredAt }, this);
+    }
     return new Conversation(conversationData, properties, this);
   }
 

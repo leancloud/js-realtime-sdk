@@ -1,6 +1,12 @@
 import ConversationBase from './conversation-base';
-import { createError } from '../error';
+import { createError, ErrorCode } from '../error';
 import { decodeDate } from '../utils';
+
+const transformNotFoundError = error => (
+  error.code === ErrorCode.CONVERSATION_NOT_FOUND
+    ? createError({ code: ErrorCode.CONVERSATION_EXPIRED })
+    : error
+);
 
 /**
  * @since 4.0.0
@@ -37,13 +43,19 @@ class TemporaryConversation extends ConversationBase {
   }
 
   async _send(...args) {
-    if (this.expired) throw createError({ code: 4317 });
+    if (this.expired) throw createError({ code: ErrorCode.CONVERSATION_EXPIRED });
     try {
       return await super._send(...args);
     } catch (error) {
-      // CONVERSATION_NOT_FOUND
-      if (error.code === 4303) throw createError({ code: 4317 });
-      throw error;
+      throw transformNotFoundError(error);
+    }
+  }
+
+  async send(...args) {
+    try {
+      return await super.send(...args);
+    } catch (error) {
+      throw transformNotFoundError(error);
     }
   }
 

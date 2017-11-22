@@ -8,11 +8,14 @@ import {
 import {
   Conversation,
   ServiceConversation,
-} from '../src/conversations';
-import { MessageQueryDirection } from '../src/conversations/conversation-base';
-import Message, { MessageStatus } from '../src/messages/message';
-import TextMessage from '../src/messages/text-message';
-import { defineConversationProperty } from '../src/plugin-im';
+  TemporaryConversation,
+  MessageQueryDirection,
+  Message,
+  MessageStatus,
+  TextMessage,
+  defineConversationProperty,
+  ErrorCode,
+} from '../src';
 
 import {
   APP_ID,
@@ -23,7 +26,7 @@ import {
   CLIENT_ID,
 } from './configs';
 
-import { listen, sinon } from './test-utils';
+import { listen, sinon, wait } from './test-utils';
 
 describe('Conversation', () => {
   let realtime;
@@ -444,5 +447,76 @@ describe('Conversation', () => {
         })).then(() => {
         bwang0.close();
       });
+  });
+
+  describe('TemporaryConversation', () => {
+    let fzhang;
+    let she;
+    let fzhangConversation;
+    before(async () => {
+      she = await realtime.createIMClient();
+      fzhang = await realtime.createIMClient();
+      fzhangConversation = await fzhang.createTemporaryConversation({
+        members: [she.id],
+      });
+    });
+    after(() => {
+      fzhang.close();
+      she.close();
+    });
+    it('should be immutable', () => {
+      [
+        'set',
+        'save',
+        'get',
+        'fetch',
+        'join',
+        'quit',
+        'add',
+        'remove',
+      ].forEach(key => fzhangConversation.should.not.have.property(key));
+    });
+    it('serialize and parse', async () => {
+      const json = fzhangConversation.toFullJSON();
+      const parsedConversation =
+        await fzhang.parseConversation(JSON.parse(JSON.stringify(json)));
+      parsedConversation.should.be.instanceof(TemporaryConversation);
+      parsedConversation.toFullJSON().should.eql(json);
+    });
+    it('create, send and recieve', async () => {
+      const waitForMessage = listen(she, 'message');
+      const message = new TextMessage('hi');
+      await fzhangConversation.send(message);
+      const [recievedMessage, recievedConversation] = await waitForMessage;
+      recievedMessage.id.should.eql(message.id);
+      recievedConversation.id.should.eql(fzhangConversation.id);
+      recievedConversation.expired.should.eql(false);
+      recievedConversation.expiredAt.should.be.instanceof(Date);
+      const sheConversation = await she.createTemporaryConversation({
+        members: [fzhang.id],
+      });
+      // should use cached conversation
+      sheConversation.should.be.exactly(recievedConversation);
+    });
+    it('expiration', async () => {
+      const conv = await fzhang.createTemporaryConversation({
+        members: ['dli'],
+        ttl: 1,
+      });
+      await wait(1100);
+      // local expiration check
+      conv.expired.should.eql(true);
+      await conv.send(new TextMessage('')).should.be.rejectedWith(Error, {
+        message: 'Temporary conversation expired or does not exist.',
+        code: ErrorCode.CONVERSATION_EXPIRED,
+      });
+      // server expiration check
+      conv.expiredAt = Date.now() + 1000000;
+      conv.expired.should.eql(false);
+      return conv.send(new TextMessage('')).should.be.rejectedWith(Error, {
+        message: 'Temporary conversation expired or does not exist.',
+        code: ErrorCode.CONVERSATION_EXPIRED,
+      });
+    });
   });
 });

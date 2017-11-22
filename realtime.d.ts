@@ -58,49 +58,57 @@ declare module LeanCloudRealtime {
   */
   class ConversationBase extends EventEmitter {
     id: string;
-    name: string;
-    creator: string;
-    createdAt: Date;
-    updatedAt: Date;
     lastMessage?: Message;
     lastMessageAt?: Date;
     lastDeliveredAt?: Date;
     lastReadAt?: Date;
     unreadMessagesCount: Number;
     members: string[];
-    muted: boolean;
-    mutedMembers?: string[];
-    system: boolean;
-    transient: boolean;
     readonly unreadMessagesMentioned: Boolean;
     [key: string]: any;
     // constructor();
-    add(members: string[]): Promise<this>;
-    count(): Promise<number>;
     createMessagesIterator(option: { limit?: number, beforeTime?: Date, beforeMessageId?: string });
-    fetch(): Promise<this>;
-    get(key: string): any;
-    join(): Promise<this>;
     read(): Promise<this>;
     fetchReceiptTimestamps(): Promise<this>;
-    mute(): Promise<this>;
     queryMessages(options: { beforeTime?: Date, beforeMessageId?: string, afterTime?: Date, afterMessageId?: string, limit?: number }): Promise<Array<Message>>;
     queryMessages(options: { startTime?: Date, startMessageId?: string, startClosed?: boolean, endTime?: Date, endMessageId?: string, endClosed?: boolean, limit?: number, direction?: MessageQueryDirection }): Promise<Array<Message>>;
-    quit(): Promise<this>;
-    remove(clientIds: string[]): Promise<this>;
-    save(): Promise<this>;
     send<T extends Message>(message: T, options?: { pushData?: Object, priority?: MessagePriority, receipt?: boolean, transient?: boolean, will?: boolean }): Promise<T>;
-    set(key: string, value: any): this;
-    unmute(): Promise<this>;
     update<T extends Message>(message: MessagePointer, newMessage: T): Promise<T>;
     recall(message: MessagePointer): Promise<RecalledMessage>;
     toJSON(): Object;
     toFullJSON(): Object;
   }
 
-  export class Conversation extends ConversationBase {}
-  export class ChatRoom extends ConversationBase {}
-  export class ServiceConversation extends ConversationBase {}
+  class PresistentConversation extends ConversationBase {
+    name: string;
+    creator: string;
+    createdAt: Date;
+    updatedAt: Date;
+    muted: boolean;
+    mutedMembers?: string[];
+    system: boolean;
+    transient: boolean;
+    get(key: string): any;
+    set(key: string, value: any): this;
+    save(): Promise<this>;
+    fetch(): Promise<this>;
+    mute(): Promise<this>;
+    unmute(): Promise<this>;
+    add(members: string[]): Promise<this>;
+    count(): Promise<number>;
+    join(): Promise<this>;
+    quit(): Promise<this>;
+    remove(clientIds: string[]): Promise<this>;
+  }
+
+  export class Conversation extends PresistentConversation {}
+  export class ChatRoom extends PresistentConversation {}
+  export class ServiceConversation extends PresistentConversation {}
+
+  export class TemporaryConversation extends ConversationBase {
+    expiredAt: Date;
+    expired: Boolean;
+  }
 
   type MessagePointer = Message | {id: string, timestamp: Date|number};
 
@@ -221,6 +229,7 @@ declare module LeanCloudRealtime {
     CONVERSATION_UPDATE_FAILED,
     CONVERSATION_READ_ONLY,
     CONVERSATION_NOT_ALLOWED,
+    CONVERSATION_EXPIRED,
     INVALID_MESSAGING_TARGET,
     MESSAGE_REJECTED_BY_APP,
   }
