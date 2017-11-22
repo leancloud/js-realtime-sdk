@@ -66,7 +66,7 @@ export const error = Object.freeze({
   },
   4317: {
     name: 'CONVERSATION_EXPIRED',
-    message: 'Temporary conversation has expired or does not exist.',
+    message: 'Temporary conversation expired or does not exist.',
   },
   4401: {
     name: 'INVALID_MESSAGING_TARGET',
