@@ -20,7 +20,7 @@ export default class Realtime extends EventEmitter {
    * @param  {String} [options.region='cn'] 节点 id
    * @param  {Boolean} [options.pushOfflineMessages=false] 启用推送离线消息模式（默认为发送未读消息通知模式）
    * @param  {Boolean} [options.noBinary=false] 设置 WebSocket 使用字符串格式收发消息（默认为二进制格式）。
-   *                                            适用于 WebSocket 实现不支持二进制数据格式的情况（如微信小程序）
+   *                                            适用于 WebSocket 实现不支持二进制数据格式的情况
    * @param  {Boolean} [options.ssl=true] 使用 wss 进行连接
    * @param  {String} [options.server] 指定私有部署的服务器域名（since 4.0.0）
    * @param  {String|String[]} [options.RTMServers] 指定私有部署的 RTM 服务器地址（since 4.0.0）
@@ -40,7 +40,7 @@ export default class Realtime extends EventEmitter {
       appKey: undefined,
       region: 'cn',
       pushOfflineMessages: false,
-      noBinary: isWeapp,
+      noBinary: false,
       ssl: true,
       RTMServerName: process.env.RTM_SERVER_NAME, // undocumented on purpose, internal use only
     }, options);
