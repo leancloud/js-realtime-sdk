@@ -422,6 +422,18 @@ export default class ConversationBase extends EventEmitter {
   }
 
   /**
+   * 获取对话人数，或暂态对话的在线人数
+   * @return {Promise.<Number>}
+   */
+  async count() {
+    this._debug('count');
+    const resCommand = await this._send(new GenericCommand({
+      op: 'count',
+    }));
+    return resCommand.convMessage.count;
+  }
+
+  /**
    * 修改已发送的消息
    * @param {AVMessage} message 要修改的消息，该消息必须是由当前用户发送的。也可以提供一个包含消息 {id, timestamp} 的对象
    * @param {AVMessage} newMessage 新的消息
