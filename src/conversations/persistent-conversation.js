@@ -234,18 +234,6 @@ class PersistentConversation extends ConversationBase {
   }
 
   /**
-   * 获取对话人数，或暂态对话的在线人数
-   * @return {Promise.<Number>}
-   */
-  async count() {
-    this._debug('count');
-    const resCommand = await this._send(new GenericCommand({
-      op: 'count',
-    }));
-    return resCommand.convMessage.count;
-  }
-
-  /**
    * 增加成员
    * @param {String|String[]} clientIds 新增成员 client id
    * @return {Promise.<this>} self

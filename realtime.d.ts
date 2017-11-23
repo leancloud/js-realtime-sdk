@@ -75,6 +75,7 @@ declare module LeanCloudRealtime {
     send<T extends Message>(message: T, options?: { pushData?: Object, priority?: MessagePriority, receipt?: boolean, transient?: boolean, will?: boolean }): Promise<T>;
     update<T extends Message>(message: MessagePointer, newMessage: T): Promise<T>;
     recall(message: MessagePointer): Promise<RecalledMessage>;
+    count(): Promise<number>;
     toJSON(): Object;
     toFullJSON(): Object;
   }
@@ -95,7 +96,6 @@ declare module LeanCloudRealtime {
     mute(): Promise<this>;
     unmute(): Promise<this>;
     add(members: string[]): Promise<this>;
-    count(): Promise<number>;
     join(): Promise<this>;
     quit(): Promise<this>;
     remove(clientIds: string[]): Promise<this>;
