@@ -33,6 +33,8 @@
   },
   "homepage": "https://leancloud.cn/",
   "devDependencies": {
+    "@commitlint/cli": "^4.2.2",
+    "@commitlint/config-angular": "^4.2.1",
     "@leeyeh/jsdoc-rtd": "^1.0.13",
     "@leeyeh/rollup-plugin-node-resolve": "^3.0.0",
     "babel-eslint": "^8.0.0",
@@ -73,8 +75,6 @@
     "weapp-polyfill": "^3.0.0"
   },
   "dependencies": {
-    "@commitlint/cli": "^4.2.2",
-    "@commitlint/config-angular": "^4.2.1",
     "axios": "^0.16.1",
     "babel-runtime": "^6.6.1",
     "base64-arraybuffer": "^0.1.5",
