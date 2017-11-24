@@ -11,7 +11,7 @@
 
 * 支持临时对话（TemporaryConversation)。临时对话是一种有有效期的对话，更多关于临时对话的的说明请参考[《实时通信服务总览 - 临时对话》](https://url.leanapp.cn/temporary-conversation)。
 * 拆分了对话的概念。
-  - SDK 现在暴露了四种不同的对话类：
+  - SDK 现在暴露了四种不同的对话类：
     * 普通对话（`Conversation`）
     * 聊天室（`ChatRoom`）
     * 系统对话（`SystemConversation`）
@@ -24,7 +24,6 @@
   - 使用二进制帧通讯，减少流量消耗。
   - 自动感知网络状态变化从而获得更及时的重连。
 * 支持私有部署。
-
 
 
 <a name="4.0.0-alpha.3"></a>
