@@ -1,5 +1,5 @@
 import uuid from 'uuid/v4';
-import { ensureArray, decodeDate, compact } from '../utils';
+import { ensureArray, decodeDate, getTime } from '../utils';
 
 
 /**
@@ -143,14 +143,14 @@ export default class Message {
       mentionList,
       mentionedAll,
     } = this;
-    return compact({
+    return ({
       data: content,
       id,
       cid,
       from,
-      timestamp,
-      deliveredAt,
-      updatedAt: _updatedAt,
+      timestamp: getTime(timestamp),
+      deliveredAt: getTime(deliveredAt),
+      updatedAt: getTime(_updatedAt),
       mentionList,
       mentionedAll,
     });

@@ -1,6 +1,6 @@
 import ConversationBase from './conversation-base';
 import { createError, ErrorCode } from '../error';
-import { decodeDate } from '../utils';
+import { decodeDate, getTime } from '../utils';
 
 const transformNotFoundError = error => (
   error.code === ErrorCode.CONVERSATION_NOT_FOUND
@@ -65,7 +65,7 @@ class TemporaryConversation extends ConversationBase {
     } = this;
     return {
       ...super.toFullJSON(),
-      expiredAt,
+      expiredAt: getTime(expiredAt),
     };
   }
 

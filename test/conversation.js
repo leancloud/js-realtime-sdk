@@ -476,13 +476,6 @@ describe('Conversation', () => {
         'remove',
       ].forEach(key => fzhangConversation.should.not.have.property(key));
     });
-    it('serialize and parse', async () => {
-      const json = fzhangConversation.toFullJSON();
-      const parsedConversation =
-        await fzhang.parseConversation(JSON.parse(JSON.stringify(json)));
-      parsedConversation.should.be.instanceof(TemporaryConversation);
-      parsedConversation.toFullJSON().should.eql(json);
-    });
     it('create, send and recieve', async () => {
       const waitForMessage = listen(she, 'message');
       const message = new TextMessage('hi');
@@ -517,6 +510,13 @@ describe('Conversation', () => {
         message: 'Temporary conversation expired or does not exist.',
         code: ErrorCode.CONVERSATION_EXPIRED,
       });
+    });
+    it('serialize and parse', async () => {
+      const json = fzhangConversation.toFullJSON();
+      const parsedConversation =
+        await fzhang.parseConversation(JSON.parse(JSON.stringify(json)));
+      parsedConversation.should.be.instanceof(TemporaryConversation);
+      parsedConversation.toFullJSON().should.eql(json);
     });
   });
 });
