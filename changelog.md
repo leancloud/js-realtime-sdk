@@ -1,3 +1,32 @@
+<a name="4.0.0-beta.0"></a>
+# 4.0.0-beta.0 (2017-11-24)
+
+
+### Bug Fixes
+
+* 修复了创建 unique 对话时，尽管内存中已经存在了该对话，仍然会得到一个新实例的问题。
+
+
+### Features
+
+* 支持临时对话（TemporaryConversation)。临时对话是一种有有效期的对话，更多关于临时对话的的说明请参考[《实时通信服务总览 - 临时对话》](https://url.leanapp.cn/temporary-conversation)。
+* 拆分了对话的概念。
+  - SDK 现在暴露了四种不同的对话类：
+    * 普通对话（`Conversation`）
+    * 聊天室（`ChatRoom`）
+    * 系统对话（`SystemConversation`）
+    * 临时对话（`TemporaryConversation`）
+  - 相应的，`IMClient` 提供了三种创建对话的方法（系统对话不支持在客户端创建）：
+    * `IMClient#createConversation`
+    * `IMClient#createChatRoom`
+    * `IMClient#createTemporaryConversation`
+* 改善了小程序中的性能
+  - 使用二进制帧通讯，减少流量消耗。
+  - 自动感知网络状态变化从而获得更及时的重连。
+* 支持私有部署。
+
+
+
 <a name="4.0.0-alpha.3"></a>
 # 4.0.0-alpha.3 (2017-11-02)
 
