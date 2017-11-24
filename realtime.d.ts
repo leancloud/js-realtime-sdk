@@ -16,6 +16,7 @@ declare module LeanCloudRealtime {
     close(): Promise<void>;
     createConversation(options: { members?: string[], name?: string, transient?: boolean, unique?: boolean, [key: string]: any }): Promise<ConversationBase>;
     createChatRoom(options: { name?: string, [key: string]: any }): Promise<ChatRoom>;
+    createTemporaryConversation(options: { members?: string[], ttl?: number }): Promise<TemporaryConversation>;
     getConversation(id: string, noCache?: boolean): Promise<ConversationBase>;
     getQuery(): ConversationQuery;
     markAllAsRead(conversations: ConversationBase[]): Promise<Array<ConversationBase>>;
