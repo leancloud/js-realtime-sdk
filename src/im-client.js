@@ -722,7 +722,7 @@ export default class IMClient extends EventEmitter {
       }),
     });
     const resCommand = await this._send(command);
-    return this._handleQueryResults(resCommand);
+    return (await this._handleQueryResults(resCommand))[0];
   }
 
   /**
