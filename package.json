@@ -70,7 +70,7 @@
     "should-sinon": "0.0.5",
     "sinon": "^3.3.0",
     "typescript": "^2.4.1",
-    "weapp-polyfill": "^1.1.0"
+    "weapp-polyfill": "^3.0.0"
   },
   "dependencies": {
     "@commitlint/cli": "^4.2.2",
