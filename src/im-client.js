@@ -24,6 +24,7 @@ import {
 import { ErrorCode, createError } from './error';
 import { Expirable, Cache, keyRemap, union, difference, trim, internal, throttle, encode, decode } from './utils';
 import { applyDecorators, applyDispatcher } from './plugin';
+import SessionManager from './session-manager';
 import runSignatureFactory from './signature-factory-runner';
 import { MessageStatus } from './messages/message';
 import { version as VERSION } from '../package.json';
@@ -552,18 +553,14 @@ export default class IMClient extends EventEmitter {
           configBitmap: 1,
         }),
       }))
-      .then((command) => {
+      .then(async (command) => {
         if (isReconnect) {
-          // if sessionToken is not expired, skip signature/tag/deviceId
-          const { sessionToken } = internal(this);
-          if (sessionToken) {
-            const { value } = sessionToken;
-            if (value && value !== Expirable.EXPIRED) {
-              Object.assign(command.sessionMessage, {
-                st: value,
-              });
-              return command;
-            }
+          const sessionToken = await this._sessionManager.getSessionToken({ autoRefresh: false });
+          if (sessionToken && sessionToken !== Expirable.EXPIRED) {
+            Object.assign(command.sessionMessage, {
+              st: sessionToken,
+            });
+            return command;
           }
         }
         Object.assign(command.sessionMessage, trim({
@@ -571,15 +568,15 @@ export default class IMClient extends EventEmitter {
           deviceId,
         }));
         if (this.options.signatureFactory) {
-          return runSignatureFactory(this.options.signatureFactory, [this._identity])
-            .then((signatureResult) => {
-              Object.assign(command.sessionMessage, keyRemap({
-                signature: 's',
-                timestamp: 't',
-                nonce: 'n',
-              }, signatureResult));
-              return command;
-            });
+          const signatureResult = await runSignatureFactory(
+            this.options.signatureFactory,
+            [this._identity],
+          );
+          Object.assign(command.sessionMessage, keyRemap({
+            signature: 's',
+            timestamp: 't',
+            nonce: 'n',
+          }, signatureResult));
         }
         return command;
       })
@@ -604,22 +601,56 @@ export default class IMClient extends EventEmitter {
         this.id = peerId;
         if (!this._identity) this._identity = peerId;
         if (token) {
-          internal(this).sessionToken = new Expirable(token, tokenTTL * 1000);
+          this._sessionManager = this._sessionManager || this._createSessionManager();
+          this._sessionManager.setSessionToken(token, tokenTTL);
         }
       })
       .catch((error) => {
         if (error.code === ErrorCode.SESSION_TOKEN_EXPIRED) {
-          if (internal(this).sessionToken === undefined) {
+          if (!this._sessionManager) {
             // let it fail if sessoinToken not cached but command rejected as token expired
             // to prevent session openning flood
             throw new Error('Unexpected session expiration');
           }
           debug('Session token expired, reopening');
-          delete internal(this).sessionToken;
+          this._sessionManager.revoke();
           return this._open(appId, tag, deviceId, isReconnect);
         }
         throw error;
       });
+  }
+
+  _createSessionManager() {
+    debug('create SessionManager');
+    return new SessionManager({
+      refresh: (manager, expiredSessionToken) =>
+        manager.setSessionTokenAsync(Promise.resolve(new GenericCommand({
+          cmd: 'session',
+          op: 'refresh',
+          sessionMessage: new SessionCommand({
+            ua: `js/${VERSION}`,
+            st: expiredSessionToken,
+          }),
+        })).then(async (command) => {
+          if (this.options.signatureFactory) {
+            const signatureResult = await runSignatureFactory(
+              this.options.signatureFactory,
+              [this._identity],
+            );
+            Object.assign(command.sessionMessage, keyRemap({
+              signature: 's',
+              timestamp: 't',
+              nonce: 'n',
+            }, signatureResult));
+          }
+          return command;
+        }).then(this._send.bind(this)).then(({
+          sessionMessage: {
+            st: token,
+            stTtl: ttl,
+          },
+        }) => [token, ttl])),
+    });
   }
 
   /**

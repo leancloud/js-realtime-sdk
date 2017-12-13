@@ -5,7 +5,8 @@ import Realtime from '../src/realtime';
 import IMClient from '../src/im-client';
 import { Conversation, ChatRoom } from '../src/conversations';
 import Message from '../src/messages/message';
-import { internal } from '../src/utils';
+import SessionManager from '../src/session-manager';
+import { Expirable } from '../src/utils';
 
 import { sinon, listen, series } from './test-utils';
 
@@ -241,24 +242,64 @@ describe('IMClient', () => {
   });
 
   describe('session token', () => {
-    beforeEach(function setupSpy() {
-      this.spy = sinon.spy(client, '_open');
+    const FAKE_TOKEN = 'fake_session_token';
+    const EXPIRED_SESSION_TOKEN = 'expired_session_token';
+    it('get/set/revoke', async () => {
+      const sm = new SessionManager();
+      sm.setSessionToken(FAKE_TOKEN, 1000);
+      const token = await sm.getSessionToken();
+      token.should.be.eql(FAKE_TOKEN);
+      sm.revoke();
+      const revokedToken = await sm.getSessionToken();
+      revokedToken.should.be.eql(Expirable.EXPIRED);
     });
-    afterEach(function setupSpy() {
-      this.spy.restore();
+    it('setAsync', async () => {
+      const sm = new SessionManager();
+      await sm.setSessionTokenAsync(Promise.resolve([FAKE_TOKEN, 1000]));
+      const token = await sm.getSessionToken();
+      token.should.be.eql(FAKE_TOKEN);
     });
-    it('reconnect with session token', function () {
-      client._connection.disconnect();
-      return listen(client, 'reconnect').then(() => {
-        this.spy.should.be.called();
+    it('setAsyncRejected', async () => {
+      const sm = new SessionManager();
+      sm.setSessionToken(FAKE_TOKEN, 1000);
+      try {
+        await sm.setSessionTokenAsync(Promise.reject(new Error('fetch session token error')));
+      } catch (error) {
+        // ignore
+      }
+      const token = await sm.getSessionToken();
+      token.should.be.eql(FAKE_TOKEN);
+    });
+    it('refresh', async () => {
+      const refresh = sinon.stub().returns(Promise.resolve([FAKE_TOKEN, 1000]));
+      const sm = new SessionManager({
+        refresh,
       });
+      sm.setSessionToken(EXPIRED_SESSION_TOKEN, 0);
+      const token = await sm.getSessionToken();
+      token.should.be.eql(FAKE_TOKEN);
+      refresh.should.be.calledWith(sm, EXPIRED_SESSION_TOKEN);
     });
-    it('session token expiration', function () {
-      // Magic
-      internal(client).sessionToken._value = 'fake_session_token';
-      client._connection.disconnect();
-      return listen(client, 'reconnect').then(() => {
-        this.spy.should.be.calledTwice();
+    describe('reconnect with session token', () => {
+      beforeEach(function setupSpy() {
+        this.spy = sinon.spy(client, '_open');
+      });
+      afterEach(function setupSpy() {
+        this.spy.restore();
+      });
+      it('normal case', function () {
+        client._connection.disconnect();
+        return listen(client, 'reconnect').then(() => {
+          this.spy.should.be.called();
+        });
+      });
+      it('session token expired', function () {
+        // Magic
+        client._sessionManager.setSessionToken(EXPIRED_SESSION_TOKEN, 1000);
+        client._connection.disconnect();
+        return listen(client, 'reconnect').then(() => {
+          this.spy.should.be.calledTwice();
+        });
       });
     });
   });
