@@ -287,14 +287,14 @@ describe('IMClient', () => {
       afterEach(function setupSpy() {
         this.spy.restore();
       });
-      it('normal case', function () {
+      it('normal case', async function () {
         client._connection.disconnect();
+        await client._sessionManager.getSessionToken().should.be.rejectedWith('Connection unavailable');
         return listen(client, 'reconnect').then(() => {
           this.spy.should.be.called();
         });
       });
       it('session token expired', function () {
-        // Magic
         client._sessionManager.setSessionToken(EXPIRED_SESSION_TOKEN, 1000);
         client._connection.disconnect();
         return listen(client, 'reconnect').then(() => {

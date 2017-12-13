@@ -18,14 +18,7 @@ const DEFAULT_RETRY_STRATEGY = attempt => Math.min(1000 * (2 ** attempt), 300000
 const requireConnected = (target, name, descriptor) =>
   Object.assign({}, descriptor, {
     value: function requireConnectedWrapper(...args) {
-      if (!this.is('connected')) {
-        const currentState = this.current;
-        console.warn(`${name} should not be called when the connection is ${currentState}`);
-        if (this.is('disconnected') || this.is('reconnecting')) {
-          console.warn('disconnect and reconnect event should be handled to avoid such calls.');
-        }
-        throw new Error('Connection unavailable');
-      }
+      this.checkConnectionAvailability(name);
       return descriptor.value.call(this, ...args);
     },
   });
@@ -140,6 +133,17 @@ class WebSocketPlus extends EventEmitter {
     if (global.removeEventListener) {
       if (this.__pause) global.removeEventListener('offline', this.__pause);
       if (this.__resume) global.removeEventListener('online', this.__resume);
+    }
+  }
+
+  checkConnectionAvailability(name = 'API') {
+    if (!this.is('connected')) {
+      const currentState = this.current;
+      console.warn(`${name} should not be called when the connection is ${currentState}`);
+      if (this.is('disconnected') || this.is('reconnecting')) {
+        console.warn('disconnect and reconnect event should be handled to avoid such calls.');
+      }
+      throw new Error('Connection unavailable');
     }
   }
 

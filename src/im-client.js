@@ -623,6 +623,7 @@ export default class IMClient extends EventEmitter {
   _createSessionManager() {
     debug('create SessionManager');
     return new SessionManager({
+      onBeforeGetSessionToken: this._connection.checkConnectionAvailability.bind(this._connection),
       refresh: (manager, expiredSessionToken) =>
         manager.setSessionTokenAsync(Promise.resolve(new GenericCommand({
           cmd: 'session',

@@ -6,8 +6,10 @@ const debug = d('LC:SessionManager');
 export default class SessionManager {
   constructor({
     refresh,
+    onBeforeGetSessionToken,
   } = {}) {
     this.refresh = refresh;
+    this._onBeforeGetSessionToken = onBeforeGetSessionToken;
     this.setSessionToken(null, 0);
   }
 
@@ -32,6 +34,9 @@ export default class SessionManager {
 
   async getSessionToken({ autoRefresh = true } = {}) {
     debug('get session token');
+    if (this._onBeforeGetSessionToken) {
+      this._onBeforeGetSessionToken(this);
+    }
     const { value, originalValue } = this._sessionToken || await this._pendingSessionTokenPromise;
     if (value === Expirable.EXPIRED && autoRefresh && this.refresh) {
       debug('refresh expired session token');
