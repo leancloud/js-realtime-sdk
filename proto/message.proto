@@ -69,9 +69,9 @@ enum OpType {
   members = 50;
   max_read = 51;
   is_member = 52;
-  property_update = 53;
-  property_updated = 54;
-  property_changed = 55;
+  member_info_update = 53;
+  member_info_updated = 54;
+  member_info_changed = 55;
 
   // room
   join = 80;
@@ -104,6 +104,21 @@ enum OpType {
   // blacklist, query, query_result defined with 7, 8
   block = 170;
   unblock = 171;
+  blocked = 172;
+  unblocked = 173;
+  members_blocked = 174;
+  members_unblocked = 175;
+
+  add_shutup = 180;
+  remove_shutup = 181;
+  query_shutup = 182;
+  shutup_added = 183;
+  shutup_removed = 184;
+  shutup_result = 185;
+  shutuped = 186;
+  unshutuped = 187;
+  members_shutuped = 188;
+  members_unshutuped = 189;
 }
 
 enum StatusType {
@@ -125,6 +140,7 @@ message UnreadTuple {
   optional int64 patchTimestamp = 7;
   optional bool mentioned = 8;
   optional bytes binaryMsg = 9;
+  optional int32 convType = 10;
 }
 
 message LogItem {
@@ -138,12 +154,13 @@ message LogItem {
   optional bool mentionAll = 8;
   repeated string mentionPids = 9;
   optional bool bin = 10;
+  optional int32 convType = 11;
 }
 
-message ConvProperty {
+message ConvMemberInfo {
   optional string pid = 1;
   optional string role = 2;
-  optional string propertyId = 3;
+  optional string infoId = 3;
 }
 
 message DataCommand {
@@ -179,6 +196,7 @@ message ErrorCommand {
   required string reason = 2;
   optional int32 appCode = 3;
   optional string detail = 4;
+  repeated string pids = 5;
 }
 
 message DirectCommand {
@@ -201,6 +219,7 @@ message DirectCommand {
   optional bytes binaryMsg = 19;
   repeated string mentionPids = 20;
   optional bool mentionAll = 21;
+  optional int32 convType = 22;
 }
 
 message AckCommand {
@@ -251,15 +270,17 @@ message ConvCommand {
   repeated MaxReadTuple maxReadTuples = 24;
   repeated string cids = 25;
 
-  optional ConvProperty property = 26;
+  optional ConvMemberInfo info = 26;
 
   optional bool tempConv = 27;
   optional int32 tempConvTTL = 28;
-  optional string tempConvId = 29;
+  repeated string tempConvIds = 29;
 
-  repeated string convBlockedPids = 30;
-  repeated string clientBlockedPids = 31;
-  repeated string allowedPids = 32;
+  repeated string allowedPids = 30;
+  repeated ErrorCommand failedPids = 31;
+
+  // used in blacklist/shutup query
+  optional string offset = 40;
 
   optional JsonObjectMessage results = 100;
   optional JsonObjectMessage where = 101;
@@ -293,6 +314,7 @@ message LogsCommand {
   optional QueryDirection direction = 10 [default = OLD];
   optional bool tIncluded = 11;
   optional bool ttIncluded = 12;
+  optional int32 lctype = 13;
 
   repeated LogItem logs = 105;
 }
@@ -368,12 +390,14 @@ message BlacklistCommand {
   repeated string toPids      = 2;
   optional string srcPid      = 3;
   repeated string toCids      = 4;
-  optional int32 limit        = 5 [default = 100];
-  optional int32 offset       = 6 [default = 0];
-  optional string lastRk      = 7;
+  optional int32 limit        = 5;
+  optional string offset      = 6;
 
   repeated string blockedPids = 8;
   repeated string blockedCids = 9;
+
+  repeated string allowedPids = 10;
+  repeated ErrorCommand failedPids = 11;
 }
 
 message GenericCommand {
@@ -386,6 +410,7 @@ message GenericCommand {
   optional string installationId = 6;
   optional int32 priority = 7;
   optional int32 service = 8;
+  optional int64 serverTs = 9;
 
   optional DataCommand dataMessage = 101;
   optional SessionCommand sessionMessage = 102;

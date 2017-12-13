@@ -74,6 +74,12 @@ module.exports = require("protobufjs/dist/protobuf-light").newBuilder({})['impor
                     "type": "bytes",
                     "name": "binaryMsg",
                     "id": 9
+                },
+                {
+                    "rule": "optional",
+                    "type": "int32",
+                    "name": "convType",
+                    "id": 10
                 }
             ]
         },
@@ -140,11 +146,17 @@ module.exports = require("protobufjs/dist/protobuf-light").newBuilder({})['impor
                     "type": "bool",
                     "name": "bin",
                     "id": 10
+                },
+                {
+                    "rule": "optional",
+                    "type": "int32",
+                    "name": "convType",
+                    "id": 11
                 }
             ]
         },
         {
-            "name": "ConvProperty",
+            "name": "ConvMemberInfo",
             "syntax": "proto2",
             "fields": [
                 {
@@ -162,7 +174,7 @@ module.exports = require("protobufjs/dist/protobuf-light").newBuilder({})['impor
                 {
                     "rule": "optional",
                     "type": "string",
-                    "name": "propertyId",
+                    "name": "infoId",
                     "id": 3
                 }
             ]
@@ -338,6 +350,12 @@ module.exports = require("protobufjs/dist/protobuf-light").newBuilder({})['impor
                     "type": "string",
                     "name": "detail",
                     "id": 4
+                },
+                {
+                    "rule": "repeated",
+                    "type": "string",
+                    "name": "pids",
+                    "id": 5
                 }
             ]
         },
@@ -458,6 +476,12 @@ module.exports = require("protobufjs/dist/protobuf-light").newBuilder({})['impor
                     "type": "bool",
                     "name": "mentionAll",
                     "id": 21
+                },
+                {
+                    "rule": "optional",
+                    "type": "int32",
+                    "name": "convType",
+                    "id": 22
                 }
             ]
         },
@@ -707,8 +731,8 @@ module.exports = require("protobufjs/dist/protobuf-light").newBuilder({})['impor
                 },
                 {
                     "rule": "optional",
-                    "type": "ConvProperty",
-                    "name": "property",
+                    "type": "ConvMemberInfo",
+                    "name": "info",
                     "id": 26
                 },
                 {
@@ -724,28 +748,28 @@ module.exports = require("protobufjs/dist/protobuf-light").newBuilder({})['impor
                     "id": 28
                 },
                 {
-                    "rule": "optional",
+                    "rule": "repeated",
                     "type": "string",
-                    "name": "tempConvId",
+                    "name": "tempConvIds",
                     "id": 29
                 },
                 {
                     "rule": "repeated",
                     "type": "string",
-                    "name": "convBlockedPids",
+                    "name": "allowedPids",
                     "id": 30
                 },
                 {
                     "rule": "repeated",
-                    "type": "string",
-                    "name": "clientBlockedPids",
+                    "type": "ErrorCommand",
+                    "name": "failedPids",
                     "id": 31
                 },
                 {
-                    "rule": "repeated",
+                    "rule": "optional",
                     "type": "string",
-                    "name": "allowedPids",
-                    "id": 32
+                    "name": "offset",
+                    "id": 40
                 },
                 {
                     "rule": "optional",
@@ -893,6 +917,12 @@ module.exports = require("protobufjs/dist/protobuf-light").newBuilder({})['impor
                     "type": "bool",
                     "name": "ttIncluded",
                     "id": 12
+                },
+                {
+                    "rule": "optional",
+                    "type": "int32",
+                    "name": "lctype",
+                    "id": 13
                 },
                 {
                     "rule": "repeated",
@@ -1238,25 +1268,13 @@ module.exports = require("protobufjs/dist/protobuf-light").newBuilder({})['impor
                     "rule": "optional",
                     "type": "int32",
                     "name": "limit",
-                    "id": 5,
-                    "options": {
-                        "default": 100
-                    }
-                },
-                {
-                    "rule": "optional",
-                    "type": "int32",
-                    "name": "offset",
-                    "id": 6,
-                    "options": {
-                        "default": 0
-                    }
+                    "id": 5
                 },
                 {
                     "rule": "optional",
                     "type": "string",
-                    "name": "lastRk",
-                    "id": 7
+                    "name": "offset",
+                    "id": 6
                 },
                 {
                     "rule": "repeated",
@@ -1269,6 +1287,18 @@ module.exports = require("protobufjs/dist/protobuf-light").newBuilder({})['impor
                     "type": "string",
                     "name": "blockedCids",
                     "id": 9
+                },
+                {
+                    "rule": "repeated",
+                    "type": "string",
+                    "name": "allowedPids",
+                    "id": 10
+                },
+                {
+                    "rule": "repeated",
+                    "type": "ErrorCommand",
+                    "name": "failedPids",
+                    "id": 11
                 }
             ]
         },
@@ -1323,6 +1353,12 @@ module.exports = require("protobufjs/dist/protobuf-light").newBuilder({})['impor
                     "type": "int32",
                     "name": "service",
                     "id": 8
+                },
+                {
+                    "rule": "optional",
+                    "type": "int64",
+                    "name": "serverTs",
+                    "id": 9
                 },
                 {
                     "rule": "optional",
@@ -1639,15 +1675,15 @@ module.exports = require("protobufjs/dist/protobuf-light").newBuilder({})['impor
                     "id": 52
                 },
                 {
-                    "name": "property_update",
+                    "name": "member_info_update",
                     "id": 53
                 },
                 {
-                    "name": "property_updated",
+                    "name": "member_info_updated",
                     "id": 54
                 },
                 {
-                    "name": "property_changed",
+                    "name": "member_info_changed",
                     "id": 55
                 },
                 {
@@ -1721,6 +1757,62 @@ module.exports = require("protobufjs/dist/protobuf-light").newBuilder({})['impor
                 {
                     "name": "unblock",
                     "id": 171
+                },
+                {
+                    "name": "blocked",
+                    "id": 172
+                },
+                {
+                    "name": "unblocked",
+                    "id": 173
+                },
+                {
+                    "name": "members_blocked",
+                    "id": 174
+                },
+                {
+                    "name": "members_unblocked",
+                    "id": 175
+                },
+                {
+                    "name": "add_shutup",
+                    "id": 180
+                },
+                {
+                    "name": "remove_shutup",
+                    "id": 181
+                },
+                {
+                    "name": "query_shutup",
+                    "id": 182
+                },
+                {
+                    "name": "shutup_added",
+                    "id": 183
+                },
+                {
+                    "name": "shutup_removed",
+                    "id": 184
+                },
+                {
+                    "name": "shutup_result",
+                    "id": 185
+                },
+                {
+                    "name": "shutuped",
+                    "id": 186
+                },
+                {
+                    "name": "unshutuped",
+                    "id": 187
+                },
+                {
+                    "name": "members_shutuped",
+                    "id": 188
+                },
+                {
+                    "name": "members_unshutuped",
+                    "id": 189
                 }
             ]
         },
