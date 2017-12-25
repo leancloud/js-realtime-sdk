@@ -11,7 +11,7 @@ const realtime = new Realtime({
   appKey: '',
   plugins: TypedMessagesPlugin,
 });
-const client = new IMClient('test', undefined, undefined, {
+const client = new IMClient('test', undefined, {
   _messageParser: realtime._messageParser,
   _plugins: realtime._plugins,
 });

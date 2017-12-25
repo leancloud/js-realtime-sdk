@@ -8,6 +8,7 @@ import { tap, Cache, trim, internal, ensureArray, isWeapp } from './utils';
 import { applyDecorators, applyDispatcher } from './plugin';
 
 const debug = d('LC:Realtime');
+const debugRequest = d('LC:request');
 
 const routerCache = new Cache('push-router');
 
@@ -83,7 +84,7 @@ export default class Realtime extends EventEmitter {
     const { appId, region } = this._options;
     const { api } = await this.constructor._getServerUrls({ appId, region });
     const url = `https://${api}/${version}${path}`;
-    return axios(url, {
+    const options = {
       method,
       params: query,
       headers: {
@@ -92,7 +93,21 @@ export default class Realtime extends EventEmitter {
         ...headers,
       },
       data,
-    }).then(response => response.data);
+    };
+    debugRequest('Req: %O %O', url, options);
+    return axios(url, options).then(
+      (response) => {
+        debugRequest('Res: %O %O %O', url, response.status, response.data);
+        return response.data;
+      },
+      (error) => {
+        debugRequest('Error: %O %O %O', url, error.response.status, error.response.data);
+        if (error.response && error.response.data && error.response.data.code) {
+          throw createError(error.response.data);
+        }
+        throw error;
+      },
+    );
   }
 
   _open() {

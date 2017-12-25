@@ -1,11 +1,14 @@
 import isEmpty from 'lodash/isEmpty';
 import cloneDeep from 'lodash/cloneDeep';
 import ConversationBase from './conversation-base';
+import ConversationMemberInfo, { ConversationMemberRole } from '../conversation-member-info';
 import { decodeDate, getTime, encode, keyRemap, union, difference, internal, setValue } from '../utils';
 import {
   GenericCommand,
   ConvCommand,
+  ConvMemberInfo,
   JsonObjectMessage,
+  OpType,
 } from '../../proto/message';
 import runSignatureFactory from '../signature-factory-runner';
 
@@ -321,6 +324,77 @@ class PersistentConversation extends ConversationBase {
   async quit() {
     this._debug('quit');
     return this.remove(this._client.id);
+  }
+
+  /**
+   * 获取所有成员的对话属性
+   * @since 4.0.0
+   * @return {Promise.<ConversationMemberInfo[]>} 所有成员的对话属性列表
+   */
+  async getAllMemberInfo() {
+    const response = await this._client._requestWithSessionToken({
+      method: 'GET',
+      path: '/classes/_ConversationMemberInfo',
+      query: {
+        where: { cid: this.id },
+      },
+    });
+    const memberInfos = response.results.map(info => new ConversationMemberInfo({
+      conversation: this,
+      memberId: info.peerId,
+      role: info.role,
+    }));
+    const memberInfoMap = {};
+    memberInfos.forEach((memberInfo) => {
+      memberInfoMap[memberInfo.memberId] = memberInfo;
+    });
+    this.members.forEach((memberId) => {
+      memberInfoMap[memberId] = new ConversationMemberInfo({
+        conversation: this,
+        memberId,
+        role: ConversationMemberRole.MEMBER,
+      });
+    });
+    internal(this).memberInfoMap = memberInfoMap;
+    return this.members.map(memberId => memberInfoMap[memberId]);
+  }
+
+  /**
+   * 获取指定成员的对话属性
+   * @since 4.0.0
+   * @return {Promise.<ConversationMemberInfo>} 指定成员的对话属性
+   */
+  async getMemberInfo(memberId) {
+    if (this.members.indexOf(memberId) === -1) throw new Error(`${memberId} is not the mumber of conversation[${this.id}]`);
+    const { memberInfoMap } = internal(this);
+    if (!(memberInfoMap && memberInfoMap[memberId])) await this.getAllMemberInfo();
+    return internal(this).memberInfoMap[memberId];
+  }
+
+  /**
+   * 更新指定用户的角色
+   * @since 4.0.0
+   * @param {String} memberId 成员 Id
+   * @param {module:leancloud-realtime.ConversationMemberRole | String} role 角色
+   * @return {Promise.<this>} self
+   */
+  async updateMemberRole(memberId, role) {
+    this._debug('mute');
+    await this._send(new GenericCommand({
+      op: OpType.member_info_update,
+      convMessage: new ConvCommand({
+        targetClientId: memberId,
+        info: new ConvMemberInfo({
+          pid: memberId,
+          role,
+        }),
+      }),
+    }));
+    const { memberInfos } = internal(this);
+    if (memberInfos && memberInfos[memberId]) {
+      internal(memberInfos[memberId]).role = role;
+    }
+    return this;
   }
 
   toFullJSON() {

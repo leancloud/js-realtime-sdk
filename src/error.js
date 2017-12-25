@@ -15,7 +15,7 @@ export const error = Object.freeze({
   },
   4105: {
     name: 'SESSION_REQUIRED',
-    message: 'Message sent before session opened. ',
+    message: 'Message sent before session opened.',
   },
   4107: {
     name: 'READ_TIMEOUT',

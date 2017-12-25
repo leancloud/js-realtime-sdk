@@ -119,6 +119,7 @@ export {
   IE10Compatible,
 } from './messages/helpers';
 
+export { ConversationMemberRole } from './conversation-member-info';
 export {
   /**
    * @see Conversation
@@ -199,7 +200,9 @@ const onRealtimeCreate = (realtime) => {
       }
     }
     const promise = realtime._open().then((connection) => {
-      const client = new IMClient(id, { ...buildinOptions, ...clientOptions }, connection, {
+      const client = new IMClient(id, { ...buildinOptions, ...clientOptions }, {
+        _connection: connection,
+        _request: realtime._request.bind(realtime),
         _messageParser: messageParser,
         _plugins: realtime._plugins,
         _identity: identity,

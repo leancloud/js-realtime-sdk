@@ -27,6 +27,7 @@ import {
 } from './configs';
 
 import { listen, sinon, wait } from './test-utils';
+import { ConversationMemberRole } from '../src/conversation-member-info';
 
 describe('Conversation', () => {
   let realtime;
@@ -193,9 +194,9 @@ describe('Conversation', () => {
       });
     });
     it('remove', function removeAsserts() {
-      return this.conversation.quit().then(() => {
+      return this.conversation.remove(['wduan']).then(() => {
         this.conversationSignatureFactory.getCall(1).args
-          .should.be.eql([this.conversation.id, 'ycui', ['ycui'], 'remove']);
+          .should.be.eql([this.conversation.id, 'ycui', ['wduan'], 'remove']);
       });
     });
   });
@@ -447,6 +448,38 @@ describe('Conversation', () => {
         })).then(() => {
         bwang0.close();
       });
+  });
+
+  describe('ConversationMemberInfo', () => {
+    let owner;
+    let member;
+    let ownerConversation;
+    let memberConversation;
+    before(async () => {
+      member = await realtime.createIMClient();
+      owner = await realtime.createIMClient();
+      ownerConversation = await owner.createConversation({
+        members: [member.id, uuid()],
+      });
+      memberConversation = await member.getConversation(ownerConversation.id);
+    });
+    after(() => {
+      owner.close();
+      member.close();
+    });
+    it('member can not promote itself', async () =>
+      memberConversation.updateMemberRole(member.id, ConversationMemberRole.MANAGER)
+        .should.be.rejectedWith('CONVERSATION_OPERATION_UNAUTHORIZED'));
+    it('info update and notification', async () => {
+      const waitForUpdate = listen(memberConversation, 'memberinfoupdated');
+      await ownerConversation.updateMemberRole(member.id, ConversationMemberRole.MANAGER);
+      const [{ member: memberId, memberInfo, updatedBy }] = await waitForUpdate;
+      memberId.should.be.eql(member.id);
+      updatedBy.should.be.eql(owner.id);
+      memberInfo.role.should.be.eql(ConversationMemberRole.MANAGER);
+      const cachedMemberInfo = await memberConversation.getMemberInfo(member.id);
+      cachedMemberInfo.role.should.be.eql(ConversationMemberRole.MANAGER);
+    });
   });
 
   describe('TemporaryConversation', () => {

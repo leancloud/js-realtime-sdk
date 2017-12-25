@@ -43,7 +43,7 @@ export default class IMClient extends EventEmitter {
    * @param  {Function} [options.signatureFactory] open session 时的签名方法 // TODO need details
    * @param  {Function} [options.conversationSignatureFactory] 对话创建、增减成员操作时的签名方法
    */
-  constructor(id, options = {}, connection, props) {
+  constructor(id, options = {}, props) {
     if (!(id === undefined || typeof id === 'string')) {
       throw new TypeError(`Client id [${id}] is not a String`);
     }
@@ -54,7 +54,6 @@ export default class IMClient extends EventEmitter {
        * @memberof IMClient#
        */
       id,
-      _connection: connection,
       options,
     }, props);
 
@@ -70,6 +69,7 @@ export default class IMClient extends EventEmitter {
       'kicked',
       'membersjoined',
       'membersleft',
+      'memberinfoupdated',
       'message',
       'unreadmessages',
       'unreadmessagescountupdate',
@@ -299,7 +299,7 @@ export default class IMClient extends EventEmitter {
     const {
       convMessage,
       convMessage: {
-        initBy, m,
+        initBy, m, info,
       },
     } = message;
     const conversation = await this.getConversation(convMessage.cid);
@@ -408,6 +408,39 @@ export default class IMClient extends EventEmitter {
          * @param {String} payload.kickedBy 该移除操作的发起者 id
          */
         conversation.emit('membersleft', payload);
+        return;
+      }
+      case OpType.member_info_changed: {
+        const { pid, role } = info;
+        const { memberInfoMap } = internal(conversation);
+        // 如果不存在缓存，且不是 role 的更新，则不通知
+        if (!memberInfoMap && !role) return;
+        const memberInfo = await conversation.getMemberInfo(pid);
+        internal(memberInfo).role = role;
+        const payload = {
+          member: pid,
+          memberInfo,
+          updatedBy: initBy,
+        };
+        /**
+         * 有成员的对话信息被更新
+         * @event IMClient#memberinfoupdated
+         * @param {Object} payload
+         * @param {String[]} payload.member 被更新对话信息的成员 id
+         * @param {ConversationMumberInfo} payload.memberInfo 被更新的成员对话信息
+         * @param {String} payload.updatedBy 该操作的发起者 id
+         * @param {ConversationBase} conversation
+         */
+        this.emit('memberinfoupdated', payload, conversation);
+        /**
+         * 有成员的对话信息被更新
+         * @event Conversation#memberinfoupdated
+         * @param {Object} payload
+         * @param {String[]} payload.member 被更新对话信息的成员 id
+         * @param {ConversationMumberInfo} payload.memberInfo 被更新的成员对话信息
+         * @param {String} payload.updatedBy 该操作的发起者 id
+         */
+        conversation.emit('memberinfoupdated', payload);
         return;
       }
       default:
@@ -654,6 +687,25 @@ export default class IMClient extends EventEmitter {
     });
   }
 
+  async _requestWithSessionToken({
+    headers,
+    query,
+    ...params
+  }) {
+    const sessionToken = await this._sessionManager.getSessionToken();
+    return this._request({
+      headers: {
+        'X-LC-IM-Session-Token': sessionToken,
+        ...headers,
+      },
+      query: {
+        client_id: this.id,
+        ...query,
+      },
+      ...params,
+    });
+  }
+
   /**
    * 关闭客户端
    * @return {Promise}
@@ -711,7 +763,7 @@ export default class IMClient extends EventEmitter {
       }
     }
     if (isTemporaryConversatrionId(id)) {
-      return this._getTemporaryConversations(id);
+      return (await this._getTemporaryConversations([id]))[0] || null;
     }
     return this
       .getQuery()
@@ -752,11 +804,11 @@ export default class IMClient extends EventEmitter {
       cmd: 'conv',
       op: 'query',
       convMessage: new ConvCommand({
-        tempConvId: ids,
+        tempConvIds: ids,
       }),
     });
     const resCommand = await this._send(command);
-    return (await this._handleQueryResults(resCommand))[0];
+    return this._handleQueryResults(resCommand);
   }
 
   /**
