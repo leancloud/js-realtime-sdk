@@ -11,6 +11,35 @@ import {
   OpType,
 } from '../../proto/message';
 import runSignatureFactory from '../signature-factory-runner';
+import { createError } from '../error';
+
+/**
+ * 部分失败异常
+ * @typedef OperationFailureError
+ * @type {Error}
+ * @property {string} message 异常信息
+ * @property {string[]} clientIds 因为该原因失败的 client id 列表
+ * @property {number} [code] 错误码
+ * @property {string} [detail] 详细信息
+ */
+
+/**
+ * 部分成功的结果
+ * @typedef PartiallySuccess
+ * @type {Object}
+ * @property {string[]} successfulClientIds 成功的 client id 列表
+ * @property {OperationFailureError[]} failures 失败的异常列表
+ */
+
+const createPartiallySuccess = ({
+  allowedPids,
+  failedPids,
+}) => ({
+  successfulClientIds: allowedPids,
+  failures: failedPids.map(({
+    pids, ...error
+  }) => Object.assign(createError(error), { clientIds: pids })),
+});
 
 /**
  * @extends ConversationBase
@@ -239,19 +268,18 @@ class PersistentConversation extends ConversationBase {
   /**
    * 增加成员
    * @param {String|String[]} clientIds 新增成员 client id
-   * @return {Promise.<this>} self
+   * @return {Promise.<PartiallySuccess>} 部分成功结果，包含了成功的 id 列表、失败原因与对应的 id 列表
    */
   async add(clientIds) {
     this._debug('add', clientIds);
     if (typeof clientIds === 'string') {
       clientIds = [clientIds]; // eslint-disable-line no-param-reassign
     }
-    const convMessage = new ConvCommand({
-      m: clientIds,
-    });
     const command = new GenericCommand({
       op: 'add',
-      convMessage,
+      convMessage: new ConvCommand({
+        m: clientIds,
+      }),
     });
     if (this._client.options.conversationSignatureFactory) {
       const params = [this.id, this._client.id, clientIds.sort(), 'add'];
@@ -265,29 +293,33 @@ class PersistentConversation extends ConversationBase {
         nonce: 'n',
       }, signatureResult));
     }
-    await this._send(command);
+    const {
+      convMessage,
+      convMessage: {
+        allowedPids,
+      },
+    } = await this._send(command);
     if (!this.transient && !this.system) {
-      this.members = union(this.members, clientIds);
+      this.members = union(this.members, allowedPids);
     }
-    return this;
+    return createPartiallySuccess(convMessage);
   }
 
   /**
    * 剔除成员
    * @param {String|String[]} clientIds 成员 client id
-   * @return {Promise.<this>} self
+   * @return {Promise.<PartiallySuccess>} 部分成功结果，包含了成功的 id 列表、失败原因与对应的 id 列表
    */
   async remove(clientIds) {
     this._debug('remove', clientIds);
     if (typeof clientIds === 'string') {
       clientIds = [clientIds]; // eslint-disable-line no-param-reassign
     }
-    const convMessage = new ConvCommand({
-      m: clientIds,
-    });
     const command = new GenericCommand({
       op: 'remove',
-      convMessage,
+      convMessage: new ConvCommand({
+        m: clientIds,
+      }),
     });
     if (this._client.options.conversationSignatureFactory) {
       const params = [this.id, this._client.id, clientIds.sort(), 'remove'];
@@ -301,11 +333,16 @@ class PersistentConversation extends ConversationBase {
         nonce: 'n',
       }, signatureResult));
     }
-    await this._send(command);
+    const {
+      convMessage,
+      convMessage: {
+        allowedPids,
+      },
+    } = await this._send(command);
     if (!this.transient && !this.system) {
-      this.members = difference(this.members, clientIds);
+      this.members = difference(this.members, allowedPids);
     }
-    return this;
+    return createPartiallySuccess(convMessage);
   }
 
   /**
@@ -314,7 +351,12 @@ class PersistentConversation extends ConversationBase {
    */
   async join() {
     this._debug('join');
-    return this.add(this._client.id);
+    return this.add(this._client.id).then(({
+      failures,
+    }) => {
+      if (failures[0]) throw failures[0];
+      return this;
+    });
   }
 
   /**
@@ -323,7 +365,12 @@ class PersistentConversation extends ConversationBase {
    */
   async quit() {
     this._debug('quit');
-    return this.remove(this._client.id);
+    return this.remove(this._client.id).then(({
+      failures,
+    }) => {
+      if (failures[0]) throw failures[0];
+      return this;
+    });
   }
 
   /**

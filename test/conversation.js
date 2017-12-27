@@ -145,15 +145,13 @@ describe('Conversation', () => {
       conv.mutedMembers.should.not.containEql(CLIENT_ID);
     }));
   it('count', () => conversation.count().should.be.fulfilledWith(2));
-  it('add/remove', () =>
-    client.createConversation({ members: ['nsun'] })
-      .then(conv => conv.add('rguo'))
-      .then((conv) => {
-        conv.members.should.containEql('rguo');
-        return conv.remove('rguo');
-      }).then((conv) => {
-        conv.members.should.not.containEql('rguo');
-      }));
+  it('add/remove', async () => {
+    const conv = await client.createConversation({ members: ['nsun'] });
+    await conv.add('rguo');
+    conv.members.should.containEql('rguo');
+    await conv.remove('rguo');
+    conv.members.should.not.containEql('rguo');
+  });
   it('join/quit', () =>
     client.createConversation({ members: ['rguo'] })
       .then(conv => conv.quit())
@@ -479,6 +477,15 @@ describe('Conversation', () => {
       memberInfo.role.should.be.eql(ConversationMemberRole.MANAGER);
       const cachedMemberInfo = await memberConversation.getMemberInfo(member.id);
       cachedMemberInfo.role.should.be.eql(ConversationMemberRole.MANAGER);
+    });
+    it('owner can not quit', () => ownerConversation.quit().should.be.rejected('CONVERSATION_NEED_OWNER'));
+    it('remove should succeed partially', async () => {
+      const result = await ownerConversation.remove([owner.id, member.id]);
+      result.successfulClientIds.should.eql([member.id]);
+      result.failures.should.have.length(1);
+      result.failures[0].should.be.instanceof(Error);
+      result.failures[0].message.should.eql('CONVERSATION_NEED_OWNER');
+      result.failures[0].clientIds.should.eql([owner.id]);
     });
   });
 

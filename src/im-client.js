@@ -583,7 +583,7 @@ export default class IMClient extends EventEmitter {
           r: isReconnect,
           lastUnreadNotifTime,
           lastPatchTime,
-          configBitmap: 1,
+          configBitmap: 0x3F,
         }),
       }))
       .then(async (command) => {
