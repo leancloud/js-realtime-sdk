@@ -542,6 +542,7 @@ export default class IMClient extends EventEmitter {
         cmd: 'session',
         op: 'open',
         appId,
+        peerId: this.id,
         sessionMessage: new SessionCommand({
           ua: `js/${VERSION}`,
           r: isReconnect,
