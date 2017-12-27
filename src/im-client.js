@@ -8,6 +8,7 @@ import {
   ServiceConversation,
   TemporaryConversation,
 } from './conversations';
+import ConversationBase from './conversations/conversation-base';
 import ConversationQuery from './conversation-query';
 import {
   GenericCommand,
@@ -1011,7 +1012,7 @@ export default class IMClient extends EventEmitter {
     const conversations = Array.from(buffer);
     if (!conversations.length) return;
     const ids = conversations.map((conversation) => {
-      if (!(conversation instanceof Conversation)) {
+      if (!(conversation instanceof ConversationBase)) {
         throw new TypeError(`${conversation} is not a Conversation`);
       }
       return conversation.id;
