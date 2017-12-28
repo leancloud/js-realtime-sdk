@@ -23,9 +23,9 @@
   - SDK 现在暴露了四种不同的对话类：
     * 普通对话（`Conversation`）
     * 聊天室（`ChatRoom`）
-    * 系统对话（`SystemConversation`）
+    * 服务号（`ServiceConversation`）
     * 临时对话（`TemporaryConversation`）
-  - 相应的，`IMClient` 提供了三种创建对话的方法（系统对话不支持在客户端创建）：
+  - 相应的，`IMClient` 提供了三种创建对话的方法（服务号不支持在客户端创建）：
     * `IMClient#createConversation`
     * `IMClient#createChatRoom`
     * `IMClient#createTemporaryConversation`

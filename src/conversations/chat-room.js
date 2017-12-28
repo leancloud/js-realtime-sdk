@@ -1,7 +1,7 @@
 import PersistentConversation from './persistent-conversation';
 
 /**
- * 普通对话
+ * 聊天室
  * @since 4.0.0
  * @extends PersistentConversation
  * @public

@@ -9,6 +9,7 @@ const transformNotFoundError = error => (
 );
 
 /**
+ * 临时对话
  * @since 4.0.0
  * @extends ConversationBase
  * @public
