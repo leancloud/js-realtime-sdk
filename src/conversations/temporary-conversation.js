@@ -15,6 +15,9 @@ const transformNotFoundError = error => (
  * @public
  */
 class TemporaryConversation extends ConversationBase {
+  /**
+   * 无法直接实例化，请使用 {@link IMClient#createTemporaryConversation} 创建新的临时对话。
+   */
   constructor(data, {
     expiredAt,
   }, client) {
