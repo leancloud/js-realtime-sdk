@@ -398,6 +398,10 @@ message BlacklistCommand {
 
   repeated string allowedPids = 10;
   repeated ErrorCommand failedPids = 11;
+
+  optional int64 t = 12;
+  optional string n = 13;
+  optional string s = 14;
 }
 
 message GenericCommand {

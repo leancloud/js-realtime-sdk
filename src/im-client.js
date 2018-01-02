@@ -42,6 +42,7 @@ export default class IMClient extends EventEmitter {
    * @param  {Object} [options]
    * @param  {Function} [options.signatureFactory] open session 时的签名方法 // TODO need details
    * @param  {Function} [options.conversationSignatureFactory] 对话创建、增减成员操作时的签名方法
+   * @param  {Function} [options.BlacklistSignatureFactory] 黑名单操作时的签名方法
    */
   constructor(id, options = {}, props) {
     if (!(id === undefined || typeof id === 'string')) {
@@ -70,8 +71,15 @@ export default class IMClient extends EventEmitter {
       'membersjoined',
       'membersleft',
       'memberinfoupdated',
+      'blocked',
+      'unblocked',
+      'membersblocked',
+      'membersunblocked',
+      'muted',
+      'unmuted',
+      'membersmuted',
+      'membersunmuted',
       'message',
-      'unreadmessages',
       'unreadmessagescountupdate',
       'close',
       'conflict',
@@ -408,6 +416,186 @@ export default class IMClient extends EventEmitter {
          * @param {String} payload.kickedBy 该移除操作的发起者 id
          */
         conversation.emit('membersleft', payload);
+        return;
+      }
+      case OpType.members_blocked: {
+        const payload = {
+          blockedBy: initBy,
+          members: m,
+        };
+        /**
+         * 有成员被加入某个对话的黑名单
+         * @event IMClient#membersblocked
+         * @param {Object} payload
+         * @param {String[]} payload.members 成员 id 列表
+         * @param {String} payload.blockedBy 该操作的发起者 id
+         * @param {ConversationBase} conversation
+         */
+        this.emit('membersblocked', payload, conversation);
+        /**
+         * 有成员被加入当前对话的黑名单
+         * @event Conversation#membersblocked
+         * @param {Object} payload
+         * @param {String[]} payload.members 成员 id 列表
+         * @param {String} payload.blockedBy 该操作的发起者 id
+         */
+        conversation.emit('membersblocked', payload);
+        return;
+      }
+      case OpType.members_unblocked: {
+        const payload = {
+          unblockedBy: initBy,
+          members: m,
+        };
+        /**
+         * 有成员被移出某个对话的黑名单
+         * @event IMClient#membersunblocked
+         * @param {Object} payload
+         * @param {String[]} payload.members 成员 id 列表
+         * @param {String} payload.unblockedBy 该操作的发起者 id
+         * @param {ConversationBase} conversation
+         */
+        this.emit('membersunblocked', payload, conversation);
+        /**
+         * 有成员被移出当前对话的黑名单
+         * @event Conversation#membersunblocked
+         * @param {Object} payload
+         * @param {String[]} payload.members 成员 id 列表
+         * @param {String} payload.unblockedBy 该操作的发起者 id
+         */
+        conversation.emit('membersunblocked', payload);
+        return;
+      }
+      case OpType.blocked: {
+        const payload = {
+          blockedBy: initBy,
+        };
+        /**
+         * 当前用户被加入某个对话的黑名单
+         * @event IMClient#blocked
+         * @param {Object} payload
+         * @param {String} payloadblockedBy 该操作的发起者 id
+         * @param {ConversationBase} conversation
+         */
+        this.emit('blocked', payload, conversation);
+        /**
+         * 当前用户被加入当前对话的黑名单
+         * @event Conversation#blocked
+         * @param {Object} payload
+         * @param {String} payload.blockedBy 该操作的发起者 id
+         */
+        conversation.emit('blocked', payload);
+        return;
+      }
+      case OpType.unblocked: {
+        const payload = {
+          unblockedBy: initBy,
+        };
+        /**
+         * 当前用户被移出某个对话的黑名单
+         * @event IMClient#unblocked
+         * @param {Object} payload
+         * @param {String} payload.unblockedBy 该操作的发起者 id
+         * @param {ConversationBase} conversation
+         */
+        this.emit('unblocked', payload, conversation);
+        /**
+         * 当前用户被移出当前对话的黑名单
+         * @event Conversation#unblocked
+         * @param {Object} payload
+         * @param {String} payload.unblockedBy 该操作的发起者 id
+         */
+        conversation.emit('unblocked', payload);
+        return;
+      }
+      case OpType.members_shutuped: {
+        const payload = {
+          mutedBy: initBy,
+          members: m,
+        };
+        /**
+         * 有成员在某个对话中被禁言
+         * @event IMClient#membersmuted
+         * @param {Object} payload
+         * @param {String[]} payload.members 成员 id 列表
+         * @param {String} payload.mutedBy 该操作的发起者 id
+         * @param {ConversationBase} conversation
+         */
+        this.emit('membersmuted', payload, conversation);
+        /**
+         * 有成员在当前对话中被禁言
+         * @event Conversation#membersmuted
+         * @param {Object} payload
+         * @param {String[]} payload.members 成员 id 列表
+         * @param {String} payload.mutedBy 该操作的发起者 id
+         */
+        conversation.emit('membersmuted', payload);
+        return;
+      }
+      case OpType.members_unshutuped: {
+        const payload = {
+          unmutedBy: initBy,
+          members: m,
+        };
+        /**
+         * 有成员在某个对话中被解除禁言
+         * @event IMClient#membersunmuted
+         * @param {Object} payload
+         * @param {String[]} payload.members 成员 id 列表
+         * @param {String} payload.unmutedBy 该操作的发起者 id
+         * @param {ConversationBase} conversation
+         */
+        this.emit('membersunmuted', payload, conversation);
+        /**
+         * 有成员在当前对话中被解除禁言
+         * @event Conversation#membersunmuted
+         * @param {Object} payload
+         * @param {String[]} payload.members 成员 id 列表
+         * @param {String} payload.unmutedBy 该操作的发起者 id
+         */
+        conversation.emit('membersunmuted', payload);
+        return;
+      }
+      case OpType.shutuped: {
+        const payload = {
+          mutedBy: initBy,
+        };
+        /**
+         * 有成员在某个对话中被禁言
+         * @event IMClient#muted
+         * @param {Object} payload
+         * @param {String} payload.mutedBy 该操作的发起者 id
+         * @param {ConversationBase} conversation
+         */
+        this.emit('muted', payload, conversation);
+        /**
+         * 有成员在当前对话中被禁言
+         * @event Conversation#muted
+         * @param {Object} payload
+         * @param {String} payload.mutedBy 该操作的发起者 id
+         */
+        conversation.emit('muted', payload);
+        return;
+      }
+      case OpType.unshutuped: {
+        const payload = {
+          unmutedBy: initBy,
+        };
+        /**
+         * 有成员在某个对话中被解除禁言
+         * @event IMClient#unmuted
+         * @param {Object} payload
+         * @param {String} payload.unmutedBy 该操作的发起者 id
+         * @param {ConversationBase} conversation
+         */
+        this.emit('unmuted', payload, conversation);
+        /**
+         * 有成员在当前对话中被解除禁言
+         * @event Conversation#unmuted
+         * @param {Object} payload
+         * @param {String} payload.unmutedBy 该操作的发起者 id
+         */
+        conversation.emit('unmuted', payload);
         return;
       }
       case OpType.member_info_changed: {

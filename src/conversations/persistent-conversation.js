@@ -2,12 +2,13 @@ import isEmpty from 'lodash/isEmpty';
 import cloneDeep from 'lodash/cloneDeep';
 import ConversationBase from './conversation-base';
 import ConversationMemberInfo, { ConversationMemberRole } from '../conversation-member-info';
-import { decodeDate, getTime, encode, keyRemap, union, difference, internal, setValue } from '../utils';
+import { decodeDate, getTime, encode, keyRemap, union, difference, internal, setValue, ensureArray } from '../utils';
 import {
   GenericCommand,
   ConvCommand,
   ConvMemberInfo,
   JsonObjectMessage,
+  BlacklistCommand,
   OpType,
 } from '../../proto/message';
 import runSignatureFactory from '../signature-factory-runner';
@@ -29,6 +30,14 @@ import { createError } from '../error';
  * @type {Object}
  * @property {string[]} successfulClientIds 成功的 client id 列表
  * @property {OperationFailureError[]} failures 失败的异常列表
+ */
+
+/**
+ * 分页查询结果
+ * @typedef PagedResults
+ * @type {Object}
+ * @property {T[]} results 查询结果
+ * @property {string} [next] 存在表示还有更多结果，在下次查询中带上可实现翻页。
  */
 
 const createPartiallySuccess = ({
@@ -265,6 +274,21 @@ class PersistentConversation extends ConversationBase {
     return this;
   }
 
+  async _appendConversationSignature(command, action, clientIds) {
+    if (this._client.options.conversationSignatureFactory) {
+      const params = [this.id, this._client.id, clientIds.sort(), action];
+      const signatureResult = await runSignatureFactory(
+        this._client.options.conversationSignatureFactory,
+        params,
+      );
+      Object.assign(command.convMessage, keyRemap({
+        signature: 's',
+        timestamp: 't',
+        nonce: 'n',
+      }, signatureResult));
+    }
+  }
+
   /**
    * 增加成员
    * @param {String|String[]} clientIds 新增成员 client id
@@ -281,18 +305,7 @@ class PersistentConversation extends ConversationBase {
         m: clientIds,
       }),
     });
-    if (this._client.options.conversationSignatureFactory) {
-      const params = [this.id, this._client.id, clientIds.sort(), 'add'];
-      const signatureResult = await runSignatureFactory(
-        this._client.options.conversationSignatureFactory,
-        params,
-      );
-      Object.assign(command.convMessage, keyRemap({
-        signature: 's',
-        timestamp: 't',
-        nonce: 'n',
-      }, signatureResult));
-    }
+    await this._appendConversationSignature(command, 'add', clientIds);
     const {
       convMessage,
       convMessage: {
@@ -321,18 +334,7 @@ class PersistentConversation extends ConversationBase {
         m: clientIds,
       }),
     });
-    if (this._client.options.conversationSignatureFactory) {
-      const params = [this.id, this._client.id, clientIds.sort(), 'remove'];
-      const signatureResult = await runSignatureFactory(
-        this._client.options.conversationSignatureFactory,
-        params,
-      );
-      Object.assign(command.convMessage, keyRemap({
-        signature: 's',
-        timestamp: 't',
-        nonce: 'n',
-      }, signatureResult));
-    }
+    await this._appendConversationSignature(command, 'remove', clientIds);
     const {
       convMessage,
       convMessage: {
@@ -371,6 +373,156 @@ class PersistentConversation extends ConversationBase {
       if (failures[0]) throw failures[0];
       return this;
     });
+  }
+
+  /**
+   * 在该对话中禁言成员
+   * @param {String|String[]} clientIds 成员 client id
+   * @return {Promise.<PartiallySuccess>} 部分成功结果，包含了成功的 id 列表、失败原因与对应的 id 列表
+   */
+  async muteMembers(clientIds) {
+    this._debug('mute', clientIds);
+    clientIds = ensureArray(clientIds); // eslint-disable-line no-param-reassign
+    const command = new GenericCommand({
+      op: OpType.add_shutup,
+      convMessage: new ConvCommand({
+        m: clientIds,
+      }),
+    });
+    const {
+      convMessage,
+    } = await this._send(command);
+    return createPartiallySuccess(convMessage);
+  }
+
+  /**
+   * 在该对话中解除成员禁言
+   * @param {String|String[]} clientIds 成员 client id
+   * @return {Promise.<PartiallySuccess>} 部分成功结果，包含了成功的 id 列表、失败原因与对应的 id 列表
+   */
+  async unmuteMembers(clientIds) {
+    this._debug('mute', clientIds);
+    clientIds = ensureArray(clientIds); // eslint-disable-line no-param-reassign
+    const command = new GenericCommand({
+      op: OpType.remove_shutup,
+      convMessage: new ConvCommand({
+        m: clientIds,
+      }),
+    });
+    const {
+      convMessage,
+    } = await this._send(command);
+    return createPartiallySuccess(convMessage);
+  }
+
+  /**
+   * 查询该对话禁言成员列表
+   * @param {Object} [options]
+   * @param {Number} [options.limit] 返回的成员数量，服务器默认值 10
+   * @param {Number} [options.next] 从指定 next 开始查询，与 limit 一起使用可以完成翻页。
+   * @return {PagedResults.<string>} 查询结果。其中的 cureser 存在表示还有更多结果。
+   */
+  async queryMutedMembers({
+    limit,
+    next,
+  } = {}) {
+    this._debug('query muted: limit %O, next: %O', limit, next);
+    const command = new GenericCommand({
+      op: OpType.query_shutup,
+      convMessage: new ConvCommand({
+        limit,
+        offset: next,
+      }),
+    });
+    const {
+      convMessage: {
+        m,
+        offset,
+      },
+    } = await this._send(command);
+    return {
+      results: m,
+      next: offset,
+    };
+  }
+
+  /**
+   * 将用户加入该对话黑名单
+   * @param {String|String[]} clientIds 成员 client id
+   * @return {Promise.<PartiallySuccess>} 部分成功结果，包含了成功的 id 列表、失败原因与对应的 id 列表
+   */
+  async blockMembers(clientIds) {
+    this._debug('block', clientIds);
+    clientIds = ensureArray(clientIds); // eslint-disable-line no-param-reassign
+    const command = new GenericCommand({
+      cmd: 'blacklist',
+      op: OpType.block,
+      blacklistMessage: new BlacklistCommand({
+        srcCid: this.id,
+        toPids: clientIds,
+      }),
+    });
+    // await this._appendBlacklistSignature(command, 'block', clientIds);
+    const {
+      blacklistMessage,
+    } = await this._send(command);
+    return createPartiallySuccess(blacklistMessage);
+  }
+
+  /**
+   * 将用户移出该对话黑名单
+   * @param {String|String[]} clientIds 成员 client id
+   * @return {Promise.<PartiallySuccess>} 部分成功结果，包含了成功的 id 列表、失败原因与对应的 id 列表
+   */
+  async unblockMembers(clientIds) {
+    this._debug('block', clientIds);
+    clientIds = ensureArray(clientIds); // eslint-disable-line no-param-reassign
+    const command = new GenericCommand({
+      cmd: 'blacklist',
+      op: OpType.unblock,
+      blacklistMessage: new BlacklistCommand({
+        srcCid: this.id,
+        toPids: clientIds,
+      }),
+    });
+    // await this._appendBlacklistSignature(command, 'unblock', clientIds);
+    const {
+      blacklistMessage,
+    } = await this._send(command);
+    return createPartiallySuccess(blacklistMessage);
+  }
+
+  /**
+   * 查询该对话黑名单
+   * @param {Object} [options]
+   * @param {Number} [options.limit] 返回的成员数量，服务器默认值 10
+   * @param {Number} [options.next] 从指定 next 开始查询，与 limit 一起使用可以完成翻页
+   * @return {PagedResults.<string>} 查询结果。其中的 cureser 存在表示还有更多结果。
+   */
+  async queryBlockedMembers({
+    limit,
+    next,
+  } = {}) {
+    this._debug('query blocked: limit %O, next: %O', limit, next);
+    const command = new GenericCommand({
+      cmd: 'blacklist',
+      op: OpType.query,
+      blacklistMessage: new BlacklistCommand({
+        srcCid: this.id,
+        limit,
+        offset: next,
+      }),
+    });
+    const {
+      blacklistMessage: {
+        blockedPids,
+        offset,
+      },
+    } = await this._send(command);
+    return {
+      results: blockedPids,
+      cursor: offset,
+    };
   }
 
   /**

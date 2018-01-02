@@ -448,16 +448,17 @@ describe('Conversation', () => {
       });
   });
 
-  describe('ConversationMemberInfo', () => {
+  describe('Conversation Management', () => {
     let owner;
     let member;
     let ownerConversation;
     let memberConversation;
+    const randomId = uuid();
     before(async () => {
       member = await realtime.createIMClient();
       owner = await realtime.createIMClient();
       ownerConversation = await owner.createConversation({
-        members: [member.id, uuid()],
+        members: [member.id, randomId, uuid()],
       });
       memberConversation = await member.getConversation(ownerConversation.id);
     });
@@ -480,12 +481,62 @@ describe('Conversation', () => {
     });
     it('owner can not quit', () => ownerConversation.quit().should.be.rejected('CONVERSATION_NEED_OWNER'));
     it('remove should succeed partially', async () => {
-      const result = await ownerConversation.remove([owner.id, member.id]);
-      result.successfulClientIds.should.eql([member.id]);
+      const result = await ownerConversation.remove([owner.id, randomId]);
+      result.successfulClientIds.should.eql([randomId]);
       result.failures.should.have.length(1);
       result.failures[0].should.be.instanceof(Error);
       result.failures[0].message.should.eql('CONVERSATION_NEED_OWNER');
       result.failures[0].clientIds.should.eql([owner.id]);
+    });
+
+    it('mute/unmute', async () => {
+      const mutedEvent = listen(memberConversation, 'muted');
+      const membersMutedEvent = listen(ownerConversation, 'membersmuted');
+      await ownerConversation.muteMembers(member.id);
+      const [payload] = await membersMutedEvent;
+      payload.should.eql({
+        members: [member.id],
+        mutedBy: owner.id,
+      });
+      await mutedEvent;
+      const { results } = await memberConversation.queryMutedMembers();
+      results.should.eql([member.id]);
+      await memberConversation.send(new TextMessage('')).should.be.rejected();
+      await memberConversation.unmuteMembers(member.id).should.be.rejected();
+
+      const unmutedEvent = listen(memberConversation, 'membersunmuted');
+      await ownerConversation.unmuteMembers(member.id);
+      const [payload2] = await unmutedEvent;
+      payload2.should.eql({
+        members: [member.id],
+        unmutedBy: owner.id,
+      });
+    });
+
+    it('block/unblock', async () => {
+      const blockedEvent = listen(memberConversation, 'blocked');
+      const membersBlockedEvent = listen(ownerConversation, 'membersblocked');
+      const removedEvent = listen(ownerConversation, 'membersleft');
+      const kickedEvent = listen(memberConversation, 'kicked');
+      await ownerConversation.blockMembers(member.id);
+      const [payload] = await membersBlockedEvent;
+      payload.should.eql({
+        members: [member.id],
+        blockedBy: owner.id,
+      });
+      await blockedEvent;
+      await kickedEvent;
+      await removedEvent;
+      const { results } = await ownerConversation.queryBlockedMembers();
+      results.should.eql([member.id]);
+      await memberConversation.unblockMembers(member.id).should.be.rejected();
+      const unblockedEvent = listen(ownerConversation, 'membersunblocked');
+      await ownerConversation.unblockMembers(member.id);
+      const [payload2] = await unblockedEvent;
+      payload2.should.eql({
+        members: [member.id],
+        unblockedBy: owner.id,
+      });
     });
   });
 

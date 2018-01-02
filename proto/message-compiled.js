@@ -1299,6 +1299,24 @@ module.exports = require("protobufjs/dist/protobuf-light").newBuilder({})['impor
                     "type": "ErrorCommand",
                     "name": "failedPids",
                     "id": 11
+                },
+                {
+                    "rule": "optional",
+                    "type": "int64",
+                    "name": "t",
+                    "id": 12
+                },
+                {
+                    "rule": "optional",
+                    "type": "string",
+                    "name": "n",
+                    "id": 13
+                },
+                {
+                    "rule": "optional",
+                    "type": "string",
+                    "name": "s",
+                    "id": 14
                 }
             ]
         },
