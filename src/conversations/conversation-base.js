@@ -348,7 +348,7 @@ export default class ConversationBase extends EventEmitter {
       priority,
     });
     try {
-      const resCommand = await this._send(command, !transient);
+      const resCommand = await this._send(command);
       if (!transient) {
         const {
           ackMessage: {
