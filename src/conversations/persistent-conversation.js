@@ -289,6 +289,21 @@ class PersistentConversation extends ConversationBase {
     }
   }
 
+  async _appendBlacklistSignature(command, action, clientIds) {
+    if (this._client.options.blacklistSignatureFactory) {
+      const params = [this._client.id, this.id, clientIds.sort(), action];
+      const signatureResult = await runSignatureFactory(
+        this._client.options.blacklistSignatureFactory,
+        params,
+      );
+      Object.assign(command.blacklistMessage, keyRemap({
+        signature: 's',
+        timestamp: 't',
+        nonce: 'n',
+      }, signatureResult));
+    }
+  }
+
   /**
    * 增加成员
    * @param {String|String[]} clientIds 新增成员 client id
@@ -462,7 +477,7 @@ class PersistentConversation extends ConversationBase {
         toPids: clientIds,
       }),
     });
-    // await this._appendBlacklistSignature(command, 'block', clientIds);
+    await this._appendBlacklistSignature(command, 'conversation-block-clients', clientIds);
     const {
       blacklistMessage,
     } = await this._send(command);
@@ -485,7 +500,7 @@ class PersistentConversation extends ConversationBase {
         toPids: clientIds,
       }),
     });
-    // await this._appendBlacklistSignature(command, 'unblock', clientIds);
+    await this._appendBlacklistSignature(command, 'conversation-unblock-clients', clientIds);
     const {
       blacklistMessage,
     } = await this._send(command);

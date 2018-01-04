@@ -42,7 +42,7 @@ export default class IMClient extends EventEmitter {
    * @param  {Object} [options]
    * @param  {Function} [options.signatureFactory] open session 时的签名方法 // TODO need details
    * @param  {Function} [options.conversationSignatureFactory] 对话创建、增减成员操作时的签名方法
-   * @param  {Function} [options.BlacklistSignatureFactory] 黑名单操作时的签名方法
+   * @param  {Function} [options.blacklistSignatureFactory] 黑名单操作时的签名方法
    */
   constructor(id, options = {}, props) {
     if (!(id === undefined || typeof id === 'string')) {
