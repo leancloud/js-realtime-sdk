@@ -446,18 +446,18 @@ class PersistentConversation extends ConversationBase {
       op: OpType.query_shutup,
       convMessage: new ConvCommand({
         limit,
-        offset: next,
+        next,
       }),
     });
     const {
       convMessage: {
         m,
-        offset,
+        next: newNext,
       },
     } = await this._send(command);
     return {
       results: m,
-      next: offset,
+      next: newNext,
     };
   }
 
@@ -525,18 +525,18 @@ class PersistentConversation extends ConversationBase {
       blacklistMessage: new BlacklistCommand({
         srcCid: this.id,
         limit,
-        offset: next,
+        next,
       }),
     });
     const {
       blacklistMessage: {
         blockedPids,
-        offset,
+        next: newNext,
       },
     } = await this._send(command);
     return {
       results: blockedPids,
-      cursor: offset,
+      next: newNext,
     };
   }
 

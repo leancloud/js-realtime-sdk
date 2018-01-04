@@ -279,8 +279,8 @@ message ConvCommand {
   repeated string allowedPids = 30;
   repeated ErrorCommand failedPids = 31;
 
-  // used in blacklist/shutup query
-  optional string offset = 40;
+  // used in shutup query
+  optional string next = 40;
 
   optional JsonObjectMessage results = 100;
   optional JsonObjectMessage where = 101;
@@ -391,7 +391,7 @@ message BlacklistCommand {
   optional string srcPid      = 3;
   repeated string toCids      = 4;
   optional int32 limit        = 5;
-  optional string offset      = 6;
+  optional string next        = 6;
 
   repeated string blockedPids = 8;
   repeated string blockedCids = 9;

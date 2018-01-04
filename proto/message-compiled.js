@@ -768,7 +768,7 @@ module.exports = require("protobufjs/dist/protobuf-light").newBuilder({})['impor
                 {
                     "rule": "optional",
                     "type": "string",
-                    "name": "offset",
+                    "name": "next",
                     "id": 40
                 },
                 {
@@ -1273,7 +1273,7 @@ module.exports = require("protobufjs/dist/protobuf-light").newBuilder({})['impor
                 {
                     "rule": "optional",
                     "type": "string",
-                    "name": "offset",
+                    "name": "next",
                     "id": 6
                 },
                 {
