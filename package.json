@@ -72,7 +72,7 @@
     "should-sinon": "0.0.5",
     "sinon": "^3.3.0",
     "typescript": "^2.4.1",
-    "weapp-polyfill": "^3.0.0"
+    "weapp-polyfill": "^3.1.1"
   },
   "dependencies": {
     "axios": "^0.16.1",
@@ -93,6 +93,7 @@
     "./dist/realtime-core.js": "./dist/realtime-core.browser.js"
   },
   "weapp": {
+    "ws": "weapp-polyfill/websocket.js",
     "./src/polyfills/polyfills.js": "./src/polyfills/polyfills-weapp.js",
     "./dist/realtime.js": "./dist/realtime.weapp.js",
     "./dist/realtime-core.js": "./dist/realtime-core.weapp.js"
@@ -113,7 +114,9 @@
     "instrument": false
   },
   "commitlint": {
-    "extends": ["@commitlint/config-angular"]
+    "extends": [
+      "@commitlint/config-angular"
+    ]
   },
   "types": "./realtime.d.ts",
   "typings": "./realtime.d.ts"

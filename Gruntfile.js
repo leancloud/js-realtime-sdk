@@ -13,7 +13,7 @@ module.exports = function(grunt) {
     return {
       intro() {
         return `
-var process = (window && window.process) || {};
+var process = (typeof window !== 'undefined' && window.process) || {};
 process.env = process.env || {};`;
       }
     };
