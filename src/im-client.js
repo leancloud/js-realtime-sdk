@@ -33,6 +33,16 @@ const debug = d('LC:IMClient');
 
 const isTemporaryConversatrionId = id => /^_tmp:/.test(id);
 
+/**
+ * 1 patch-msg
+ * 1 temp-conv-msg
+ * 0 auto-bind-deviceid-and-installation
+ * 1 transient-msg-ack
+ * 0 keep-notification
+ * 1 partial-failed-msg
+ */
+const configBitmap = 0B101011;
+
 export default class IMClient extends EventEmitter {
   /**
    * 无法直接实例化，请使用 {@link Realtime#createIMClient} 创建新的 IMClient。
@@ -771,7 +781,7 @@ export default class IMClient extends EventEmitter {
           r: isReconnect,
           lastUnreadNotifTime,
           lastPatchTime,
-          configBitmap: 0x3F,
+          configBitmap,
         }),
       }))
       .then(async (command) => {
