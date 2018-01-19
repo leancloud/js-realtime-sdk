@@ -8,6 +8,22 @@ import PersistentConversation from './persistent-conversation';
  * @extends PersistentConversation
  * @public
  */
-class ServiceConversation extends PersistentConversation {}
+class ServiceConversation extends PersistentConversation {
+  /**
+   * 订阅该服务号
+   * @return {Promise.<this>} self
+   */
+  async subscribe() {
+    return this.join();
+  }
+
+  /**
+   * 退订该服务号
+   * @return {Promise.<this>} self
+   */
+  async unsubscribe() {
+    return this.quit();
+  }
+}
 
 export default ServiceConversation;

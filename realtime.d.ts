@@ -18,14 +18,16 @@ declare module LeanCloudRealtime {
     createChatRoom(options: { name?: string, [key: string]: any }): Promise<ChatRoom>;
     createTemporaryConversation(options: { members?: string[], ttl?: number }): Promise<TemporaryConversation>;
     getConversation(id: string, noCache?: boolean): Promise<ConversationBase>;
-    getQuery(): ConversationQuery;
+    getQuery(): ConversationQuery<PresistentConversation>;
+    getServiceConversationQuery(): ConversationQuery<ServiceConversation>;
+    getChatRoomQuery(): ConversationQuery<ChatRoom>;
     markAllAsRead(conversations: ConversationBase[]): Promise<Array<ConversationBase>>;
     ping(clientIds: string[]): Promise<Array<string>>;
     parseMessage(json: Object): Promise<AVMessage>;
     parseConversation(json: Object): Promise<ConversationBase>;
   }
 
-  class ConversationQuery {
+  class ConversationQuery<T extends ConversationBase> {
     addAscending(key: string): this;
     addDescending(key: string): this;
     ascending(key: string): this;
@@ -39,7 +41,7 @@ declare module LeanCloudRealtime {
     endsWith(key: string, suffix: string): this;
     equalTo(key: string, value: any): this;
     exists(key: string): this;
-    find(): Promise<Array<ConversationBase>>;
+    find(): Promise<T[]>;
     greaterThan(key: string, value: any): this;
     greaterThanOrEqualTo(key: string, value: any): this;
     lessThan(key: string, value: any): this;
@@ -104,7 +106,10 @@ declare module LeanCloudRealtime {
 
   export class Conversation extends PresistentConversation {}
   export class ChatRoom extends PresistentConversation {}
-  export class ServiceConversation extends PresistentConversation {}
+  export class ServiceConversation extends PresistentConversation {
+    subscribe(): Promise<this>;
+    unsubscribe(): Promise<this>;
+  }
 
   export class TemporaryConversation extends ConversationBase {
     expiredAt: Date;

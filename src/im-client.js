@@ -1001,10 +1001,26 @@ export default class IMClient extends EventEmitter {
 
   /**
    * 构造一个 ConversationQuery 来查询对话
-   * @return {ConversationQuery}
+   * @return {ConversationQuery.<PersistentConversation>}
    */
   getQuery() {
     return new ConversationQuery(this);
+  }
+
+  /**
+   * 构造一个 ConversationQuery 来查询聊天室
+   * @return {ConversationQuery.<ChatRoom>}
+   */
+  getChatRoomQuery() {
+    return this.getQuery().equalTo('tr', true);
+  }
+
+  /**
+   * 构造一个 ConversationQuery 来查询服务号
+   * @return {ConversationQuery.<ServiceConversation>}
+   */
+  getServiceConversationQuery() {
+    return this.getQuery().equalTo('sys', true);
   }
 
   async _executeQuery(query) {
