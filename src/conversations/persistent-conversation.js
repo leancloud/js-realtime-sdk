@@ -555,7 +555,7 @@ class PersistentConversation extends ConversationBase {
     });
     const memberInfos = response.results.map(info => new ConversationMemberInfo({
       conversation: this,
-      memberId: info.peerId,
+      memberId: info.clientId,
       role: info.role,
     }));
     const memberInfoMap = {};
