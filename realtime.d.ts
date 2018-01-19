@@ -3,9 +3,24 @@ declare module LeanCloudRealtime {
     getSessionToken(): string;
   }
 
+  interface SignatureResult {
+    signature: string,
+    timestamp: number,
+    nonce: string,
+  }
+  type SignatureFactoryResult = Promise<SignatureResult> | SignatureResult;
+
   export class Realtime extends EventEmitter {
     constructor(options: { appId: string, appKey: string, region?: string, pushOfflineMessages?: boolean, noBinary?: boolean, ssl?: boolean, server?: string|{RTMRouter: string, api: string}, RTMServers?: string|string[], plugins?: Array<Plugin> });
-    createIMClient(client: string|AVUser, clientOptions?: { signatureFactory?: Function, conversationSignatureFactory?: Function, tag?: string }): Promise<IMClient>;
+    createIMClient(
+      client: string|AVUser,
+      clientOptions?: {
+        signatureFactory?: (clientId: string) => SignatureFactoryResult,
+        conversationSignatureFactory?: (clientId: string, conversationId: string, targetIds: string[], action: string) => SignatureFactoryResult,
+        blacklistSignatureFactory?: (clientId: string, conversationId: string, targetIds: string[], action: string) => SignatureFactoryResult,
+      },
+      tag?: string,
+    ): Promise<IMClient>;
     static defineConversationProperty(prop: string, descriptor?: Object);
     register(messageClass: AVMessage[]);
     retry();
@@ -83,6 +98,27 @@ declare module LeanCloudRealtime {
     toFullJSON(): Object;
   }
 
+  interface OperationFailureError extends Error {
+    clientIds: string[];
+    code?: number;
+    detail?: string;
+  }
+
+  interface PartiallySuccess {
+    successfulClientIds: string[];
+    failures: OperationFailureError[];
+  }
+
+  interface PagedQueryParams {
+    limit?: number;
+    next?: string;
+  }
+
+  interface PagedResults<T> {
+    results: T[];
+    next: string;
+  }
+
   class PresistentConversation extends ConversationBase {
     name: string;
     creator: string;
@@ -98,10 +134,19 @@ declare module LeanCloudRealtime {
     fetch(): Promise<this>;
     mute(): Promise<this>;
     unmute(): Promise<this>;
-    add(members: string[]): Promise<this>;
+    add(members: string[]): Promise<PartiallySuccess>;
     join(): Promise<this>;
     quit(): Promise<this>;
-    remove(clientIds: string[]): Promise<this>;
+    remove(clientIds: string[]): Promise<PartiallySuccess>;
+    muteMembers(clientIds: string[]): Promise<PartiallySuccess>;
+    unmuteMembers(clientIds: string[]): Promise<PartiallySuccess>;
+    queryMutedMembers(options?: PagedQueryParams): Promise<PagedResults<string>>;
+    blockMembers(clientIds: string[]): Promise<PartiallySuccess>;
+    unblockMembers(clientIds: string[]): Promise<PartiallySuccess>;
+    queryBlockedMembers(options?: PagedQueryParams): Promise<PagedResults<string>>;
+    getAllMemberInfo(): Promise<ConversationMemberInfo[]>;
+    getMemberInfo(memberId: string): Promise<ConversationMemberInfo>;
+    updateMemberRole(memberId: string, role: ConversationMemberRole): Promise<this>;
   }
 
   export class Conversation extends PresistentConversation {}
@@ -114,6 +159,19 @@ declare module LeanCloudRealtime {
   export class TemporaryConversation extends ConversationBase {
     expiredAt: Date;
     expired: Boolean;
+  }
+
+  export enum ConversationMemberRole {
+    MANAGER,
+    MEMBER,
+  }
+
+  class ConversationMemberInfo {
+    readonly conversationId: string;
+    readonly memberId: string;
+    readonly role: ConversationMemberRole;
+    readonly isOwner: boolean;
+    toJSON(): Object;
   }
 
   type MessagePointer = Message | {id: string, timestamp: Date|number};

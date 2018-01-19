@@ -416,7 +416,7 @@ class PersistentConversation extends ConversationBase {
    * @return {Promise.<PartiallySuccess>} 部分成功结果，包含了成功的 id 列表、失败原因与对应的 id 列表
    */
   async unmuteMembers(clientIds) {
-    this._debug('mute', clientIds);
+    this._debug('unmute', clientIds);
     clientIds = ensureArray(clientIds); // eslint-disable-line no-param-reassign
     const command = new GenericCommand({
       op: OpType.remove_shutup,
@@ -434,7 +434,7 @@ class PersistentConversation extends ConversationBase {
    * 查询该对话禁言成员列表
    * @param {Object} [options]
    * @param {Number} [options.limit] 返回的成员数量，服务器默认值 10
-   * @param {Number} [options.next] 从指定 next 开始查询，与 limit 一起使用可以完成翻页。
+   * @param {String} [options.next] 从指定 next 开始查询，与 limit 一起使用可以完成翻页。
    * @return {PagedResults.<string>} 查询结果。其中的 cureser 存在表示还有更多结果。
    */
   async queryMutedMembers({
@@ -490,7 +490,7 @@ class PersistentConversation extends ConversationBase {
    * @return {Promise.<PartiallySuccess>} 部分成功结果，包含了成功的 id 列表、失败原因与对应的 id 列表
    */
   async unblockMembers(clientIds) {
-    this._debug('block', clientIds);
+    this._debug('unblock', clientIds);
     clientIds = ensureArray(clientIds); // eslint-disable-line no-param-reassign
     const command = new GenericCommand({
       cmd: 'blacklist',
@@ -511,7 +511,7 @@ class PersistentConversation extends ConversationBase {
    * 查询该对话黑名单
    * @param {Object} [options]
    * @param {Number} [options.limit] 返回的成员数量，服务器默认值 10
-   * @param {Number} [options.next] 从指定 next 开始查询，与 limit 一起使用可以完成翻页
+   * @param {String} [options.next] 从指定 next 开始查询，与 limit 一起使用可以完成翻页
    * @return {PagedResults.<string>} 查询结果。其中的 cureser 存在表示还有更多结果。
    */
   async queryBlockedMembers({

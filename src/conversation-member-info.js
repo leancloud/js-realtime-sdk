@@ -37,21 +37,25 @@ export default class ConversationMemberInfo {
   /**
    * 对话 Id
    * @type {String}
+   * @readonly
    */
   get conversationId() { return internal(this).conversation.id; }
   /**
    * 成员 Id
    * @type {String}
+   * @readonly
    */
   get memberId() { return internal(this).memberId; }
   /**
    * 角色
    * @type {module:leancloud-realtime.ConversationMemberRole | String}
+   * @readonly
    */
   get role() { return internal(this).role; }
   /**
    * 是否是管理员
-   * @type Boolean
+   * @type {Boolean}
+   * @readonly
    */
   get isOwner() { return this.memberId === internal(this).conversation.id; }
 
