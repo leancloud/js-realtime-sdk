@@ -57,7 +57,7 @@ export default class ConversationMemberInfo {
    * @type {Boolean}
    * @readonly
    */
-  get isOwner() { return this.memberId === internal(this).conversation.id; }
+  get isOwner() { return this.memberId === internal(this).conversation.creator; }
 
   toJSON() {
     const {

@@ -469,6 +469,22 @@ describe('Conversation', () => {
     it('member can not promote itself', async () =>
       memberConversation.updateMemberRole(member.id, ConversationMemberRole.MANAGER)
         .should.be.rejectedWith('CONVERSATION_OPERATION_UNAUTHORIZED'));
+    it('info query', async () => {
+      const infoes = await ownerConversation.getAllMemberInfo();
+      infoes.should.have.length(4);
+      (await ownerConversation.getMemberInfo(owner.id)).toJSON().should.eql({
+        conversationId: ownerConversation.id,
+        memberId: owner.id,
+        role: ConversationMemberRole.MEMBER,
+        isOwner: true,
+      });
+      (await ownerConversation.getMemberInfo(member.id)).toJSON().should.eql({
+        conversationId: ownerConversation.id,
+        memberId: member.id,
+        role: ConversationMemberRole.MEMBER,
+        isOwner: false,
+      });
+    });
     it('info update and notification', async () => {
       const waitForUpdate = listen(memberConversation, 'memberinfoupdated');
       await ownerConversation.updateMemberRole(member.id, ConversationMemberRole.MANAGER);
@@ -476,6 +492,7 @@ describe('Conversation', () => {
       memberId.should.be.eql(member.id);
       updatedBy.should.be.eql(owner.id);
       memberInfo.role.should.be.eql(ConversationMemberRole.MANAGER);
+      memberInfo.isOwner.should.be.false();
       const cachedMemberInfo = await memberConversation.getMemberInfo(member.id);
       cachedMemberInfo.role.should.be.eql(ConversationMemberRole.MANAGER);
     });
