@@ -1,5 +1,5 @@
 <a name="4.0.0-beta.3"></a>
-# 4.0.0-beta.3 (2018-01-19)
+# 4.0.0-beta.3 (2018-01-23)
 
 
 ### Features
@@ -7,14 +7,14 @@
 * 新增对话成员角色功能，对话成员支持区分「管理员」与「成员」等不同角色。为了支持该功能，我们增加了 `ConversationMemberInfo` 类用来存储对话成员的属性。相关的 API 有：
   * `Conversation` 与 `ChatRoom` 增加了 `#getAllMemberInfo` 与 `#getMemberInfo` 方法用于查询用户的角色信息。
   * `Conversation` 与 `ChatRoom` 增加了 `#updateMemberRole` 方法用于设置用户的角色。
-  * 增加了 `ConversationMemberRole` 枚举，包含了内置的 `MANAGER` 与 `MEMBER` 两种角色。
+  * 增加了 `ConversationMemberRole` 枚举，包含了内置的 `MANAGER` 与 `MEMBER` 两种角色。
 * 新增对话黑名单与禁言功能：
   * `Conversation`、`ChatRoom` 与 `ServiceConversation` 增加了 `#blockMembers`、`#unblockMembers` 与 `#queryBlockedMembers` 方法。
   * `Conversation`、`ChatRoom` 与 `ServiceConversation` 增加了 `#muteMembers`、`#unmuteMembers` 与 `#queryMutedMembers` 方法。
   * `Realtime#createIMClient` 方法增加了指定黑名单的签名方法的参数 `clientOptions.blacklistSignatureFactory` 。
 * 为不同的对话类补充了更多相应的 API：
   * `IMClient#getChatRoomQuery` 与 `IMClient#getServiceConversationQuery` 方法
-  * `ServiceConversation#subscribe` 与 `ServiceConversation# unsubscribe` 方法
+  * `ServiceConversation#subscribe` 与 `ServiceConversation#unsubscribe` 方法
 * 所有支持批量操作对话成员的方法（包括已经存在 add/remove，新增的 block/unblockMembers、mute/unmuteMembers），均支持部分成功。可以在成功的结果中得到对哪些成员的操作成功了，对哪些成员的操作失败了以及对应的失败原因。
 
 

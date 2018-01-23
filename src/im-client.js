@@ -40,6 +40,7 @@ const isTemporaryConversatrionId = id => /^_tmp:/.test(id);
  * 1 transient-msg-ack
  * 0 keep-notification
  * 1 partial-failed-msg
+ * @ignore
  */
 const configBitmap = 0B101011;
 
