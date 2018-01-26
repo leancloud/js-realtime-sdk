@@ -496,7 +496,7 @@ describe('Conversation', () => {
       const cachedMemberInfo = await memberConversation.getMemberInfo(member.id);
       cachedMemberInfo.role.should.be.eql(ConversationMemberRole.MANAGER);
     });
-    it('owner can not quit', () => ownerConversation.quit().should.be.rejected('CONVERSATION_NEED_OWNER'));
+    it('owner can not quit', () => ownerConversation.quit().should.be.rejectedWith('CONVERSATION_NEED_OWNER'));
     it('remove should succeed partially', async () => {
       const result = await ownerConversation.remove([owner.id, randomId]);
       result.successfulClientIds.should.eql([randomId]);
