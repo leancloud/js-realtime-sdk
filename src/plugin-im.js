@@ -175,11 +175,19 @@ const onRealtimeCreate = (realtime) => {
    * @instance
    * @param  {String|AV.User} [identity] 客户端 identity，如果不指定该参数，服务端会随机生成一个字符串作为 identity，
    * 如果传入一个已登录的 AV.User，则会使用该用户的 id 作为客户端 identity 登录。
-   * @param  {Object} [clientOptions] 详细参数 @see {@link IMClient}
-   * @param  {String} [tag] 客户端类型标记，以支持单点登录功能
+   * @param  {Object} [options]
+   * @param  {Function} [options.signatureFactory] open session 时的签名方法 // TODO need details
+   * @param  {Function} [options.conversationSignatureFactory] 对话创建、增减成员操作时的签名方法
+   * @param  {Function} [options.blacklistSignatureFactory] 黑名单操作时的签名方法
+   * @param  {String} [options.tag] 客户端类型标记，以支持单点登录功能
+   * @param  {String} [options.isReconnect=false] 单点登录时标记该次登录是不是应用启动时自动重新登录
    * @return {Promise.<IMClient>}
    */
-  const createIMClient = async (identity, clientOptions, tag) => {
+  const createIMClient = async (identity, {
+    tag,
+    isReconnect,
+    ...clientOptions
+  } = {}, lagecyTag) => {
     let id;
     const buildinOptions = {};
     if (identity) {
@@ -199,6 +207,10 @@ const onRealtimeCreate = (realtime) => {
         return realtime._IMClients[id];
       }
     }
+    if (lagecyTag) {
+      console.warn('DEPRECATION createIMClient tag param: Use options.tag instead.');
+    }
+    const _tag = tag || lagecyTag;
     const promise = realtime._open().then((connection) => {
       const client = new IMClient(id, { ...buildinOptions, ...clientOptions }, {
         _connection: connection,
@@ -208,7 +220,7 @@ const onRealtimeCreate = (realtime) => {
         _identity: identity,
       });
       connection.on('reconnect', () =>
-        client._open(realtime._options.appId, tag, deviceId, true)
+        client._open(realtime._options.appId, _tag, deviceId, true)
           /**
            * 客户端连接恢复正常，该事件通常在 {@link Realtime#event:reconnect} 之后发生
            * @event IMClient#reconnect
@@ -228,7 +240,7 @@ const onRealtimeCreate = (realtime) => {
         delete realtime._IMClients[client.id];
         realtime._deregister(client);
       }, realtime);
-      return client._open(realtime._options.appId, tag, deviceId)
+      return client._open(realtime._options.appId, _tag, deviceId, isReconnect)
         .then(() => {
           realtime._IMClients[client.id] = client;
           realtime._IMClientsCreationCount += 1;
