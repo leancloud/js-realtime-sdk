@@ -16,7 +16,6 @@ cp -r plugins/typed-messages/docs gh_pages/plugins/typed-messages/;
 mkdir -p gh_pages/plugins/live-query;
 cp -r plugins/live-query/dist gh_pages/plugins/live-query/;
 cp -r plugins/live-query/docs gh_pages/plugins/live-query/;
-cp -r bower_components gh_pages/;
 cd gh_pages && git init;
 git config user.name "leancloud-bot";
 git config user.email "ci@leancloud.cn";
