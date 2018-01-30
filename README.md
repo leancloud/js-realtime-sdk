@@ -6,6 +6,7 @@ LeanCloud JavaScript Realtime SDK
 [![Build Status](https://img.shields.io/travis/leancloud/js-realtime-sdk.svg?style=flat-square)](https://travis-ci.org/leancloud/js-realtime-sdk)
 [![Codecov](https://img.shields.io/codecov/c/github/leancloud/js-realtime-sdk.svg?style=flat-square)](https://codecov.io/github/leancloud/js-realtime-sdk)
 [![Known Vulnerabilities](https://snyk.io/test/github/leancloud/js-realtime-sdk/badge.svg?style=flat-square)](https://snyk.io/test/github/leancloud/js-realtime-sdk)
+[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fleancloud%2Fjs-realtime-sdk.svg?type=shield)](https://app.fossa.io/projects/git%2Bgithub.com%2Fleancloud%2Fjs-realtime-sdk?ref=badge_shield)
 
 为您的 JavaScript App 接入 LeanCloud 实时通讯服务。
 
@@ -183,3 +184,7 @@ Release Process Workflow
 0. Fetch and checkout remote `dist` branch 并确认该提交的内容是即将发布的版本
 0. npm publish（`npm publish`，需 npm 协作者身份），如果是 pre-release 版本需要带 next tag
 0. 如有更新，在 npm 上发布各个 plugin
+
+
+## License
+[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fleancloud%2Fjs-realtime-sdk.svg?type=large)](https://app.fossa.io/projects/git%2Bgithub.com%2Fleancloud%2Fjs-realtime-sdk?ref=badge_large)
