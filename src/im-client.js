@@ -92,6 +92,7 @@ export default class IMClient extends EventEmitter {
       'unhandledmessage',
       'reconnect',
       'reconnecterror',
+      'conversationinfoupdated',
     ].forEach(event => this.on(
       event,
       (...payload) => this._debug(`${event} event emitted. %O`, payload),
@@ -313,7 +314,7 @@ export default class IMClient extends EventEmitter {
     const {
       convMessage,
       convMessage: {
-        initBy, m, info,
+        initBy, m, info, attr,
       },
     } = message;
     const conversation = await this.getConversation(convMessage.cid);
@@ -635,6 +636,32 @@ export default class IMClient extends EventEmitter {
          * @param {String} payload.updatedBy 该操作的发起者 id
          */
         conversation.emit('memberinfoupdated', payload);
+        return;
+      }
+      case OpType.updated: {
+        const attributes = decode(JSON.parse(attr.data));
+        conversation._updateServerAttributes(attributes);
+        const payload = {
+          attributes,
+          updatedBy: initBy,
+        };
+        /**
+         * 该对话信息被更新
+         * @event IMClient#conversationinfoupdated
+         * @param {Object} payload
+         * @param {Object} payload.attributes 被更新的属性
+         * @param {String} payload.updatedBy 该操作的发起者 id
+         * @param {ConversationBase} conversation
+         */
+        this.emit('conversationinfoupdated', payload, conversation);
+        /**
+         * 有对话信息被更新
+         * @event Conversation#infoupdated
+         * @param {Object} payload
+         * @param {Object} payload.attributes 被更新的属性
+         * @param {String} payload.updatedBy 该操作的发起者 id
+         */
+        conversation.emit('infoupdated', payload);
         return;
       }
       default:

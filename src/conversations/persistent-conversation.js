@@ -191,13 +191,22 @@ class PersistentConversation extends ConversationBase {
         pendingAttributes[key] = value;
       }
     }
-    // build currentAttributes
+    this._buildCurrentAttributes();
+    return this;
+  }
+
+  _buildCurrentAttributes() {
+    const { pendingAttributes } = internal(this);
     internal(this).currentAttributes = Object.keys(pendingAttributes)
       .reduce(
         (target, k) => setValue(target, k, pendingAttributes[k]),
         cloneDeep(this._attributes),
       );
-    return this;
+  }
+
+  _updateServerAttributes(attributes) {
+    Object.keys(attributes).forEach(key => setValue(this._attributes, key, attributes[key]));
+    this._buildCurrentAttributes();
   }
 
   _reset() {

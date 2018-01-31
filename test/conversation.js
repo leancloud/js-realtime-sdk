@@ -4,6 +4,7 @@ import { tap } from '../src/utils';
 import {
   GenericCommand,
   ConvCommand,
+  JsonObjectMessage,
 } from '../proto/message';
 import {
   Conversation,
@@ -386,6 +387,45 @@ describe('Conversation', () => {
           invitedBy: CLIENT_ID,
         });
         conversation2.members.should.containEql(CLIENT_ID_2);
+      });
+    });
+    it('info updated', () => {
+      const UPDATED_NAME = 'updated name';
+      const callback = sinon.spy();
+      client2.on('conversationinfoupdated', callback);
+      const conversationCallback = sinon.spy();
+      conversation2.on('infoupdated', conversationCallback);
+      return client2._dispatchCommand(new GenericCommand({
+        cmd: 'conv',
+        op: 'updated',
+        peerId: CLIENT_ID_2,
+        convMessage: new ConvCommand({
+          cid: conversation2.id,
+          attr: new JsonObjectMessage({
+            data: JSON.stringify({
+              name: UPDATED_NAME,
+            }),
+          }),
+          initBy: CLIENT_ID,
+        }),
+      })).then(() => {
+        callback.should.be.calledOnce();
+        callback.getCall(0).args[0].should.be.eql({
+          updatedBy: CLIENT_ID,
+          attributes: {
+            name: UPDATED_NAME,
+          },
+        });
+        callback.getCall(0).args[1].should.be.exactly(conversation2);
+        conversationCallback.should.be.calledOnce();
+        conversationCallback.getCall(0).args[0].should.be.containEql({
+          updatedBy: CLIENT_ID,
+          attributes: {
+            name: UPDATED_NAME,
+          },
+        });
+        conversation2.members.should.containEql(CLIENT_ID_2);
+        conversation2.name.should.eql(UPDATED_NAME);
       });
     });
   });

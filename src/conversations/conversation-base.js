@@ -132,6 +132,7 @@ export default class ConversationBase extends EventEmitter {
       'lastreadatupdate',
       'messagerecall',
       'messageupdate',
+      'infoupdated',
     ].forEach(event => this.on(
       event,
       (...payload) => this._debug(`${event} event emitted. %O`, payload),
