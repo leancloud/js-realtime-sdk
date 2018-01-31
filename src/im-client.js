@@ -1046,7 +1046,7 @@ export default class IMClient extends EventEmitter {
   async _handleQueryResults(resCommand) {
     let conversations;
     try {
-      conversations = JSON.parse(decode(resCommand.convMessage.results.data));
+      conversations = decode(JSON.parse(resCommand.convMessage.results.data));
     } catch (error) {
       const commandString = JSON.stringify(trim(resCommand));
       throw new Error(`Parse query result failed: ${error.message}. Command: ${commandString}`);
