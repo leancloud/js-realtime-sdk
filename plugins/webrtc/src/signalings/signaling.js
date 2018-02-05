@@ -7,9 +7,11 @@ const Signaling = inherit(TypedMessage, {
   __constructor(payload) {
     this.__base();
     this.payload = payload;
-    this.setTransient(true);
   },
 });
+Signaling.sendOptions = {
+  transient: true,
+};
 
 messageField('payload')(Signaling);
 

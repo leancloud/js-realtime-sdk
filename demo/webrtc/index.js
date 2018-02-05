@@ -1,8 +1,10 @@
 'use strict';
 
 var APP_ID = 'nOmzEDu7NtMDBXUJJhIw9bNs-gzGzoHsz';
+var APP_KEY = 'eRTm5hmmJ1Ki1dH9CA4qf3zL';
 var realtime = new AV.Realtime({
   appId: APP_ID,
+  appKey: APP_KEY,
   plugins: AV.WebRTCPlugin
 });
 
