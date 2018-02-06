@@ -90,8 +90,8 @@ declare module LeanCloudRealtime {
     createMessagesIterator(option: { limit?: number, beforeTime?: Date, beforeMessageId?: string });
     read(): Promise<this>;
     fetchReceiptTimestamps(): Promise<this>;
-    queryMessages(options: { beforeTime?: Date, beforeMessageId?: string, afterTime?: Date, afterMessageId?: string, limit?: number }): Promise<Array<Message>>;
-    queryMessages(options: { startTime?: Date, startMessageId?: string, startClosed?: boolean, endTime?: Date, endMessageId?: string, endClosed?: boolean, limit?: number, direction?: MessageQueryDirection }): Promise<Array<Message>>;
+    queryMessages(options: { beforeTime?: Date, beforeMessageId?: string, afterTime?: Date, afterMessageId?: string, limit?: number, type: number }): Promise<Array<Message>>;
+    queryMessages(options: { startTime?: Date, startMessageId?: string, startClosed?: boolean, endTime?: Date, endMessageId?: string, endClosed?: boolean, limit?: number, type: number, direction?: MessageQueryDirection }): Promise<Array<Message>>;
     send<T extends Message>(message: T, options?: { pushData?: Object, priority?: MessagePriority, receipt?: boolean, transient?: boolean, will?: boolean }): Promise<T>;
     update<T extends Message>(message: MessagePointer, newMessage: T): Promise<T>;
     recall(message: MessagePointer): Promise<RecalledMessage>;
@@ -214,6 +214,7 @@ declare module LeanCloudRealtime {
 
   // 富媒体消息
   export class TypedMessage extends Message {
+    static type: number;
     attributes: Object;
     text: string;
     readonly summary: string;

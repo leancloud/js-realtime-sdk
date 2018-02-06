@@ -213,6 +213,12 @@ describe('Conversation', () => {
       }).then((messages) => {
         messages.should.be.an.empty();
       }));
+    it('with type limit', () =>
+      conversation.queryMessages({
+        type: 1000,
+      }).then((messages) => {
+        messages.should.be.an.empty();
+      }));
     it('beforeTime', () =>
       conversation.queryMessages({
         beforeTime: 1,
