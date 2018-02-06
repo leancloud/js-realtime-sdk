@@ -212,13 +212,13 @@ declare module LeanCloudRealtime {
 
   // 富媒体消息
   export class TypedMessage extends Message {
-    attributes: {};
+    attributes: Object;
     text: string;
-    title: string;
+    readonly summary: string;
     type: number;
-    getAttributes(): {};
+    getAttributes(): Object;
     getText(): string;
-    setAttributes(attributes: {}): this;
+    setAttributes(attributes: Object): this;
   }
 
   // 内置文本消息类
