@@ -14,10 +14,12 @@ declare module LeanCloudRealtime {
     constructor(options: { appId: string, appKey: string, region?: string, pushOfflineMessages?: boolean, noBinary?: boolean, ssl?: boolean, server?: string|{RTMRouter: string, api: string}, RTMServers?: string|string[], plugins?: Array<Plugin> });
     createIMClient(
       client: string|AVUser,
-      clientOptions?: {
+      options?: {
         signatureFactory?: (clientId: string) => SignatureFactoryResult,
         conversationSignatureFactory?: (clientId: string, conversationId: string, targetIds: string[], action: string) => SignatureFactoryResult,
         blacklistSignatureFactory?: (clientId: string, conversationId: string, targetIds: string[], action: string) => SignatureFactoryResult,
+        tag?: string,
+        isReconnect?: boolean,
       },
       tag?: string,
     ): Promise<IMClient>;

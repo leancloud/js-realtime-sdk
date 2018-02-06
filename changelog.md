@@ -1,3 +1,27 @@
+<a name="4.0.0-beta.4"></a>
+# 4.0.0-beta.4 (2018-02-06)
+
+
+### Bug Fixes
+
+* 修复了查询得到的对话中自定义的 Date 类型的属性没有被正确解析为 Date 的问题。
+* 修复了当连接不可用时，调用 `IMClient#close` 方法会抛异常的问题。
+
+
+### Features
+
+* 支持对话属性更新通知：
+  * `Conversation`、`ChatRoom` 与 `ServiceConversation` 的属性现在会自动更新，并增加了 `infoupdated` 事件。
+  * 相应的，`IMClient` 增加了 `conversationinfoupdated` 事件。
+* `Realtime#createIMClient` 方法的第二个参数 `options` 增加了用于单点登录的 `tag` 与 `isReconnect` 选项。原第三个参数 `tag` 已被废弃。
+
+
+### BREAKING CHANGES
+
+* 移除了对 Bower 的支持，请使用 npm 或 Yarn。
+
+
+
 <a name="4.0.0-beta.3"></a>
 # 4.0.0-beta.3 (2018-01-23)
 
