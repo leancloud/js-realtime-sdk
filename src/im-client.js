@@ -22,7 +22,7 @@ import {
   OpType,
 } from '../proto/message';
 import { ErrorCode, createError } from './error';
-import { Expirable, Cache, keyRemap, union, difference, trim, internal, throttle, encode, decode } from './utils';
+import { Expirable, Cache, keyRemap, union, difference, trim, internal, throttle, encode, decode, decodeDate, getTime } from './utils';
 import { applyDecorators, applyDispatcher } from './plugin';
 import SessionManager from './session-manager';
 import runSignatureFactory from './signature-factory-runner';
@@ -38,11 +38,11 @@ const isTemporaryConversatrionId = id => /^_tmp:/.test(id);
  * 1 temp-conv-msg
  * 0 auto-bind-deviceid-and-installation
  * 1 transient-msg-ack
- * 0 keep-notification
+ * 1 keep-notification
  * 1 partial-failed-msg
  * @ignore
  */
-const configBitmap = 0B101011;
+const configBitmap = 0B111011;
 
 export default class IMClient extends EventEmitter {
   /**
@@ -70,6 +70,7 @@ export default class IMClient extends EventEmitter {
     this._conversationCache = new Cache(`client:${this.id}`);
     this._ackMessageBuffer = {};
     internal(this).lastPatchTime = Date.now();
+    internal(this).lastNotificationTime = undefined;
     internal(this)._eventemitter = new EventEmitter();
     [
       'invited',
@@ -111,6 +112,9 @@ export default class IMClient extends EventEmitter {
    */
   async _dispatchCommand(command) {
     this._debug(trim(command), 'received');
+    if (command.serverTs) {
+      internal(this).lastNotificationTime = getTime(decodeDate(command.serverTs));
+    }
     switch (command.cmd) {
       case CommandType.conv:
         return this._dispatchConvMessage(command);
@@ -190,7 +194,7 @@ export default class IMClient extends EventEmitter {
         if (!conversation) return null;
         let timestamp;
         if (ts) {
-          timestamp = new Date(ts.toNumber());
+          timestamp = decodeDate(ts);
           conversation.lastMessageAt = timestamp; // eslint-disable-line no-param-reassign
         }
         return (mid ? this._messageParser.parse(binaryMsg || data).then((message) => {
@@ -235,7 +239,7 @@ export default class IMClient extends EventEmitter {
     } = message;
     const conversationId = rcpMessage.cid;
     const messageId = rcpMessage.id;
-    const timestamp = new Date(rcpMessage.t.toNumber());
+    const timestamp = decodeDate(rcpMessage.t);
     const conversation = this._conversationCache.get(conversationId);
     // conversation not cached means the client does not send the message
     // during this session
@@ -257,7 +261,7 @@ export default class IMClient extends EventEmitter {
         // deleted conversation
         if (!conversation) return null;
         return this._messageParser.parse(binaryMsg || data).then((message) => {
-          const patchTime = patchTimestamp.toNumber();
+          const patchTime = getTime(decodeDate(patchTimestamp));
           const messageProps = {
             id: mid,
             cid,
@@ -787,91 +791,128 @@ export default class IMClient extends EventEmitter {
     return this._connection.send(command, ...args);
   }
 
-  _open(appId, tag, deviceId, isReconnect = false) {
+  async _open(appId, tag, deviceId, isReconnect = false) {
     this._debug('open session');
     const {
       lastUnreadNotifTime,
       lastPatchTime,
     } = internal(this);
-    return Promise
-      .resolve(new GenericCommand({
-        cmd: 'session',
-        op: 'open',
-        appId,
-        peerId: this.id,
-        sessionMessage: new SessionCommand({
-          ua: `js/${VERSION}`,
-          r: isReconnect,
-          lastUnreadNotifTime,
-          lastPatchTime,
-          configBitmap,
-        }),
-      }))
-      .then(async (command) => {
-        if (isReconnect) {
-          const sessionToken = await this._sessionManager.getSessionToken({ autoRefresh: false });
-          if (sessionToken && sessionToken !== Expirable.EXPIRED) {
-            Object.assign(command.sessionMessage, {
-              st: sessionToken,
-            });
-            return command;
-          }
+    const command = new GenericCommand({
+      cmd: 'session',
+      op: 'open',
+      appId,
+      peerId: this.id,
+      sessionMessage: new SessionCommand({
+        ua: `js/${VERSION}`,
+        r: isReconnect,
+        lastUnreadNotifTime,
+        lastPatchTime,
+        configBitmap,
+      }),
+    });
+    if (!isReconnect) {
+      Object.assign(command.sessionMessage, trim({
+        tag,
+        deviceId,
+      }));
+      if (this.options.signatureFactory) {
+        const signatureResult = await runSignatureFactory(
+          this.options.signatureFactory,
+          [this._identity],
+        );
+        Object.assign(command.sessionMessage, keyRemap({
+          signature: 's',
+          timestamp: 't',
+          nonce: 'n',
+        }, signatureResult));
+      }
+    } else {
+      const sessionToken = await this._sessionManager.getSessionToken({ autoRefresh: false });
+      if (sessionToken && sessionToken !== Expirable.EXPIRED) {
+        Object.assign(command.sessionMessage, {
+          st: sessionToken,
+        });
+      }
+    }
+    let resCommand;
+    try {
+      resCommand = await this._send(command);
+    } catch (error) {
+      if (error.code === ErrorCode.SESSION_TOKEN_EXPIRED) {
+        if (!this._sessionManager) {
+          // let it fail if sessoinToken not cached but command rejected as token expired
+          // to prevent session openning flood
+          throw new Error('Unexpected session expiration');
         }
-        Object.assign(command.sessionMessage, trim({
-          tag,
-          deviceId,
-        }));
-        if (this.options.signatureFactory) {
-          const signatureResult = await runSignatureFactory(
-            this.options.signatureFactory,
-            [this._identity],
-          );
-          Object.assign(command.sessionMessage, keyRemap({
-            signature: 's',
-            timestamp: 't',
-            nonce: 'n',
-          }, signatureResult));
-        }
-        return command;
-      })
-      .then(this._send.bind(this))
-      .then((resCommand) => {
-        const {
-          peerId,
-          sessionMessage,
-          sessionMessage: {
-            st: token,
-            stTtl: tokenTTL,
-            code,
-          },
-        } = resCommand;
-        if (code) {
-          throw createError(sessionMessage);
-        }
-        if (!peerId) {
-          console.warn('Unexpected session opened without peerId.');
-          return;
-        }
-        this.id = peerId;
-        if (!this._identity) this._identity = peerId;
-        if (token) {
-          this._sessionManager = this._sessionManager || this._createSessionManager();
-          this._sessionManager.setSessionToken(token, tokenTTL);
-        }
-      })
-      .catch((error) => {
-        if (error.code === ErrorCode.SESSION_TOKEN_EXPIRED) {
-          if (!this._sessionManager) {
-            // let it fail if sessoinToken not cached but command rejected as token expired
-            // to prevent session openning flood
-            throw new Error('Unexpected session expiration');
-          }
-          debug('Session token expired, reopening');
-          this._sessionManager.revoke();
-          return this._open(appId, tag, deviceId, isReconnect);
-        }
-        throw error;
+        debug('Session token expired, reopening');
+        this._sessionManager.revoke();
+        return this._open(appId, tag, deviceId, isReconnect);
+      }
+      throw error;
+    }
+    const {
+      peerId,
+      sessionMessage,
+      sessionMessage: {
+        st: token,
+        stTtl: tokenTTL,
+        code,
+      },
+    } = resCommand;
+    if (code) {
+      throw createError(sessionMessage);
+    }
+    if (peerId) {
+      this.id = peerId;
+      if (!this._identity) this._identity = peerId;
+      if (token) {
+        this._sessionManager = this._sessionManager || this._createSessionManager();
+        this._sessionManager.setSessionToken(token, tokenTTL);
+      }
+      if (internal(this).lastNotificationTime) {
+        // Do not await for it as this is failable
+        this._syncNotifications(internal(this).lastNotificationTime).catch(error => console.warn('Syncing notifications failed:', error));
+      } else {
+        // Set timestamp to now for next reconnection
+        internal(this).lastNotificationTime = Date.now();
+      }
+    } else {
+      console.warn('Unexpected session opened without peerId.');
+    }
+    return undefined;
+  }
+
+  async _syncNotifications(timestamp) {
+    const {
+      hasMore,
+      notifications,
+    } = await this._fetchNotifications(timestamp);
+    notifications.forEach((notification) => {
+      const {
+        cmd, op, serverTs, ...payload
+      } = notification;
+      this._dispatchCommand({
+        cmd: CommandType[cmd],
+        op: OpType[op],
+        serverTs,
+        [`${cmd}Message`]: payload,
       });
+    });
+    if (hasMore) {
+      return this._syncNotifications(internal(this).lastNotificationTime);
+    }
+    return undefined;
+  }
+
+  async _fetchNotifications(timestamp) {
+    return this._requestWithSessionToken({
+      method: 'GET',
+      path: '/rtm/notifications',
+      query: {
+        start_ts: timestamp,
+        notification_type: 'permanent',
+      },
+    });
   }
 
   _createSessionManager() {

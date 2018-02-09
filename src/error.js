@@ -83,11 +83,10 @@ export const ErrorCode = Object.freeze(Object.keys(error).reduce(
   {},
 ));
 
-export const createError = (errorMessage) => {
-  const {
-    code, reason, appCode, detail,
-  } = errorMessage;
-  let message = reason || detail;
+export const createError = ({
+  code, reason, appCode, detail, error: errorMessage,
+}) => {
+  let message = reason || detail || errorMessage;
   if (!message && error[code]) {
     message = error[code].message || error[code].name;
   }

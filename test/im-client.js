@@ -287,20 +287,46 @@ describe('IMClient', () => {
       afterEach(function setupSpy() {
         this.spy.restore();
       });
-      it('normal case', async function () {
+      it('normal case', async function test() {
         client._connection.disconnect();
         await client._sessionManager.getSessionToken().should.be.rejectedWith('Connection unavailable');
         return listen(client, 'reconnect').then(() => {
           this.spy.should.be.called();
         });
       });
-      it('session token expired', function () {
+      it('session token expired', function test() {
         client._sessionManager.setSessionToken(EXPIRED_SESSION_TOKEN, 1000);
         client._connection.disconnect();
         return listen(client, 'reconnect').then(() => {
           this.spy.should.be.calledTwice();
         });
       });
+    });
+  });
+
+  describe('Reliable notifications', () => {
+    before(async function setup() {
+      this.realtime = new Realtime({
+        appId: APP_ID,
+        appKey: APP_KEY,
+        region: REGION,
+      });
+      this.client = await this.realtime.createIMClient();
+    });
+    after(async function teardown() {
+      await this.client.close();
+    });
+    it('should dispatch events', async function test() {
+      this.realtime.pause();
+      const conversation = await client.createConversation({
+        members: [this.client.id],
+      });
+      this.realtime.resume();
+      const [payload, conv] = await listen(this.client, 'invited');
+      payload.should.eql({
+        invitedBy: client.id,
+      });
+      conv.id.should.eql(conversation.id);
     });
   });
 });
