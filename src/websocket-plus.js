@@ -10,6 +10,16 @@ import { ensureArray, tryAll, global } from './utils';
 
 const debug = d('LC:WebSocketPlus');
 
+export const OPEN = 'open';
+export const DISCONNECT = 'disconnect';
+export const RECONNECT = 'reconnect';
+export const RETRY = 'retry';
+export const SCHEDULE = 'schedule';
+export const OFFLINE = 'offline';
+export const ONLINE = 'online';
+export const ERROR = 'error';
+export const MESSAGE = 'message';
+
 const HEARTBEAT_TIME = 180000;
 const TIMEOUT_TIME = 380000;
 
@@ -85,7 +95,7 @@ class WebSocketPlus extends EventEmitter {
     debug(`${event}: ${from} -> ${to}`, ...payload);
   }
   onopen() {
-    this.emit('open');
+    this.emit(OPEN);
   }
   onconnected() {
     this._startConnectionKeeper();
@@ -94,22 +104,22 @@ class WebSocketPlus extends EventEmitter {
     this._stopConnectionKeeper();
     this._destroyWs();
     if (to === 'offline' || to === 'disconnected') {
-      this.emit('disconnect');
+      this.emit(DISCONNECT);
     }
   }
   onpause() {
-    this.emit('offline');
+    this.emit(OFFLINE);
   }
   onbeforeresume() {
-    this.emit('online');
+    this.emit(ONLINE);
   }
   onreconnect() {
-    this.emit('reconnect');
+    this.emit(RECONNECT);
   }
   ondisconnected(event, from, to, attempt = 0) {
     const delay = DEFAULT_RETRY_STRATEGY.call(null, attempt);
     debug(`schedule attempt=${attempt} delay=${delay}`);
-    this.emit('schedule', attempt, delay);
+    this.emit(SCHEDULE, attempt, delay);
     if (this.__scheduledRetry) {
       clearTimeout(this.__scheduledRetry);
     }
@@ -120,14 +130,14 @@ class WebSocketPlus extends EventEmitter {
     }, delay);
   }
   onretry(event, from, to, attempt = 0) {
-    this.emit('retry', attempt);
+    this.emit(RETRY, attempt);
     this._createWs(this._getUrls, this._protocol).then(
       () => (this.can('reconnect') ? this.reconnect() : this._destroyWs()),
       () => this.can('fail') && this.fail(attempt + 1),
     );
   }
   onerror(event, from, to, error) {
-    this.emit('error', error);
+    this.emit(ERROR, error);
   }
   onclose() {
     if (global.removeEventListener) {
@@ -224,7 +234,7 @@ class WebSocketPlus extends EventEmitter {
     this.handleMessage(event.data);
   }
   handleMessage(message) {
-    this.emit('message', message);
+    this.emit(MESSAGE, message);
   }
 }
 

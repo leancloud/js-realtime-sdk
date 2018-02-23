@@ -1,13 +1,13 @@
 import 'should';
 import 'should-sinon';
-import WebSocketPlus from '../src/websocket-plus';
+import WebSocketPlus, { ERROR, OPEN, DISCONNECT, SCHEDULE, RETRY, RECONNECT, OFFLINE, ONLINE } from '../src/websocket-plus';
 import { listen, wait, sinon } from './test-utils';
 
 describe('WebSocketPlus', () => {
   describe('open/close', () => {
     it('basic open and close', () => {
       const ws = new WebSocketPlus('ws://demos.kaazing.com/echo');
-      return listen(ws, 'open', 'error').then(() => {
+      return listen(ws, OPEN, ERROR).then(() => {
         ws.is('connected').should.be.true();
         ws.close();
         ws.is('closed').should.be.true();
@@ -16,7 +16,7 @@ describe('WebSocketPlus', () => {
     });
     it('error event should be emitted when got 404 error', (done) => {
       const ws = new WebSocketPlus('ws://404.github.com');
-      ws.on('error', (error) => {
+      ws.on(ERROR, (error) => {
         error.should.be.instanceof(Error);
         done();
       });
@@ -26,13 +26,13 @@ describe('WebSocketPlus', () => {
         'ws://404.github.com',
         'ws://demos.kaazing.com/echo',
       ]);
-      return listen(ws, 'open', 'error').then(() => ws.close());
+      return listen(ws, OPEN, ERROR).then(() => ws.close());
     });
     it('should support promised endpoints', () => {
       const ws = new WebSocketPlus(Promise.resolve([
         'ws://demos.kaazing.com/echo',
       ]));
-      return listen(ws, 'open', 'error').then(() => ws.close());
+      return listen(ws, OPEN, ERROR).then(() => ws.close());
     });
   });
 
@@ -41,7 +41,7 @@ describe('WebSocketPlus', () => {
       const ws = new WebSocketPlus('ws://demos.kaazing.com/echo');
       (() => ws.send()).should.throw(/Connection unavailable/);
       (() => ws._ping()).should.throw(/Connection unavailable/);
-      ws.on('open', () => ws.close());
+      ws.on(OPEN, () => ws.close());
     });
   });
 
@@ -49,20 +49,20 @@ describe('WebSocketPlus', () => {
     let ws;
     before(() => {
       ws = new WebSocketPlus('ws://demos.kaazing.com/echo');
-      return listen(ws, 'open', 'error');
+      return listen(ws, OPEN, ERROR);
     });
     after(() => {
       if (!ws.is('closed')) ws.close();
     });
     it('should reconnect when closed', () => {
       const disconnectCallback = sinon.spy();
-      ws.on('disconnect', disconnectCallback);
+      ws.on(DISCONNECT, disconnectCallback);
       const scheduleCallback = sinon.spy();
-      ws.on('schedule', scheduleCallback);
+      ws.on(SCHEDULE, scheduleCallback);
       const retryCallback = sinon.spy();
-      ws.on('retry', retryCallback);
+      ws.on(RETRY, retryCallback);
       ws._ws.close();
-      return listen(ws, 'reconnect').then(() => {
+      return listen(ws, RECONNECT).then(() => {
         disconnectCallback.should.be.calledOnce();
         scheduleCallback.should.be.calledOnce();
         scheduleCallback.should.be.calledWith(0, 1000);
@@ -73,7 +73,7 @@ describe('WebSocketPlus', () => {
     });
     it('should not reconnect when closed manually', () => {
       const disconnectCallback = sinon.spy();
-      ws.on('disconnect', disconnectCallback);
+      ws.on(DISCONNECT, disconnectCallback);
       ws.close();
       return wait(500).then(() => {
         disconnectCallback.should.have.callCount(0);
@@ -86,23 +86,25 @@ describe('WebSocketPlus', () => {
     let ws;
     before(() => {
       ws = new WebSocketPlus('ws://demos.kaazing.com/echo');
-      return listen(ws, 'open', 'error');
+      return listen(ws, OPEN, ERROR);
     });
     after(() => {
       if (!ws.is('closed')) ws.close();
     });
     it('should emit offline-disconnect-online-schedule in order', () => {
       const events = [];
-      ['disconnect', 'offline', 'online', 'schedule'].forEach(event => ws.on(event, () => events.push(event)));
-      const listenOffline = listen(ws, 'offline');
-      const listenSchedule = listen(ws, 'schedule');
+      [DISCONNECT, OFFLINE, ONLINE, SCHEDULE].forEach((event) => {
+        ws.on(event, () => events.push(event));
+      });
+      const listenOffline = listen(ws, OFFLINE);
+      const listenSchedule = listen(ws, SCHEDULE);
       ws.pause();
       return listenOffline.then(() => {
-        events.should.eql(['disconnect', 'offline']);
+        events.should.eql([DISCONNECT, OFFLINE]);
         ws.resume();
         return listenSchedule;
       }).then(() => {
-        events.should.eql(['disconnect', 'offline', 'online', 'schedule']);
+        events.should.eql([DISCONNECT, OFFLINE, ONLINE, SCHEDULE]);
       });
     });
   });

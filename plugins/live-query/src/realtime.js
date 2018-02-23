@@ -4,9 +4,7 @@ import { Protocals, Promise as _Promise } from 'leancloud-realtime/core';
 if (!Protocals) {
   throw new Error('LeanCloud Realtime SDK not installed');
 }
-export {
-  _Promise,
-};
+export { _Promise };
 
 export {
   Protocals,

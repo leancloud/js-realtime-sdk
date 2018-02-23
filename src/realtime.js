@@ -2,7 +2,17 @@ import d from 'debug';
 import EventEmitter from 'eventemitter3';
 import axios from 'axios';
 import shuffle from 'lodash/shuffle';
-import Connection from './connection';
+import Connection, {
+  OPEN,
+  DISCONNECT,
+  RECONNECT,
+  RETRY,
+  SCHEDULE,
+  OFFLINE,
+  ONLINE,
+  ERROR,
+  MESSAGE,
+} from './connection';
 import { ErrorCode, createError } from './error';
 import { tap, Cache, trim, internal, ensureArray, isWeapp } from './utils';
 import { applyDecorators, applyDispatcher } from './plugin';
@@ -133,48 +143,48 @@ export default class Realtime extends EventEmitter {
         () => this._getRTMServers(this._options),
         protocol,
       );
-      connection.on('open', () => resolve(connection));
-      connection.on('error', reject);
-      connection.on('message', this._dispatchCommand.bind(this));
+      connection.on(OPEN, () => resolve(connection));
+      connection.on(ERROR, reject);
+      connection.on(MESSAGE, this._dispatchCommand.bind(this));
       /**
        * 连接断开。
-       * 连接断开可能是因为 SDK 进入了离线状态（see {@link Realtime#event:offline}），或长时间没有收到服务器心跳。
+       * 连接断开可能是因为 SDK 进入了离线状态（see {@link Realtime#event:OFFLINE}），或长时间没有收到服务器心跳。
        * 连接断开后所有的网络操作都会失败，请在连接断开后禁用相关的 UI 元素。
-       * @event Realtime#disconnect
+       * @event Realtime#DISCONNECT
        */
       /**
        * 计划在一段时间后尝试重新连接
-       * @event Realtime#schedule
+       * @event Realtime#SCHEDULE
        * @param {Number} attempt 尝试重连的次数
        * @param {Number} delay 延迟的毫秒数
        */
       /**
        * 正在尝试重新连接
-       * @event Realtime#retry
+       * @event Realtime#RETRY
        * @param {Number} attempt 尝试重连的次数
        */
       /**
        * 连接恢复正常。
-       * 请重新启用在 {@link Realtime#event:disconnect} 事件中禁用的相关 UI 元素
-       * @event Realtime#reconnect
+       * 请重新启用在 {@link Realtime#event:DISCONNECT} 事件中禁用的相关 UI 元素
+       * @event Realtime#RECONNECT
        */
 
       /**
        * 客户端连接断开
-       * @event IMClient#disconnect
-       * @see Realtime#event:disconnect
+       * @event IMClient#DISCONNECT
+       * @see Realtime#event:DISCONNECT
        * @since 3.2.0
        */
       /**
        * 计划在一段时间后尝试重新连接
-       * @event IMClient#schedule
+       * @event IMClient#SCHEDULE
        * @param {Number} attempt 尝试重连的次数
        * @param {Number} delay 延迟的毫秒数
        * @since 3.2.0
        */
       /**
        * 正在尝试重新连接
-       * @event IMClient#retry
+       * @event IMClient#RETRY
        * @param {Number} attempt 尝试重连的次数
        * @since 3.2.0
        */
@@ -182,33 +192,40 @@ export default class Realtime extends EventEmitter {
       /**
        * 客户端进入离线状态。
        * 这通常意味着网络已断开，或者 {@link Realtime#pause} 被调用
-       * @event Realtime#offline
+       * @event Realtime#OFFLINE
        * @since 3.4.0
        */
       /**
        * 客户端恢复在线状态
        * 这通常意味着网络已恢复，或者 {@link Realtime#resume} 被调用
-       * @event Realtime#online
+       * @event Realtime#ONLINE
        * @since 3.4.0
        */
       /**
        * 进入离线状态。
        * 这通常意味着网络已断开，或者 {@link Realtime#pause} 被调用
-       * @event IMClient#offline
+       * @event IMClient#OFFLINE
        * @since 3.4.0
        */
       /**
        * 恢复在线状态
        * 这通常意味着网络已恢复，或者 {@link Realtime#resume} 被调用
-       * @event IMClient#online
+       * @event IMClient#ONLINE
        * @since 3.4.0
        */
 
       // event proxy
-      ['disconnect', 'reconnect', 'retry', 'schedule', 'offline', 'online'].forEach(event => connection.on(event, (...payload) => {
+      [
+        DISCONNECT,
+        RECONNECT,
+        RETRY,
+        SCHEDULE,
+        OFFLINE,
+        ONLINE,
+      ].forEach(event => connection.on(event, (...payload) => {
         debug(`${event} event emitted. %O`, payload);
         this.emit(event, ...payload);
-        if (event !== 'reconnect') {
+        if (event !== RECONNECT) {
           internal(this).clients.forEach((client) => {
             client.emit(event, ...payload);
           });
@@ -333,7 +350,7 @@ export default class Realtime extends EventEmitter {
   /**
    * 手动进行重连。
    * SDK 在网络出现异常时会自动按照一定的时间间隔尝试重连，调用该方法会立即尝试重连并重置重连尝试计数器。
-   * 只能在 `schedule` 事件之后，`retry` 事件之前调用，如果当前网络正常或者正在进行重连，调用该方法会抛异常。
+   * 只能在 `SCHEDULE` 事件之后，`RETRY` 事件之前调用，如果当前网络正常或者正在进行重连，调用该方法会抛异常。
    */
   retry() {
     const { connection } = internal(this);
@@ -351,7 +368,7 @@ export default class Realtime extends EventEmitter {
    * 在浏览器中 SDK 会自动监听网络变化，因此无需手动调用该方法。
    *
    * @since 3.4.0
-   * @see Realtime#event:offline
+   * @see Realtime#event:OFFLINE
    */
   pause() {
     // 这个方法常常在网络断开、进入后台时被调用，此时 connection 可能没有建立或者已经 close。
@@ -365,7 +382,7 @@ export default class Realtime extends EventEmitter {
    * 你可以在网络恢复、应用回到前台等时刻调用该方法让 SDK 恢复在线状态，恢复在线状态后 SDK 会开始尝试重连。
    *
    * @since 3.4.0
-   * @see Realtime#event:online
+   * @see Realtime#event:ONLINE
    */
   resume() {
     // 与 pause 一样，这个方法应该尽可能 loose

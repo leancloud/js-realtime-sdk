@@ -3,6 +3,7 @@ import 'should-sinon';
 import Realtime from '../src/realtime';
 import { Conversation } from '../src/conversations';
 import {
+  Event,
   ErrorCode,
   MessagePriority,
   MessageStatus,
@@ -165,9 +166,9 @@ describe('Messages', () => {
     it('sending message', () => {
       const message = new Message('hello');
       const promise = Promise.all([
-        listen(conversationZwang, 'message'),
-        listen(zwang, 'message'),
-        listen(zwang, 'unreadmessagescountupdate'),
+        listen(conversationZwang, Event.MESSAGE),
+        listen(zwang, Event.MESSAGE),
+        listen(zwang, Event.UNREAD_MESSAGES_COUNT_UPDATE),
         conversationWchen.send(message),
       ]).then((messages) => {
         const [
@@ -194,7 +195,7 @@ describe('Messages', () => {
       return promise;
     });
     it('sending typed message', () => {
-      const receivePromise = listen(conversationZwang, 'message');
+      const receivePromise = listen(conversationZwang, Event.MESSAGE);
       const sendPromise = conversationWchen.send(new TextMessage('hello').setAttributes({
         leancloud: 'rocks',
       }));
@@ -206,7 +207,7 @@ describe('Messages', () => {
       });
     });
     it('sending binary message', () => {
-      const receivePromise = listen(conversationZwang, 'message');
+      const receivePromise = listen(conversationZwang, Event.MESSAGE);
       const sendPromise = conversationWchen.send(new BinaryMessage(new ArrayBuffer(10)));
       return Promise.all([receivePromise, sendPromise]).then((messages) => {
         const [[receivedMessage], sentMessage] = messages;
@@ -227,7 +228,7 @@ describe('Messages', () => {
     it('mention', () => {
       const message = new TextMessage(`@${zwang.id} @all`).setMentionList(zwang.id).mentionAll();
       conversationWchen.send(message);
-      return listen(conversationZwang, 'message').then(([receivedMessage]) => {
+      return listen(conversationZwang, Event.MESSAGE).then(([receivedMessage]) => {
         receivedMessage.mentioned.should.eql(true);
         receivedMessage.getMentionList().should.eql([zwang.id]);
         receivedMessage.mentionedAll.should.eql(true);
@@ -268,7 +269,7 @@ describe('Messages', () => {
     });
     it('receipt', () => {
       const message = new TextMessage('message needs receipt');
-      const receiptPromise = listen(conversationZwang, 'lastdeliveredatupdate');
+      const receiptPromise = listen(conversationZwang, Event.LAST_DELIVERED_AT_UPDATE);
       return conversationZwang.send(message, { receipt: true })
         .then(() => receiptPromise)
         .then(() => {
@@ -279,8 +280,8 @@ describe('Messages', () => {
     });
     it('read', () => {
       const message = new TextMessage('message needs receipt');
-      const readPromise = listen(conversationZwang, 'lastreadatupdate');
-      conversationWchen.on('message', (msg) => {
+      const readPromise = listen(conversationZwang, Event.LAST_READ_AT_UPDATE);
+      conversationWchen.on(Event.MESSAGE, (msg) => {
         if (msg.id === message.id) conversationWchen.read();
       });
       return conversationZwang.send(message, { receipt: true })
@@ -325,7 +326,7 @@ describe('Messages', () => {
       });
       it('update', function testUpdate() {
         return conversationWchen.update(this.originalMessage, this.modifiedMessage)
-          .then(() => listen(conversationZwang, 'messageupdate'))
+          .then(() => listen(conversationZwang, Event.MESSAGE_UPDATE))
           .then(([message]) => {
             message.should.be.instanceof(TextMessage);
             message.text.should.be.eql('modified');
@@ -337,7 +338,7 @@ describe('Messages', () => {
       });
       it('recall', function testRecall() {
         return conversationWchen.recall(this.modifiedMessage)
-          .then(() => listen(conversationZwang, 'messagerecall'))
+          .then(() => listen(conversationZwang, Event.MESSAGE_RECALL))
           .then(([message]) => {
             message.should.be.instanceof(RecalledMessage);
             message.updatedAt.should.be.a.Date();

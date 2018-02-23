@@ -21,6 +21,7 @@ import {
   CommandType,
   OpType,
 } from '../proto/message';
+import * as Event from './events/im';
 import { ErrorCode, createError } from './error';
 import { Expirable, Cache, keyRemap, union, difference, trim, internal, throttle, encode, decode, decodeDate, getTime } from './utils';
 import { applyDecorators, applyDispatcher } from './plugin';
@@ -30,6 +31,31 @@ import { MessageStatus } from './messages/message';
 import { version as VERSION } from '../package.json';
 
 const debug = d('LC:IMClient');
+
+const {
+  INVITED,
+  KICKED,
+  MEMBERS_JOINED,
+  MEMBERS_LEFT,
+  MEMBER_INFO_UPDATED,
+  BLOCKED,
+  UNBLOCKED,
+  MEMBERS_BLOCKED,
+  MEMBERS_UNBLOCKED,
+  MUTED,
+  UNMUTED,
+  MEMBERS_MUTED,
+  MEMBERS_UNMUTED,
+  MESSAGE,
+  UNREAD_MESSAGES_COUNT_UPDATE,
+  CLOSE,
+  CONFLICT,
+  UNHANDLED_MESSAGE,
+  CONVERSATION_INFO_UPDATED,
+  MESSAGE_RECALL,
+  MESSAGE_UPDATE,
+  INFO_UPDATED,
+} = Event;
 
 const isTemporaryConversatrionId = id => /^_tmp:/.test(id);
 
@@ -72,32 +98,12 @@ export default class IMClient extends EventEmitter {
     internal(this).lastPatchTime = Date.now();
     internal(this).lastNotificationTime = undefined;
     internal(this)._eventemitter = new EventEmitter();
-    [
-      'invited',
-      'kicked',
-      'membersjoined',
-      'membersleft',
-      'memberinfoupdated',
-      'blocked',
-      'unblocked',
-      'membersblocked',
-      'membersunblocked',
-      'muted',
-      'unmuted',
-      'membersmuted',
-      'membersunmuted',
-      'message',
-      'unreadmessagescountupdate',
-      'close',
-      'conflict',
-      'unhandledmessage',
-      'reconnect',
-      'reconnecterror',
-      'conversationinfoupdated',
-    ].forEach(event => this.on(
-      event,
-      (...payload) => this._debug(`${event} event emitted. %O`, payload),
-    ));
+    if (debug.enabled) {
+      Object.values(Event).forEach(event => this.on(
+        event,
+        (...payload) => this._debug(`${event} event emitted. %O`, payload),
+      ));
+    }
     // onIMClientCreate hook
     applyDecorators(this._plugins.onIMClientCreate, this);
   }
@@ -129,7 +135,7 @@ export default class IMClient extends EventEmitter {
       case CommandType.patch:
         return this._dispatchPatchMessage(command);
       default:
-        return this.emit('unhandledmessage', command);
+        return this.emit(UNHANDLED_MESSAGE, command);
     }
   }
 
@@ -145,25 +151,25 @@ export default class IMClient extends EventEmitter {
         if (code === ErrorCode.SESSION_CONFLICT) {
           /**
            * 用户在其他客户端登录，当前客户端被服务端强行下线。详见文档「单点登录」章节。
-           * @event IMClient#conflict
+           * @event IMClient#CONFLICT
            */
-          return this.emit('conflict', {
+          return this.emit(CONFLICT, {
             reason,
           });
         }
         /**
          * 当前客户端被服务端强行下线
-         * @event IMClient#close
+         * @event IMClient#CLOSE
          * @param {Object} payload
          * @param {Number} payload.code 错误码
          * @param {String} payload.reason 原因
          */
-        return this.emit('close', {
+        return this.emit(CLOSE, {
           code, reason,
         });
       }
       default:
-        this.emit('unhandledmessage', message);
+        this.emit(UNHANDLED_MESSAGE, message);
         throw new Error('Unrecognized session command');
     }
   }
@@ -221,11 +227,11 @@ export default class IMClient extends EventEmitter {
         if (conversations.length) {
           /**
            * 未读消息数目更新
-           * @event IMClient#unreadmessagescountupdate
+           * @event IMClient#UNREAD_MESSAGES_COUNT_UPDATE
            * @since 3.4.0
            * @param {Conversation[]} conversations 未读消息数目有更新的对话列表
            */
-          this.emit('unreadmessagescountupdate', conversations);
+          this.emit(UNREAD_MESSAGES_COUNT_UPDATE, conversations);
         }
       });
   }
@@ -284,31 +290,31 @@ export default class IMClient extends EventEmitter {
           if (recall) {
             /**
              * 消息被撤回
-             * @event IMClient#messagerecall
+             * @event IMClient#MESSAGE_RECALL
              * @param {AVMessage} message 被撤回的消息
              * @param {ConversationBase} conversation 消息所在的会话
              */
-            this.emit('messagerecall', message, conversation);
+            this.emit(MESSAGE_RECALL, message, conversation);
             /**
              * 消息被撤回
-             * @event Conversation#messagerecall
+             * @event ConversationBase#MESSAGE_RECALL
              * @param {AVMessage} message 被撤回的消息
              */
-            conversation.emit('messagerecall', message);
+            conversation.emit(MESSAGE_RECALL, message);
           } else {
             /**
              * 消息被修改
-             * @event IMClient#messageupdate
+             * @event IMClient#MESSAGE_UPDATE
              * @param {AVMessage} message 被修改的消息
              * @param {ConversationBase} conversation 消息所在的会话
              */
-            this.emit('messageupdate', message, conversation);
+            this.emit(MESSAGE_UPDATE, message, conversation);
             /**
              * 消息被修改
-             * @event Conversation#messageupdate
+             * @event ConversationBase#MESSAGE_UPDATE
              * @param {AVMessage} message 被修改的消息
              */
-            conversation.emit('messageupdate', message);
+            conversation.emit(MESSAGE_UPDATE, message);
           }
         });
       })));
@@ -333,19 +339,19 @@ export default class IMClient extends EventEmitter {
         };
         /**
          * 当前用户被添加至某个对话
-         * @event IMClient#invited
+         * @event IMClient#INVITED
          * @param {Object} payload
          * @param {String} payload.invitedBy 邀请者 id
          * @param {ConversationBase} conversation
          */
-        this.emit('invited', payload, conversation);
+        this.emit(INVITED, payload, conversation);
         /**
          * 当前用户被添加至当前对话
-         * @event Conversation#invited
+         * @event ConversationBase#INVITED
          * @param {Object} payload
          * @param {String} payload.invitedBy 该移除操作的发起者 id
          */
-        conversation.emit('invited', payload);
+        conversation.emit(INVITED, payload);
         return;
       }
       case OpType.left: {
@@ -358,19 +364,19 @@ export default class IMClient extends EventEmitter {
         };
         /**
          * 当前用户被从某个对话中移除
-         * @event IMClient#kicked
+         * @event IMClient#KICKED
          * @param {Object} payload
          * @param {String} payload.kickedBy 该移除操作的发起者 id
          * @param {ConversationBase} conversation
          */
-        this.emit('kicked', payload, conversation);
+        this.emit(KICKED, payload, conversation);
         /**
          * 当前用户被从当前对话中移除
-         * @event Conversation#kicked
+         * @event ConversationBase#KICKED
          * @param {Object} payload
          * @param {String} payload.kickedBy 该移除操作的发起者 id
          */
-        conversation.emit('kicked', payload);
+        conversation.emit(KICKED, payload);
         return;
       }
       case OpType.members_joined: {
@@ -384,21 +390,21 @@ export default class IMClient extends EventEmitter {
         };
         /**
          * 有用户被添加至某个对话
-         * @event IMClient#membersjoined
+         * @event IMClient#MEMBERS_JOINED
          * @param {Object} payload
          * @param {String[]} payload.members 被添加的用户 id 列表
          * @param {String} payload.invitedBy 邀请者 id
          * @param {ConversationBase} conversation
          */
-        this.emit('membersjoined', payload, conversation);
+        this.emit(MEMBERS_JOINED, payload, conversation);
         /**
          * 有成员被添加至当前对话
-         * @event Conversation#membersjoined
+         * @event ConversationBase#MEMBERS_JOINED
          * @param {Object} payload
          * @param {String[]} payload.members 被添加的成员 id 列表
          * @param {String} payload.invitedBy 邀请者 id
          */
-        conversation.emit('membersjoined', payload);
+        conversation.emit(MEMBERS_JOINED, payload);
         return;
       }
       case OpType.members_left: {
@@ -412,21 +418,21 @@ export default class IMClient extends EventEmitter {
         };
         /**
          * 有成员被从某个对话中移除
-         * @event IMClient#membersleft
+         * @event IMClient#MEMBERS_LEFT
          * @param {Object} payload
          * @param {String[]} payload.members 被移除的成员 id 列表
          * @param {String} payload.kickedBy 该移除操作的发起者 id
          * @param {ConversationBase} conversation
          */
-        this.emit('membersleft', payload, conversation);
+        this.emit(MEMBERS_LEFT, payload, conversation);
         /**
          * 有成员被从当前对话中移除
-         * @event Conversation#membersleft
+         * @event ConversationBase#MEMBERS_LEFT
          * @param {Object} payload
          * @param {String[]} payload.members 被移除的成员 id 列表
          * @param {String} payload.kickedBy 该移除操作的发起者 id
          */
-        conversation.emit('membersleft', payload);
+        conversation.emit(MEMBERS_LEFT, payload);
         return;
       }
       case OpType.members_blocked: {
@@ -436,21 +442,21 @@ export default class IMClient extends EventEmitter {
         };
         /**
          * 有成员被加入某个对话的黑名单
-         * @event IMClient#membersblocked
+         * @event IMClient#MEMBERS_BLOCKED
          * @param {Object} payload
          * @param {String[]} payload.members 成员 id 列表
          * @param {String} payload.blockedBy 该操作的发起者 id
          * @param {ConversationBase} conversation
          */
-        this.emit('membersblocked', payload, conversation);
+        this.emit(MEMBERS_BLOCKED, payload, conversation);
         /**
          * 有成员被加入当前对话的黑名单
-         * @event Conversation#membersblocked
+         * @event ConversationBase#MEMBERS_BLOCKED
          * @param {Object} payload
          * @param {String[]} payload.members 成员 id 列表
          * @param {String} payload.blockedBy 该操作的发起者 id
          */
-        conversation.emit('membersblocked', payload);
+        conversation.emit(MEMBERS_BLOCKED, payload);
         return;
       }
       case OpType.members_unblocked: {
@@ -460,21 +466,21 @@ export default class IMClient extends EventEmitter {
         };
         /**
          * 有成员被移出某个对话的黑名单
-         * @event IMClient#membersunblocked
+         * @event IMClient#MEMBERS_UNBLOCKED
          * @param {Object} payload
          * @param {String[]} payload.members 成员 id 列表
          * @param {String} payload.unblockedBy 该操作的发起者 id
          * @param {ConversationBase} conversation
          */
-        this.emit('membersunblocked', payload, conversation);
+        this.emit(MEMBERS_UNBLOCKED, payload, conversation);
         /**
          * 有成员被移出当前对话的黑名单
-         * @event Conversation#membersunblocked
+         * @event ConversationBase#MEMBERS_UNBLOCKED
          * @param {Object} payload
          * @param {String[]} payload.members 成员 id 列表
          * @param {String} payload.unblockedBy 该操作的发起者 id
          */
-        conversation.emit('membersunblocked', payload);
+        conversation.emit(MEMBERS_UNBLOCKED, payload);
         return;
       }
       case OpType.blocked: {
@@ -483,19 +489,19 @@ export default class IMClient extends EventEmitter {
         };
         /**
          * 当前用户被加入某个对话的黑名单
-         * @event IMClient#blocked
+         * @event IMClient#BLOCKED
          * @param {Object} payload
          * @param {String} payloadblockedBy 该操作的发起者 id
          * @param {ConversationBase} conversation
          */
-        this.emit('blocked', payload, conversation);
+        this.emit(BLOCKED, payload, conversation);
         /**
          * 当前用户被加入当前对话的黑名单
-         * @event Conversation#blocked
+         * @event ConversationBase#BLOCKED
          * @param {Object} payload
          * @param {String} payload.blockedBy 该操作的发起者 id
          */
-        conversation.emit('blocked', payload);
+        conversation.emit(BLOCKED, payload);
         return;
       }
       case OpType.unblocked: {
@@ -504,19 +510,19 @@ export default class IMClient extends EventEmitter {
         };
         /**
          * 当前用户被移出某个对话的黑名单
-         * @event IMClient#unblocked
+         * @event IMClient#UNBLOCKED
          * @param {Object} payload
          * @param {String} payload.unblockedBy 该操作的发起者 id
          * @param {ConversationBase} conversation
          */
-        this.emit('unblocked', payload, conversation);
+        this.emit(UNBLOCKED, payload, conversation);
         /**
          * 当前用户被移出当前对话的黑名单
-         * @event Conversation#unblocked
+         * @event ConversationBase#UNBLOCKED
          * @param {Object} payload
          * @param {String} payload.unblockedBy 该操作的发起者 id
          */
-        conversation.emit('unblocked', payload);
+        conversation.emit(UNBLOCKED, payload);
         return;
       }
       case OpType.members_shutuped: {
@@ -526,21 +532,21 @@ export default class IMClient extends EventEmitter {
         };
         /**
          * 有成员在某个对话中被禁言
-         * @event IMClient#membersmuted
+         * @event IMClient#MEMBERS_MUTED
          * @param {Object} payload
          * @param {String[]} payload.members 成员 id 列表
          * @param {String} payload.mutedBy 该操作的发起者 id
          * @param {ConversationBase} conversation
          */
-        this.emit('membersmuted', payload, conversation);
+        this.emit(MEMBERS_MUTED, payload, conversation);
         /**
          * 有成员在当前对话中被禁言
-         * @event Conversation#membersmuted
+         * @event ConversationBase#MEMBERS_MUTED
          * @param {Object} payload
          * @param {String[]} payload.members 成员 id 列表
          * @param {String} payload.mutedBy 该操作的发起者 id
          */
-        conversation.emit('membersmuted', payload);
+        conversation.emit(MEMBERS_MUTED, payload);
         return;
       }
       case OpType.members_unshutuped: {
@@ -550,21 +556,21 @@ export default class IMClient extends EventEmitter {
         };
         /**
          * 有成员在某个对话中被解除禁言
-         * @event IMClient#membersunmuted
+         * @event IMClient#MEMBERS_UNMUTED
          * @param {Object} payload
          * @param {String[]} payload.members 成员 id 列表
          * @param {String} payload.unmutedBy 该操作的发起者 id
          * @param {ConversationBase} conversation
          */
-        this.emit('membersunmuted', payload, conversation);
+        this.emit(MEMBERS_UNMUTED, payload, conversation);
         /**
          * 有成员在当前对话中被解除禁言
-         * @event Conversation#membersunmuted
+         * @event ConversationBase#MEMBERS_UNMUTED
          * @param {Object} payload
          * @param {String[]} payload.members 成员 id 列表
          * @param {String} payload.unmutedBy 该操作的发起者 id
          */
-        conversation.emit('membersunmuted', payload);
+        conversation.emit(MEMBERS_UNMUTED, payload);
         return;
       }
       case OpType.shutuped: {
@@ -573,19 +579,19 @@ export default class IMClient extends EventEmitter {
         };
         /**
          * 有成员在某个对话中被禁言
-         * @event IMClient#muted
+         * @event IMClient#MUTED
          * @param {Object} payload
          * @param {String} payload.mutedBy 该操作的发起者 id
          * @param {ConversationBase} conversation
          */
-        this.emit('muted', payload, conversation);
+        this.emit(MUTED, payload, conversation);
         /**
          * 有成员在当前对话中被禁言
-         * @event Conversation#muted
+         * @event ConversationBase#MUTED
          * @param {Object} payload
          * @param {String} payload.mutedBy 该操作的发起者 id
          */
-        conversation.emit('muted', payload);
+        conversation.emit(MUTED, payload);
         return;
       }
       case OpType.unshutuped: {
@@ -594,19 +600,19 @@ export default class IMClient extends EventEmitter {
         };
         /**
          * 有成员在某个对话中被解除禁言
-         * @event IMClient#unmuted
+         * @event IMClient#UNMUTED
          * @param {Object} payload
          * @param {String} payload.unmutedBy 该操作的发起者 id
          * @param {ConversationBase} conversation
          */
-        this.emit('unmuted', payload, conversation);
+        this.emit(UNMUTED, payload, conversation);
         /**
          * 有成员在当前对话中被解除禁言
-         * @event Conversation#unmuted
+         * @event ConversationBase#UNMUTED
          * @param {Object} payload
          * @param {String} payload.unmutedBy 该操作的发起者 id
          */
-        conversation.emit('unmuted', payload);
+        conversation.emit(UNMUTED, payload);
         return;
       }
       case OpType.member_info_changed: {
@@ -623,23 +629,23 @@ export default class IMClient extends EventEmitter {
         };
         /**
          * 有成员的对话信息被更新
-         * @event IMClient#memberinfoupdated
+         * @event IMClient#MEMBER_INFO_UPDATED
          * @param {Object} payload
          * @param {String[]} payload.member 被更新对话信息的成员 id
          * @param {ConversationMumberInfo} payload.memberInfo 被更新的成员对话信息
          * @param {String} payload.updatedBy 该操作的发起者 id
          * @param {ConversationBase} conversation
          */
-        this.emit('memberinfoupdated', payload, conversation);
+        this.emit(MEMBER_INFO_UPDATED, payload, conversation);
         /**
          * 有成员的对话信息被更新
-         * @event Conversation#memberinfoupdated
+         * @event ConversationBase#MEMBER_INFO_UPDATED
          * @param {Object} payload
          * @param {String[]} payload.member 被更新对话信息的成员 id
          * @param {ConversationMumberInfo} payload.memberInfo 被更新的成员对话信息
          * @param {String} payload.updatedBy 该操作的发起者 id
          */
-        conversation.emit('memberinfoupdated', payload);
+        conversation.emit(MEMBER_INFO_UPDATED, payload);
         return;
       }
       case OpType.updated: {
@@ -651,25 +657,25 @@ export default class IMClient extends EventEmitter {
         };
         /**
          * 该对话信息被更新
-         * @event IMClient#conversationinfoupdated
+         * @event IMClient#CONVERSATION_INFO_UPDATED
          * @param {Object} payload
          * @param {Object} payload.attributes 被更新的属性
          * @param {String} payload.updatedBy 该操作的发起者 id
          * @param {ConversationBase} conversation
          */
-        this.emit('conversationinfoupdated', payload, conversation);
+        this.emit(CONVERSATION_INFO_UPDATED, payload, conversation);
         /**
          * 有对话信息被更新
-         * @event Conversation#infoupdated
+         * @event ConversationBase#INFO_UPDATED
          * @param {Object} payload
          * @param {Object} payload.attributes 被更新的属性
          * @param {String} payload.updatedBy 该操作的发起者 id
          */
-        conversation.emit('infoupdated', payload);
+        conversation.emit(INFO_UPDATED, payload);
         return;
       }
       default:
-        this.emit('unhandledmessage', message);
+        this.emit(UNHANDLED_MESSAGE, message);
         throw new Error('Unrecognized conversation command');
     }
   }
@@ -725,17 +731,17 @@ export default class IMClient extends EventEmitter {
         }
         /**
          * 当前用户收到消息
-         * @event IMClient#message
+         * @event IMClient#MESSAGE
          * @param {Message} message
          * @param {ConversationBase} conversation 收到消息的对话
          */
-        this.emit('message', message, conversation);
+        this.emit(MESSAGE, message, conversation);
         /**
          * 当前对话收到消息
-         * @event Conversation#message
+         * @event ConversationBase#MESSAGE
          * @param {Message} message
          */
-        conversation.emit('message', message);
+        conversation.emit(MESSAGE, message);
       });
   }
 
@@ -982,7 +988,7 @@ export default class IMClient extends EventEmitter {
       await this._send(command);
     }
     internal(this)._eventemitter.emit('close');
-    this.emit('close', {
+    this.emit(CLOSE, {
       code: 0,
     });
   }

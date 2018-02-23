@@ -13,6 +13,7 @@ import {
   CommandType,
   OpType,
 } from '../../proto/message';
+import * as Event from '../events/im';
 import { createError } from '../error';
 import Message, { MessageStatus } from '../messages/message';
 import RecalledMessage from '../messages/recalled-message';
@@ -113,30 +114,12 @@ export default class ConversationBase extends EventEmitter {
     } else {
       throw new TypeError('Conversation must be initialized with a client');
     }
-    [
-      'kicked',
-      'membersjoined',
-      'membersleft',
-      'memberinfoupdated',
-      'blocked',
-      'unblocked',
-      'membersblocked',
-      'membersunblocked',
-      'muted',
-      'unmuted',
-      'membersmuted',
-      'membersunmuted',
-      'message',
-      'receipt',
-      'lastdeliveredatupdate',
-      'lastreadatupdate',
-      'messagerecall',
-      'messageupdate',
-      'infoupdated',
-    ].forEach(event => this.on(
-      event,
-      (...payload) => this._debug(`${event} event emitted. %O`, payload),
-    ));
+    if (debug.enabled) {
+      Object.values(Event).forEach(event => this.on(
+        event,
+        (...payload) => this._debug(`${event} event emitted. %O`, payload),
+      ));
+    }
     // onConversationCreate hook
     applyDecorators(this._client._plugins.onConversationCreate, this);
   }
@@ -156,7 +139,7 @@ export default class ConversationBase extends EventEmitter {
   set unreadMessagesCount(value) {
     if (value !== this.unreadMessagesCount) {
       internal(this).unreadMessagesCount = value;
-      this._client.emit('unreadmessagescountupdate', [this]);
+      this._client.emit(Event.UNREAD_MESSAGES_COUNT_UPDATE, [this]);
     }
   }
   /**
@@ -190,10 +173,10 @@ export default class ConversationBase extends EventEmitter {
       internal(this).lastDeliveredAt = date;
       /**
        * 最后消息送达时间更新
-       * @event Conversation#lastdeliveredatupdate
+       * @event ConversationBase#LAST_DELIVERED_AT_UPDATE
        * @since 3.4.0
        */
-      this.emit('lastdeliveredatupdate');
+      this.emit(Event.LAST_DELIVERED_AT_UPDATE);
     }
   }
   /**
@@ -211,10 +194,10 @@ export default class ConversationBase extends EventEmitter {
       internal(this).lastReadAt = date;
       /**
        * 最后消息被阅读时间更新
-       * @event Conversation#lastreadatupdate
+       * @event ConversationBase#LAST_READ_AT_UPDATE
        * @since 3.4.0
        */
-      this.emit('lastreadatupdate');
+      this.emit(Event.LAST_READ_AT_UPDATE);
     }
   }
 

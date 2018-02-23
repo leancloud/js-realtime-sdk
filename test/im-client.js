@@ -5,6 +5,7 @@ import Realtime from '../src/realtime';
 import IMClient from '../src/im-client';
 import { Conversation, ChatRoom } from '../src/conversations';
 import Message from '../src/messages/message';
+import { Event } from '../src';
 import SessionManager from '../src/session-manager';
 import { Expirable } from '../src/utils';
 
@@ -290,14 +291,14 @@ describe('IMClient', () => {
       it('normal case', async function test() {
         client._connection.disconnect();
         await client._sessionManager.getSessionToken().should.be.rejectedWith('Connection unavailable');
-        return listen(client, 'reconnect').then(() => {
+        return listen(client, Event.RECONNECT).then(() => {
           this.spy.should.be.called();
         });
       });
       it('session token expired', function test() {
         client._sessionManager.setSessionToken(EXPIRED_SESSION_TOKEN, 1000);
         client._connection.disconnect();
-        return listen(client, 'reconnect').then(() => {
+        return listen(client, Event.RECONNECT).then(() => {
           this.spy.should.be.calledTwice();
         });
       });
@@ -322,7 +323,7 @@ describe('IMClient', () => {
         members: [this.client.id],
       });
       this.realtime.resume();
-      const [payload, conv] = await listen(this.client, 'invited');
+      const [payload, conv] = await listen(this.client, Event.INVITED);
       payload.should.eql({
         invitedBy: client.id,
       });

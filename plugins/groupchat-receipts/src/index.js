@@ -74,6 +74,4 @@ export const GroupchatReceiptsPlugin = {
   },
 };
 
-export {
-  ReadReceipt,
-};
+export { ReadReceipt };

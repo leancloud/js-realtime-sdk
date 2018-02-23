@@ -5,6 +5,7 @@ import Realtime from '../src/realtime';
 import Connection from '../src/connection';
 import { GenericCommand, CommandType, ConvCommand } from '../proto/message';
 import TextMessage from '../src/messages/text-message';
+import { Event } from '../src';
 
 import { listen, sinon, wait } from './test-utils';
 
@@ -111,11 +112,16 @@ describe('Realtime', () => {
       const realtime = createRealtime();
       return realtime._open()
         .then((connection) => {
-          const callbackPromise = Promise.all(['retry', 'schedule', 'disconnect', 'reconnect'].map(event => listen(realtime, event)));
-          connection.emit('disconnect');
-          connection.emit('retry', 1, 2);
-          connection.emit('schedule');
-          connection.emit('reconnect');
+          const callbackPromise = Promise.all([
+            Event.RETRY,
+            Event.SCHEDULE,
+            Event.DISCONNECT,
+            Event.RECONNECT,
+          ].map(event => listen(realtime, event)));
+          connection.emit(Event.DISCONNECT);
+          connection.emit(Event.RETRY, 1, 2);
+          connection.emit(Event.SCHEDULE);
+          connection.emit(Event.RECONNECT);
           callbackPromise.then(() => connection.close());
           return callbackPromise.then(([[retryPayload1, retryPayload2]]) => {
             retryPayload1.should.equal(1);
@@ -152,20 +158,20 @@ describe('Realtime', () => {
     });
     it('should retry when disconnected', () =>
       realtime._open().then((connection) => {
-        const promise = listen(realtime, 'disconnect', 'eroor');
+        const promise = listen(realtime, Event.DISCONNECT);
         connection.disconnect();
         return promise;
       }).then(() => {
         realtime.retry();
-        return listen(realtime, 'reconnect', 'eroor');
+        return listen(realtime, Event.RECONNECT);
       }));
     it('should reconnect when offline', () =>
       realtime._open().then(() => {
-        const promises = ['disconnect', 'offline'].map(event => listen(realtime, event, 'eroor'));
+        const promises = [Event.DISCONNECT, Event.OFFLINE].map(event => listen(realtime, event));
         realtime.pause();
         return Promise.all(promises);
       }).then(() => {
-        const promises = ['retry', 'reconnect', 'online'].map(event => listen(realtime, event, 'eroor'));
+        const promises = ['retry', Event.RECONNECT, Event.ONLINE].map(event => listen(realtime, event));
         realtime.resume();
         return Promise.all(promises);
       }));

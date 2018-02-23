@@ -2,6 +2,10 @@
 import d from 'debug';
 import uuid from 'uuid/v4';
 import IMClient from './im-client';
+import {
+  RECONNECT,
+  RECONNECT_ERROR,
+} from './events/core';
 import { Conversation } from './conversations';
 import { MessageQueryDirection } from './conversations/conversation-base';
 import Message, { MessageStatus } from './messages/message';
@@ -219,22 +223,22 @@ const onRealtimeCreate = (realtime) => {
         _plugins: realtime._plugins,
         _identity: identity,
       });
-      connection.on('reconnect', () =>
+      connection.on(RECONNECT, () =>
         client._open(realtime._options.appId, _tag, deviceId, true)
           /**
-           * 客户端连接恢复正常，该事件通常在 {@link Realtime#event:reconnect} 之后发生
-           * @event IMClient#reconnect
-           * @see Realtime#event:reconnect
+           * 客户端连接恢复正常，该事件通常在 {@link Realtime#event:RECONNECT} 之后发生
+           * @event IMClient#RECONNECT
+           * @see Realtime#event:RECONNECT
            * @since 3.2.0
            */
           /**
            * 客户端重新登录发生错误（网络连接已恢复，但重新登录错误）
-           * @event IMClient#reconnecterror
+           * @event IMClient#RECONNECT_ERROR
            * @since 3.2.0
            */
           .then(
-            () => client.emit('reconnect'),
-            error => client.emit('reconnecterror', error),
+            () => client.emit(RECONNECT),
+            error => client.emit(RECONNECT_ERROR, error),
           ));
       internal(client)._eventemitter.on('close', () => {
         delete realtime._IMClients[client.id];

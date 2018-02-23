@@ -16,6 +16,7 @@ import {
   TextMessage,
   defineConversationProperty,
   ErrorCode,
+  Event,
 } from '../src';
 
 import {
@@ -287,9 +288,9 @@ describe('Conversation', () => {
     after(() => client2.close());
     it('membersjoined', () => {
       const clientCallback = sinon.spy();
-      client2.on('membersjoined', clientCallback);
+      client2.on(Event.MEMBERS_JOINED, clientCallback);
       const conversationCallback = sinon.spy();
-      conversation2.on('membersjoined', conversationCallback);
+      conversation2.on(Event.MEMBERS_JOINED, conversationCallback);
       return client2._dispatchCommand(new GenericCommand({
         cmd: 'conv',
         op: 'members_joined',
@@ -316,9 +317,9 @@ describe('Conversation', () => {
     });
     it('membersleft', () => {
       const clientCallback = sinon.spy();
-      client2.on('membersleft', clientCallback);
+      client2.on(Event.MEMBERS_LEFT, clientCallback);
       const conversationCallback = sinon.spy();
-      conversation2.on('membersleft', conversationCallback);
+      conversation2.on(Event.MEMBERS_LEFT, conversationCallback);
       return client2._dispatchCommand(new GenericCommand({
         cmd: 'conv',
         op: 'members_left',
@@ -345,9 +346,9 @@ describe('Conversation', () => {
     });
     it('kicked', () => {
       const clientCallback = sinon.spy();
-      client2.on('kicked', clientCallback);
+      client2.on(Event.KICKED, clientCallback);
       const conversationCallback = sinon.spy();
-      conversation2.on('kicked', conversationCallback);
+      conversation2.on(Event.KICKED, conversationCallback);
       return client2._dispatchCommand(new GenericCommand({
         cmd: 'conv',
         op: 'left',
@@ -371,9 +372,9 @@ describe('Conversation', () => {
     });
     it('invited', () => {
       const callback = sinon.spy();
-      client2.on('invited', callback);
+      client2.on(Event.INVITED, callback);
       const conversationCallback = sinon.spy();
-      conversation2.on('invited', conversationCallback);
+      conversation2.on(Event.INVITED, conversationCallback);
       return client2._dispatchCommand(new GenericCommand({
         cmd: 'conv',
         op: 'joined',
@@ -398,9 +399,9 @@ describe('Conversation', () => {
     it('info updated', () => {
       const UPDATED_NAME = 'updated name';
       const callback = sinon.spy();
-      client2.on('conversationinfoupdated', callback);
+      client2.on(Event.CONVERSATION_INFO_UPDATED, callback);
       const conversationCallback = sinon.spy();
-      conversation2.on('infoupdated', conversationCallback);
+      conversation2.on(Event.INFO_UPDATED, conversationCallback);
       return client2._dispatchCommand(new GenericCommand({
         cmd: 'conv',
         op: 'updated',
@@ -464,7 +465,7 @@ describe('Conversation', () => {
         return bwangRealtime.createIMClient(bwangId);
       }).then((c) => {
         bwang0 = c;
-        return listen(bwang0, 'unreadmessagescountupdate').then(([[conv]]) => {
+        return listen(bwang0, Event.UNREAD_MESSAGES_COUNT_UPDATE).then(([[conv]]) => {
           conv.unreadMessagesCount.should.eql(3);
           conv.unreadMessagesMentioned.should.eql(true);
           conv.id.should.be.eql(conversationId);
@@ -473,7 +474,7 @@ describe('Conversation', () => {
         });
       })
       .then(() => realtime.createIMClient(bwangId))
-      .then(bwang1 => listen(bwang1, 'unreadmessagescountupdate')
+      .then(bwang1 => listen(bwang1, Event.UNREAD_MESSAGES_COUNT_UPDATE)
         .then(([[conv]]) => {
           conv.unreadMessagesCount.should.be.eql(3);
           conv.unreadMessagesMentioned.should.eql(true);
@@ -483,7 +484,7 @@ describe('Conversation', () => {
             conv1.unreadMessagesCount.should.be.eql(0);
             bwang1.close();
           });
-        })).then(() => listen(bwang0, 'unreadmessagescountupdate')
+        })).then(() => listen(bwang0, Event.UNREAD_MESSAGES_COUNT_UPDATE)
         .then(([[conv]]) => {
           conv.unreadMessagesCount.should.be.eql(0);
           conv.unreadMessagesMentioned.should.eql(false);
@@ -532,7 +533,7 @@ describe('Conversation', () => {
       });
     });
     it('info update and notification', async () => {
-      const waitForUpdate = listen(memberConversation, 'memberinfoupdated');
+      const waitForUpdate = listen(memberConversation, Event.MEMBER_INFO_UPDATED);
       await ownerConversation.updateMemberRole(member.id, ConversationMemberRole.MANAGER);
       const [{ member: memberId, memberInfo, updatedBy }] = await waitForUpdate;
       memberId.should.be.eql(member.id);
@@ -553,8 +554,8 @@ describe('Conversation', () => {
     });
 
     it('mute/unmute', async () => {
-      const mutedEvent = listen(memberConversation, 'muted');
-      const membersMutedEvent = listen(ownerConversation, 'membersmuted');
+      const mutedEvent = listen(memberConversation, Event.MUTED);
+      const membersMutedEvent = listen(ownerConversation, Event.MEMBERS_MUTED);
       await ownerConversation.muteMembers(member.id);
       const [payload] = await membersMutedEvent;
       payload.should.eql({
@@ -567,7 +568,7 @@ describe('Conversation', () => {
       await memberConversation.send(new TextMessage('')).should.be.rejected();
       await memberConversation.unmuteMembers(member.id).should.be.rejected();
 
-      const unmutedEvent = listen(memberConversation, 'membersunmuted');
+      const unmutedEvent = listen(memberConversation, Event.MEMBERS_UNMUTED);
       await ownerConversation.unmuteMembers(member.id);
       const [payload2] = await unmutedEvent;
       payload2.should.eql({
@@ -577,10 +578,10 @@ describe('Conversation', () => {
     });
 
     it('block/unblock', async () => {
-      const blockedEvent = listen(memberConversation, 'blocked');
-      const membersBlockedEvent = listen(ownerConversation, 'membersblocked');
-      const removedEvent = listen(ownerConversation, 'membersleft');
-      const kickedEvent = listen(memberConversation, 'kicked');
+      const blockedEvent = listen(memberConversation, Event.BLOCKED);
+      const membersBlockedEvent = listen(ownerConversation, Event.MEMBERS_BLOCKED);
+      const removedEvent = listen(ownerConversation, Event.MEMBERS_LEFT);
+      const kickedEvent = listen(memberConversation, Event.KICKED);
       await ownerConversation.blockMembers(member.id);
       const [payload] = await membersBlockedEvent;
       payload.should.eql({
@@ -593,7 +594,7 @@ describe('Conversation', () => {
       const { results } = await ownerConversation.queryBlockedMembers();
       results.should.eql([member.id]);
       await memberConversation.unblockMembers(member.id).should.be.rejected();
-      const unblockedEvent = listen(ownerConversation, 'membersunblocked');
+      const unblockedEvent = listen(ownerConversation, Event.MEMBERS_UNBLOCKED);
       await ownerConversation.unblockMembers(member.id);
       const [payload2] = await unblockedEvent;
       payload2.should.eql({
@@ -631,7 +632,7 @@ describe('Conversation', () => {
       ].forEach(key => fzhangConversation.should.not.have.property(key));
     });
     it('create, send and recieve', async () => {
-      const waitForMessage = listen(she, 'message');
+      const waitForMessage = listen(she, Event.MESSAGE);
       const message = new TextMessage('hi');
       await fzhangConversation.send(message);
       const [recievedMessage, recievedConversation] = await waitForMessage;

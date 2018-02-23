@@ -1,5 +1,15 @@
 import d from 'debug';
-import WebSocketPlus from './websocket-plus';
+import WebSocketPlus, {
+  OPEN,
+  DISCONNECT,
+  RECONNECT,
+  RETRY,
+  SCHEDULE,
+  OFFLINE,
+  ONLINE,
+  ERROR,
+  MESSAGE,
+} from './websocket-plus';
 import { createError } from './error';
 import { GenericCommand, CommandType } from '../proto/message';
 import { trim, isWeapp } from './utils';
@@ -7,6 +17,18 @@ import { trim, isWeapp } from './utils';
 const debug = d('LC:Connection');
 
 const COMMAND_TIMEOUT = 20000;
+
+export {
+  OPEN,
+  DISCONNECT,
+  RECONNECT,
+  RETRY,
+  SCHEDULE,
+  OFFLINE,
+  ONLINE,
+  ERROR,
+  MESSAGE,
+};
 
 export default class Connection extends WebSocketPlus {
   constructor(getUrl, { format, version }) {
@@ -30,7 +52,7 @@ export default class Connection extends WebSocketPlus {
       serialId = this._serialId;
       command.i = serialId; // eslint-disable-line no-param-reassign
     }
-    debug('↑ %O sent', trim(command));
+    if (debug.enabled) debug('↑ %O sent', trim(command));
 
     let message;
     if (this._protocalFormat === 'proto2base64') {
@@ -54,7 +76,7 @@ export default class Connection extends WebSocketPlus {
         timeout: setTimeout(
           () => {
             if (this._commands[serialId]) {
-              debug('✗ %O timeout', trim(command));
+              if (debug.enabled) debug('✗ %O timeout', trim(command));
               reject(new Error('Command Timeout.'));
               delete this._commands[serialId];
             }
@@ -69,11 +91,10 @@ export default class Connection extends WebSocketPlus {
     let message;
     try {
       message = GenericCommand.decode(msg);
-      debug('↓ %O received', trim(message));
+      if (debug.enabled) debug('↓ %O received', trim(message));
     } catch (e) {
       console.warn('Decode message failed', msg);
     }
-    this.emit('allmessage', message);
     const serialId = message.i;
     if (serialId) {
       if (this._commands[serialId]) {
@@ -93,9 +114,9 @@ export default class Connection extends WebSocketPlus {
          which have timed out or never been requested.`);
       }
     } else if (message.cmd === CommandType.error) {
-      this.emit('error', createError(message.errorMessage));
+      this.emit(ERROR, createError(message.errorMessage));
     } else {
-      this.emit('message', message);
+      this.emit(MESSAGE, message);
     }
   }
 

@@ -301,6 +301,43 @@ declare module LeanCloudRealtime {
     MESSAGE_REJECTED_BY_APP,
   }
   
+  export enum Event {
+    DISCONNECT,
+    RECONNECT,
+    RETRY,
+    SCHEDULE,
+    OFFLINE,
+    ONLINE,
+
+    RECONNECT_ERROR,
+  
+    INVITED,
+    KICKED,
+    MEMBERS_JOINED,
+    MEMBERS_LEFT,
+    MEMBER_INFO_UPDATED,
+    BLOCKED,
+    UNBLOCKED,
+    MEMBERS_BLOCKED,
+    MEMBERS_UNBLOCKED,
+    MUTED,
+    UNMUTED,
+    MEMBERS_MUTED,
+    MEMBERS_UNMUTED,
+    MESSAGE,
+    UNREAD_MESSAGES_COUNT_UPDATE,
+    CLOSE,
+    CONFLICT,
+    UNHANDLED_MESSAGE,
+    CONVERSATION_INFO_UPDATED,
+
+    LAST_DELIVERED_AT_UPDATE,
+    LAST_READ_AT_UPDATE,
+    MESSAGE_RECALL,
+    MESSAGE_UPDATE,
+    INFO_UPDATED,
+  }
+
   export function messageType(type: number): Function
   export function messageField(fields: string[]): Function
 }
