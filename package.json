@@ -75,7 +75,7 @@
     "weapp-polyfill": "^3.1.1"
   },
   "dependencies": {
-    "axios": "^0.17.1",
+    "axios": "^0.18.0",
     "babel-runtime": "^6.6.1",
     "base64-arraybuffer": "^0.1.5",
     "debug": "^3.0.0",

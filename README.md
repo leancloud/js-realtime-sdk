@@ -76,7 +76,6 @@ leancloud-realtime-plugin-webrtc|WebRTC 客户端|[![npm](https://img.shields.io
 
 0. Fork 这个项目，clone 到本地
 0. 在目录中执行 `npm install` 安装所需 Node.js 依赖包
-0. 在目录中执行 `bower install` 安装所需 web 依赖包
 0. 执行 `grunt dev` 浏览器打开 [](http://localhost:8000) 本地进行调试
 0. 编码，更新测试用例
 0. 运行 `npm test` 确保测试全部 pass
