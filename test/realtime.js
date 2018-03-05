@@ -9,58 +9,61 @@ import { Event } from '../src';
 
 import { listen, sinon, wait } from './test-utils';
 
-import {
-  APP_ID,
-  APP_KEY,
-  REGION,
-  NON_EXISTING_ROOM_ID,
-} from './configs';
+import { APP_ID, APP_KEY, REGION, NON_EXISTING_ROOM_ID } from './configs';
 
-const createRealtime = options => new Realtime(Object.assign({
-  appId: APP_ID,
-  appKey: APP_KEY,
-  region: REGION,
-}, options));
+const createRealtime = options =>
+  new Realtime(
+    Object.assign(
+      {
+        appId: APP_ID,
+        appKey: APP_KEY,
+        region: REGION,
+      },
+      options
+    )
+  );
 
 class Client {}
 
 describe('Realtime', () => {
   describe('constructor', () => {
-    it('appId required', () =>
-      (() => new Realtime()).should.throw());
+    it('appId required', () => (() => new Realtime()).should.throw());
     it('normal', () =>
-      (() => new Realtime({
-        appId: APP_ID,
-        appKey: APP_KEY,
-      })).should.not.throw);
+      (() =>
+        new Realtime({
+          appId: APP_ID,
+          appKey: APP_KEY,
+        })).should.not.throw);
   });
   describe('_open/_close', () => {
     it('connection should be reused', () => {
       const realtime = createRealtime();
       let firstConnection;
-      return realtime._open()
-        .then((connection) => {
+      return realtime
+        ._open()
+        .then(connection => {
           connection.should.be.a.instanceof(Connection);
           firstConnection = connection;
         })
         .then(() => realtime._open())
-        .then((connection) => {
+        .then(connection => {
           connection.should.be.exactly(firstConnection);
           connection.close();
         });
     });
     it('_close', () => {
       const realtime = createRealtime();
-      return realtime._open()
-        .then((connection) => {
+      return realtime
+        ._open()
+        .then(connection => {
           should(realtime._openPromise).not.be.undefined();
           return connection;
         })
-        .then((connection) => {
+        .then(connection => {
           realtime._close();
           return connection;
         })
-        .then((connection) => {
+        .then(connection => {
           should(realtime._openPromise).be.undefined();
           connection.current.should.be.equal('closed');
         });
@@ -68,15 +71,17 @@ describe('Realtime', () => {
     it('noBinary mode fallback', () =>
       createRealtime({
         noBinary: true,
-      }).createIMClient()
+      })
+        .createIMClient()
         .then(client => client.close()));
   });
   describe('RTMServers cache', () => {
     it('_getRTMServers should use cache', async () => {
-      const _fetchRTMServers =
-        sinon.stub(Realtime, '_fetchRTMServers').returns(Promise.resolve({
+      const _fetchRTMServers = sinon.stub(Realtime, '_fetchRTMServers').returns(
+        Promise.resolve({
           ttl: 1000,
-        }));
+        })
+      );
       let realtime = createRealtime();
       await realtime._getRTMServers(realtime._options);
       _fetchRTMServers.should.be.calledOnce();
@@ -93,41 +98,38 @@ describe('Realtime', () => {
   it('_register/_deregister clients', () => {
     const realtime = createRealtime();
     const _disconnect = sinon.spy(realtime, '_close');
-    return realtime._open()
-      .then(() => {
-        const a = new Client();
-        const b = new Client();
-        realtime._register(a);
-        realtime._register(b);
-        // (() => realtime._regiser({})).should.throw();
-        realtime._deregister(a);
-        _disconnect.should.not.be.called();
-        realtime._deregister(b);
-        _disconnect.should.be.calledOnce();
-        _disconnect.restore();
-      });
+    return realtime._open().then(() => {
+      const a = new Client();
+      const b = new Client();
+      realtime._register(a);
+      realtime._register(b);
+      // (() => realtime._regiser({})).should.throw();
+      realtime._deregister(a);
+      _disconnect.should.not.be.called();
+      realtime._deregister(b);
+      _disconnect.should.be.calledOnce();
+      _disconnect.restore();
+    });
   });
   describe('events', () => {
     it('should proxy network events', () => {
       const realtime = createRealtime();
-      return realtime._open()
-        .then((connection) => {
-          const callbackPromise = Promise.all([
-            Event.RETRY,
-            Event.SCHEDULE,
-            Event.DISCONNECT,
-            Event.RECONNECT,
-          ].map(event => listen(realtime, event)));
-          connection.emit(Event.DISCONNECT);
-          connection.emit(Event.RETRY, 1, 2);
-          connection.emit(Event.SCHEDULE);
-          connection.emit(Event.RECONNECT);
-          callbackPromise.then(() => connection.close());
-          return callbackPromise.then(([[retryPayload1, retryPayload2]]) => {
-            retryPayload1.should.equal(1);
-            retryPayload2.should.equal(2);
-          });
+      return realtime._open().then(connection => {
+        const callbackPromise = Promise.all(
+          [Event.RETRY, Event.SCHEDULE, Event.DISCONNECT, Event.RECONNECT].map(
+            event => listen(realtime, event)
+          )
+        );
+        connection.emit(Event.DISCONNECT);
+        connection.emit(Event.RETRY, 1, 2);
+        connection.emit(Event.SCHEDULE);
+        connection.emit(Event.RECONNECT);
+        callbackPromise.then(() => connection.close());
+        return callbackPromise.then(([[retryPayload1, retryPayload2]]) => {
+          retryPayload1.should.equal(1);
+          retryPayload2.should.equal(2);
         });
+      });
     });
   });
   describe('register Message classes', () => {
@@ -157,24 +159,34 @@ describe('Realtime', () => {
       (() => realtime.retry()).should.throw();
     });
     it('should retry when disconnected', () =>
-      realtime._open().then((connection) => {
-        const promise = listen(realtime, Event.DISCONNECT);
-        connection.disconnect();
-        return promise;
-      }).then(() => {
-        realtime.retry();
-        return listen(realtime, Event.RECONNECT);
-      }));
+      realtime
+        ._open()
+        .then(connection => {
+          const promise = listen(realtime, Event.DISCONNECT);
+          connection.disconnect();
+          return promise;
+        })
+        .then(() => {
+          realtime.retry();
+          return listen(realtime, Event.RECONNECT);
+        }));
     it('should reconnect when offline', () =>
-      realtime._open().then(() => {
-        const promises = [Event.DISCONNECT, Event.OFFLINE].map(event => listen(realtime, event));
-        realtime.pause();
-        return Promise.all(promises);
-      }).then(() => {
-        const promises = ['retry', Event.RECONNECT, Event.ONLINE].map(event => listen(realtime, event));
-        realtime.resume();
-        return Promise.all(promises);
-      }));
+      realtime
+        ._open()
+        .then(() => {
+          const promises = [Event.DISCONNECT, Event.OFFLINE].map(event =>
+            listen(realtime, event)
+          );
+          realtime.pause();
+          return Promise.all(promises);
+        })
+        .then(() => {
+          const promises = ['retry', Event.RECONNECT, Event.ONLINE].map(event =>
+            listen(realtime, event)
+          );
+          realtime.resume();
+          return Promise.all(promises);
+        }));
   });
 });
 
@@ -182,38 +194,49 @@ describe('Connection', () => {
   let client;
   let connection;
   before(() =>
-    createRealtime().createIMClient()
-      .then((c) => {
+    createRealtime()
+      .createIMClient()
+      .then(c => {
         client = c;
         connection = client._connection;
         return connection.ping();
-      }));
+      })
+  );
   after(() => connection.close());
 
   it('ping', () =>
-    connection.ping()
-      .then((resCommand) => {
-        resCommand.cmd.should.be.equal(CommandType.echo);
-      }));
+    connection.ping().then(resCommand => {
+      resCommand.cmd.should.be.equal(CommandType.echo);
+    }));
   it('send command error', () =>
-    connection.send(new GenericCommand({
-      cmd: 'conv',
-      op: 'update',
-      peerId: client.id,
-      convMessage: new ConvCommand({
-        cid: NON_EXISTING_ROOM_ID,
-      }),
-    })).should.be.rejectedWith('CONVERSATION_NOT_FOUND'));
+    connection
+      .send(
+        new GenericCommand({
+          cmd: 'conv',
+          op: 'update',
+          peerId: client.id,
+          convMessage: new ConvCommand({
+            cid: NON_EXISTING_ROOM_ID,
+          }),
+        })
+      )
+      .should.be.rejectedWith('CONVERSATION_NOT_FOUND'));
   it('message dispatch', async () => {
     let clientMessageEventCallback = sinon.spy(client, '_dispatchCommand');
-    connection.emit('message', new GenericCommand({
-      cmd: 1,
-      service: 0,
-    }));
-    connection.emit('message', new GenericCommand({
-      cmd: 1,
-      peerId: 'fake clientId',
-    }));
+    connection.emit(
+      'message',
+      new GenericCommand({
+        cmd: 1,
+        service: 0,
+      })
+    );
+    connection.emit(
+      'message',
+      new GenericCommand({
+        cmd: 1,
+        peerId: 'fake clientId',
+      })
+    );
     await wait(0);
     clientMessageEventCallback.should.not.be.called();
     const validMessage = new GenericCommand({

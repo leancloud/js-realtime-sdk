@@ -7,16 +7,14 @@
     "test": "test"
   },
   "scripts": {
-    "test": "echo \"Error: tests included in package leancloud-realtime\" && exit 1"
+    "test":
+      "echo \"Error: tests included in package leancloud-realtime\" && exit 1"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/leancloud/js-realtime-sdk.git"
   },
-  "keywords": [
-    "leancloud",
-    "realtime"
-  ],
+  "keywords": ["leancloud", "realtime"],
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/leancloud/js-realtime-sdk/issues"

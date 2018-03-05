@@ -38,7 +38,9 @@ export default class OutgoingCall extends Call {
    */
   cancel() {
     this._call.cancel();
-    return this._conversation.send(new Cancelation()).then(() => this._destroy());
+    return this._conversation
+      .send(new Cancelation())
+      .then(() => this._destroy());
   }
 
   /**

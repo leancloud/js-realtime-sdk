@@ -6,11 +6,7 @@
     "type": "git",
     "url": "git+https://github.com/leancloud/js-realtime-sdk.git"
   },
-  "keywords": [
-    "leancloud",
-    "realtime",
-    "livequery"
-  ],
+  "keywords": ["leancloud", "realtime", "livequery"],
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/leancloud/js-realtime-sdk/issues"

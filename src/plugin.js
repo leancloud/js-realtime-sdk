@@ -98,24 +98,40 @@
 
 import { ensureArray, tap } from './utils';
 
-const checkType = middleware => (param) => {
+const checkType = middleware => param => {
   const { constructor } = param;
-  return Promise.resolve(param).then(middleware).then(tap((result) => {
-    if (result === undefined || result === null) {
-      // eslint-disable-next-line max-len
-      return console.warn(`Middleware[${middleware._pluginName || 'anonymous plugin'}:${middleware.name || 'anonymous middleware'}] param/return types not match. It returns ${result} while a ${param.constructor.name} expected.`);
-    }
-    if (!(result instanceof constructor)) {
-      // eslint-disable-next-line max-len
-      return console.warn(`Middleware[${middleware._pluginName || 'anonymous plugin'}:${middleware.name || 'anonymous middleware'}] param/return types not match. It returns a ${result.constructor.name} while a ${param.constructor.name} expected.`);
-    }
-    return 0;
-  }));
+  return Promise.resolve(param)
+    .then(middleware)
+    .then(
+      tap(result => {
+        if (result === undefined || result === null) {
+          // eslint-disable-next-line max-len
+          return console.warn(
+            `Middleware[${middleware._pluginName ||
+              'anonymous plugin'}:${middleware.name ||
+              'anonymous middleware'}] param/return types not match. It returns ${result} while a ${
+              param.constructor.name
+            } expected.`
+          );
+        }
+        if (!(result instanceof constructor)) {
+          // eslint-disable-next-line max-len
+          return console.warn(
+            `Middleware[${middleware._pluginName ||
+              'anonymous plugin'}:${middleware.name ||
+              'anonymous middleware'}] param/return types not match. It returns a ${
+              result.constructor.name
+            } while a ${param.constructor.name} expected.`
+          );
+        }
+        return 0;
+      })
+    );
 };
 
 export const applyDecorators = (decorators, target) => {
   if (decorators) {
-    decorators.forEach((decorator) => {
+    decorators.forEach(decorator => {
       try {
         decorator(target);
       } catch (error) {
@@ -130,27 +146,31 @@ export const applyDecorators = (decorators, target) => {
 
 export const applyMiddlewares = middlewares => target =>
   ensureArray(middlewares).reduce(
-    (previousPromise, middleware) => previousPromise
-      .then(checkType(middleware))
-      .catch((error) => {
+    (previousPromise, middleware) =>
+      previousPromise.then(checkType(middleware)).catch(error => {
         if (middleware._pluginName) {
           // eslint-disable-next-line no-param-reassign
           error.message += `[${middleware._pluginName}]`;
         }
         throw error;
       }),
-    Promise.resolve(target),
+    Promise.resolve(target)
   );
 
 export const applyDispatcher = (dispatchers, payload) =>
   ensureArray(dispatchers).reduce(
-    (resultPromise, dispatcher) => resultPromise.then(shouldDispatch =>
-      (shouldDispatch === false ? false : dispatcher(...payload))).catch((error) => {
-      if (dispatcher._pluginName) {
-        // eslint-disable-next-line no-param-reassign
-        error.message += `[${dispatcher._pluginName}]`;
-      }
-      throw error;
-    }),
-    Promise.resolve(true),
+    (resultPromise, dispatcher) =>
+      resultPromise
+        .then(
+          shouldDispatch =>
+            shouldDispatch === false ? false : dispatcher(...payload)
+        )
+        .catch(error => {
+          if (dispatcher._pluginName) {
+            // eslint-disable-next-line no-param-reassign
+            error.message += `[${dispatcher._pluginName}]`;
+          }
+          throw error;
+        }),
+    Promise.resolve(true)
   );

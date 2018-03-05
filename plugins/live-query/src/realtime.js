@@ -6,7 +6,4 @@ if (!Protocals) {
 }
 export { _Promise };
 
-export {
-  Protocals,
-  EventEmitter,
-} from 'leancloud-realtime/core';
+export { Protocals, EventEmitter } from 'leancloud-realtime/core';

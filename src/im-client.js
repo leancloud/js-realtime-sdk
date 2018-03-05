@@ -23,7 +23,20 @@ import {
 } from '../proto/message';
 import * as Event from './events/im';
 import { ErrorCode, createError } from './error';
-import { Expirable, Cache, keyRemap, union, difference, trim, internal, throttle, encode, decode, decodeDate, getTime } from './utils';
+import {
+  Expirable,
+  Cache,
+  keyRemap,
+  union,
+  difference,
+  trim,
+  internal,
+  throttle,
+  encode,
+  decode,
+  decodeDate,
+  getTime,
+} from './utils';
 import { applyDecorators, applyDispatcher } from './plugin';
 import SessionManager from './session-manager';
 import runSignatureFactory from './signature-factory-runner';
@@ -68,7 +81,7 @@ const isTemporaryConversatrionId = id => /^_tmp:/.test(id);
  * 1 partial-failed-msg
  * @ignore
  */
-const configBitmap = 0B111011;
+const configBitmap = 0b111011;
 
 export default class IMClient extends EventEmitter {
   /**
@@ -81,14 +94,18 @@ export default class IMClient extends EventEmitter {
       throw new TypeError(`Client id [${id}] is not a String`);
     }
     super();
-    Object.assign(this, {
-      /**
-       * @var id {String} 客户端 id
-       * @memberof IMClient#
-       */
-      id,
-      options,
-    }, props);
+    Object.assign(
+      this,
+      {
+        /**
+         * @var id {String} 客户端 id
+         * @memberof IMClient#
+         */
+        id,
+        options,
+      },
+      props
+    );
 
     if (!this._messageParser) {
       throw new Error('IMClient must be initialized with a MessageParser');
@@ -99,10 +116,11 @@ export default class IMClient extends EventEmitter {
     internal(this).lastNotificationTime = undefined;
     internal(this)._eventemitter = new EventEmitter();
     if (debug.enabled) {
-      Object.values(Event).forEach(event => this.on(
-        event,
-        (...payload) => this._debug(`${event} event emitted. %O`, payload),
-      ));
+      Object.values(Event).forEach(event =>
+        this.on(event, (...payload) =>
+          this._debug(`${event} event emitted. %O`, payload)
+        )
+      );
     }
     // onIMClientCreate hook
     applyDecorators(this._plugins.onIMClientCreate, this);
@@ -119,7 +137,9 @@ export default class IMClient extends EventEmitter {
   async _dispatchCommand(command) {
     this._debug(trim(command), 'received');
     if (command.serverTs) {
-      internal(this).lastNotificationTime = getTime(decodeDate(command.serverTs));
+      internal(this).lastNotificationTime = getTime(
+        decodeDate(command.serverTs)
+      );
     }
     switch (command.cmd) {
       case CommandType.conv:
@@ -140,11 +160,7 @@ export default class IMClient extends EventEmitter {
   }
 
   async _dispatchSessionMessage(message) {
-    const {
-      sessionMessage: {
-        code, reason,
-      },
-    } = message;
+    const { sessionMessage: { code, reason } } = message;
     switch (message.op) {
       case OpType.closed: {
         internal(this)._eventemitter.emit('close');
@@ -165,7 +181,8 @@ export default class IMClient extends EventEmitter {
          * @param {String} payload.reason 原因
          */
         return this.emit(CLOSE, {
-          code, reason,
+          code,
+          reason,
         });
       }
       default:
@@ -174,56 +191,63 @@ export default class IMClient extends EventEmitter {
     }
   }
 
-  _dispatchUnreadMessage({
-    unreadMessage: {
-      convs,
-      notifTime,
-    },
-  }) {
+  _dispatchUnreadMessage({ unreadMessage: { convs, notifTime } }) {
     internal(this).lastUnreadNotifTime = notifTime;
     // ensure all converstions are cached
-    return this.getConversations(convs.map(conv => conv.cid)).then(() =>
-      // update conversations data
-      Promise.all(convs.map(({
-        cid,
-        unread,
-        mid,
-        timestamp: ts,
-        from,
-        data,
-        binaryMsg,
-        patchTimestamp,
-        mentioned,
-      }) => {
-        const conversation = this._conversationCache.get(cid);
-        // deleted conversation
-        if (!conversation) return null;
-        let timestamp;
-        if (ts) {
-          timestamp = decodeDate(ts);
-          conversation.lastMessageAt = timestamp; // eslint-disable-line no-param-reassign
-        }
-        return (mid ? this._messageParser.parse(binaryMsg || data).then((message) => {
-          const messageProps = {
-            id: mid,
-            cid,
-            timestamp,
-            updatedAt: patchTimestamp,
-            from,
-          };
-          Object.assign(message, messageProps);
-          conversation.lastMessage = message; // eslint-disable-line no-param-reassign
-        }) : Promise.resolve()).then(() => {
-          conversation._setUnreadMessagesMentioned(mentioned);
-          const countNotUpdated = unread === internal(conversation).unreadMessagesCount;
-          if (countNotUpdated) return null; // to be filtered
-          // manipulate internal property directly to skip unreadmessagescountupdate event
-          internal(conversation).unreadMessagesCount = unread;
-          return conversation;
-        });
-      // filter conversations without unread count update
-      })).then(conversations => conversations.filter(conversation => conversation)))
-      .then((conversations) => {
+    return this.getConversations(convs.map(conv => conv.cid))
+      .then(() =>
+        // update conversations data
+        Promise.all(
+          convs.map(
+            ({
+              cid,
+              unread,
+              mid,
+              timestamp: ts,
+              from,
+              data,
+              binaryMsg,
+              patchTimestamp,
+              mentioned,
+            }) => {
+              const conversation = this._conversationCache.get(cid);
+              // deleted conversation
+              if (!conversation) return null;
+              let timestamp;
+              if (ts) {
+                timestamp = decodeDate(ts);
+                conversation.lastMessageAt = timestamp; // eslint-disable-line no-param-reassign
+              }
+              return (mid
+                ? this._messageParser.parse(binaryMsg || data).then(message => {
+                    const messageProps = {
+                      id: mid,
+                      cid,
+                      timestamp,
+                      updatedAt: patchTimestamp,
+                      from,
+                    };
+                    Object.assign(message, messageProps);
+                    conversation.lastMessage = message; // eslint-disable-line no-param-reassign
+                  })
+                : Promise.resolve()
+              ).then(() => {
+                conversation._setUnreadMessagesMentioned(mentioned);
+                const countNotUpdated =
+                  unread === internal(conversation).unreadMessagesCount;
+                if (countNotUpdated) return null; // to be filtered
+                // manipulate internal property directly to skip unreadmessagescountupdate event
+                internal(conversation).unreadMessagesCount = unread;
+                return conversation;
+              });
+              // filter conversations without unread count update
+            }
+          )
+        ).then(conversations =>
+          conversations.filter(conversation => conversation)
+        )
+      )
+      .then(conversations => {
         if (conversations.length) {
           /**
            * 未读消息数目更新
@@ -237,12 +261,7 @@ export default class IMClient extends EventEmitter {
   }
 
   async _dispatchRcpMessage(message) {
-    const {
-      rcpMessage,
-      rcpMessage: {
-        read,
-      },
-    } = message;
+    const { rcpMessage, rcpMessage: { read } } = message;
     const conversationId = rcpMessage.cid;
     const messageId = rcpMessage.id;
     const timestamp = decodeDate(rcpMessage.t);
@@ -253,80 +272,90 @@ export default class IMClient extends EventEmitter {
     conversation._handleReceipt({ messageId, timestamp, read });
   }
 
-  _dispatchPatchMessage({
-    patchMessage: {
-      patches,
-    },
-  }) {
+  _dispatchPatchMessage({ patchMessage: { patches } }) {
     // ensure all converstions are cached
     return this.getConversations(patches.map(patch => patch.cid)).then(() =>
-      Promise.all(patches.map(({
-        cid, mid, timestamp, recall, data, patchTimestamp, from, binaryMsg, mentionAll, mentionPids,
-      }) => {
-        const conversation = this._conversationCache.get(cid);
-        // deleted conversation
-        if (!conversation) return null;
-        return this._messageParser.parse(binaryMsg || data).then((message) => {
-          const patchTime = getTime(decodeDate(patchTimestamp));
-          const messageProps = {
-            id: mid,
+      Promise.all(
+        patches.map(
+          ({
             cid,
+            mid,
             timestamp,
-            updatedAt: patchTime,
+            recall,
+            data,
+            patchTimestamp,
             from,
-            mentionList: mentionPids,
-            mentionedAll: mentionAll,
-          };
-          Object.assign(message, messageProps);
-          message._setStatus(MessageStatus.SENT);
-          message._updateMentioned(this.id);
-          if (internal(this).lastPatchTime < patchTime) {
-            internal(this).lastPatchTime = patchTime;
+            binaryMsg,
+            mentionAll,
+            mentionPids,
+          }) => {
+            const conversation = this._conversationCache.get(cid);
+            // deleted conversation
+            if (!conversation) return null;
+            return this._messageParser
+              .parse(binaryMsg || data)
+              .then(message => {
+                const patchTime = getTime(decodeDate(patchTimestamp));
+                const messageProps = {
+                  id: mid,
+                  cid,
+                  timestamp,
+                  updatedAt: patchTime,
+                  from,
+                  mentionList: mentionPids,
+                  mentionedAll: mentionAll,
+                };
+                Object.assign(message, messageProps);
+                message._setStatus(MessageStatus.SENT);
+                message._updateMentioned(this.id);
+                if (internal(this).lastPatchTime < patchTime) {
+                  internal(this).lastPatchTime = patchTime;
+                }
+                // update conversation lastMessage
+                if (
+                  conversation.lastMessage &&
+                  conversation.lastMessage.id === mid
+                ) {
+                  conversation.lastMessage = message; // eslint-disable-line no-param-reassign
+                }
+                if (recall) {
+                  /**
+                   * 消息被撤回
+                   * @event IMClient#MESSAGE_RECALL
+                   * @param {AVMessage} message 被撤回的消息
+                   * @param {ConversationBase} conversation 消息所在的会话
+                   */
+                  this.emit(MESSAGE_RECALL, message, conversation);
+                  /**
+                   * 消息被撤回
+                   * @event ConversationBase#MESSAGE_RECALL
+                   * @param {AVMessage} message 被撤回的消息
+                   */
+                  conversation.emit(MESSAGE_RECALL, message);
+                } else {
+                  /**
+                   * 消息被修改
+                   * @event IMClient#MESSAGE_UPDATE
+                   * @param {AVMessage} message 被修改的消息
+                   * @param {ConversationBase} conversation 消息所在的会话
+                   */
+                  this.emit(MESSAGE_UPDATE, message, conversation);
+                  /**
+                   * 消息被修改
+                   * @event ConversationBase#MESSAGE_UPDATE
+                   * @param {AVMessage} message 被修改的消息
+                   */
+                  conversation.emit(MESSAGE_UPDATE, message);
+                }
+              });
           }
-          // update conversation lastMessage
-          if (conversation.lastMessage && conversation.lastMessage.id === mid) {
-            conversation.lastMessage = message; // eslint-disable-line no-param-reassign
-          }
-          if (recall) {
-            /**
-             * 消息被撤回
-             * @event IMClient#MESSAGE_RECALL
-             * @param {AVMessage} message 被撤回的消息
-             * @param {ConversationBase} conversation 消息所在的会话
-             */
-            this.emit(MESSAGE_RECALL, message, conversation);
-            /**
-             * 消息被撤回
-             * @event ConversationBase#MESSAGE_RECALL
-             * @param {AVMessage} message 被撤回的消息
-             */
-            conversation.emit(MESSAGE_RECALL, message);
-          } else {
-            /**
-             * 消息被修改
-             * @event IMClient#MESSAGE_UPDATE
-             * @param {AVMessage} message 被修改的消息
-             * @param {ConversationBase} conversation 消息所在的会话
-             */
-            this.emit(MESSAGE_UPDATE, message, conversation);
-            /**
-             * 消息被修改
-             * @event ConversationBase#MESSAGE_UPDATE
-             * @param {AVMessage} message 被修改的消息
-             */
-            conversation.emit(MESSAGE_UPDATE, message);
-          }
-        });
-      })));
+        )
+      )
+    );
   }
 
   async _dispatchConvMessage(message) {
-    const {
-      convMessage,
-      convMessage: {
-        initBy, m, info, attr,
-      },
-    } = message;
+    const { convMessage, convMessage: { initBy, m, info, attr } } = message;
     const conversation = await this.getConversation(convMessage.cid);
     switch (message.op) {
       case OpType.joined: {
@@ -410,7 +439,10 @@ export default class IMClient extends EventEmitter {
       case OpType.members_left: {
         if (!conversation.transient) {
           // eslint-disable-next-line no-param-reassign
-          conversation.members = difference(conversation.members, convMessage.m);
+          conversation.members = difference(
+            conversation.members,
+            convMessage.m
+          );
         }
         const payload = {
           kickedBy: initBy,
@@ -684,8 +716,16 @@ export default class IMClient extends EventEmitter {
     const {
       directMessage,
       directMessage: {
-        id, cid, fromPeerId, timestamp, transient, patchTimestamp, mentionPids, mentionAll,
-        binaryMsg, msg,
+        id,
+        cid,
+        fromPeerId,
+        timestamp,
+        transient,
+        patchTimestamp,
+        mentionPids,
+        mentionAll,
+        binaryMsg,
+        msg,
       },
     } = originalMessage;
     const content = binaryMsg ? binaryMsg.toArrayBuffer() : msg;
@@ -719,30 +759,32 @@ export default class IMClient extends EventEmitter {
 
   _dispatchParsedMessage(message, conversation) {
     // beforeMessageDispatch hook
-    return applyDispatcher(this._plugins.beforeMessageDispatch, [message, conversation])
-      .then((shouldDispatch) => {
-        if (shouldDispatch === false) return;
-        conversation.lastMessage = message; // eslint-disable-line no-param-reassign
-        conversation.lastMessageAt = message.timestamp; // eslint-disable-line no-param-reassign
-        // filter outgoing message sent from another device
-        if (message.from !== this.id) {
-          conversation.unreadMessagesCount += 1; // eslint-disable-line no-param-reassign
-          if (message.mentioned) conversation._setUnreadMessagesMentioned(true);
-        }
-        /**
-         * 当前用户收到消息
-         * @event IMClient#MESSAGE
-         * @param {Message} message
-         * @param {ConversationBase} conversation 收到消息的对话
-         */
-        this.emit(MESSAGE, message, conversation);
-        /**
-         * 当前对话收到消息
-         * @event ConversationBase#MESSAGE
-         * @param {Message} message
-         */
-        conversation.emit(MESSAGE, message);
-      });
+    return applyDispatcher(this._plugins.beforeMessageDispatch, [
+      message,
+      conversation,
+    ]).then(shouldDispatch => {
+      if (shouldDispatch === false) return;
+      conversation.lastMessage = message; // eslint-disable-line no-param-reassign
+      conversation.lastMessageAt = message.timestamp; // eslint-disable-line no-param-reassign
+      // filter outgoing message sent from another device
+      if (message.from !== this.id) {
+        conversation.unreadMessagesCount += 1; // eslint-disable-line no-param-reassign
+        if (message.mentioned) conversation._setUnreadMessagesMentioned(true);
+      }
+      /**
+       * 当前用户收到消息
+       * @event IMClient#MESSAGE
+       * @param {Message} message
+       * @param {ConversationBase} conversation 收到消息的对话
+       */
+      this.emit(MESSAGE, message, conversation);
+      /**
+       * 当前对话收到消息
+       * @event ConversationBase#MESSAGE
+       * @param {Message} message
+       */
+      conversation.emit(MESSAGE, message);
+    });
   }
 
   _sendAck(message) {
@@ -765,24 +807,26 @@ export default class IMClient extends EventEmitter {
     // if not connected, just skip everything
     if (!this._connection.is('connected')) return;
     this._debug('do send ack %O', this._ackMessageBuffer);
-    Promise.all(Object.keys(this._ackMessageBuffer).map((cid) => {
-      const convAckMessages = this._ackMessageBuffer[cid];
-      const timestamps = convAckMessages.map(message => message.timestamp);
-      const command = new GenericCommand({
-        cmd: 'ack',
-        peerId: this.id,
-        ackMessage: new AckCommand({
-          cid,
-          fromts: Math.min.apply(null, timestamps),
-          tots: Math.max.apply(null, timestamps),
-        }),
-      });
-      delete this._ackMessageBuffer[cid];
-      return this._send(command, false).catch((error) => {
-        this._debug('send ack failed: %O', error);
-        this._ackMessageBuffer[cid] = convAckMessages;
-      });
-    }));
+    Promise.all(
+      Object.keys(this._ackMessageBuffer).map(cid => {
+        const convAckMessages = this._ackMessageBuffer[cid];
+        const timestamps = convAckMessages.map(message => message.timestamp);
+        const command = new GenericCommand({
+          cmd: 'ack',
+          peerId: this.id,
+          ackMessage: new AckCommand({
+            cid,
+            fromts: Math.min.apply(null, timestamps),
+            tots: Math.max.apply(null, timestamps),
+          }),
+        });
+        delete this._ackMessageBuffer[cid];
+        return this._send(command, false).catch(error => {
+          this._debug('send ack failed: %O', error);
+          this._ackMessageBuffer[cid] = convAckMessages;
+        });
+      })
+    );
   }
 
   _omitPeerId(value) {
@@ -799,10 +843,7 @@ export default class IMClient extends EventEmitter {
 
   async _open(appId, tag, deviceId, isReconnect = false) {
     this._debug('open session');
-    const {
-      lastUnreadNotifTime,
-      lastPatchTime,
-    } = internal(this);
+    const { lastUnreadNotifTime, lastPatchTime } = internal(this);
     const command = new GenericCommand({
       cmd: 'session',
       op: 'open',
@@ -817,23 +858,34 @@ export default class IMClient extends EventEmitter {
       }),
     });
     if (!isReconnect) {
-      Object.assign(command.sessionMessage, trim({
-        tag,
-        deviceId,
-      }));
+      Object.assign(
+        command.sessionMessage,
+        trim({
+          tag,
+          deviceId,
+        })
+      );
       if (this.options.signatureFactory) {
         const signatureResult = await runSignatureFactory(
           this.options.signatureFactory,
-          [this._identity],
+          [this._identity]
         );
-        Object.assign(command.sessionMessage, keyRemap({
-          signature: 's',
-          timestamp: 't',
-          nonce: 'n',
-        }, signatureResult));
+        Object.assign(
+          command.sessionMessage,
+          keyRemap(
+            {
+              signature: 's',
+              timestamp: 't',
+              nonce: 'n',
+            },
+            signatureResult
+          )
+        );
       }
     } else {
-      const sessionToken = await this._sessionManager.getSessionToken({ autoRefresh: false });
+      const sessionToken = await this._sessionManager.getSessionToken({
+        autoRefresh: false,
+      });
       if (sessionToken && sessionToken !== Expirable.EXPIRED) {
         Object.assign(command.sessionMessage, {
           st: sessionToken,
@@ -859,11 +911,7 @@ export default class IMClient extends EventEmitter {
     const {
       peerId,
       sessionMessage,
-      sessionMessage: {
-        st: token,
-        stTtl: tokenTTL,
-        code,
-      },
+      sessionMessage: { st: token, stTtl: tokenTTL, code },
     } = resCommand;
     if (code) {
       throw createError(sessionMessage);
@@ -872,12 +920,15 @@ export default class IMClient extends EventEmitter {
       this.id = peerId;
       if (!this._identity) this._identity = peerId;
       if (token) {
-        this._sessionManager = this._sessionManager || this._createSessionManager();
+        this._sessionManager =
+          this._sessionManager || this._createSessionManager();
         this._sessionManager.setSessionToken(token, tokenTTL);
       }
       if (internal(this).lastNotificationTime) {
         // Do not await for it as this is failable
-        this._syncNotifications(internal(this).lastNotificationTime).catch(error => console.warn('Syncing notifications failed:', error));
+        this._syncNotifications(internal(this).lastNotificationTime).catch(
+          error => console.warn('Syncing notifications failed:', error)
+        );
       } else {
         // Set timestamp to now for next reconnection
         internal(this).lastNotificationTime = Date.now();
@@ -889,14 +940,11 @@ export default class IMClient extends EventEmitter {
   }
 
   async _syncNotifications(timestamp) {
-    const {
-      hasMore,
-      notifications,
-    } = await this._fetchNotifications(timestamp);
-    notifications.forEach((notification) => {
-      const {
-        cmd, op, serverTs, ...payload
-      } = notification;
+    const { hasMore, notifications } = await this._fetchNotifications(
+      timestamp
+    );
+    notifications.forEach(notification => {
+      const { cmd, op, serverTs, ...payload } = notification;
       this._dispatchCommand({
         cmd: CommandType[cmd],
         op: OpType[op],
@@ -924,42 +972,51 @@ export default class IMClient extends EventEmitter {
   _createSessionManager() {
     debug('create SessionManager');
     return new SessionManager({
-      onBeforeGetSessionToken: this._connection.checkConnectionAvailability.bind(this._connection),
+      onBeforeGetSessionToken: this._connection.checkConnectionAvailability.bind(
+        this._connection
+      ),
       refresh: (manager, expiredSessionToken) =>
-        manager.setSessionTokenAsync(Promise.resolve(new GenericCommand({
-          cmd: 'session',
-          op: 'refresh',
-          sessionMessage: new SessionCommand({
-            ua: `js/${VERSION}`,
-            st: expiredSessionToken,
-          }),
-        })).then(async (command) => {
-          if (this.options.signatureFactory) {
-            const signatureResult = await runSignatureFactory(
-              this.options.signatureFactory,
-              [this._identity],
-            );
-            Object.assign(command.sessionMessage, keyRemap({
-              signature: 's',
-              timestamp: 't',
-              nonce: 'n',
-            }, signatureResult));
-          }
-          return command;
-        }).then(this._send.bind(this)).then(({
-          sessionMessage: {
-            st: token,
-            stTtl: ttl,
-          },
-        }) => [token, ttl])),
+        manager.setSessionTokenAsync(
+          Promise.resolve(
+            new GenericCommand({
+              cmd: 'session',
+              op: 'refresh',
+              sessionMessage: new SessionCommand({
+                ua: `js/${VERSION}`,
+                st: expiredSessionToken,
+              }),
+            })
+          )
+            .then(async command => {
+              if (this.options.signatureFactory) {
+                const signatureResult = await runSignatureFactory(
+                  this.options.signatureFactory,
+                  [this._identity]
+                );
+                Object.assign(
+                  command.sessionMessage,
+                  keyRemap(
+                    {
+                      signature: 's',
+                      timestamp: 't',
+                      nonce: 'n',
+                    },
+                    signatureResult
+                  )
+                );
+              }
+              return command;
+            })
+            .then(this._send.bind(this))
+            .then(({ sessionMessage: { st: token, stTtl: ttl } }) => [
+              token,
+              ttl,
+            ])
+        ),
     });
   }
 
-  async _requestWithSessionToken({
-    headers,
-    query,
-    ...params
-  }) {
+  async _requestWithSessionToken({ headers, query, ...params }) {
     const sessionToken = await this._sessionManager.getSessionToken();
     return this._request({
       headers: {
@@ -1035,8 +1092,7 @@ export default class IMClient extends EventEmitter {
     if (isTemporaryConversatrionId(id)) {
       return (await this._getTemporaryConversations([id]))[0] || null;
     }
-    return this
-      .getQuery()
+    return this.getQuery()
       .equalTo('objectId', id)
       .find()
       .then(conversations => conversations[0] || null);
@@ -1050,18 +1106,27 @@ export default class IMClient extends EventEmitter {
    * @return {Promise.<ConversationBase[]>} 如果 id 对应的对话不存在则返回 null
    */
   async getConversations(ids, noCache = false) {
-    const remoteConversationIds =
-      noCache ? ids : ids.filter(id => this._conversationCache.get(id) === null);
+    const remoteConversationIds = noCache
+      ? ids
+      : ids.filter(id => this._conversationCache.get(id) === null);
     if (remoteConversationIds.length) {
-      const remoteTemporaryConversationIds =
-        remove(remoteConversationIds, isTemporaryConversatrionId);
+      const remoteTemporaryConversationIds = remove(
+        remoteConversationIds,
+        isTemporaryConversatrionId
+      );
       const query = [];
       if (remoteConversationIds.length) {
-        query.push(this.getQuery().containedIn('objectId', remoteConversationIds).limit(999).find());
+        query.push(
+          this.getQuery()
+            .containedIn('objectId', remoteConversationIds)
+            .limit(999)
+            .find()
+        );
       }
       if (remoteTemporaryConversationIds.length) {
-        const remoteTemporaryConversationsPromise =
-          remoteTemporaryConversationIds.map(this._getTemporaryConversations.bind(this));
+        const remoteTemporaryConversationsPromise = remoteTemporaryConversationIds.map(
+          this._getTemporaryConversations.bind(this)
+        );
         query.push(...remoteTemporaryConversationsPromise);
       }
       await Promise.all(query);
@@ -1125,10 +1190,13 @@ export default class IMClient extends EventEmitter {
       conversations = decode(JSON.parse(resCommand.convMessage.results.data));
     } catch (error) {
       const commandString = JSON.stringify(trim(resCommand));
-      throw new Error(`Parse query result failed: ${error.message}. Command: ${commandString}`);
+      throw new Error(
+        `Parse query result failed: ${error.message}. Command: ${commandString}`
+      );
     }
-    conversations =
-      await Promise.all(conversations.map(this._parseConversationFromRawData.bind(this)));
+    conversations = await Promise.all(
+      conversations.map(this._parseConversationFromRawData.bind(this))
+    );
     return conversations.map(this._upsertConversationToCache.bind(this));
   }
 
@@ -1151,7 +1219,7 @@ export default class IMClient extends EventEmitter {
         '_attributes',
         'transient',
         'muted',
-      ].forEach((key) => {
+      ].forEach(key => {
         const value = fetchedConversation[key];
         if (value !== undefined) conversation[key] = value;
       });
@@ -1166,11 +1234,7 @@ export default class IMClient extends EventEmitter {
    * @return {AVMessage} 解析后的消息
    * @since 4.0.0
    */
-  async parseMessage({
-    data,
-    bin = false,
-    ...properties
-  }) {
+  async parseMessage({ data, bin = false, ...properties }) {
     const content = bin ? decodeBase64(data) : data;
     const message = await this._messageParser.parse(content);
     Object.assign(message, properties);
@@ -1209,13 +1273,10 @@ export default class IMClient extends EventEmitter {
       conversationData.lastMessage = await this.parseMessage(lastMessage);
       conversationData.lastMessage._setStatus(MessageStatus.SENT);
     }
-    const {
-      transient,
-      system,
-      expiredAt,
-    } = properties;
+    const { transient, system, expiredAt } = properties;
     if (transient) return new ChatRoom(conversationData, properties, this);
-    if (system) return new ServiceConversation(conversationData, properties, this);
+    if (system)
+      return new ServiceConversation(conversationData, properties, this);
     if (expiredAt || isTemporaryConversatrionId(id)) {
       return new TemporaryConversation(conversationData, { expiredAt }, this);
     }
@@ -1223,15 +1284,18 @@ export default class IMClient extends EventEmitter {
   }
 
   async _parseConversationFromRawData(rawData) {
-    const data = keyRemap({
-      objectId: 'id',
-      lm: 'lastMessageAt',
-      m: 'members',
-      tr: 'transient',
-      sys: 'system',
-      c: 'creator',
-      mu: 'mutedMembers',
-    }, rawData);
+    const data = keyRemap(
+      {
+        objectId: 'id',
+        lm: 'lastMessageAt',
+        m: 'members',
+        tr: 'transient',
+        sys: 'system',
+        c: 'creator',
+        mu: 'mutedMembers',
+      },
+      rawData
+    );
     if (data.msg) {
       data.lastMessage = {
         data: data.msg,
@@ -1247,7 +1311,7 @@ export default class IMClient extends EventEmitter {
       delete data.lastMessagePatchTimestamp;
     }
     const { ttl } = data;
-    if (ttl) data.expiredAt = Date.now() + (ttl * 1000);
+    if (ttl) data.expiredAt = Date.now() + ttl * 1000;
     return this.parseConversation(data);
   }
 
@@ -1304,20 +1368,24 @@ export default class IMClient extends EventEmitter {
       const params = [null, this._identity, members, 'create'];
       const signatureResult = await runSignatureFactory(
         this.options.conversationSignatureFactory,
-        params,
+        params
       );
-      Object.assign(command.convMessage, keyRemap({
-        signature: 's',
-        timestamp: 't',
-        nonce: 'n',
-      }, signatureResult));
+      Object.assign(
+        command.convMessage,
+        keyRemap(
+          {
+            signature: 's',
+            timestamp: 't',
+            nonce: 'n',
+          },
+          signatureResult
+        )
+      );
     }
 
-    const {
-      convMessage: {
-        cid, cdate, tempConvTTL: ttl,
-      },
-    } = await this._send(command);
+    const { convMessage: { cid, cdate, tempConvTTL: ttl } } = await this._send(
+      command
+    );
     const data = {
       name,
       transient,
@@ -1330,7 +1398,7 @@ export default class IMClient extends EventEmitter {
       members: transient ? [] : members,
       ...properties,
     };
-    if (ttl) data.expiredAt = Date.now() + (ttl * 1000);
+    if (ttl) data.expiredAt = Date.now() + ttl * 1000;
     const conversation = await this.parseConversation(data);
     return this._upsertConversationToCache(conversation);
   }
@@ -1359,10 +1427,7 @@ export default class IMClient extends EventEmitter {
    * @param {String} [options.ttl] 对话存在时间，单位为秒，最大值与默认值均为 86400（一天），过期后该对话不再可用。
    * @return {Promise.<TemporaryConversation>}
    */
-  async createTemporaryConversation({
-    ttl: _tempConvTTL,
-    ...param
-  }) {
+  async createTemporaryConversation({ ttl: _tempConvTTL, ...param }) {
     return this.createConversation({
       ...param,
       transient: false,
@@ -1381,7 +1446,7 @@ export default class IMClient extends EventEmitter {
     const buffer = internal(this).readConversationsBuffer;
     const conversations = Array.from(buffer);
     if (!conversations.length) return;
-    const ids = conversations.map((conversation) => {
+    const ids = conversations.map(conversation => {
       if (!(conversation instanceof ConversationBase)) {
         throw new TypeError(`${conversation} is not a Conversation`);
       }
@@ -1389,22 +1454,31 @@ export default class IMClient extends EventEmitter {
     });
     this._debug(`mark [${ids}] as read`);
     buffer.clear();
-    this._sendReadCommand(conversations).catch((error) => {
+    this._sendReadCommand(conversations).catch(error => {
       this._debug('send read failed: %O', error);
       conversations.forEach(buffer.add.bind(buffer));
     });
   }
   _sendReadCommand(conversations) {
-    return this._send(new GenericCommand({
-      cmd: 'read',
-      readMessage: new ReadCommand({
-        convs: conversations.map(conversation => new ReadTuple({
-          cid: conversation.id,
-          mid: (conversation.lastMessage && conversation.lastMessage.from !== this.id)
-            ? conversation.lastMessage.id : undefined,
-          timestamp: (conversation.lastMessageAt || new Date()).getTime(),
-        })),
+    return this._send(
+      new GenericCommand({
+        cmd: 'read',
+        readMessage: new ReadCommand({
+          convs: conversations.map(
+            conversation =>
+              new ReadTuple({
+                cid: conversation.id,
+                mid:
+                  conversation.lastMessage &&
+                  conversation.lastMessage.from !== this.id
+                    ? conversation.lastMessage.id
+                    : undefined,
+                timestamp: (conversation.lastMessageAt || new Date()).getTime(),
+              })
+          ),
+        }),
       }),
-    }), false);
+      false
+    );
   }
 }

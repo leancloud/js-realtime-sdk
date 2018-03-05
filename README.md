@@ -1,5 +1,5 @@
-LeanCloud JavaScript Realtime SDK
-====
+# LeanCloud JavaScript Realtime SDK
+
 [![npm](https://img.shields.io/npm/v/leancloud-realtime.svg?style=flat-square)](https://www.npmjs.com/package/leancloud-realtime)
 [![npm](https://img.shields.io/npm/v/leancloud-realtime/next.svg?style=flat-square)](https://www.npmjs.com/package/leancloud-realtime)
 ![gzip size](http://img.badgesize.io/leancloud/js-realtime-sdk/dist/dist/realtime.browser.min.js.svg?compression=gzip&style=flat-square)
@@ -9,80 +9,82 @@ LeanCloud JavaScript Realtime SDK
 
 为您的 JavaScript App 接入 LeanCloud 实时通讯服务。
 
-版本说明
-----
+## 版本说明
 
 遵循 [语义化版本](http://semver.org/lang/zh-CN/)。
 
 安装稳定版本：
+
 ```
 npm install leancloud-realtime --save
 ```
 
 安装测试版本：
+
 ```
 npm install leancloud-realtime@next --save
 ```
 
 安装指定版本：
+
 ```
 // 安装 v3 版本
 npm install leancloud-realtime@3 --save
 ```
 
-支持的运行环境
-----
-- 浏览器 / WebView
-  - IE 10+ / Edge
-  - Chrome 31+
-  - Firefox latest
-  - iOS 8.0+
-  - Android 4.4+
-- Node.js 4.0+
-- 微信小程序 latest
-- React Native 0.26+
-- Electron latest
+## 支持的运行环境
 
-文档
-----
-- [安装文档](https://leancloud.cn/docs/realtime_guide-js.html#安装和初始化)
-- [使用文档](https://leancloud.cn/docs/realtime_guide-js.html)
-- [API 文档](https://leancloud.github.io/js-realtime-sdk/docs/)
+* 浏览器 / WebView
+  * IE 10+ / Edge
+  * Chrome 31+
+  * Firefox latest
+  * iOS 8.0+
+  * Android 4.4+
+* Node.js 4.0+
+* 微信小程序 latest
+* React Native 0.26+
+* Electron latest
 
-Demo
-----
-- [Simple Chatroom](https://leancloud.github.io/js-realtime-sdk/demo/simple-chatroom/) ([src](https://github.com/leancloud/js-realtime-sdk/tree/master/demo/simple-chatroom))
-- [LeanMessage](https://leancloud.github.io/leanmessage-demo) ([src](https://github.com/leancloud/leanmessage-demo))
-- [WebRTC 视频通话](https://leancloud.github.io/js-realtime-sdk/demo/webrtc/) ([src](https://github.com/leancloud/js-realtime-sdk/tree/master/demo/webrtc))
+## 文档
 
-插件
-----
-package name|描述|版本|文档|
-:--|:--|:--:|:--:|
-leancloud-realtime-plugin-typed-messages|富媒体消息|[![npm](https://img.shields.io/npm/v/leancloud-realtime-plugin-typed-messages.svg?style=flat-square)](https://www.npmjs.com/package/leancloud-realtime-plugin-typed-messages)|[API docs](https://leancloud.github.io/js-realtime-sdk/plugins/typed-messages/docs/)
-leancloud-realtime-plugin-groupchat-receipts|群聊已读回执|[![npm](https://img.shields.io/npm/v/leancloud-realtime-plugin-groupchat-receipts.svg?style=flat-square)](https://www.npmjs.com/package/leancloud-realtime-plugin-groupchat-receipts)|[API docs](https://leancloud.github.io/js-realtime-sdk/plugins/groupchat-receipts/docs/)
-leancloud-realtime-plugin-webrtc|WebRTC 客户端|[![npm](https://img.shields.io/npm/v/leancloud-realtime-plugin-webrtc.svg?style=flat-square)](https://www.npmjs.com/package/leancloud-realtime-plugin-webrtc)|[API docs](https://leancloud.github.io/js-realtime-sdk/plugins/webrtc/docs/)
+* [安装文档](https://leancloud.cn/docs/realtime_guide-js.html#安装和初始化)
+* [使用文档](https://leancloud.cn/docs/realtime_guide-js.html)
+* [API 文档](https://leancloud.github.io/js-realtime-sdk/docs/)
 
+## Demo
 
-支持
-----
+* [Simple Chatroom](https://leancloud.github.io/js-realtime-sdk/demo/simple-chatroom/) ([src](https://github.com/leancloud/js-realtime-sdk/tree/master/demo/simple-chatroom))
+* [LeanMessage](https://leancloud.github.io/leanmessage-demo) ([src](https://github.com/leancloud/leanmessage-demo))
+* [WebRTC 视频通话](https://leancloud.github.io/js-realtime-sdk/demo/webrtc/) ([src](https://github.com/leancloud/js-realtime-sdk/tree/master/demo/webrtc))
+
+## 插件
+
+| package name                                 | 描述          |                                                                                         版本                                                                                          |                                           文档                                           |
+| :------------------------------------------- | :------------ | :-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------: | :--------------------------------------------------------------------------------------: |
+| leancloud-realtime-plugin-typed-messages     | 富媒体消息    |     [![npm](https://img.shields.io/npm/v/leancloud-realtime-plugin-typed-messages.svg?style=flat-square)](https://www.npmjs.com/package/leancloud-realtime-plugin-typed-messages)     |   [API docs](https://leancloud.github.io/js-realtime-sdk/plugins/typed-messages/docs/)   |
+| leancloud-realtime-plugin-groupchat-receipts | 群聊已读回执  | [![npm](https://img.shields.io/npm/v/leancloud-realtime-plugin-groupchat-receipts.svg?style=flat-square)](https://www.npmjs.com/package/leancloud-realtime-plugin-groupchat-receipts) | [API docs](https://leancloud.github.io/js-realtime-sdk/plugins/groupchat-receipts/docs/) |
+| leancloud-realtime-plugin-webrtc             | WebRTC 客户端 |             [![npm](https://img.shields.io/npm/v/leancloud-realtime-plugin-webrtc.svg?style=flat-square)](https://www.npmjs.com/package/leancloud-realtime-plugin-webrtc)             |       [API docs](https://leancloud.github.io/js-realtime-sdk/plugins/webrtc/docs/)       |
+
+## 支持
+
 * 在使用过程中遇到了问题时
   * 如果你是商用版用户，请新建一个工单。
   * 也可以在 [论坛](https://forum.leancloud.cn/) 提问、讨论。
 
-贡献
-----
+## 贡献
+
 如果你希望为这个项目贡献代码，请按以下步骤进行：
 
-0. Fork 这个项目，clone 到本地
-0. 在目录中执行 `npm install` 安装所需 Node.js 依赖包
-0. 执行 `grunt dev` 浏览器打开 [](http://localhost:8000) 本地进行调试
-0. 编码，更新测试用例
-0. 运行 `npm test` 确保测试全部 pass
-0. 提交改动，请遵循 [conversational commit message 风格](http://www.ruanyifeng.com/blog/2016/01/commit_message_change_log.html)
-0. 发起 Pull Request 至 master 分支
+0.  Fork 这个项目，clone 到本地
+1.  在目录中执行 `npm install` 安装所需 Node.js 依赖包
+1.  执行 `grunt dev` 浏览器打开 [](http://localhost:8000) 本地进行调试
+1.  编码，更新测试用例
+1.  运行 `npm test` 确保测试全部 pass
+1.  提交改动，请遵循 [conversational commit message 风格](http://www.ruanyifeng.com/blog/2016/01/commit_message_change_log.html)
+1.  发起 Pull Request 至 master 分支
 
 ### 项目的目录结构
+
 ```
 .
 ├── demo
@@ -108,9 +110,11 @@ leancloud-realtime-plugin-webrtc|WebRTC 客户端|[![npm](https://img.shields.io
 ```
 
 ### Architecture
+
 SDK 分为连接层与应用层两部分，只存在应用层对连接层公开 API 的调用，连接层对开发者不可见。
 
 #### 连接层
+
 * `WebSocketPlus`：封装了 WebSocket。相比 w3 WebSocket，增加了以下特性：
   * 是一个有限状态机
   * 实现了 [Node.js EventEmitter 接口](https://nodejs.org/api/events.html)
@@ -122,6 +126,7 @@ SDK 分为连接层与应用层两部分，只存在应用层对连接层公开 
   * 实现了应用层 ping/pong
 
 #### 应用层
+
 * `Realtime`：开发者使用 SDK 的入口，负责访问 router、创建 connection、创建与管理 clients、创建 messageParser（管理消息类型）、监听 connection 的消息并 dispatch 给对应的 client
 * `Client`：所有的 clients 共享一个 connection
   * `IMClient`：对应即时通讯中的「用户」，持有 connection 与 conversations，负责创建管理将收到的消息处理后在对应 conversation 上派发，所有的 IMClients 共享一个 messageParser
@@ -138,47 +143,60 @@ SDK 分为连接层与应用层两部分，只存在应用层对连接层公开 
 ### 开启调试模式
 
 #### Node.js
+
 ```bash
 export DEBUG=LC*
 ```
+
 #### 浏览器
+
 ```javascript
 localStorage.setItem('debug', 'LC*');
 ```
 
-Develop Workflow
-----
+## Develop Workflow
+
 ### 本地开发
+
 更新 .proto 后请运行
+
 ```
 npm run convert-pb
 ```
+
 测试
+
 ```
 npm run test:node -- --grep KEYWORDS
 ```
+
 浏览器测试
+
 ```
 # 在当前目录启动一个静态 server
 # static . -p 8000
 npm run test:browser
 # open http://localhost:8000/test/browser/
 ```
-生成 dist/realtime.*
+
+生成 dist/realtime.\*
+
 ```
 npm run build
 ```
+
 ### 持续集成
+
 合并 PR 到 master 分支后持续集成会自动运行 `npm build` 与 `npm run docs`，然后将 dist 目录推送到 dist 分支，将文档与 demo 推送到 gh-pages。
 
-Release Process Workflow
-----
-0. 遵循 semver 提升 `package.json` 与 `bower.json` 中的版本号
-0. `npm run changelog` 生成新的 `changelog.md`，润色之
-0. Commit `package.json`，`bower.json`，`changelog.md`
-0. Push to remote `master` branch
-0. 等待持续集成 pass
-0. 使用 GitHub 基于 dist 分支生成 pre-release 包（for bower）
-0. Fetch and checkout remote `dist` branch 并确认该提交的内容是即将发布的版本
-0. npm publish（`npm publish`，需 npm 协作者身份），如果是 pre-release 版本需要带 next tag
-0. 如有更新，在 npm 上发布各个 plugin
+## Release Process Workflow
+
+0.  遵循 semver 提升 `package.json` 与 `bower.json` 中的版本号
+1.  `npm run changelog` 生成新的 `changelog.md`，润色之
+1.  Commit `package.json`，`bower.json`，`changelog.md`
+1.  Push to remote `master` branch
+1.  等待持续集成 pass
+1.  使用 GitHub 基于 dist 分支生成 pre-release 包（for bower）
+1.  Fetch and checkout remote `dist` branch 并确认该提交的内容是即将发布的版本
+1.  npm publish（`npm publish`，需 npm 协作者身份），如果是 pre-release 版本需要带 next tag
+1.  如有更新，在 npm 上发布各个 plugin

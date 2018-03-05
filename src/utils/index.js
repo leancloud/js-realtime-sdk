@@ -3,7 +3,7 @@ import global from './global';
 
 export { global };
 
-export const tryAll = (promiseConstructors) => {
+export const tryAll = promiseConstructors => {
   const promise = new Promise(promiseConstructors[0]);
   if (promiseConstructors.length === 1) {
     return promise;
@@ -11,7 +11,7 @@ export const tryAll = (promiseConstructors) => {
   return promise.catch(() => tryAll(promiseConstructors.slice(1)));
 };
 
-export const tap = interceptor => value => ((interceptor(value), value));
+export const tap = interceptor => value => (interceptor(value), value);
 
 export { default as Expirable } from './expirable';
 export { default as Cache } from './cache';
@@ -21,7 +21,7 @@ export { default as Cache } from './cache';
  * 其他情况下（包括对象为 falsy）返回原值。
  * @private
  */
-export const decodeDate = (date) => {
+export const decodeDate = date => {
   if (!date) return date;
   if (typeof date === 'string' || typeof date === 'number') {
     return new Date(date);
@@ -39,23 +39,27 @@ export const decodeDate = (date) => {
  * 获取 Date 的毫秒数，如果不是一个 Date 返回 undefined。
  * @private
  */
-export const getTime = date => ((date && date.getTime) ? date.getTime() : undefined);
+export const getTime = date =>
+  date && date.getTime ? date.getTime() : undefined;
 
 /**
  * 解码对象中的 LeanCloud 数据结构。
  * 目前仅会处理 Date 类型。
  * @private
  */
-export const decode = (value) => {
+export const decode = value => {
   if (!value) return value;
   if (value.__type === 'Date' && value.iso) {
     return new Date(value.iso);
   }
   if (isPlainObject(value)) {
-    return Object.keys(value).reduce((result, key) => ({
-      ...result,
-      [key]: decode(value[key]),
-    }), {});
+    return Object.keys(value).reduce(
+      (result, key) => ({
+        ...result,
+        [key]: decode(value[key]),
+      }),
+      {}
+    );
   }
   return value;
 };
@@ -64,13 +68,16 @@ export const decode = (value) => {
  * 目前仅会处理 Date 类型。
  * @private
  */
-export const encode = (value) => {
+export const encode = value => {
   if (value instanceof Date) return { __type: 'Date', iso: value.toJSON() };
   if (isPlainObject(value)) {
-    return Object.keys(value).reduce((result, key) => ({
-      ...result,
-      [key]: encode(value[key]),
-    }), {});
+    return Object.keys(value).reduce(
+      (result, key) => ({
+        ...result,
+        [key]: encode(value[key]),
+      }),
+      {}
+    );
   }
   return value;
 };
@@ -83,15 +90,15 @@ export const keyRemap = (keymap, obj) =>
     });
   }, {});
 
-export const isIE10 = (
+export const isIE10 =
   global.navigator &&
   global.navigator.userAgent &&
-  global.navigator.userAgent.indexOf('MSIE 10.') !== -1
-);
+  global.navigator.userAgent.indexOf('MSIE 10.') !== -1;
 
 /* eslint-disable no-proto */
 export const getStaticProperty = (klass, property) =>
-  (klass[property] || (klass.__proto__ ? getStaticProperty(klass.__proto__, property) : undefined));
+  klass[property] ||
+  (klass.__proto__ ? getStaticProperty(klass.__proto__, property) : undefined);
 /* eslint-enable no-proto */
 
 export const union = (a, b) => Array.from(new Set([...a, ...b]));
@@ -101,7 +108,7 @@ export const difference = (a, b) =>
 const map = new WeakMap();
 
 // protected property helper
-export const internal = (object) => {
+export const internal = object => {
   if (!map.has(object)) {
     map.set(object, {});
   }
@@ -129,7 +136,7 @@ export const compact = (obj, filter) => {
 const removeNull = obj => compact(obj, null);
 export const trim = message => removeNull(JSON.parse(JSON.stringify(message)));
 
-export const ensureArray = (target) => {
+export const ensureArray = target => {
   if (Array.isArray(target)) {
     return target;
   }
@@ -144,7 +151,7 @@ export const setValue = (target, key, value) => {
   const segs = key.split('.');
   const lastSeg = segs.pop();
   let currentTarget = target;
-  segs.forEach((seg) => {
+  segs.forEach(seg => {
     if (currentTarget[seg] === undefined) currentTarget[seg] = {};
     currentTarget = currentTarget[seg];
   });
@@ -153,7 +160,8 @@ export const setValue = (target, key, value) => {
 };
 
 // eslint-disable-next-line no-undef
-export const isWeapp = typeof wx === 'object' && typeof wx.connectSocket === 'function';
+export const isWeapp =
+  typeof wx === 'object' && typeof wx.connectSocket === 'function';
 
 // throttle decorator
 export const throttle = wait => (target, property, descriptor) => {
@@ -165,24 +173,17 @@ export const throttle = wait => (target, property, descriptor) => {
   return {
     ...descriptor,
     value() {
-      let {
-        throttleMeta,
-      } = internal(this);
+      let { throttleMeta } = internal(this);
       if (!throttleMeta) {
         throttleMeta = {};
         internal(this).throttleMeta = throttleMeta;
       }
-      let {
-        [property]: propertyMeta,
-      } = throttleMeta;
+      let { [property]: propertyMeta } = throttleMeta;
       if (!propertyMeta) {
         propertyMeta = {};
         throttleMeta[property] = propertyMeta;
       }
-      const {
-        previouseTimestamp = 0,
-        timeout,
-      } = propertyMeta;
+      const { previouseTimestamp = 0, timeout } = propertyMeta;
       const now = Date.now();
       const remainingTime = wait - (now - previouseTimestamp);
       if (remainingTime <= 0) {

@@ -21,19 +21,23 @@ import { name } from '../package.json';
 export const GroupchatReceiptsPlugin = {
   name,
   messageClasses: [ReadReceipt],
-  onIMClientCreate: (client) => {
+  onIMClientCreate: client => {
     const originalSendReadCommand = client._sendReadCommand;
     // eslint-disable-next-line no-param-reassign
     client._sendReadCommand = (conversations, ...args) => {
-      conversations.forEach((conversation) => {
+      conversations.forEach(conversation => {
         if (!conversation.transient && conversation.members.length > 2) {
-          conversation.send(new ReadReceipt(conversation.lastMessageAt || new Date())).catch(error => console.warn(`Sending groupchat receipt fail: ${error.message}`));
+          conversation
+            .send(new ReadReceipt(conversation.lastMessageAt || new Date()))
+            .catch(error =>
+              console.warn(`Sending groupchat receipt fail: ${error.message}`)
+            );
         }
       });
       return originalSendReadCommand.call(client, conversations, ...args);
     };
   },
-  onConversationCreate: (conversation) => {
+  onConversationCreate: conversation => {
     const originalQueryMessages = conversation.queryMessages;
     // eslint-disable-next-line no-param-reassign
     conversation.queryMessages = (...args) => {
@@ -42,14 +46,23 @@ export const GroupchatReceiptsPlugin = {
         conversation.members.length > 2 &&
         !conversation.lastReadTimestamps
       ) {
-        conversation._fetchAllReceiptTimestamps().then((maxReadTuple) => {
-          // eslint-disable-next-line no-param-reassign
-          conversation.lastReadTimestamps = maxReadTuple.reduce(
-            (result, { pid, lastReadAt }) => Object.assign(result, { [pid]: lastReadAt }),
-            {},
+        conversation
+          ._fetchAllReceiptTimestamps()
+          .then(maxReadTuple => {
+            // eslint-disable-next-line no-param-reassign
+            conversation.lastReadTimestamps = maxReadTuple.reduce(
+              (result, { pid, lastReadAt }) =>
+                Object.assign(result, { [pid]: lastReadAt }),
+              {}
+            );
+            conversation.emit(
+              'lastreadtimestampsupdate',
+              conversation.lastReadTimestamps
+            );
+          })
+          .catch(error =>
+            console.warn(`Initialize group receipts fail: ${error.message}`)
           );
-          conversation.emit('lastreadtimestampsupdate', conversation.lastReadTimestamps);
-        }).catch(error => console.warn(`Initialize group receipts fail: ${error.message}`));
       }
       return originalQueryMessages.call(conversation, ...args);
     };

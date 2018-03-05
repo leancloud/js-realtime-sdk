@@ -1,7 +1,6 @@
 import uuid from 'uuid/v4';
 import { ensureArray, decodeDate, getTime } from '../utils';
 
-
 /**
  * 消息状态枚举
  * @enum {Symbol}
@@ -38,46 +37,50 @@ export default class Message {
    * @param  {Object|String|ArrayBuffer} content 消息内容
    */
   constructor(content) {
-    Object.assign(this, { content }, {
-      /**
-       * @type {String}
-       * @memberof Message#
-       */
-      id: uuid(),
-      /**
-       * 消息所在的 conversation id
-       * @memberof Message#
-       * @type {String?}
-       */
-      cid: null,
-      /**
-       * 消息发送时间
-       * @memberof Message#
-       * @type {Date}
-       */
-      timestamp: new Date(),
-      /**
-       * 消息发送者
-       * @memberof Message#
-       * @type {String}
-       */
-      from: undefined,
-      /**
-       * 消息提及的用户
-       * @since 4.0.0
-       * @memberof Message#
-       * @type {String[]}
-       */
-      mentionList: [],
-      /**
-       * 消息是否提及了所有人
-       * @since 4.0.0
-       * @memberof Message#
-       * @type {Boolean}
-       */
-      mentionedAll: false,
-      _mentioned: false,
-    });
+    Object.assign(
+      this,
+      { content },
+      {
+        /**
+         * @type {String}
+         * @memberof Message#
+         */
+        id: uuid(),
+        /**
+         * 消息所在的 conversation id
+         * @memberof Message#
+         * @type {String?}
+         */
+        cid: null,
+        /**
+         * 消息发送时间
+         * @memberof Message#
+         * @type {Date}
+         */
+        timestamp: new Date(),
+        /**
+         * 消息发送者
+         * @memberof Message#
+         * @type {String}
+         */
+        from: undefined,
+        /**
+         * 消息提及的用户
+         * @since 4.0.0
+         * @memberof Message#
+         * @type {String[]}
+         */
+        mentionList: [],
+        /**
+         * 消息是否提及了所有人
+         * @since 4.0.0
+         * @memberof Message#
+         * @type {Boolean}
+         */
+        mentionedAll: false,
+        _mentioned: false,
+      }
+    );
     this._setStatus(MessageStatus.NONE);
   }
 
@@ -143,7 +146,7 @@ export default class Message {
       mentionList,
       mentionedAll,
     } = this;
-    return ({
+    return {
       data: content,
       id,
       cid,
@@ -153,7 +156,7 @@ export default class Message {
       updatedAt: getTime(_updatedAt),
       mentionList,
       mentionedAll,
-    });
+    };
   }
 
   /**

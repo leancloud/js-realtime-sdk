@@ -18,7 +18,7 @@ import {
 @messageType(1)
 class PluginDefinedMessage extends TypedMessage {}
 
-const patchTestFunction = (value = true, fnName = 'test') => (target) => {
+const patchTestFunction = (value = true, fnName = 'test') => target => {
   target[fnName] = () => value;
 };
 
@@ -31,24 +31,27 @@ describe('Plugin', () => {
         appId: APP_ID,
         appKey: APP_KEY,
         region: REGION,
-        plugins: [{
-          messageClasses: [PluginDefinedMessage],
-          onRealtimeCreate: patchTestFunction(),
-          onIMClientCreate: patchTestFunction(),
-          onConversationCreate: patchTestFunction(),
-          beforeMessageParse: json => Object.assign({}, json, {
-            _lctext: `[plugin-test]${json._lctext}`,
-          }),
-          afterMessageParse: (message) => {
-            message.foo = 'bar';
-            return message;
+        plugins: [
+          {
+            messageClasses: [PluginDefinedMessage],
+            onRealtimeCreate: patchTestFunction(),
+            onIMClientCreate: patchTestFunction(),
+            onConversationCreate: patchTestFunction(),
+            beforeMessageParse: json =>
+              Object.assign({}, json, {
+                _lctext: `[plugin-test]${json._lctext}`,
+              }),
+            afterMessageParse: message => {
+              message.foo = 'bar';
+              return message;
+            },
+            beforeMessageDispatch: message => message.text === '1',
           },
-          beforeMessageDispatch: message => message.text === '1',
-        }],
+        ],
       });
-      return realtime
-        .createIMClient(CLIENT_ID)
-        .then((c) => { client = c; });
+      return realtime.createIMClient(CLIENT_ID).then(c => {
+        client = c;
+      });
     });
 
     after(() => client.close());
@@ -56,12 +59,14 @@ describe('Plugin', () => {
     it('should work', () => {
       realtime.test().should.be.ok();
       const messageHandler = sinon.spy();
-      return realtime._messageParser.parse(new PluginDefinedMessage().getPayload())
+      return realtime._messageParser
+        .parse(new PluginDefinedMessage().getPayload())
         .then(message => message.should.be.instanceof(PluginDefinedMessage))
         .then(() => {
           client.test().should.be.ok();
           return client.getConversation(EXISTING_ROOM_ID);
-        }).then((conversation) => {
+        })
+        .then(conversation => {
           conversation.test().should.be.ok();
           conversation.on('message', messageHandler);
           const message0 = new TextMessage('0');
@@ -70,10 +75,13 @@ describe('Plugin', () => {
           message1.transient = true;
           client._dispatchParsedMessage(message0, conversation);
           client._dispatchParsedMessage(message1, conversation);
-          return conversation.createMessagesIterator({
-            limit: 1,
-          }).next();
-        }).then(({ value: [message] }) => {
+          return conversation
+            .createMessagesIterator({
+              limit: 1,
+            })
+            .next();
+        })
+        .then(({ value: [message] }) => {
           message.text.should.startWith('[plugin-test]');
           message.foo.should.be.eql('bar');
           messageHandler.should.be.calledOnce();
@@ -89,24 +97,30 @@ describe('Plugin', () => {
         appId: APP_ID,
         appKey: APP_KEY,
         region: REGION,
-        plugins: [{
-          onRealtimeCreate: patchTestFunction(1),
-          beforeMessageParse: json => Object.assign({}, json, {
-            _lctext: `[plugin-test]${json._lctext}`,
-          }),
-        }, {
-          onRealtimeCreate: patchTestFunction(2),
-          beforeMessageParse: json => Object.assign({}, json, {
-            _lctext: `${json._lctext}[plugin-test]`,
-          }),
-        }, {
-          onRealtimeCreate: patchTestFunction(1, 'test2'),
-          beforeMessageParse: hold(200),
-        }],
+        plugins: [
+          {
+            onRealtimeCreate: patchTestFunction(1),
+            beforeMessageParse: json =>
+              Object.assign({}, json, {
+                _lctext: `[plugin-test]${json._lctext}`,
+              }),
+          },
+          {
+            onRealtimeCreate: patchTestFunction(2),
+            beforeMessageParse: json =>
+              Object.assign({}, json, {
+                _lctext: `${json._lctext}[plugin-test]`,
+              }),
+          },
+          {
+            onRealtimeCreate: patchTestFunction(1, 'test2'),
+            beforeMessageParse: hold(200),
+          },
+        ],
       });
-      return realtime
-        .createIMClient(CLIENT_ID)
-        .then((c) => { client = c; });
+      return realtime.createIMClient(CLIENT_ID).then(c => {
+        client = c;
+      });
     });
 
     after(() => client.close());
@@ -116,8 +130,9 @@ describe('Plugin', () => {
       realtime.test2().should.be.eql(1);
     });
     it('all middlewares should be applied', () =>
-      realtime._messageParser.parse(new TextMessage('1').getPayload())
-        .then((message) => {
+      realtime._messageParser
+        .parse(new TextMessage('1').getPayload())
+        .then(message => {
           message.should.be.instanceof(TextMessage);
           message.text.should.startWith('[plugin-test]');
           message.text.should.endWith('[plugin-test]');
@@ -126,58 +141,76 @@ describe('Plugin', () => {
 
   describe('error handling', () => {
     it('create Realtime should throw', () => {
-      (() => new Realtime({
-        appId: APP_ID,
-        appKey: APP_KEY,
-        region: REGION,
-        plugins: [{
-          name: 'ErrorPlugin',
-          onRealtimeCreate: () => {
-            throw new Error('test');
-          },
-        }],
-      })).should.throw('test[ErrorPlugin]');
+      (() =>
+        new Realtime({
+          appId: APP_ID,
+          appKey: APP_KEY,
+          region: REGION,
+          plugins: [
+            {
+              name: 'ErrorPlugin',
+              onRealtimeCreate: () => {
+                throw new Error('test');
+              },
+            },
+          ],
+        })).should.throw('test[ErrorPlugin]');
     });
     it('create IMClient should be rejected', () =>
       new Realtime({
         appId: APP_ID,
         appKey: APP_KEY,
         region: REGION,
-        plugins: [{
-          name: 'ErrorPlugin',
-          onIMClientCreate: () => {
-            throw new Error('test');
+        plugins: [
+          {
+            name: 'ErrorPlugin',
+            onIMClientCreate: () => {
+              throw new Error('test');
+            },
           },
-        }],
-      }).createIMClient().should.be.rejectedWith('test[ErrorPlugin]'));
+        ],
+      })
+        .createIMClient()
+        .should.be.rejectedWith('test[ErrorPlugin]'));
     it('middleware error should be reported', () =>
       new Realtime({
         appId: APP_ID,
         appKey: APP_KEY,
         region: REGION,
-        plugins: [{
-          name: 'ErrorPlugin',
-          beforeMessageParse: () => {
-            throw new Error('test');
+        plugins: [
+          {
+            name: 'ErrorPlugin',
+            beforeMessageParse: () => {
+              throw new Error('test');
+            },
           },
-        }],
-      })._messageParser.parse(new TextMessage('1').getPayload())
+        ],
+      })._messageParser
+        .parse(new TextMessage('1').getPayload())
         .should.be.rejectedWith('test[ErrorPlugin]'));
     it('beforeMessageDispatch error should be reported', () =>
       new Realtime({
         appId: APP_ID,
         appKey: APP_KEY,
         region: REGION,
-        plugins: [{
-          name: 'ErrorPlugin',
-          beforeMessageDispatch: () => {
-            throw new Error('test');
+        plugins: [
+          {
+            name: 'ErrorPlugin',
+            beforeMessageDispatch: () => {
+              throw new Error('test');
+            },
           },
-        }],
-      }).createIMClient()
-        .then(client => client.getConversation(EXISTING_ROOM_ID)
-          .then(conversation => client._dispatchParsedMessage(new TextMessage(), conversation))
-          .should.be.rejectedWith('test[ErrorPlugin]')));
+        ],
+      })
+        .createIMClient()
+        .then(client =>
+          client
+            .getConversation(EXISTING_ROOM_ID)
+            .then(conversation =>
+              client._dispatchParsedMessage(new TextMessage(), conversation)
+            )
+            .should.be.rejectedWith('test[ErrorPlugin]')
+        ));
     it('middleware return type mismatch should trigger a warning', () => {
       const spy = sinon.spy(console, 'warn');
       return Promise.all([
@@ -185,19 +218,23 @@ describe('Plugin', () => {
           appId: APP_ID,
           appKey: APP_KEY,
           region: REGION,
-          plugins: [{
-            name: 'ErrorPlugin',
-            beforeMessageParse: () => Promise.resolve(),
-          }],
+          plugins: [
+            {
+              name: 'ErrorPlugin',
+              beforeMessageParse: () => Promise.resolve(),
+            },
+          ],
         })._messageParser.parse(new TextMessage('1').getPayload()),
         new Realtime({
           appId: APP_ID,
           appKey: APP_KEY,
           region: REGION,
-          plugins: [{
-            name: 'ErrorPlugin',
-            beforeMessageParse: () => 1,
-          }],
+          plugins: [
+            {
+              name: 'ErrorPlugin',
+              beforeMessageParse: () => 1,
+            },
+          ],
         })._messageParser.parse(new TextMessage('1').getPayload()),
       ]).then(() => {
         spy.should.be.calledTwice();

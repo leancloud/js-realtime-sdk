@@ -1,9 +1,5 @@
 import { File } from './storage';
-import {
-  TypedMessage,
-  messageType,
-  messageField,
-} from './realtime';
+import { TypedMessage, messageType, messageField } from './realtime';
 
 export default class FileMessage extends TypedMessage {
   /**
@@ -35,7 +31,8 @@ export default class FileMessage extends TypedMessage {
    * @readonly
    */
   get summary() {
-    return `[${this.constructor._summaryType}] ${this._file.name() || ''}`.trim();
+    return `[${this.constructor._summaryType}] ${this._file.name() ||
+      ''}`.trim();
   }
 
   /**

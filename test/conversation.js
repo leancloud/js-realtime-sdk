@@ -41,12 +41,13 @@ describe('Conversation', () => {
       appKey: APP_KEY,
       region: REGION,
     });
-    return realtime.createIMClient(CLIENT_ID)
-      .then((c) => {
+    return realtime
+      .createIMClient(CLIENT_ID)
+      .then(c => {
         client = c;
         return client.getConversation(EXISTING_ROOM_ID);
       })
-      .then((conv) => {
+      .then(conv => {
         conversation = conv;
         return conv.send(new TextMessage('42'));
       });
@@ -64,8 +65,9 @@ describe('Conversation', () => {
 
   it('serialize and parse', async () => {
     const json = conversation.toFullJSON();
-    const parsedConversation =
-      await client.parseConversation(JSON.parse(JSON.stringify(json)));
+    const parsedConversation = await client.parseConversation(
+      JSON.parse(JSON.stringify(json))
+    );
     parsedConversation.should.be.instanceof(Conversation);
     parsedConversation.toFullJSON().should.eql(json);
   });
@@ -75,8 +77,9 @@ describe('Conversation', () => {
     conv.should.be.instanceof(ServiceConversation);
     conv.system.should.be.equal(true);
     const json = conv.toFullJSON();
-    const parsedConversation =
-      await client.parseConversation(JSON.parse(JSON.stringify(json)));
+    const parsedConversation = await client.parseConversation(
+      JSON.parse(JSON.stringify(json))
+    );
     parsedConversation.should.be.instanceof(ServiceConversation);
     parsedConversation.toFullJSON().should.eql(json);
   });
@@ -84,50 +87,53 @@ describe('Conversation', () => {
   it('update', () => {
     const timestamp = Date.now();
     const { name } = conversation;
-    return Promise.resolve(conversation).then((conv) => {
-      conv.name = name;
-      conv.set('attr', {
-        timestamp,
-      });
-      return conv.save();
-    }).then((conv) => {
-      conv.should.be.exactly(conversation);
-      conv.name.should.be.equal(name);
-      conv.get('attr').should.be.eql({ timestamp });
-      return conv
-        .set('attr', {
+    return Promise.resolve(conversation)
+      .then(conv => {
+        conv.name = name;
+        conv.set('attr', {
+          timestamp,
+        });
+        return conv.save();
+      })
+      .then(conv => {
+        conv.should.be.exactly(conversation);
+        conv.name.should.be.equal(name);
+        conv.get('attr').should.be.eql({ timestamp });
+        return conv
+          .set('attr', {
+            lean: 'cloud',
+          })
+          .save();
+      })
+      .then(conv => {
+        conv.name.should.be.equal(name);
+        conv.get('attr').should.be.eql({
           lean: 'cloud',
-        })
-        .save();
-    }).then((conv) => {
-      conv.name.should.be.equal(name);
-      conv.get('attr').should.be.eql({
-        lean: 'cloud',
+        });
+        return conv.set('attr.lee', 'yeh').save();
+      })
+      .then(conv => {
+        conv.name.should.be.equal(name);
+        conv.get('attr').should.be.eql({
+          lean: 'cloud',
+          lee: 'yeh',
+        });
+        return conv.fetch();
+      })
+      .then(conv => {
+        conv.name.should.be.equal(name);
+        conv.get('attr').should.be.eql({
+          lean: 'cloud',
+          lee: 'yeh',
+        });
       });
-      return conv
-        .set('attr.lee', 'yeh')
-        .save();
-    }).then((conv) => {
-      conv.name.should.be.equal(name);
-      conv.get('attr').should.be.eql({
-        lean: 'cloud',
-        lee: 'yeh',
-      });
-      return conv.fetch();
-    }).then((conv) => {
-      conv.name.should.be.equal(name);
-      conv.get('attr').should.be.eql({
-        lean: 'cloud',
-        lee: 'yeh',
-      });
-    });
   });
 
   it('fetch', () => {
     const { name, createdAt } = conversation;
     conversation.name = 'should not be this name';
     conversation.createdAt = new Date();
-    return conversation.fetch().then((conv) => {
+    return conversation.fetch().then(conv => {
       conv.name.should.be.equal(name);
       conv.createdAt.should.be.eql(createdAt);
       conv.should.be.exactly(conversation);
@@ -135,13 +141,13 @@ describe('Conversation', () => {
   });
 
   it('mute', () =>
-    conversation.mute().then((conv) => {
+    conversation.mute().then(conv => {
       conv.should.be.exactly(conversation);
       conv.muted.should.be.equal(true);
       conv.mutedMembers.should.containEql(CLIENT_ID);
     }));
   it('unmute', () =>
-    conversation.unmute().then((conv) => {
+    conversation.unmute().then(conv => {
       conv.should.be.exactly(conversation);
       conv.muted.should.be.equal(false);
       conv.mutedMembers.should.not.containEql(CLIENT_ID);
@@ -155,12 +161,14 @@ describe('Conversation', () => {
     conv.members.should.not.containEql('rguo');
   });
   it('join/quit', () =>
-    client.createConversation({ members: ['rguo'] })
+    client
+      .createConversation({ members: ['rguo'] })
       .then(conv => conv.quit())
-      .then((conv) => {
+      .then(conv => {
         conv.members.should.not.containEql(CLIENT_ID);
         return conv.join();
-      }).then((conv) => {
+      })
+      .then(conv => {
         conv.members.should.containEql(CLIENT_ID);
       }));
 
@@ -171,89 +179,123 @@ describe('Conversation', () => {
         timestamp: Date.now(),
         nonce: 'nonce',
       });
-      return realtime.createIMClient('ycui', {
-        conversationSignatureFactory: this.conversationSignatureFactory,
-      }).then((c) => {
-        this.ycui = c;
-        return c.createConversation({
-          members: ['zwang', 'dli', 'zwang'], // duplicated id should be ignored
+      return realtime
+        .createIMClient('ycui', {
+          conversationSignatureFactory: this.conversationSignatureFactory,
+        })
+        .then(c => {
+          this.ycui = c;
+          return c.createConversation({
+            members: ['zwang', 'dli', 'zwang'], // duplicated id should be ignored
+          });
+        })
+        .then(conv => {
+          this.conversation = conv;
         });
-      }).then((conv) => { this.conversation = conv; });
     });
     afterEach(function cleanup() {
       return this.ycui.close();
     });
     it('create', function createAsserts() {
-      this.conversationSignatureFactory
-        .should.be.calledWith(null, 'ycui', ['dli', 'ycui', 'zwang'], 'create');
+      this.conversationSignatureFactory.should.be.calledWith(
+        null,
+        'ycui',
+        ['dli', 'ycui', 'zwang'],
+        'create'
+      );
     });
     it('add', function addAsserts() {
       return this.conversation.add(['wduan', 'jwu']).then(() => {
-        this.conversationSignatureFactory.getCall(1).args
-          .should.be.eql([this.conversation.id, 'ycui', ['jwu', 'wduan'], 'add']);
+        this.conversationSignatureFactory
+          .getCall(1)
+          .args.should.be.eql([
+            this.conversation.id,
+            'ycui',
+            ['jwu', 'wduan'],
+            'add',
+          ]);
       });
     });
     it('remove', function removeAsserts() {
       return this.conversation.remove(['wduan']).then(() => {
-        this.conversationSignatureFactory.getCall(1).args
-          .should.be.eql([this.conversation.id, 'ycui', ['wduan'], 'remove']);
+        this.conversationSignatureFactory
+          .getCall(1)
+          .args.should.be.eql([
+            this.conversation.id,
+            'ycui',
+            ['wduan'],
+            'remove',
+          ]);
       });
     });
   });
 
   describe('Message Query', () => {
     it('queryMessages', () =>
-      conversation.queryMessages().then((messages) => {
+      conversation.queryMessages().then(messages => {
         messages.should.be.an.Array();
         messages[0].should.be.instanceof(Message);
         messages[0].status.should.be.eql(MessageStatus.SENT);
       }));
     it('with limit', () =>
-      conversation.queryMessages({
-        limit: 0,
-      }).then((messages) => {
-        messages.should.be.an.empty();
-      }));
+      conversation
+        .queryMessages({
+          limit: 0,
+        })
+        .then(messages => {
+          messages.should.be.an.empty();
+        }));
     it('with type limit', () =>
-      conversation.queryMessages({
-        type: 1000,
-      }).then((messages) => {
-        messages.should.be.an.empty();
-      }));
+      conversation
+        .queryMessages({
+          type: 1000,
+        })
+        .then(messages => {
+          messages.should.be.an.empty();
+        }));
     it('beforeTime', () =>
-      conversation.queryMessages({
-        beforeTime: 1,
-      }).then((messages) => {
-        messages.should.be.an.empty();
-      }));
+      conversation
+        .queryMessages({
+          beforeTime: 1,
+        })
+        .then(messages => {
+          messages.should.be.an.empty();
+        }));
     it('afterTime', () =>
-      conversation.queryMessages({
-        afterTime: new Date(),
-      }).then((messages) => {
-        messages.should.be.an.empty();
-      }));
+      conversation
+        .queryMessages({
+          afterTime: new Date(),
+        })
+        .then(messages => {
+          messages.should.be.an.empty();
+        }));
     it('direction', () =>
-      conversation.queryMessages({
-        startTime: new Date(),
-        direction: MessageQueryDirection.OLD_TO_NEW,
-      }).then((messages) => {
-        messages.should.be.an.empty();
-      }));
+      conversation
+        .queryMessages({
+          startTime: new Date(),
+          direction: MessageQueryDirection.OLD_TO_NEW,
+        })
+        .then(messages => {
+          messages.should.be.an.empty();
+        }));
     describe('MessageIterator', () => {
       it('normal case', () => {
         const iterator = conversation.createMessagesIterator({
           limit: 2,
         });
-        return Promise.all([iterator.next(), iterator.next()])
-          .then(([page1, page2]) => {
+        return Promise.all([iterator.next(), iterator.next()]).then(
+          ([page1, page2]) => {
             page1.value.should.be.an.Array();
             page1.value.length.should.eql(2);
             page1.done.should.eql(false);
             page2.value.should.be.an.Array();
-            const minMessageTimestamp =
-              Math.min(page1.value[0].timestamp, page1.value[1].timestamp);
+            const minMessageTimestamp = Math.min(
+              page1.value[0].timestamp,
+              page1.value[1].timestamp
+            );
             page2.value[0].timestamp.should.lessThan(minMessageTimestamp);
-          });
+          }
+        );
       });
       // https://github.com/leancloud/js-realtime-sdk/issues/240
       it('result should be a copy', () => {
@@ -261,12 +303,17 @@ describe('Conversation', () => {
           limit: 2,
         });
         let minMessageTimestamp;
-        return iterator.next()
-          .then((page1) => {
-            minMessageTimestamp = Math.min(page1.value[0].timestamp, page1.value[1].timestamp);
+        return iterator
+          .next()
+          .then(page1 => {
+            minMessageTimestamp = Math.min(
+              page1.value[0].timestamp,
+              page1.value[1].timestamp
+            );
             page1.value.splice(0);
             return iterator.next();
-          }).then((page2) => {
+          })
+          .then(page2 => {
             page2.value[0].timestamp.should.lessThan(minMessageTimestamp);
           });
       });
@@ -277,124 +324,150 @@ describe('Conversation', () => {
     let client2;
     let conversation2;
     const CLIENT_ID_2 = Date.now().toString();
-    before(() => realtime
-      .createIMClient(CLIENT_ID_2)
-      .then(tap((c) => { client2 = c; }))
-      .then(c => c.createConversation({
-        members: ['xwang', 'csun'],
-        name: 'message dispatch test conversation',
-      }))
-      .then((c) => { conversation2 = c; }));
+    before(() =>
+      realtime
+        .createIMClient(CLIENT_ID_2)
+        .then(
+          tap(c => {
+            client2 = c;
+          })
+        )
+        .then(c =>
+          c.createConversation({
+            members: ['xwang', 'csun'],
+            name: 'message dispatch test conversation',
+          })
+        )
+        .then(c => {
+          conversation2 = c;
+        })
+    );
     after(() => client2.close());
     it('membersjoined', () => {
       const clientCallback = sinon.spy();
       client2.on(Event.MEMBERS_JOINED, clientCallback);
       const conversationCallback = sinon.spy();
       conversation2.on(Event.MEMBERS_JOINED, conversationCallback);
-      return client2._dispatchCommand(new GenericCommand({
-        cmd: 'conv',
-        op: 'members_joined',
-        peerId: CLIENT_ID_2,
-        convMessage: new ConvCommand({
-          cid: conversation2.id,
-          m: ['lan'],
-          initBy: CLIENT_ID,
-        }),
-      })).then(() => {
-        clientCallback.should.be.calledOnce();
-        clientCallback.getCall(0).args[0].should.be.containEql({
-          invitedBy: CLIENT_ID,
-          members: ['lan'],
+      return client2
+        ._dispatchCommand(
+          new GenericCommand({
+            cmd: 'conv',
+            op: 'members_joined',
+            peerId: CLIENT_ID_2,
+            convMessage: new ConvCommand({
+              cid: conversation2.id,
+              m: ['lan'],
+              initBy: CLIENT_ID,
+            }),
+          })
+        )
+        .then(() => {
+          clientCallback.should.be.calledOnce();
+          clientCallback.getCall(0).args[0].should.be.containEql({
+            invitedBy: CLIENT_ID,
+            members: ['lan'],
+          });
+          clientCallback.getCall(0).args[1].should.be.exactly(conversation2);
+          conversationCallback.should.be.calledOnce();
+          conversationCallback.getCall(0).args[0].should.be.containEql({
+            invitedBy: CLIENT_ID,
+            members: ['lan'],
+          });
+          conversation2.members.should.containEql('lan');
         });
-        clientCallback.getCall(0).args[1].should.be.exactly(conversation2);
-        conversationCallback.should.be.calledOnce();
-        conversationCallback.getCall(0).args[0].should.be.containEql({
-          invitedBy: CLIENT_ID,
-          members: ['lan'],
-        });
-        conversation2.members.should.containEql('lan');
-      });
     });
     it('membersleft', () => {
       const clientCallback = sinon.spy();
       client2.on(Event.MEMBERS_LEFT, clientCallback);
       const conversationCallback = sinon.spy();
       conversation2.on(Event.MEMBERS_LEFT, conversationCallback);
-      return client2._dispatchCommand(new GenericCommand({
-        cmd: 'conv',
-        op: 'members_left',
-        peerId: CLIENT_ID_2,
-        convMessage: new ConvCommand({
-          cid: conversation2.id,
-          m: ['lan'],
-          initBy: CLIENT_ID,
-        }),
-      })).then(() => {
-        clientCallback.should.be.calledOnce();
-        clientCallback.getCall(0).args[0].should.be.containEql({
-          kickedBy: CLIENT_ID,
-          members: ['lan'],
+      return client2
+        ._dispatchCommand(
+          new GenericCommand({
+            cmd: 'conv',
+            op: 'members_left',
+            peerId: CLIENT_ID_2,
+            convMessage: new ConvCommand({
+              cid: conversation2.id,
+              m: ['lan'],
+              initBy: CLIENT_ID,
+            }),
+          })
+        )
+        .then(() => {
+          clientCallback.should.be.calledOnce();
+          clientCallback.getCall(0).args[0].should.be.containEql({
+            kickedBy: CLIENT_ID,
+            members: ['lan'],
+          });
+          clientCallback.getCall(0).args[1].should.be.exactly(conversation2);
+          conversationCallback.should.be.calledOnce();
+          conversationCallback.getCall(0).args[0].should.be.containEql({
+            kickedBy: CLIENT_ID,
+            members: ['lan'],
+          });
+          conversation2.members.should.not.containEql('lan');
         });
-        clientCallback.getCall(0).args[1].should.be.exactly(conversation2);
-        conversationCallback.should.be.calledOnce();
-        conversationCallback.getCall(0).args[0].should.be.containEql({
-          kickedBy: CLIENT_ID,
-          members: ['lan'],
-        });
-        conversation2.members.should.not.containEql('lan');
-      });
     });
     it('kicked', () => {
       const clientCallback = sinon.spy();
       client2.on(Event.KICKED, clientCallback);
       const conversationCallback = sinon.spy();
       conversation2.on(Event.KICKED, conversationCallback);
-      return client2._dispatchCommand(new GenericCommand({
-        cmd: 'conv',
-        op: 'left',
-        peerId: CLIENT_ID_2,
-        convMessage: new ConvCommand({
-          cid: conversation2.id,
-          initBy: CLIENT_ID,
-        }),
-      })).then(() => {
-        clientCallback.should.be.calledOnce();
-        clientCallback.getCall(0).args[0].should.be.eql({
-          kickedBy: CLIENT_ID,
+      return client2
+        ._dispatchCommand(
+          new GenericCommand({
+            cmd: 'conv',
+            op: 'left',
+            peerId: CLIENT_ID_2,
+            convMessage: new ConvCommand({
+              cid: conversation2.id,
+              initBy: CLIENT_ID,
+            }),
+          })
+        )
+        .then(() => {
+          clientCallback.should.be.calledOnce();
+          clientCallback.getCall(0).args[0].should.be.eql({
+            kickedBy: CLIENT_ID,
+          });
+          clientCallback.getCall(0).args[1].should.be.exactly(conversation2);
+          conversationCallback.should.be.calledOnce();
+          conversationCallback.getCall(0).args[0].should.be.eql({
+            kickedBy: CLIENT_ID,
+          });
+          conversation2.members.should.not.containEql(CLIENT_ID_2);
         });
-        clientCallback.getCall(0).args[1].should.be.exactly(conversation2);
-        conversationCallback.should.be.calledOnce();
-        conversationCallback.getCall(0).args[0].should.be.eql({
-          kickedBy: CLIENT_ID,
-        });
-        conversation2.members.should.not.containEql(CLIENT_ID_2);
-      });
     });
     it('invited', () => {
       const callback = sinon.spy();
       client2.on(Event.INVITED, callback);
       const conversationCallback = sinon.spy();
       conversation2.on(Event.INVITED, conversationCallback);
-      return client2._dispatchCommand(new GenericCommand({
-        cmd: 'conv',
-        op: 'joined',
-        peerId: CLIENT_ID_2,
-        convMessage: new ConvCommand({
-          cid: conversation2.id,
-          initBy: CLIENT_ID,
-        }),
-      })).then(() => {
-        callback.should.be.calledOnce();
-        callback.getCall(0).args[0].should.be.eql({
-          invitedBy: CLIENT_ID,
+      return client2
+        ._dispatchCommand(
+          new GenericCommand({
+            cmd: 'conv',
+            op: 'joined',
+            peerId: CLIENT_ID_2,
+            convMessage: new ConvCommand({
+              cid: conversation2.id,
+              initBy: CLIENT_ID,
+            }),
+          })
+        )
+        .then(() => {
+          callback.should.be.calledOnce();
+          callback.getCall(0).args[0].should.be.eql({
+            invitedBy: CLIENT_ID,
+          });
+          callback.getCall(0).args[1].should.be.exactly(conversation2);
+          conversationCallback.should.be.calledOnce();
+          conversationCallback.getCall(0).args[0].should.be.containEql({
+            invitedBy: CLIENT_ID,
+          });
+          conversation2.members.should.containEql(CLIENT_ID_2);
         });
-        callback.getCall(0).args[1].should.be.exactly(conversation2);
-        conversationCallback.should.be.calledOnce();
-        conversationCallback.getCall(0).args[0].should.be.containEql({
-          invitedBy: CLIENT_ID,
-        });
-        conversation2.members.should.containEql(CLIENT_ID_2);
-      });
     });
     it('info updated', () => {
       const UPDATED_NAME = 'updated name';
@@ -402,38 +475,42 @@ describe('Conversation', () => {
       client2.on(Event.CONVERSATION_INFO_UPDATED, callback);
       const conversationCallback = sinon.spy();
       conversation2.on(Event.INFO_UPDATED, conversationCallback);
-      return client2._dispatchCommand(new GenericCommand({
-        cmd: 'conv',
-        op: 'updated',
-        peerId: CLIENT_ID_2,
-        convMessage: new ConvCommand({
-          cid: conversation2.id,
-          attr: new JsonObjectMessage({
-            data: JSON.stringify({
-              name: UPDATED_NAME,
+      return client2
+        ._dispatchCommand(
+          new GenericCommand({
+            cmd: 'conv',
+            op: 'updated',
+            peerId: CLIENT_ID_2,
+            convMessage: new ConvCommand({
+              cid: conversation2.id,
+              attr: new JsonObjectMessage({
+                data: JSON.stringify({
+                  name: UPDATED_NAME,
+                }),
+              }),
+              initBy: CLIENT_ID,
             }),
-          }),
-          initBy: CLIENT_ID,
-        }),
-      })).then(() => {
-        callback.should.be.calledOnce();
-        callback.getCall(0).args[0].should.be.eql({
-          updatedBy: CLIENT_ID,
-          attributes: {
-            name: UPDATED_NAME,
-          },
+          })
+        )
+        .then(() => {
+          callback.should.be.calledOnce();
+          callback.getCall(0).args[0].should.be.eql({
+            updatedBy: CLIENT_ID,
+            attributes: {
+              name: UPDATED_NAME,
+            },
+          });
+          callback.getCall(0).args[1].should.be.exactly(conversation2);
+          conversationCallback.should.be.calledOnce();
+          conversationCallback.getCall(0).args[0].should.be.containEql({
+            updatedBy: CLIENT_ID,
+            attributes: {
+              name: UPDATED_NAME,
+            },
+          });
+          conversation2.members.should.containEql(CLIENT_ID_2);
+          conversation2.name.should.eql(UPDATED_NAME);
         });
-        callback.getCall(0).args[1].should.be.exactly(conversation2);
-        conversationCallback.should.be.calledOnce();
-        conversationCallback.getCall(0).args[0].should.be.containEql({
-          updatedBy: CLIENT_ID,
-          attributes: {
-            name: UPDATED_NAME,
-          },
-        });
-        conversation2.members.should.containEql(CLIENT_ID_2);
-        conversation2.name.should.eql(UPDATED_NAME);
-      });
     });
   });
 
@@ -444,53 +521,66 @@ describe('Conversation', () => {
     let bwangRealtime;
     const message = new Message({});
     message.setMentionList(bwangId).mentionAll();
-    return realtime.createIMClient()
+    return realtime
+      .createIMClient()
       .then(jwu =>
-        jwu.createConversation({
-          members: [bwangId],
-        }).then((conv) => {
-          conversationId = conv.id;
-          // 这里连续发 3 条消息，conv.lm 可能不会被更新为最后一条消息
-          // 发送 read 命令时如果用 conv.lm 可能会导致漏标消息
-          return Promise.all([
-            conv.send(new Message({}).setMentionList(bwangId)),
-            conv.send(new Message({}).mentionAll()),
-          ]).then(() => conv.send(message));
-        }).then(tap(() => jwu.close()))).then(() => {
+        jwu
+          .createConversation({
+            members: [bwangId],
+          })
+          .then(conv => {
+            conversationId = conv.id;
+            // 这里连续发 3 条消息，conv.lm 可能不会被更新为最后一条消息
+            // 发送 read 命令时如果用 conv.lm 可能会导致漏标消息
+            return Promise.all([
+              conv.send(new Message({}).setMentionList(bwangId)),
+              conv.send(new Message({}).mentionAll()),
+            ]).then(() => conv.send(message));
+          })
+          .then(tap(() => jwu.close()))
+      )
+      .then(() => {
         bwangRealtime = new Realtime({
           appId: APP_ID,
           appKey: APP_KEY,
           region: REGION,
         });
         return bwangRealtime.createIMClient(bwangId);
-      }).then((c) => {
+      })
+      .then(c => {
         bwang0 = c;
-        return listen(bwang0, Event.UNREAD_MESSAGES_COUNT_UPDATE).then(([[conv]]) => {
-          conv.unreadMessagesCount.should.eql(3);
-          conv.unreadMessagesMentioned.should.eql(true);
-          conv.id.should.be.eql(conversationId);
-          conv.lastMessage.should.be.instanceof(Message);
-          conv.lastMessage.id.should.eql(message.id);
-        });
+        return listen(bwang0, Event.UNREAD_MESSAGES_COUNT_UPDATE).then(
+          ([[conv]]) => {
+            conv.unreadMessagesCount.should.eql(3);
+            conv.unreadMessagesMentioned.should.eql(true);
+            conv.id.should.be.eql(conversationId);
+            conv.lastMessage.should.be.instanceof(Message);
+            conv.lastMessage.id.should.eql(message.id);
+          }
+        );
       })
       .then(() => realtime.createIMClient(bwangId))
-      .then(bwang1 => listen(bwang1, Event.UNREAD_MESSAGES_COUNT_UPDATE)
-        .then(([[conv]]) => {
+      .then(bwang1 =>
+        listen(bwang1, Event.UNREAD_MESSAGES_COUNT_UPDATE).then(([[conv]]) => {
           conv.unreadMessagesCount.should.be.eql(3);
           conv.unreadMessagesMentioned.should.eql(true);
           conv.id.should.be.eql(conversationId);
           conv.lastMessage.id.should.eql(message.id);
-          return conv.read().then((conv1) => {
+          return conv.read().then(conv1 => {
             conv1.unreadMessagesCount.should.be.eql(0);
             bwang1.close();
           });
-        })).then(() => listen(bwang0, Event.UNREAD_MESSAGES_COUNT_UPDATE)
-        .then(([[conv]]) => {
+        })
+      )
+      .then(() =>
+        listen(bwang0, Event.UNREAD_MESSAGES_COUNT_UPDATE).then(([[conv]]) => {
           conv.unreadMessagesCount.should.be.eql(0);
           conv.unreadMessagesMentioned.should.eql(false);
           conv.id.should.be.eql(conversationId);
           conv.lastMessage.id.should.eql(message.id);
-        })).then(() => {
+        })
+      )
+      .then(() => {
         bwang0.close();
       });
   });
@@ -514,7 +604,8 @@ describe('Conversation', () => {
       member.close();
     });
     it('member can not promote itself', async () =>
-      memberConversation.updateMemberRole(member.id, ConversationMemberRole.MANAGER)
+      memberConversation
+        .updateMemberRole(member.id, ConversationMemberRole.MANAGER)
         .should.be.rejectedWith('CONVERSATION_OPERATION_UNAUTHORIZED'));
     it('info query', async () => {
       const infoes = await ownerConversation.getAllMemberInfo();
@@ -533,17 +624,28 @@ describe('Conversation', () => {
       });
     });
     it('info update and notification', async () => {
-      const waitForUpdate = listen(memberConversation, Event.MEMBER_INFO_UPDATED);
-      await ownerConversation.updateMemberRole(member.id, ConversationMemberRole.MANAGER);
+      const waitForUpdate = listen(
+        memberConversation,
+        Event.MEMBER_INFO_UPDATED
+      );
+      await ownerConversation.updateMemberRole(
+        member.id,
+        ConversationMemberRole.MANAGER
+      );
       const [{ member: memberId, memberInfo, updatedBy }] = await waitForUpdate;
       memberId.should.be.eql(member.id);
       updatedBy.should.be.eql(owner.id);
       memberInfo.role.should.be.eql(ConversationMemberRole.MANAGER);
       memberInfo.isOwner.should.be.false();
-      const cachedMemberInfo = await memberConversation.getMemberInfo(member.id);
+      const cachedMemberInfo = await memberConversation.getMemberInfo(
+        member.id
+      );
       cachedMemberInfo.role.should.be.eql(ConversationMemberRole.MANAGER);
     });
-    it('owner can not quit', () => ownerConversation.quit().should.be.rejectedWith('CONVERSATION_NEED_OWNER'));
+    it('owner can not quit', () =>
+      ownerConversation
+        .quit()
+        .should.be.rejectedWith('CONVERSATION_NEED_OWNER'));
     it('remove should succeed partially', async () => {
       const result = await ownerConversation.remove([owner.id, randomId]);
       result.successfulClientIds.should.eql([randomId]);
@@ -579,7 +681,10 @@ describe('Conversation', () => {
 
     it('block/unblock', async () => {
       const blockedEvent = listen(memberConversation, Event.BLOCKED);
-      const membersBlockedEvent = listen(ownerConversation, Event.MEMBERS_BLOCKED);
+      const membersBlockedEvent = listen(
+        ownerConversation,
+        Event.MEMBERS_BLOCKED
+      );
       const removedEvent = listen(ownerConversation, Event.MEMBERS_LEFT);
       const kickedEvent = listen(memberConversation, Event.KICKED);
       await ownerConversation.blockMembers(member.id);
@@ -620,16 +725,9 @@ describe('Conversation', () => {
       she.close();
     });
     it('should be immutable', () => {
-      [
-        'set',
-        'save',
-        'get',
-        'fetch',
-        'join',
-        'quit',
-        'add',
-        'remove',
-      ].forEach(key => fzhangConversation.should.not.have.property(key));
+      ['set', 'save', 'get', 'fetch', 'join', 'quit', 'add', 'remove'].forEach(
+        key => fzhangConversation.should.not.have.property(key)
+      );
     });
     it('create, send and recieve', async () => {
       const waitForMessage = listen(she, Event.MESSAGE);
@@ -668,8 +766,9 @@ describe('Conversation', () => {
     });
     it('serialize and parse', async () => {
       const json = fzhangConversation.toFullJSON();
-      const parsedConversation =
-        await fzhang.parseConversation(JSON.parse(JSON.stringify(json)));
+      const parsedConversation = await fzhang.parseConversation(
+        JSON.parse(JSON.stringify(json))
+      );
       parsedConversation.should.be.instanceof(TemporaryConversation);
       parsedConversation.toFullJSON().should.eql(json);
     });

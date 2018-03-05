@@ -2,11 +2,10 @@ import ConversationBase from './conversation-base';
 import { createError, ErrorCode } from '../error';
 import { decodeDate, getTime } from '../utils';
 
-const transformNotFoundError = error => (
+const transformNotFoundError = error =>
   error.code === ErrorCode.CONVERSATION_NOT_FOUND
     ? createError({ code: ErrorCode.CONVERSATION_EXPIRED })
-    : error
-);
+    : error;
 
 /**
  * 临时对话
@@ -18,13 +17,14 @@ class TemporaryConversation extends ConversationBase {
   /**
    * 无法直接实例化，请使用 {@link IMClient#createTemporaryConversation} 创建新的临时对话。
    */
-  constructor(data, {
-    expiredAt,
-  }, client) {
-    super({
-      ...data,
-      expiredAt,
-    }, client);
+  constructor(data, { expiredAt }, client) {
+    super(
+      {
+        ...data,
+        expiredAt,
+      },
+      client
+    );
   }
 
   /**
@@ -47,7 +47,8 @@ class TemporaryConversation extends ConversationBase {
   }
 
   async _send(...args) {
-    if (this.expired) throw createError({ code: ErrorCode.CONVERSATION_EXPIRED });
+    if (this.expired)
+      throw createError({ code: ErrorCode.CONVERSATION_EXPIRED });
     try {
       return await super._send(...args);
     } catch (error) {
@@ -64,9 +65,7 @@ class TemporaryConversation extends ConversationBase {
   }
 
   toFullJSON() {
-    const {
-      expiredAt,
-    } = this;
+    const { expiredAt } = this;
     return {
       ...super.toFullJSON(),
       expiredAt: getTime(expiredAt),
@@ -74,10 +73,7 @@ class TemporaryConversation extends ConversationBase {
   }
 
   toJSON() {
-    const {
-      expiredAt,
-      expired,
-    } = this;
+    const { expiredAt, expired } = this;
     return {
       ...super.toJSON(),
       expiredAt,

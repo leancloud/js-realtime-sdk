@@ -46,51 +46,44 @@ export default class Realtime extends EventEmitter {
     if (typeof options.appKey !== 'string') {
       throw new TypeError(`appKey [${options.appKey}] is not a string`);
     }
-    this._options = Object.assign({
-      appId: undefined,
-      appKey: undefined,
-      region: 'cn',
-      pushOfflineMessages: false,
-      noBinary: false,
-      ssl: true,
-      RTMServerName: process.env.RTM_SERVER_NAME, // undocumented on purpose, internal use only
-    }, options);
+    this._options = Object.assign(
+      {
+        appId: undefined,
+        appKey: undefined,
+        region: 'cn',
+        pushOfflineMessages: false,
+        noBinary: false,
+        ssl: true,
+        RTMServerName: process.env.RTM_SERVER_NAME, // undocumented on purpose, internal use only
+      },
+      options
+    );
     this._cache = new Cache('endpoints');
     internal(this).clients = new Set();
     this._plugins = [
       ...ensureArray(Realtime.__preRegisteredPlugins),
       ...ensureArray(options.plugins),
-    ].reduce(
-      (result, plugin) => {
-        // eslint-disable-next-line no-restricted-syntax
-        for (const hook in plugin) {
-          if ({}.hasOwnProperty.call(plugin, hook) && hook !== 'name') {
-            if (plugin.name) {
-              ensureArray(plugin[hook]).forEach((value) => {
-                // eslint-disable-next-line no-param-reassign
-                value._pluginName = plugin.name;
-              });
-            }
-            // eslint-disable-next-line no-param-reassign
-            result[hook] = ensureArray(result[hook]).concat(plugin[hook]);
+    ].reduce((result, plugin) => {
+      // eslint-disable-next-line no-restricted-syntax
+      for (const hook in plugin) {
+        if ({}.hasOwnProperty.call(plugin, hook) && hook !== 'name') {
+          if (plugin.name) {
+            ensureArray(plugin[hook]).forEach(value => {
+              // eslint-disable-next-line no-param-reassign
+              value._pluginName = plugin.name;
+            });
           }
+          // eslint-disable-next-line no-param-reassign
+          result[hook] = ensureArray(result[hook]).concat(plugin[hook]);
         }
-        return result;
-      },
-      {},
-    );
+      }
+      return result;
+    }, {});
     // onRealtimeCreate hook
     applyDecorators(this._plugins.onRealtimeCreate, this);
   }
 
-  async _request({
-    method,
-    version = '1.1',
-    path,
-    query,
-    headers,
-    data = {},
-  }) {
+  async _request({ method, version = '1.1', path, query, headers, data = {} }) {
     const { appId, region } = this._options;
     const { api } = await this.constructor._getServerUrls({ appId, region });
     const url = `https://${api}/${version}${path}`;
@@ -106,17 +99,22 @@ export default class Realtime extends EventEmitter {
     };
     debugRequest('Req: %O %O', url, options);
     return axios(url, options).then(
-      (response) => {
+      response => {
         debugRequest('Res: %O %O %O', url, response.status, response.data);
         return response.data;
       },
-      (error) => {
-        debugRequest('Error: %O %O %O', url, error.response.status, error.response.data);
+      error => {
+        debugRequest(
+          'Error: %O %O %O',
+          url,
+          error.response.status,
+          error.response.data
+        );
         if (error.response && error.response.data && error.response.data.code) {
           throw createError(error.response.data);
         }
         throw error;
-      },
+      }
     );
   }
 
@@ -141,7 +139,7 @@ export default class Realtime extends EventEmitter {
       debug('No connection established, create a new one.');
       const connection = new Connection(
         () => this._getRTMServers(this._options),
-        protocol,
+        protocol
       );
       connection.on(OPEN, () => resolve(connection));
       connection.on(ERROR, reject);
@@ -215,22 +213,17 @@ export default class Realtime extends EventEmitter {
        */
 
       // event proxy
-      [
-        DISCONNECT,
-        RECONNECT,
-        RETRY,
-        SCHEDULE,
-        OFFLINE,
-        ONLINE,
-      ].forEach(event => connection.on(event, (...payload) => {
-        debug(`${event} event emitted. %O`, payload);
-        this.emit(event, ...payload);
-        if (event !== RECONNECT) {
-          internal(this).clients.forEach((client) => {
-            client.emit(event, ...payload);
-          });
-        }
-      }));
+      [DISCONNECT, RECONNECT, RETRY, SCHEDULE, OFFLINE, ONLINE].forEach(event =>
+        connection.on(event, (...payload) => {
+          debug(`${event} event emitted. %O`, payload);
+          this.emit(event, ...payload);
+          if (event !== RECONNECT) {
+            internal(this).clients.forEach(client => {
+              client.emit(event, ...payload);
+            });
+          }
+        })
+      );
       // override handleClose
       connection.handleClose = function handleClose(event) {
         const isFatal = [
@@ -288,21 +281,19 @@ export default class Realtime extends EventEmitter {
           })
           .then(res => res.data)
           .then(tap(debug))
-          .then(({
-            rtm_router_server: RTMRouter,
-            api_server: api,
-            ttl = 3600,
-          }) => {
-            if (!RTMRouter) {
-              throw new Error('rtm router not exists');
+          .then(
+            ({ rtm_router_server: RTMRouter, api_server: api, ttl = 3600 }) => {
+              if (!RTMRouter) {
+                throw new Error('rtm router not exists');
+              }
+              const serverUrls = {
+                RTMRouter,
+                api,
+              };
+              routerCache.set(appId, serverUrls, ttl * 1000);
+              return serverUrls;
             }
-            const serverUrls = {
-              RTMRouter,
-              api,
-            };
-            routerCache.set(appId, serverUrls, ttl * 1000);
-            return serverUrls;
-          })
+          )
           .catch(() => {
             const id = appId.slice(0, 8).toLowerCase();
             return {
@@ -321,23 +312,25 @@ export default class Realtime extends EventEmitter {
     }
   }
 
-  static _fetchRTMServers({
-    appId, region, ssl, server, RTMServerName,
-  }) {
+  static _fetchRTMServers({ appId, region, ssl, server, RTMServerName }) {
     debug('fetch endpoint info');
     return this._getServerUrls({ appId, region, server })
       .then(tap(debug))
       .then(({ RTMRouter }) =>
-        axios.get(`https://${RTMRouter}/v1/route`, {
-          params: {
-            appId,
-            secure: ssl,
-            features: isWeapp ? 'wechat' : undefined,
-            server: RTMServerName,
-            _t: Date.now(),
-          },
-          timeout: 20000,
-        }).then(res => res.data).then(tap(debug)));
+        axios
+          .get(`https://${RTMRouter}/v1/route`, {
+            params: {
+              appId,
+              secure: ssl,
+              features: isWeapp ? 'wechat' : undefined,
+              server: RTMServerName,
+              _t: Date.now(),
+            },
+            timeout: 20000,
+          })
+          .then(res => res.data)
+          .then(tap(debug))
+      );
   }
 
   _close() {
@@ -358,7 +351,11 @@ export default class Realtime extends EventEmitter {
       throw new Error('no connection established');
     }
     if (connection.cannot('retry')) {
-      throw new Error(`retrying not allowed when not disconnected. the connection is now ${connection.current}`);
+      throw new Error(
+        `retrying not allowed when not disconnected. the connection is now ${
+          connection.current
+        }`
+      );
     }
     return connection.retry();
   }
@@ -403,11 +400,14 @@ export default class Realtime extends EventEmitter {
   }
 
   _dispatchCommand(command) {
-    return applyDispatcher(this._plugins.beforeCommandDispatch, [command, this])
-      .then((shouldDispatch) => {
-        // no plugin handled this command
-        if (shouldDispatch) return debug('[WARN] Unexpected message received: %O', trim(command));
-        return false;
-      });
+    return applyDispatcher(this._plugins.beforeCommandDispatch, [
+      command,
+      this,
+    ]).then(shouldDispatch => {
+      // no plugin handled this command
+      if (shouldDispatch)
+        return debug('[WARN] Unexpected message received: %O', trim(command));
+      return false;
+    });
   }
 }

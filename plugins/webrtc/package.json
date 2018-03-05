@@ -10,11 +10,7 @@
     "type": "git",
     "url": "git+https://github.com/leancloud/js-realtime-sdk.git"
   },
-  "keywords": [
-    "leancloud",
-    "realtime",
-    "webrtc"
-  ],
+  "keywords": ["leancloud", "realtime", "webrtc"],
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/leancloud/js-realtime-sdk/issues"

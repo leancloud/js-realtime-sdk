@@ -25,13 +25,19 @@ export default class IncomingCall extends Call {
    */
   accept(stream) {
     if (!stream) {
-      throw new TypeError('a MediaStream instance is required to accept a call');
+      throw new TypeError(
+        'a MediaStream instance is required to accept a call'
+      );
     }
     return this._handleOfferPromise
       .then(() => this._peerConnection.addStream(stream))
       .then(() => this._peerConnection.createAnswer())
       .then(answer => this._peerConnection.setLocalDescription(answer))
-      .then(() => this._conversation.send(new Answer(this._peerConnection.localDescription)))
+      .then(() =>
+        this._conversation.send(
+          new Answer(this._peerConnection.localDescription)
+        )
+      )
       .then(() => this._promises.resolveAccept());
   }
   /**

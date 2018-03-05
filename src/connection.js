@@ -37,8 +37,16 @@ export default class Connection extends WebSocketPlus {
     if (!isWeapp) {
       super(getUrl, protocolString);
     } else {
-      super(getUrl().then(urls => urls.map(url =>
-        `${url}${url.indexOf('?') === -1 ? '?' : '&'}subprotocol=${encodeURIComponent(protocolString)}`)));
+      super(
+        getUrl().then(urls =>
+          urls.map(
+            url =>
+              `${url}${
+                url.indexOf('?') === -1 ? '?' : '&'
+              }subprotocol=${encodeURIComponent(protocolString)}`
+          )
+        )
+      );
     }
     this._protocalFormat = format;
     this._commands = {};
@@ -73,16 +81,13 @@ export default class Connection extends WebSocketPlus {
       this._commands[serialId] = {
         resolve,
         reject,
-        timeout: setTimeout(
-          () => {
-            if (this._commands[serialId]) {
-              if (debug.enabled) debug('✗ %O timeout', trim(command));
-              reject(new Error('Command Timeout.'));
-              delete this._commands[serialId];
-            }
-          },
-          COMMAND_TIMEOUT,
-        ),
+        timeout: setTimeout(() => {
+          if (this._commands[serialId]) {
+            if (debug.enabled) debug('✗ %O timeout', trim(command));
+            reject(new Error('Command Timeout.'));
+            delete this._commands[serialId];
+          }
+        }, COMMAND_TIMEOUT),
       };
     });
   }
@@ -100,13 +105,9 @@ export default class Connection extends WebSocketPlus {
       if (this._commands[serialId]) {
         clearTimeout(this._commands[serialId].timeout);
         if (message.cmd === CommandType.error) {
-          this
-            ._commands[serialId]
-            .reject(createError(message.errorMessage));
+          this._commands[serialId].reject(createError(message.errorMessage));
         } else {
-          this
-            ._commands[serialId]
-            .resolve(message);
+          this._commands[serialId].resolve(message);
         }
         delete this._commands[serialId];
       } else {
@@ -121,8 +122,10 @@ export default class Connection extends WebSocketPlus {
   }
 
   ping() {
-    return this.send(new GenericCommand({
-      cmd: CommandType.echo,
-    })).catch(error => debug('ping failed:', error));
+    return this.send(
+      new GenericCommand({
+        cmd: CommandType.echo,
+      })
+    ).catch(error => debug('ping failed:', error));
   }
 }

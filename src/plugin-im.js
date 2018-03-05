@@ -2,10 +2,7 @@
 import d from 'debug';
 import uuid from 'uuid/v4';
 import IMClient from './im-client';
-import {
-  RECONNECT,
-  RECONNECT_ERROR,
-} from './events/core';
+import { RECONNECT, RECONNECT_ERROR } from './events/core';
 import { Conversation } from './conversations';
 import { MessageQueryDirection } from './conversations/conversation-base';
 import Message, { MessageStatus } from './messages/message';
@@ -48,10 +45,17 @@ Object.freeze(MessagePriority);
  * conversation.type;
  * conversation.type = 1;
  */
-const defineConversationProperty = (prop, descriptor = {
-  get() { return this.get(prop); },
-  set(value) { this.set(prop, value); },
-}) => {
+const defineConversationProperty = (
+  prop,
+  descriptor = {
+    get() {
+      return this.get(prop);
+    },
+    set(value) {
+      this.set(prop, value);
+    },
+  }
+) => {
   Object.defineProperty(Conversation.prototype, prop, descriptor);
 };
 
@@ -143,7 +147,7 @@ export {
   TemporaryConversation,
 } from './conversations';
 
-const onRealtimeCreate = (realtime) => {
+const onRealtimeCreate = realtime => {
   /* eslint-disable no-param-reassign */
   const deviceId = uuid();
   realtime._IMClients = {};
@@ -151,13 +155,14 @@ const onRealtimeCreate = (realtime) => {
   const messageParser = new MessageParser(realtime._plugins);
   realtime._messageParser = messageParser;
 
-  const signAVUser = async user => realtime._request({
-    method: 'POST',
-    path: '/rtm/sign',
-    data: {
-      session_token: user.getSessionToken(),
-    },
-  });
+  const signAVUser = async user =>
+    realtime._request({
+      method: 'POST',
+      path: '/rtm/sign',
+      data: {
+        session_token: user.getSessionToken(),
+      },
+    });
 
   /**
    * 注册消息类
@@ -187,11 +192,11 @@ const onRealtimeCreate = (realtime) => {
    * @param  {String} [options.isReconnect=false] 单点登录时标记该次登录是不是应用启动时自动重新登录
    * @return {Promise.<IMClient>}
    */
-  const createIMClient = async (identity, {
-    tag,
-    isReconnect,
-    ...clientOptions
-  } = {}, lagecyTag) => {
+  const createIMClient = async (
+    identity,
+    { tag, isReconnect, ...clientOptions } = {},
+    lagecyTag
+  ) => {
     let id;
     const buildinOptions = {};
     if (identity) {
@@ -212,19 +217,26 @@ const onRealtimeCreate = (realtime) => {
       }
     }
     if (lagecyTag) {
-      console.warn('DEPRECATION createIMClient tag param: Use options.tag instead.');
+      console.warn(
+        'DEPRECATION createIMClient tag param: Use options.tag instead.'
+      );
     }
     const _tag = tag || lagecyTag;
-    const promise = realtime._open().then((connection) => {
-      const client = new IMClient(id, { ...buildinOptions, ...clientOptions }, {
-        _connection: connection,
-        _request: realtime._request.bind(realtime),
-        _messageParser: messageParser,
-        _plugins: realtime._plugins,
-        _identity: identity,
-      });
+    const promise = realtime._open().then(connection => {
+      const client = new IMClient(
+        id,
+        { ...buildinOptions, ...clientOptions },
+        {
+          _connection: connection,
+          _request: realtime._request.bind(realtime),
+          _messageParser: messageParser,
+          _plugins: realtime._plugins,
+          _identity: identity,
+        }
+      );
       connection.on(RECONNECT, () =>
-        client._open(realtime._options.appId, _tag, deviceId, true)
+        client
+          ._open(realtime._options.appId, _tag, deviceId, true)
           /**
            * 客户端连接恢复正常，该事件通常在 {@link Realtime#event:RECONNECT} 之后发生
            * @event IMClient#RECONNECT
@@ -238,25 +250,35 @@ const onRealtimeCreate = (realtime) => {
            */
           .then(
             () => client.emit(RECONNECT),
-            error => client.emit(RECONNECT_ERROR, error),
-          ));
-      internal(client)._eventemitter.on('close', () => {
-        delete realtime._IMClients[client.id];
-        realtime._deregister(client);
-      }, realtime);
-      return client._open(realtime._options.appId, _tag, deviceId, isReconnect)
+            error => client.emit(RECONNECT_ERROR, error)
+          )
+      );
+      internal(client)._eventemitter.on(
+        'close',
+        () => {
+          delete realtime._IMClients[client.id];
+          realtime._deregister(client);
+        },
+        realtime
+      );
+      return client
+        ._open(realtime._options.appId, _tag, deviceId, isReconnect)
         .then(() => {
           realtime._IMClients[client.id] = client;
           realtime._IMClientsCreationCount += 1;
           if (realtime._IMClientsCreationCount === 1) {
             client._omitPeerId(true);
             realtime._firstIMClient = client;
-          } else if (realtime._IMClientsCreationCount > 1 && realtime._firstIMClient) {
+          } else if (
+            realtime._IMClientsCreationCount > 1 &&
+            realtime._firstIMClient
+          ) {
             realtime._firstIMClient._omitPeerId(false);
           }
           realtime._register(client);
           return client;
-        }).catch((error) => {
+        })
+        .catch(error => {
           delete realtime._IMClients[client.id];
           throw error;
         });
@@ -276,15 +298,17 @@ const onRealtimeCreate = (realtime) => {
 const beforeCommandDispatch = (command, realtime) => {
   const isIMCommand = command.service === null || command.service === 2;
   if (!isIMCommand) return true;
-  const targetClient = command.peerId ?
-    realtime._IMClients[command.peerId] :
-    realtime._firstIMClient;
+  const targetClient = command.peerId
+    ? realtime._IMClients[command.peerId]
+    : realtime._firstIMClient;
   if (targetClient) {
-    Promise.resolve(targetClient).then(client => client._dispatchCommand(command)).catch(debug);
+    Promise.resolve(targetClient)
+      .then(client => client._dispatchCommand(command))
+      .catch(debug);
   } else {
     debug(
       '[WARN] Unexpected message received without any live client match: %O',
-      trim(command),
+      trim(command)
     );
   }
   return false;
@@ -294,10 +318,5 @@ export const IMPlugin = {
   name: 'leancloud-realtime-plugin-im',
   onRealtimeCreate,
   beforeCommandDispatch,
-  messageClasses: [
-    Message,
-    BinaryMessage,
-    RecalledMessage,
-    TextMessage,
-  ],
+  messageClasses: [Message, BinaryMessage, RecalledMessage, TextMessage],
 };

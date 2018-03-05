@@ -20,10 +20,12 @@ describe('Utils', () => {
   describe('tap', () => {
     it('should return previous promise', () => {
       const interceptor = sinon.stub().returns(2);
-      return Promise.resolve(1).then(tap(interceptor)).then((result) => {
-        result.should.be.equal(1);
-        interceptor.should.be.calledOnce();
-      });
+      return Promise.resolve(1)
+        .then(tap(interceptor))
+        .then(result => {
+          result.should.be.equal(1);
+          interceptor.should.be.calledOnce();
+        });
     });
   });
 
@@ -31,11 +33,13 @@ describe('Utils', () => {
     const resolve = value => res => res(value);
     const reject = value => (res, rej) => rej(value);
     it('should return the first resolved promise', () =>
-      tryAll([reject(0), resolve(1), reject(2), resolve(3)]).then((result) => {
+      tryAll([reject(0), resolve(1), reject(2), resolve(3)]).then(result => {
         result.should.be.equal(1);
       }));
-    it('should be rejected if non resolved', (done) => {
-      tryAll([reject(0), reject(1)]).catch(() => done()).catch(done);
+    it('should be rejected if non resolved', done => {
+      tryAll([reject(0), reject(1)])
+        .catch(() => done())
+        .catch(done);
     });
     it('should be synchronized', () => {
       const successCallback = sinon.spy();
@@ -64,13 +68,16 @@ describe('Utils', () => {
 
   describe('keyRemap', () => {
     it('remap', () => {
-      keyRemap({
-        a: 'x',
-        b: 'y',
-      }, {
-        a: 1,
-        c: 2,
-      }).should.be.eql({
+      keyRemap(
+        {
+          a: 'x',
+          b: 'y',
+        },
+        {
+          a: 1,
+          c: 2,
+        }
+      ).should.be.eql({
         x: 1,
         c: 2,
       });
@@ -116,7 +123,9 @@ describe('Utils', () => {
   it('setValue', () => {
     const target = { a: { b: { c: 1 }, d: 1 } };
     setValue(target, 'a.b.c', {}).should.eql({ a: { b: { c: {} }, d: 1 } });
-    setValue(target, 'a.b.e.f', 1).should.eql({ a: { b: { c: {}, e: { f: 1 } }, d: 1 } });
+    setValue(target, 'a.b.e.f', 1).should.eql({
+      a: { b: { c: {}, e: { f: 1 } }, d: 1 },
+    });
     setValue(target, 'a.b', 1).should.eql({ a: { b: 1, d: 1 } });
     setValue(target, 'a', { b: 1 }).should.eql({ a: { b: 1 } });
   });
@@ -144,15 +153,17 @@ describe('Utils', () => {
       counter.inc1();
       counter.inc1();
       counter.value1.should.eql(1);
-      return wait(110).then(() => {
-        counter.value1.should.eql(2);
-        counter.inc1();
-        counter.value1.should.eql(2);
-        counter.inc1();
-        return wait(100);
-      }).then(() => {
-        counter.value1.should.eql(3);
-      });
+      return wait(110)
+        .then(() => {
+          counter.value1.should.eql(2);
+          counter.inc1();
+          counter.value1.should.eql(2);
+          counter.inc1();
+          return wait(100);
+        })
+        .then(() => {
+          counter.value1.should.eql(3);
+        });
     });
     it('should work with multi instances/properties', () => {
       const counter = new Counter();
@@ -165,16 +176,18 @@ describe('Utils', () => {
       counter2.value2.should.eql(1);
       counter.inc1();
       counter.inc2();
-      return wait(110).then(() => {
-        counter.value1.should.eql(2);
-        counter.value2.should.eql(1);
-        counter2.value2.should.eql(1);
-        return wait(100);
-      }).then(() => {
-        counter.value1.should.eql(2);
-        counter.value2.should.eql(2);
-        counter2.value2.should.eql(1);
-      });
+      return wait(110)
+        .then(() => {
+          counter.value1.should.eql(2);
+          counter.value2.should.eql(1);
+          counter2.value2.should.eql(1);
+          return wait(100);
+        })
+        .then(() => {
+          counter.value1.should.eql(2);
+          counter.value2.should.eql(2);
+          counter2.value2.should.eql(1);
+        });
     });
   });
 });

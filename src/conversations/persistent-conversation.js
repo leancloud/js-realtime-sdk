@@ -1,8 +1,20 @@
 import isEmpty from 'lodash/isEmpty';
 import cloneDeep from 'lodash/cloneDeep';
 import ConversationBase from './conversation-base';
-import ConversationMemberInfo, { ConversationMemberRole } from '../conversation-member-info';
-import { decodeDate, getTime, encode, keyRemap, union, difference, internal, setValue, ensureArray } from '../utils';
+import ConversationMemberInfo, {
+  ConversationMemberRole,
+} from '../conversation-member-info';
+import {
+  decodeDate,
+  getTime,
+  encode,
+  keyRemap,
+  union,
+  difference,
+  internal,
+  setValue,
+  ensureArray,
+} from '../utils';
 import {
   GenericCommand,
   ConvCommand,
@@ -40,14 +52,11 @@ import { createError } from '../error';
  * @property {string} [next] 存在表示还有更多结果，在下次查询中带上可实现翻页。
  */
 
-const createPartiallySuccess = ({
-  allowedPids,
-  failedPids,
-}) => ({
+const createPartiallySuccess = ({ allowedPids, failedPids }) => ({
   successfulClientIds: allowedPids,
-  failures: failedPids.map(({
-    pids, ...error
-  }) => Object.assign(createError(error), { clientIds: pids })),
+  failures: failedPids.map(({ pids, ...error }) =>
+    Object.assign(createError(error), { clientIds: pids })
+  ),
 });
 
 /**
@@ -56,63 +65,70 @@ const createPartiallySuccess = ({
  * @abstract
  */
 class PersistentConversation extends ConversationBase {
-  constructor(data, {
-    creator,
-    createdAt,
-    updatedAt,
-    transient = false,
-    system = false,
-    muted = false,
-    mutedMembers = [],
-    ...attributes
-  }, client) {
-    super({
-      ...data,
-      /**
-       * 对话创建者
-       * @memberof PersistentConversation#
-       * @type {String}
-       */
+  constructor(
+    data,
+    {
       creator,
-      /**
-       * 对话创建时间
-       * @memberof PersistentConversation#
-       * @type {Date}
-       */
       createdAt,
-      /**
-       * 对话更新时间
-       * @memberof PersistentConversation#
-       * @type {Date}
-       */
       updatedAt,
-      /**
-       * 对该对话设置了静音的用户列表
-       * @memberof PersistentConversation#
-       * @type {?String[]}
-       */
-      mutedMembers,
-      /**
-       * 暂态对话标记
-       * @memberof PersistentConversation#
-       * @type {Boolean}
-       */
-      transient,
-      /**
-       * 系统对话标记
-       * @memberof PersistentConversation#
-       * @type {Boolean}
-       * @since 3.3.0
-       */
-      system,
-      /**
-       * 当前用户静音该对话标记
-       * @memberof PersistentConversation#
-       * @type {Boolean}
-       */
-      muted,
-      _attributes: attributes,
-    }, client);
+      transient = false,
+      system = false,
+      muted = false,
+      mutedMembers = [],
+      ...attributes
+    },
+    client
+  ) {
+    super(
+      {
+        ...data,
+        /**
+         * 对话创建者
+         * @memberof PersistentConversation#
+         * @type {String}
+         */
+        creator,
+        /**
+         * 对话创建时间
+         * @memberof PersistentConversation#
+         * @type {Date}
+         */
+        createdAt,
+        /**
+         * 对话更新时间
+         * @memberof PersistentConversation#
+         * @type {Date}
+         */
+        updatedAt,
+        /**
+         * 对该对话设置了静音的用户列表
+         * @memberof PersistentConversation#
+         * @type {?String[]}
+         */
+        mutedMembers,
+        /**
+         * 暂态对话标记
+         * @memberof PersistentConversation#
+         * @type {Boolean}
+         */
+        transient,
+        /**
+         * 系统对话标记
+         * @memberof PersistentConversation#
+         * @type {Boolean}
+         * @since 3.3.0
+         */
+        system,
+        /**
+         * 当前用户静音该对话标记
+         * @memberof PersistentConversation#
+         * @type {Boolean}
+         */
+        muted,
+        _attributes: attributes,
+      },
+      client
+    );
     this._reset();
   }
 
@@ -128,7 +144,6 @@ class PersistentConversation extends ConversationBase {
   get updatedAt() {
     return this._updatedAt;
   }
-
 
   /**
    * 对话名字，对应 _Conversation 表中的 name
@@ -175,7 +190,7 @@ class PersistentConversation extends ConversationBase {
     // set 'a' or 'a.b': delete 'a.b'
     const re = new RegExp(`^${key}`);
     const childKeys = pendingKeys.filter(re.test.bind(re));
-    childKeys.forEach((k) => {
+    childKeys.forEach(k => {
       delete pendingAttributes[k];
     });
     if (childKeys.length) {
@@ -186,7 +201,11 @@ class PersistentConversation extends ConversationBase {
       // CAUTION: non-standard API, provided by core-js
       const parentKey = Array.find(pendingKeys, k => key.indexOf(k) === 0); // 'a.b'
       if (parentKey) {
-        setValue(pendingAttributes[parentKey], key.slice(parentKey.length + 1), value);
+        setValue(
+          pendingAttributes[parentKey],
+          key.slice(parentKey.length + 1),
+          value
+        );
       } else {
         pendingAttributes[key] = value;
       }
@@ -197,15 +216,16 @@ class PersistentConversation extends ConversationBase {
 
   _buildCurrentAttributes() {
     const { pendingAttributes } = internal(this);
-    internal(this).currentAttributes = Object.keys(pendingAttributes)
-      .reduce(
-        (target, k) => setValue(target, k, pendingAttributes[k]),
-        cloneDeep(this._attributes),
-      );
+    internal(this).currentAttributes = Object.keys(pendingAttributes).reduce(
+      (target, k) => setValue(target, k, pendingAttributes[k]),
+      cloneDeep(this._attributes)
+    );
   }
 
   _updateServerAttributes(attributes) {
-    Object.keys(attributes).forEach(key => setValue(this._attributes, key, attributes[key]));
+    Object.keys(attributes).forEach(key =>
+      setValue(this._attributes, key, attributes[key])
+    );
     this._buildCurrentAttributes();
   }
 
@@ -231,10 +251,12 @@ class PersistentConversation extends ConversationBase {
         data: JSON.stringify(encode(attr)),
       }),
     });
-    const resCommand = await this._send(new GenericCommand({
-      op: 'update',
-      convMessage,
-    }));
+    const resCommand = await this._send(
+      new GenericCommand({
+        op: 'update',
+        convMessage,
+      })
+    );
     this.updatedAt = resCommand.convMessage.udate;
     this._attributes = internal(this).currentAttributes;
     internal(this).pendingAttributes = {};
@@ -257,9 +279,11 @@ class PersistentConversation extends ConversationBase {
    */
   async mute() {
     this._debug('mute');
-    await this._send(new GenericCommand({
-      op: 'mute',
-    }));
+    await this._send(
+      new GenericCommand({
+        op: 'mute',
+      })
+    );
     if (!this.transient) {
       this.muted = true;
       this.mutedMembers = union(this.mutedMembers, [this._client.id]);
@@ -273,9 +297,11 @@ class PersistentConversation extends ConversationBase {
    */
   async unmute() {
     this._debug('unmute');
-    await this._send(new GenericCommand({
-      op: 'unmute',
-    }));
+    await this._send(
+      new GenericCommand({
+        op: 'unmute',
+      })
+    );
     if (!this.transient) {
       this.muted = false;
       this.mutedMembers = difference(this.mutedMembers, [this._client.id]);
@@ -288,13 +314,19 @@ class PersistentConversation extends ConversationBase {
       const params = [this.id, this._client.id, clientIds.sort(), action];
       const signatureResult = await runSignatureFactory(
         this._client.options.conversationSignatureFactory,
-        params,
+        params
       );
-      Object.assign(command.convMessage, keyRemap({
-        signature: 's',
-        timestamp: 't',
-        nonce: 'n',
-      }, signatureResult));
+      Object.assign(
+        command.convMessage,
+        keyRemap(
+          {
+            signature: 's',
+            timestamp: 't',
+            nonce: 'n',
+          },
+          signatureResult
+        )
+      );
     }
   }
 
@@ -303,13 +335,19 @@ class PersistentConversation extends ConversationBase {
       const params = [this._client.id, this.id, clientIds.sort(), action];
       const signatureResult = await runSignatureFactory(
         this._client.options.blacklistSignatureFactory,
-        params,
+        params
       );
-      Object.assign(command.blacklistMessage, keyRemap({
-        signature: 's',
-        timestamp: 't',
-        nonce: 'n',
-      }, signatureResult));
+      Object.assign(
+        command.blacklistMessage,
+        keyRemap(
+          {
+            signature: 's',
+            timestamp: 't',
+            nonce: 'n',
+          },
+          signatureResult
+        )
+      );
     }
   }
 
@@ -330,12 +368,9 @@ class PersistentConversation extends ConversationBase {
       }),
     });
     await this._appendConversationSignature(command, 'add', clientIds);
-    const {
-      convMessage,
-      convMessage: {
-        allowedPids,
-      },
-    } = await this._send(command);
+    const { convMessage, convMessage: { allowedPids } } = await this._send(
+      command
+    );
     if (!this.transient && !this.system) {
       this.members = union(this.members, allowedPids);
     }
@@ -359,12 +394,9 @@ class PersistentConversation extends ConversationBase {
       }),
     });
     await this._appendConversationSignature(command, 'remove', clientIds);
-    const {
-      convMessage,
-      convMessage: {
-        allowedPids,
-      },
-    } = await this._send(command);
+    const { convMessage, convMessage: { allowedPids } } = await this._send(
+      command
+    );
     if (!this.transient && !this.system) {
       this.members = difference(this.members, allowedPids);
     }
@@ -377,9 +409,7 @@ class PersistentConversation extends ConversationBase {
    */
   async join() {
     this._debug('join');
-    return this.add(this._client.id).then(({
-      failures,
-    }) => {
+    return this.add(this._client.id).then(({ failures }) => {
       if (failures[0]) throw failures[0];
       return this;
     });
@@ -391,9 +421,7 @@ class PersistentConversation extends ConversationBase {
    */
   async quit() {
     this._debug('quit');
-    return this.remove(this._client.id).then(({
-      failures,
-    }) => {
+    return this.remove(this._client.id).then(({ failures }) => {
       if (failures[0]) throw failures[0];
       return this;
     });
@@ -413,9 +441,7 @@ class PersistentConversation extends ConversationBase {
         m: clientIds,
       }),
     });
-    const {
-      convMessage,
-    } = await this._send(command);
+    const { convMessage } = await this._send(command);
     return createPartiallySuccess(convMessage);
   }
 
@@ -433,9 +459,7 @@ class PersistentConversation extends ConversationBase {
         m: clientIds,
       }),
     });
-    const {
-      convMessage,
-    } = await this._send(command);
+    const { convMessage } = await this._send(command);
     return createPartiallySuccess(convMessage);
   }
 
@@ -446,10 +470,7 @@ class PersistentConversation extends ConversationBase {
    * @param {String} [options.next] 从指定 next 开始查询，与 limit 一起使用可以完成翻页。
    * @return {PagedResults.<string>} 查询结果。其中的 cureser 存在表示还有更多结果。
    */
-  async queryMutedMembers({
-    limit,
-    next,
-  } = {}) {
+  async queryMutedMembers({ limit, next } = {}) {
     this._debug('query muted: limit %O, next: %O', limit, next);
     const command = new GenericCommand({
       op: OpType.query_shutup,
@@ -458,12 +479,7 @@ class PersistentConversation extends ConversationBase {
         next,
       }),
     });
-    const {
-      convMessage: {
-        m,
-        next: newNext,
-      },
-    } = await this._send(command);
+    const { convMessage: { m, next: newNext } } = await this._send(command);
     return {
       results: m,
       next: newNext,
@@ -486,10 +502,12 @@ class PersistentConversation extends ConversationBase {
         toPids: clientIds,
       }),
     });
-    await this._appendBlacklistSignature(command, 'conversation-block-clients', clientIds);
-    const {
-      blacklistMessage,
-    } = await this._send(command);
+    await this._appendBlacklistSignature(
+      command,
+      'conversation-block-clients',
+      clientIds
+    );
+    const { blacklistMessage } = await this._send(command);
     return createPartiallySuccess(blacklistMessage);
   }
 
@@ -509,10 +527,12 @@ class PersistentConversation extends ConversationBase {
         toPids: clientIds,
       }),
     });
-    await this._appendBlacklistSignature(command, 'conversation-unblock-clients', clientIds);
-    const {
-      blacklistMessage,
-    } = await this._send(command);
+    await this._appendBlacklistSignature(
+      command,
+      'conversation-unblock-clients',
+      clientIds
+    );
+    const { blacklistMessage } = await this._send(command);
     return createPartiallySuccess(blacklistMessage);
   }
 
@@ -523,10 +543,7 @@ class PersistentConversation extends ConversationBase {
    * @param {String} [options.next] 从指定 next 开始查询，与 limit 一起使用可以完成翻页
    * @return {PagedResults.<string>} 查询结果。其中的 cureser 存在表示还有更多结果。
    */
-  async queryBlockedMembers({
-    limit,
-    next,
-  } = {}) {
+  async queryBlockedMembers({ limit, next } = {}) {
     this._debug('query blocked: limit %O, next: %O', limit, next);
     const command = new GenericCommand({
       cmd: 'blacklist',
@@ -538,10 +555,7 @@ class PersistentConversation extends ConversationBase {
       }),
     });
     const {
-      blacklistMessage: {
-        blockedPids,
-        next: newNext,
-      },
+      blacklistMessage: { blockedPids, next: newNext },
     } = await this._send(command);
     return {
       results: blockedPids,
@@ -562,16 +576,19 @@ class PersistentConversation extends ConversationBase {
         where: { cid: this.id },
       },
     });
-    const memberInfos = response.results.map(info => new ConversationMemberInfo({
-      conversation: this,
-      memberId: info.clientId,
-      role: info.role,
-    }));
+    const memberInfos = response.results.map(
+      info =>
+        new ConversationMemberInfo({
+          conversation: this,
+          memberId: info.clientId,
+          role: info.role,
+        })
+    );
     const memberInfoMap = {};
-    memberInfos.forEach((memberInfo) => {
+    memberInfos.forEach(memberInfo => {
       memberInfoMap[memberInfo.memberId] = memberInfo;
     });
-    this.members.forEach((memberId) => {
+    this.members.forEach(memberId => {
       memberInfoMap[memberId] = new ConversationMemberInfo({
         conversation: this,
         memberId,
@@ -588,9 +605,13 @@ class PersistentConversation extends ConversationBase {
    * @return {Promise.<ConversationMemberInfo>} 指定成员的对话属性
    */
   async getMemberInfo(memberId) {
-    if (this.members.indexOf(memberId) === -1) throw new Error(`${memberId} is not the mumber of conversation[${this.id}]`);
+    if (this.members.indexOf(memberId) === -1)
+      throw new Error(
+        `${memberId} is not the mumber of conversation[${this.id}]`
+      );
     const { memberInfoMap } = internal(this);
-    if (!(memberInfoMap && memberInfoMap[memberId])) await this.getAllMemberInfo();
+    if (!(memberInfoMap && memberInfoMap[memberId]))
+      await this.getAllMemberInfo();
     return internal(this).memberInfoMap[memberId];
   }
 
@@ -603,16 +624,18 @@ class PersistentConversation extends ConversationBase {
    */
   async updateMemberRole(memberId, role) {
     this._debug('mute');
-    await this._send(new GenericCommand({
-      op: OpType.member_info_update,
-      convMessage: new ConvCommand({
-        targetClientId: memberId,
-        info: new ConvMemberInfo({
-          pid: memberId,
-          role,
+    await this._send(
+      new GenericCommand({
+        op: OpType.member_info_update,
+        convMessage: new ConvCommand({
+          targetClientId: memberId,
+          info: new ConvMemberInfo({
+            pid: memberId,
+            role,
+          }),
         }),
-      }),
-    }));
+      })
+    );
     const { memberInfos } = internal(this);
     if (memberInfos && memberInfos[memberId]) {
       internal(memberInfos[memberId]).role = role;
@@ -622,8 +645,11 @@ class PersistentConversation extends ConversationBase {
 
   toFullJSON() {
     const {
-      creator, system, transient,
-      createdAt, updatedAt,
+      creator,
+      system,
+      transient,
+      createdAt,
+      updatedAt,
       _attributes,
     } = this;
     return {
@@ -639,8 +665,13 @@ class PersistentConversation extends ConversationBase {
 
   toJSON() {
     const {
-      creator, system, transient, muted, mutedMembers,
-      createdAt, updatedAt,
+      creator,
+      system,
+      transient,
+      muted,
+      mutedMembers,
+      createdAt,
+      updatedAt,
       _attributes,
     } = this;
     return {

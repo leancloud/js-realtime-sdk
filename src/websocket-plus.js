@@ -23,7 +23,7 @@ export const MESSAGE = 'message';
 const HEARTBEAT_TIME = 180000;
 const TIMEOUT_TIME = 380000;
 
-const DEFAULT_RETRY_STRATEGY = attempt => Math.min(1000 * (2 ** attempt), 300000);
+const DEFAULT_RETRY_STRATEGY = attempt => Math.min(1000 * 2 ** attempt, 300000);
 
 const requireConnected = (target, name, descriptor) =>
   Object.assign({}, descriptor, {
@@ -36,7 +36,9 @@ const requireConnected = (target, name, descriptor) =>
 class WebSocketPlus extends EventEmitter {
   constructor(getUrls, protocol) {
     if (typeof WebSocket === 'undefined') {
-      throw new Error('WebSocket is undefined. Polyfill is required in this runtime.');
+      throw new Error(
+        'WebSocket is undefined. Polyfill is required in this runtime.'
+      );
     }
     super();
     if (typeof getUrls !== 'function') {
@@ -46,38 +48,46 @@ class WebSocketPlus extends EventEmitter {
     }
     this._protocol = protocol;
     this.init();
-    this._createWs(this._getUrls, this._protocol).then(() => {
-      this.__postponeTimeoutTimer = this._postponeTimeoutTimer.bind(this);
-      if (global.addEventListener) {
-        this.__pause = () => this.pause();
-        this.__resume = () => this.resume();
-        global.addEventListener('offline', this.__pause);
-        global.addEventListener('online', this.__resume);
-      }
-      this.open();
-    }).catch(this.throw.bind(this));
+    this._createWs(this._getUrls, this._protocol)
+      .then(() => {
+        this.__postponeTimeoutTimer = this._postponeTimeoutTimer.bind(this);
+        if (global.addEventListener) {
+          this.__pause = () => this.pause();
+          this.__resume = () => this.resume();
+          global.addEventListener('offline', this.__pause);
+          global.addEventListener('online', this.__resume);
+        }
+        this.open();
+      })
+      .catch(this.throw.bind(this));
   }
 
   _createWs(getUrls, protocol) {
-    return getUrls().then(urls => tryAll(ensureArray(urls).map(url => (resolve, reject) => {
-      debug(`connect [${url}] ${protocol}`);
-      const ws = protocol ? new WebSocket(url, protocol) : new WebSocket(url);
-      ws.binaryType = this.binaryType || 'arraybuffer';
-      ws.onopen = () => resolve(ws);
-      ws.onclose = (error) => {
-        if (error instanceof Error) {
-          return reject(error);
-        }
-        // in browser, error event is useless
-        return reject(new Error(`Failed to connect [${url}]`));
-      };
-      ws.onerror = ws.onclose;
-    })).then((ws) => {
-      this._ws = ws;
-      this._ws.onclose = this._handleClose.bind(this);
-      this._ws.onmessage = this._handleMessage.bind(this);
-      return ws;
-    }));
+    return getUrls().then(urls =>
+      tryAll(
+        ensureArray(urls).map(url => (resolve, reject) => {
+          debug(`connect [${url}] ${protocol}`);
+          const ws = protocol
+            ? new WebSocket(url, protocol)
+            : new WebSocket(url);
+          ws.binaryType = this.binaryType || 'arraybuffer';
+          ws.onopen = () => resolve(ws);
+          ws.onclose = error => {
+            if (error instanceof Error) {
+              return reject(error);
+            }
+            // in browser, error event is useless
+            return reject(new Error(`Failed to connect [${url}]`));
+          };
+          ws.onerror = ws.onclose;
+        })
+      ).then(ws => {
+        this._ws = ws;
+        this._ws.onclose = this._handleClose.bind(this);
+        this._ws.onmessage = this._handleMessage.bind(this);
+        return ws;
+      })
+    );
   }
   _destroyWs() {
     const ws = this._ws;
@@ -133,7 +143,7 @@ class WebSocketPlus extends EventEmitter {
     this.emit(RETRY, attempt);
     this._createWs(this._getUrls, this._protocol).then(
       () => (this.can('reconnect') ? this.reconnect() : this._destroyWs()),
-      () => this.can('fail') && this.fail(attempt + 1),
+      () => this.can('fail') && this.fail(attempt + 1)
     );
   }
   onerror(event, from, to, error) {
@@ -149,9 +159,13 @@ class WebSocketPlus extends EventEmitter {
   checkConnectionAvailability(name = 'API') {
     if (!this.is('connected')) {
       const currentState = this.current;
-      console.warn(`${name} should not be called when the connection is ${currentState}`);
+      console.warn(
+        `${name} should not be called when the connection is ${currentState}`
+      );
       if (this.is('disconnected') || this.is('reconnecting')) {
-        console.warn('disconnect and reconnect event should be handled to avoid such calls.');
+        console.warn(
+          'disconnect and reconnect event should be handled to avoid such calls.'
+        );
       }
       throw new Error('Connection unavailable');
     }
@@ -201,7 +215,8 @@ class WebSocketPlus extends EventEmitter {
   _stopConnectionKeeper() {
     debug('stop connection keeper');
     // websockets/ws#489
-    const removeListener = this._ws.removeListener || this._ws.removeEventListener;
+    const removeListener =
+      this._ws.removeListener || this._ws.removeEventListener;
     removeListener.call(this._ws, 'message', this.__postponeTimeoutTimer);
     removeListener.call(this._ws, 'pong', this.__postponeTimeoutTimer);
     this._clearTimeoutTimers();
@@ -246,44 +261,54 @@ StateMachine.create({
     defer: true,
   },
   terminal: 'closed',
-  events: [{
-    name: 'open',
-    from: 'initialized',
-    to: 'connected',
-  }, {
-    name: 'disconnect',
-    from: 'connected',
-    to: 'disconnected',
-  }, {
-    name: 'retry',
-    from: 'disconnected',
-    to: 'reconnecting',
-  }, {
-    name: 'fail',
-    from: 'reconnecting',
-    to: 'disconnected',
-  }, {
-    name: 'reconnect',
-    from: 'reconnecting',
-    to: 'connected',
-  }, {
-    name: 'pause',
-    from: ['connected', 'disconnected', 'reconnecting'],
-    to: 'offline',
-  }, {
-  }, {
-    name: 'resume',
-    from: 'offline',
-    to: 'disconnected',
-  }, {
-    name: 'close',
-    from: ['connected', 'disconnected', 'reconnecting', 'offline'],
-    to: 'closed',
-  }, {
-    name: 'throw',
-    from: '*',
-    to: 'error',
-  }],
+  events: [
+    {
+      name: 'open',
+      from: 'initialized',
+      to: 'connected',
+    },
+    {
+      name: 'disconnect',
+      from: 'connected',
+      to: 'disconnected',
+    },
+    {
+      name: 'retry',
+      from: 'disconnected',
+      to: 'reconnecting',
+    },
+    {
+      name: 'fail',
+      from: 'reconnecting',
+      to: 'disconnected',
+    },
+    {
+      name: 'reconnect',
+      from: 'reconnecting',
+      to: 'connected',
+    },
+    {
+      name: 'pause',
+      from: ['connected', 'disconnected', 'reconnecting'],
+      to: 'offline',
+    },
+    {},
+    {
+      name: 'resume',
+      from: 'offline',
+      to: 'disconnected',
+    },
+    {
+      name: 'close',
+      from: ['connected', 'disconnected', 'reconnecting', 'offline'],
+      to: 'closed',
+    },
+    {
+      name: 'throw',
+      from: '*',
+      to: 'error',
+    },
+  ],
 });
 
 export default WebSocketPlus;

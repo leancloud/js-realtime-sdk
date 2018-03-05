@@ -5,7 +5,4 @@ if (!File) {
   throw new Error('LeanCloud Storage SDK not installed');
 }
 
-export {
-  File,
-  GeoPoint,
-} from 'leancloud-storage';
+export { File, GeoPoint } from 'leancloud-storage';

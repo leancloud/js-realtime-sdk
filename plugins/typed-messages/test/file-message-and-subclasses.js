@@ -43,9 +43,10 @@ describe('FileMessage and subclasses', () => {
       });
       file1.metaData('foo', 'bar');
       (() => new FileMessage(file1)).should.throw();
-      return file1.save()
+      return file1
+        .save()
         .then(() => new FileMessage(file1))
-        .then((message) => {
+        .then(message => {
           message.setText('chrome');
           message.setAttributes({ version: 31 });
           message.getFile().should.be.exactly(file1);
@@ -65,7 +66,7 @@ describe('FileMessage and subclasses', () => {
           });
           return FileMessage.parse(json);
         })
-        .then((message) => {
+        .then(message => {
           message.should.be.instanceof(FileMessage);
           message.text.should.eql('chrome');
           message.attributes.should.eql({ version: 31 });
@@ -80,41 +81,44 @@ describe('FileMessage and subclasses', () => {
         });
     });
     it('file created from url', () =>
-      Promise.resolve(new FileMessage(file)).then((message) => {
-        message.setText('chrome');
-        message.setAttributes({ version: 31 });
-        message.getFile().should.be.exactly(file);
-        const json = message.getPayload();
-        json.should.containDeep({
-          _lctype: -6,
-          _lctext: 'chrome',
-          _lcattrs: { version: 31 },
-          _lcfile: {
-            url: file.url(),
-            objId: file.id,
-            metaData: {
-              name: FILE_NAME,
-              foo: 'bar',
+      Promise.resolve(new FileMessage(file))
+        .then(message => {
+          message.setText('chrome');
+          message.setAttributes({ version: 31 });
+          message.getFile().should.be.exactly(file);
+          const json = message.getPayload();
+          json.should.containDeep({
+            _lctype: -6,
+            _lctext: 'chrome',
+            _lcattrs: { version: 31 },
+            _lcfile: {
+              url: file.url(),
+              objId: file.id,
+              metaData: {
+                name: FILE_NAME,
+                foo: 'bar',
+              },
             },
-          },
-        });
-        return FileMessage.parse(json);
-      }).then((message) => {
-        message.should.be.instanceof(FileMessage);
-        message.text.should.eql('chrome');
-        message.attributes.should.eql({ version: 31 });
-        message.summary.should.eql(`[文件] ${FILE_NAME}`);
-        const fileCopy = message.getFile();
-        fileCopy.should.not.be.exactly(file);
-        fileCopy.should.be.instanceof(File);
-        fileCopy.name().should.eql(FILE_NAME);
-        fileCopy.id.should.eql(file.id);
-        fileCopy.url().should.eql(file.url());
-        fileCopy.metaData().should.eql(file.metaData());
-      }));
+          });
+          return FileMessage.parse(json);
+        })
+        .then(message => {
+          message.should.be.instanceof(FileMessage);
+          message.text.should.eql('chrome');
+          message.attributes.should.eql({ version: 31 });
+          message.summary.should.eql(`[文件] ${FILE_NAME}`);
+          const fileCopy = message.getFile();
+          fileCopy.should.not.be.exactly(file);
+          fileCopy.should.be.instanceof(File);
+          fileCopy.name().should.eql(FILE_NAME);
+          fileCopy.id.should.eql(file.id);
+          fileCopy.url().should.eql(file.url());
+          fileCopy.metaData().should.eql(file.metaData());
+        }));
     it('parser should be loose', () => {
-      FileMessage.parse({ _lcfile: { url: FILE_URL } })
-        .should.be.instanceof(FileMessage);
+      FileMessage.parse({ _lcfile: { url: FILE_URL } }).should.be.instanceof(
+        FileMessage
+      );
     });
     it('toJSON', () => {
       const message = new FileMessage(file);
@@ -126,8 +130,9 @@ describe('FileMessage and subclasses', () => {
       const message = new FileMessage(file);
       message.setAttributes({ foo: 'bar' });
       const json = message.toFullJSON();
-      const parsedMessage =
-        await client.parseMessage(JSON.parse(JSON.stringify(json)));
+      const parsedMessage = await client.parseMessage(
+        JSON.parse(JSON.stringify(json))
+      );
       parsedMessage.should.be.instanceof(FileMessage);
       parsedMessage.toFullJSON().should.eql(json);
     });
@@ -138,39 +143,41 @@ describe('FileMessage and subclasses', () => {
       (() => new ImageMessage('1')).should.throw();
     });
     it('should inherit from FileMessage', () =>
-      Promise.resolve(new ImageMessage(file)).then((message) => {
-        message.setText('chrome');
-        message.setAttributes({ version: 31 });
-        message.getFile().should.be.exactly(file);
-        const json = message.getPayload();
-        json.should.containDeep({
-          _lctype: -2,
-          _lctext: 'chrome',
-          _lcattrs: { version: 31 },
-          _lcfile: {
-            url: file.url(),
-            objId: file.id,
-            metaData: {
-              name: FILE_NAME,
-              foo: 'bar',
+      Promise.resolve(new ImageMessage(file))
+        .then(message => {
+          message.setText('chrome');
+          message.setAttributes({ version: 31 });
+          message.getFile().should.be.exactly(file);
+          const json = message.getPayload();
+          json.should.containDeep({
+            _lctype: -2,
+            _lctext: 'chrome',
+            _lcattrs: { version: 31 },
+            _lcfile: {
+              url: file.url(),
+              objId: file.id,
+              metaData: {
+                name: FILE_NAME,
+                foo: 'bar',
+              },
             },
-          },
-        });
-        return ImageMessage.parse(json);
-      }).then((message) => {
-        message.should.be.instanceof(ImageMessage);
-        message.should.be.instanceof(FileMessage);
-        message.text.should.eql('chrome');
-        message.attributes.should.eql({ version: 31 });
-        message.summary.should.eql(`[图片] ${FILE_NAME}`);
-        const fileCopy = message.getFile();
-        fileCopy.should.not.be.exactly(file);
-        fileCopy.should.be.instanceof(File);
-        fileCopy.name().should.eql(FILE_NAME);
-        fileCopy.id.should.eql(file.id);
-        fileCopy.url().should.eql(file.url());
-        fileCopy.metaData().should.eql(file.metaData());
-      }));
+          });
+          return ImageMessage.parse(json);
+        })
+        .then(message => {
+          message.should.be.instanceof(ImageMessage);
+          message.should.be.instanceof(FileMessage);
+          message.text.should.eql('chrome');
+          message.attributes.should.eql({ version: 31 });
+          message.summary.should.eql(`[图片] ${FILE_NAME}`);
+          const fileCopy = message.getFile();
+          fileCopy.should.not.be.exactly(file);
+          fileCopy.should.be.instanceof(File);
+          fileCopy.name().should.eql(FILE_NAME);
+          fileCopy.id.should.eql(file.id);
+          fileCopy.url().should.eql(file.url());
+          fileCopy.metaData().should.eql(file.metaData());
+        }));
   });
 
   describe('AudioMessage', () => {
@@ -178,45 +185,49 @@ describe('FileMessage and subclasses', () => {
       (() => new AudioMessage('1')).should.throw();
     });
     it('should inherit from FileMessage', () =>
-      Promise.resolve(new AudioMessage(file)).then((message) => {
-        message.setText('chrome');
-        message.setAttributes({ version: 31 });
-        message.getFile().should.be.exactly(file);
-        const json = message.getPayload();
-        json.should.containDeep({
-          _lctype: -3,
-        });
-        return AudioMessage.parse(json);
-      }).then((message) => {
-        message.should.be.instanceof(AudioMessage);
-        message.should.be.instanceof(FileMessage);
-        message.summary.should.eql(`[语音] ${FILE_NAME}`);
-        const fileCopy = message.getFile();
-        fileCopy.should.not.be.exactly(file);
-        fileCopy.should.be.instanceof(File);
-      }));
+      Promise.resolve(new AudioMessage(file))
+        .then(message => {
+          message.setText('chrome');
+          message.setAttributes({ version: 31 });
+          message.getFile().should.be.exactly(file);
+          const json = message.getPayload();
+          json.should.containDeep({
+            _lctype: -3,
+          });
+          return AudioMessage.parse(json);
+        })
+        .then(message => {
+          message.should.be.instanceof(AudioMessage);
+          message.should.be.instanceof(FileMessage);
+          message.summary.should.eql(`[语音] ${FILE_NAME}`);
+          const fileCopy = message.getFile();
+          fileCopy.should.not.be.exactly(file);
+          fileCopy.should.be.instanceof(File);
+        }));
   });
   describe('VideoMessage', () => {
     it('param check', () => {
       (() => new VideoMessage('1')).should.throw();
     });
     it('should inherit from FileMessage', () =>
-      Promise.resolve(new VideoMessage(file)).then((message) => {
-        message.setText('chrome');
-        message.setAttributes({ version: 31 });
-        message.getFile().should.be.exactly(file);
-        const json = message.getPayload();
-        json.should.containDeep({
-          _lctype: -4,
-        });
-        return VideoMessage.parse(json);
-      }).then((message) => {
-        message.should.be.instanceof(VideoMessage);
-        message.should.be.instanceof(FileMessage);
-        message.summary.should.eql(`[视频] ${FILE_NAME}`);
-        const fileCopy = message.getFile();
-        fileCopy.should.not.be.exactly(file);
-        fileCopy.should.be.instanceof(File);
-      }));
+      Promise.resolve(new VideoMessage(file))
+        .then(message => {
+          message.setText('chrome');
+          message.setAttributes({ version: 31 });
+          message.getFile().should.be.exactly(file);
+          const json = message.getPayload();
+          json.should.containDeep({
+            _lctype: -4,
+          });
+          return VideoMessage.parse(json);
+        })
+        .then(message => {
+          message.should.be.instanceof(VideoMessage);
+          message.should.be.instanceof(FileMessage);
+          message.summary.should.eql(`[视频] ${FILE_NAME}`);
+          const fileCopy = message.getFile();
+          fileCopy.should.not.be.exactly(file);
+          fileCopy.should.be.instanceof(File);
+        }));
   });
 });

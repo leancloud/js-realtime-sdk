@@ -77,7 +77,8 @@ class TypedMessage extends Message {
 
   _getCustomFields() {
     const fields = Array.isArray(this.constructor._customFields)
-      ? this.constructor._customFields : [];
+      ? this.constructor._customFields
+      : [];
     return fields.reduce((result, field) => {
       if (typeof field !== 'string') return result;
       result[field] = this[field]; // eslint-disable-line no-param-reassign
@@ -92,19 +93,20 @@ class TypedMessage extends Message {
   /* eslint-enable class-methods-use-this */
 
   getPayload() {
-    return compact(Object.assign({
-      _lctext: this.getText(),
-      _lcattrs: this.getAttributes(),
-    }, this._getCustomFields(), this._getType()));
+    return compact(
+      Object.assign(
+        {
+          _lctext: this.getText(),
+          _lcattrs: this.getAttributes(),
+        },
+        this._getCustomFields(),
+        this._getType()
+      )
+    );
   }
 
   toJSON() {
-    const {
-      type,
-      text,
-      attributes,
-      summary,
-    } = this;
+    const { type, text, attributes, summary } = this;
     return {
       ...super._toJSON(),
       type,

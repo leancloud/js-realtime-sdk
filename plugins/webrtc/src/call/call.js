@@ -16,10 +16,10 @@ export default class Call extends EventEmitter {
     this._peerConnection = this._createPeerConnection(RTCConfiguration);
     this._call = createCallStateMachine();
     this._promises = {};
-    const streamReady = new Promise((resolve) => {
+    const streamReady = new Promise(resolve => {
       this._promises.resolveStreamReady = resolve;
     });
-    const accept = new Promise((resolve) => {
+    const accept = new Promise(resolve => {
       this._promises.resolveAccept = resolve;
     });
     Promise.all([streamReady, accept]).then(([stream]) => {
@@ -89,8 +89,12 @@ export default class Call extends EventEmitter {
     connection.onicecandidate = this._handleICECandidateEvent.bind(this);
     connection.onaddstream = this._handleAddStreamEvent.bind(this);
     connection.onnremovestream = this._handleRemoveStreamEvent.bind(this);
-    connection.oniceconnectionstatechange = this._handleICEConnectionStateChangeEvent.bind(this);
-    connection.onsignalingstatechange = this._handleSignalingStateChangeEvent.bind(this);
+    connection.oniceconnectionstatechange = this._handleICEConnectionStateChangeEvent.bind(
+      this
+    );
+    connection.onsignalingstatechange = this._handleSignalingStateChangeEvent.bind(
+      this
+    );
     return connection;
   }
 
@@ -122,14 +126,16 @@ export default class Call extends EventEmitter {
   _handleICECandidate(message) {
     const candidate = new RTCIceCandidate(message.payload);
     if (this._peerConnection) {
-      this._peerConnection.addIceCandidate(candidate)
+      this._peerConnection
+        .addIceCandidate(candidate)
         .catch(console.error.bind(console));
     }
   }
 
   _handleICECandidateEvent(event) {
     if (event.candidate && this._conversation) {
-      return this._conversation.send(new ICECandidate(event.candidate))
+      return this._conversation
+        .send(new ICECandidate(event.candidate))
         .catch(console.error.bind(console));
     }
     return false;

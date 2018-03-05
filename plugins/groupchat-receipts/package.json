@@ -10,10 +10,7 @@
     "type": "git",
     "url": "git+https://github.com/leancloud/js-realtime-sdk.git"
   },
-  "keywords": [
-    "leancloud",
-    "realtime"
-  ],
+  "keywords": ["leancloud", "realtime"],
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/leancloud/js-realtime-sdk/issues"

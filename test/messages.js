@@ -13,16 +13,15 @@ import {
   RecalledMessage,
   BinaryMessage,
 } from '../src';
-import { messageType, messageField, IE10Compatible } from '../src/messages/helpers';
+import {
+  messageType,
+  messageField,
+  IE10Compatible,
+} from '../src/messages/helpers';
 
 import { listen, hold, sinon } from './test-utils';
 
-import {
-  APP_ID,
-  APP_KEY,
-  REGION,
-  EXISTING_ROOM_ID,
-} from './configs';
+import { APP_ID, APP_KEY, REGION, EXISTING_ROOM_ID } from './configs';
 
 @messageType(1)
 @messageField('foo')
@@ -58,22 +57,22 @@ describe('Messages', () => {
   });
 
   describe('message status', () => {
-    before(function () {
+    before(function() {
       this.message = new Message();
     });
-    it('should default to none', function () {
+    it('should default to none', function() {
       this.message.status.should.eql(MessageStatus.NONE);
     });
-    it('should be readonly', function () {
+    it('should be readonly', function() {
       (() => {
         this.message.status = MessageStatus.SENT;
       }).should.throw();
     });
-    it('_setStatus should work', function () {
+    it('_setStatus should work', function() {
       this.message._setStatus(MessageStatus.SENT);
       this.message.status.should.eql(MessageStatus.SENT);
     });
-    it('_setStatus should only accept MessageStatus', function () {
+    it('_setStatus should only accept MessageStatus', function() {
       (() => this.message._setStatus(0)).should.throw(/Invalid/);
     });
   });
@@ -85,7 +84,9 @@ describe('Messages', () => {
     it('message type should be readonly', () => {
       const message = new TextMessage('');
       message.type.should.eql(-1);
-      (() => { message.type = 0; }).should.throw();
+      (() => {
+        message.type = 0;
+      }).should.throw();
     });
     it('parse and getPayload', () => {
       const json = {
@@ -95,8 +96,9 @@ describe('Messages', () => {
         },
         _lctype: -1,
       };
-      const message = new TextMessage(json._lctext)
-        .setAttributes(json._lcattrs);
+      const message = new TextMessage(json._lctext).setAttributes(
+        json._lcattrs
+      );
       message.getPayload().should.eql(json);
       const parsedMessage = TextMessage.parse(json);
       parsedMessage.should.be.instanceof(TextMessage);
@@ -141,27 +143,24 @@ describe('Messages', () => {
         appKey: APP_KEY,
         region: REGION,
       });
-      return Promise.all([
-        realtime.createIMClient(),
-        realtime.createIMClient(),
-      ]).then((clients) => {
-        [wchen, zwang] = clients;
-        return wchen.createConversation({
-          members: [zwang.id],
-          name: 'message test conversation',
+      return Promise.all([realtime.createIMClient(), realtime.createIMClient()])
+        .then(clients => {
+          [wchen, zwang] = clients;
+          return wchen.createConversation({
+            members: [zwang.id],
+            name: 'message test conversation',
+          });
+        })
+        .then(conversation => {
+          conversationWchen = conversation;
+          return zwang.getConversation(conversation.id);
+        })
+        .then(conversation => {
+          conversationZwang = conversation;
         });
-      }).then((conversation) => {
-        conversationWchen = conversation;
-        return zwang.getConversation(conversation.id);
-      }).then((conversation) => {
-        conversationZwang = conversation;
-      });
     });
 
-    after(() => Promise.all([
-      wchen.close(),
-      zwang.close(),
-    ]));
+    after(() => Promise.all([wchen.close(), zwang.close()]));
 
     it('sending message', () => {
       const message = new Message('hello');
@@ -170,7 +169,7 @@ describe('Messages', () => {
         listen(zwang, Event.MESSAGE),
         listen(zwang, Event.UNREAD_MESSAGES_COUNT_UPDATE),
         conversationWchen.send(message),
-      ]).then((messages) => {
+      ]).then(messages => {
         const [
           [receivedMessage],
           [clientReceivedMessage, clientReceivedConversation],
@@ -196,10 +195,12 @@ describe('Messages', () => {
     });
     it('sending typed message', () => {
       const receivePromise = listen(conversationZwang, Event.MESSAGE);
-      const sendPromise = conversationWchen.send(new TextMessage('hello').setAttributes({
-        leancloud: 'rocks',
-      }));
-      return Promise.all([receivePromise, sendPromise]).then((messages) => {
+      const sendPromise = conversationWchen.send(
+        new TextMessage('hello').setAttributes({
+          leancloud: 'rocks',
+        })
+      );
+      return Promise.all([receivePromise, sendPromise]).then(messages => {
         const [[receivedMessage], sentMessage] = messages;
         receivedMessage.id.should.be.equal(sentMessage.id);
         receivedMessage.getText().should.eql(sentMessage.getText());
@@ -208,8 +209,10 @@ describe('Messages', () => {
     });
     it('sending binary message', () => {
       const receivePromise = listen(conversationZwang, Event.MESSAGE);
-      const sendPromise = conversationWchen.send(new BinaryMessage(new ArrayBuffer(10)));
-      return Promise.all([receivePromise, sendPromise]).then((messages) => {
+      const sendPromise = conversationWchen.send(
+        new BinaryMessage(new ArrayBuffer(10))
+      );
+      return Promise.all([receivePromise, sendPromise]).then(messages => {
         const [[receivedMessage], sentMessage] = messages;
         receivedMessage.id.should.be.equal(sentMessage.id);
         receivedMessage.buffer.should.be.instanceof(ArrayBuffer);
@@ -220,29 +223,33 @@ describe('Messages', () => {
       const message = new TextMessage('transient message');
       // transient message 不返回 ack
       // 这里确保成功 resolve
-      return conversationZwang.send(message, { transient: true }).then((msg) => {
+      return conversationZwang.send(message, { transient: true }).then(msg => {
         msg.should.be.instanceof(Message);
         msg.status.should.eql(MessageStatus.SENT);
       });
     });
     it('mention', () => {
-      const message = new TextMessage(`@${zwang.id} @all`).setMentionList(zwang.id).mentionAll();
+      const message = new TextMessage(`@${zwang.id} @all`)
+        .setMentionList(zwang.id)
+        .mentionAll();
       conversationWchen.send(message);
-      return listen(conversationZwang, Event.MESSAGE).then(([receivedMessage]) => {
-        receivedMessage.mentioned.should.eql(true);
-        receivedMessage.getMentionList().should.eql([zwang.id]);
-        receivedMessage.mentionedAll.should.eql(true);
-        conversationZwang.unreadMessagesMentioned.should.eql(true);
-      });
+      return listen(conversationZwang, Event.MESSAGE).then(
+        ([receivedMessage]) => {
+          receivedMessage.mentioned.should.eql(true);
+          receivedMessage.getMentionList().should.eql([zwang.id]);
+          receivedMessage.mentionedAll.should.eql(true);
+          conversationZwang.unreadMessagesMentioned.should.eql(true);
+        }
+      );
     });
     describe('sendOptions', () => {
-      beforeEach(function () {
+      beforeEach(function() {
         this.spy = sinon.spy(Conversation.prototype, '_send');
       });
-      afterEach(function () {
+      afterEach(function() {
         this.spy.restore();
       });
-      it('sendOptions', function () {
+      it('sendOptions', function() {
         const message = new TextMessage('sendOptions test');
         const pushData = {
           alert: 'test',
@@ -259,7 +266,7 @@ describe('Messages', () => {
           },
         });
       });
-      it('Message.sendOptions', function () {
+      it('Message.sendOptions', function() {
         conversationZwang.send(new CustomMessage());
         const command = this.spy.getCall(0).args[0];
         command.should.containDeepOrdered({
@@ -269,8 +276,12 @@ describe('Messages', () => {
     });
     it('receipt', () => {
       const message = new TextMessage('message needs receipt');
-      const receiptPromise = listen(conversationZwang, Event.LAST_DELIVERED_AT_UPDATE);
-      return conversationZwang.send(message, { receipt: true })
+      const receiptPromise = listen(
+        conversationZwang,
+        Event.LAST_DELIVERED_AT_UPDATE
+      );
+      return conversationZwang
+        .send(message, { receipt: true })
         .then(() => receiptPromise)
         .then(() => {
           message.status.should.eql(MessageStatus.DELIVERED);
@@ -281,10 +292,11 @@ describe('Messages', () => {
     it('read', () => {
       const message = new TextMessage('message needs receipt');
       const readPromise = listen(conversationZwang, Event.LAST_READ_AT_UPDATE);
-      conversationWchen.on(Event.MESSAGE, (msg) => {
+      conversationWchen.on(Event.MESSAGE, msg => {
         if (msg.id === message.id) conversationWchen.read();
       });
-      return conversationZwang.send(message, { receipt: true })
+      return conversationZwang
+        .send(message, { receipt: true })
         .then(() => readPromise)
         .then(() => {
           conversationZwang.lastReadAt.should.be.a.Date();
@@ -321,11 +333,14 @@ describe('Messages', () => {
     describe('patch', () => {
       before(function prepareMessage() {
         this.originalMessage = new Message('original');
-        this.modifiedMessage = new TextMessage('modified').setMentionList([zwang.id]);
+        this.modifiedMessage = new TextMessage('modified').setMentionList([
+          zwang.id,
+        ]);
         return conversationWchen.send(this.originalMessage).then(hold(400));
       });
       it('update', function testUpdate() {
-        return conversationWchen.update(this.originalMessage, this.modifiedMessage)
+        return conversationWchen
+          .update(this.originalMessage, this.modifiedMessage)
           .then(() => listen(conversationZwang, Event.MESSAGE_UPDATE))
           .then(([message]) => {
             message.should.be.instanceof(TextMessage);
@@ -337,7 +352,8 @@ describe('Messages', () => {
           });
       });
       it('recall', function testRecall() {
-        return conversationWchen.recall(this.modifiedMessage)
+        return conversationWchen
+          .recall(this.modifiedMessage)
           .then(() => listen(conversationZwang, Event.MESSAGE_RECALL))
           .then(([message]) => {
             message.should.be.instanceof(RecalledMessage);

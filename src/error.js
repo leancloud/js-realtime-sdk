@@ -76,15 +76,22 @@ export const error = Object.freeze({
   },
 });
 
-export const ErrorCode = Object.freeze(Object.keys(error).reduce(
-  (result, code) => Object.assign(result, {
-    [error[code].name]: Number(code),
-  }),
-  {},
-));
+export const ErrorCode = Object.freeze(
+  Object.keys(error).reduce(
+    (result, code) =>
+      Object.assign(result, {
+        [error[code].name]: Number(code),
+      }),
+    {}
+  )
+);
 
 export const createError = ({
-  code, reason, appCode, detail, error: errorMessage,
+  code,
+  reason,
+  appCode,
+  detail,
+  error: errorMessage,
 }) => {
   let message = reason || detail || errorMessage;
   if (!message && error[code]) {
@@ -95,6 +102,8 @@ export const createError = ({
   }
   const err = new Error(message);
   return Object.assign(err, {
-    code, appCode, detail,
+    code,
+    appCode,
+    detail,
   });
 };

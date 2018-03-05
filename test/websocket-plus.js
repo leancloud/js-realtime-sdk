@@ -1,6 +1,15 @@
 import 'should';
 import 'should-sinon';
-import WebSocketPlus, { ERROR, OPEN, DISCONNECT, SCHEDULE, RETRY, RECONNECT, OFFLINE, ONLINE } from '../src/websocket-plus';
+import WebSocketPlus, {
+  ERROR,
+  OPEN,
+  DISCONNECT,
+  SCHEDULE,
+  RETRY,
+  RECONNECT,
+  OFFLINE,
+  ONLINE,
+} from '../src/websocket-plus';
 import { listen, wait, sinon } from './test-utils';
 
 describe('WebSocketPlus', () => {
@@ -14,9 +23,9 @@ describe('WebSocketPlus', () => {
         (() => ws.open()).should.throw();
       });
     });
-    it('error event should be emitted when got 404 error', (done) => {
+    it('error event should be emitted when got 404 error', done => {
       const ws = new WebSocketPlus('ws://404.github.com');
-      ws.on(ERROR, (error) => {
+      ws.on(ERROR, error => {
         error.should.be.instanceof(Error);
         done();
       });
@@ -29,9 +38,9 @@ describe('WebSocketPlus', () => {
       return listen(ws, OPEN, ERROR).then(() => ws.close());
     });
     it('should support promised endpoints', () => {
-      const ws = new WebSocketPlus(Promise.resolve([
-        'ws://demos.kaazing.com/echo',
-      ]));
+      const ws = new WebSocketPlus(
+        Promise.resolve(['ws://demos.kaazing.com/echo'])
+      );
       return listen(ws, OPEN, ERROR).then(() => ws.close());
     });
   });
@@ -93,19 +102,21 @@ describe('WebSocketPlus', () => {
     });
     it('should emit offline-disconnect-online-schedule in order', () => {
       const events = [];
-      [DISCONNECT, OFFLINE, ONLINE, SCHEDULE].forEach((event) => {
+      [DISCONNECT, OFFLINE, ONLINE, SCHEDULE].forEach(event => {
         ws.on(event, () => events.push(event));
       });
       const listenOffline = listen(ws, OFFLINE);
       const listenSchedule = listen(ws, SCHEDULE);
       ws.pause();
-      return listenOffline.then(() => {
-        events.should.eql([DISCONNECT, OFFLINE]);
-        ws.resume();
-        return listenSchedule;
-      }).then(() => {
-        events.should.eql([DISCONNECT, OFFLINE, ONLINE, SCHEDULE]);
-      });
+      return listenOffline
+        .then(() => {
+          events.should.eql([DISCONNECT, OFFLINE]);
+          ws.resume();
+          return listenSchedule;
+        })
+        .then(() => {
+          events.should.eql([DISCONNECT, OFFLINE, ONLINE, SCHEDULE]);
+        });
     });
   });
 });

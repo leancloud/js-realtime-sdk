@@ -1,9 +1,5 @@
 import { GeoPoint } from './storage';
-import {
-  TypedMessage,
-  messageType,
-  messageField,
-} from './realtime';
+import { TypedMessage, messageType, messageField } from './realtime';
 
 export default class LocationMessage extends TypedMessage {
   /**

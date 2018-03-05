@@ -20,11 +20,7 @@ export default class ConversationMemberInfo {
    * 对话成员属性，保存了成员与某个对话相关的属性，对应 _ConversationMemberInfo 表
    * @since 4.0.0
    */
-  constructor({
-    conversation,
-    memberId,
-    role,
-  }) {
+  constructor({ conversation, memberId, role }) {
     if (!conversation) throw new Error('conversation requried');
     if (!memberId) throw new Error('memberId requried');
     Object.assign(internal(this), {
@@ -39,33 +35,36 @@ export default class ConversationMemberInfo {
    * @type {String}
    * @readonly
    */
-  get conversationId() { return internal(this).conversation.id; }
+  get conversationId() {
+    return internal(this).conversation.id;
+  }
   /**
    * 成员 Id
    * @type {String}
    * @readonly
    */
-  get memberId() { return internal(this).memberId; }
+  get memberId() {
+    return internal(this).memberId;
+  }
   /**
    * 角色
    * @type {module:leancloud-realtime.ConversationMemberRole | String}
    * @readonly
    */
-  get role() { return internal(this).role; }
+  get role() {
+    return internal(this).role;
+  }
   /**
    * 是否是管理员
    * @type {Boolean}
    * @readonly
    */
-  get isOwner() { return this.memberId === internal(this).conversation.creator; }
+  get isOwner() {
+    return this.memberId === internal(this).conversation.creator;
+  }
 
   toJSON() {
-    const {
-      conversationId,
-      memberId,
-      role,
-      isOwner,
-    } = this;
+    const { conversationId, memberId, role, isOwner } = this;
     return {
       conversationId,
       memberId,

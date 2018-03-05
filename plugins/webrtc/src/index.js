@@ -8,15 +8,9 @@ import Refusal from './signalings/refusal';
 import Cancelation from './signalings/cancelation';
 import { name } from '../package.json';
 
-const messageClasses = [
-  Offer,
-  Answer,
-  ICECandidate,
-  Refusal,
-  Cancelation,
-];
+const messageClasses = [Offer, Answer, ICECandidate, Refusal, Cancelation];
 
-const onRealtimeCreate = (realtime) => {
+const onRealtimeCreate = realtime => {
   /**
    * 创建一个 WebRTC 客户端，多次创建相同 id 的客户端会返回同一个实例。应用 WebRTC 插件后，Realtime 类会增加该实例方法。
    * WebRTC 客户端是单点登录的，既在同一时刻，同一个 id 只允许一个客户端在线，后登录的客户端会将原来在线上的客户端踢下线。
@@ -53,7 +47,7 @@ export const WebRTCPlugin = {
  * @type {Boolean}
  */
 export const isWebRTCSupported = !!(
-  window.RTCPeerConnection
-  && window.RTCSessionDescription
-  && window.RTCIceCandidate
+  window.RTCPeerConnection &&
+  window.RTCSessionDescription &&
+  window.RTCIceCandidate
 );

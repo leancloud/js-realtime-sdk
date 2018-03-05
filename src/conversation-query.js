@@ -18,13 +18,10 @@ export default class ConversationQuery {
   }
 
   static _calculateFlag(options) {
-    return [
-      'withLastMessagesRefreshed',
-      'compact',
-    ].reduce(
+    return ['withLastMessagesRefreshed', 'compact'].reduce(
       // eslint-disable-next-line no-bitwise
-      (prev, key) => (prev << 1) + (Boolean)(options[key]),
-      0,
+      (prev, key) => (prev << 1) + Boolean(options[key]),
+      0
     );
   }
 
@@ -105,7 +102,6 @@ export default class ConversationQuery {
   lessThan(key, value) {
     return this._addCondition(key, '$lt', value);
   }
-
 
   /**
    * 增加查询条件，当 conversation 的属性中对应的字段满足小于等于条件时即可返回
@@ -215,7 +211,11 @@ export default class ConversationQuery {
    * @return {ConversationQuery} self
    */
   contains(key, subString) {
-    return this._addCondition(key, '$regex', ConversationQuery._quote(subString));
+    return this._addCondition(
+      key,
+      '$regex',
+      ConversationQuery._quote(subString)
+    );
   }
 
   /**
@@ -226,7 +226,11 @@ export default class ConversationQuery {
    * @return {ConversationQuery} self
    */
   startsWith(key, prefix) {
-    return this._addCondition(key, '$regex', `^${ConversationQuery._quote(prefix)}`);
+    return this._addCondition(
+      key,
+      '$regex',
+      `^${ConversationQuery._quote(prefix)}`
+    );
   }
 
   /**
@@ -237,7 +241,11 @@ export default class ConversationQuery {
    * @return {ConversationQuery} self
    */
   endsWith(key, suffix) {
-    return this._addCondition(key, '$regex', `${ConversationQuery._quote(suffix)}$`);
+    return this._addCondition(
+      key,
+      '$regex',
+      `${ConversationQuery._quote(suffix)}$`
+    );
   }
 
   /**
@@ -253,8 +261,12 @@ export default class ConversationQuery {
     // as properties of the object. We support mi & should migrate them to
     // modifiers
     let _modifiers = '';
-    if (regex.ignoreCase) { _modifiers += 'i'; }
-    if (regex.multiline) { _modifiers += 'm'; }
+    if (regex.ignoreCase) {
+      _modifiers += 'i';
+    }
+    if (regex.multiline) {
+      _modifiers += 'm';
+    }
 
     if (_modifiers && _modifiers.length) {
       this._addCondition(key, '$options', _modifiers);

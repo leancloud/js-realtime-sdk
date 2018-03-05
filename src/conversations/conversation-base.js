@@ -20,7 +20,7 @@ import RecalledMessage from '../messages/recalled-message';
 
 const debug = d('LC:Conversation');
 
-const serializeMessage = (message) => {
+const serializeMessage = message => {
   const content = message.getPayload();
   let msg;
   let binaryMsg;
@@ -34,10 +34,7 @@ const serializeMessage = (message) => {
   return { msg, binaryMsg };
 };
 
-const {
-  NEW,
-  OLD,
-} = LogsCommand.QueryDirection;
+const { NEW, OLD } = LogsCommand.QueryDirection;
 
 /**
  * 历史消息查询方向枚举
@@ -61,17 +58,20 @@ export default class ConversationBase extends EventEmitter {
    * @private
    * @abstract
    */
-  constructor({
-    id,
-    lastMessageAt,
-    lastMessage,
-    lastDeliveredAt,
-    lastReadAt,
-    unreadMessagesCount = 0,
-    members = [],
-    mentioned = false,
-    ...properties
-  }, client) {
+  constructor(
+    {
+      id,
+      lastMessageAt,
+      lastMessage,
+      lastDeliveredAt,
+      lastReadAt,
+      unreadMessagesCount = 0,
+      members = [],
+      mentioned = false,
+      ...properties
+    },
+    client
+  ) {
     super();
     Object.assign(this, {
       /**
@@ -115,10 +115,11 @@ export default class ConversationBase extends EventEmitter {
       throw new TypeError('Conversation must be initialized with a client');
     }
     if (debug.enabled) {
-      Object.values(Event).forEach(event => this.on(
-        event,
-        (...payload) => this._debug(`${event} event emitted. %O`, payload),
-      ));
+      Object.values(Event).forEach(event =>
+        this.on(event, (...payload) =>
+          this._debug(`${event} event emitted. %O`, payload)
+        )
+      );
     }
     // onConversationCreate hook
     applyDecorators(this._client._plugins.onConversationCreate, this);
@@ -208,9 +209,13 @@ export default class ConversationBase extends EventEmitter {
    */
   toFullJSON() {
     const {
-      id, members,
-      lastMessageAt, lastDeliveredAt, lastReadAt,
-      lastMessage, unreadMessagesCount,
+      id,
+      members,
+      lastMessageAt,
+      lastDeliveredAt,
+      lastReadAt,
+      lastMessage,
+      unreadMessagesCount,
     } = this;
     return {
       id,
@@ -230,9 +235,14 @@ export default class ConversationBase extends EventEmitter {
    */
   toJSON() {
     const {
-      id, members,
-      lastMessageAt, lastDeliveredAt, lastReadAt,
-      lastMessage, unreadMessagesCount, unreadMessagesMentioned,
+      id,
+      members,
+      lastMessageAt,
+      lastDeliveredAt,
+      lastReadAt,
+      lastMessage,
+      unreadMessagesCount,
+      unreadMessagesMentioned,
     } = this;
     return {
       id,
@@ -283,31 +293,35 @@ export default class ConversationBase extends EventEmitter {
     if (!(message instanceof Message)) {
       throw new TypeError(`${message} is not a Message`);
     }
-    const {
-      transient,
-      receipt,
-      priority,
-      pushData,
-      will,
-    } = Object.assign(
+    const { transient, receipt, priority, pushData, will } = Object.assign(
       {},
       // support Message static property: sendOptions
       message.constructor.sendOptions,
       // support Message static property: getSendOptions
-      typeof message.constructor.getSendOptions === 'function' ? message.constructor.getSendOptions(message) : {},
-      options,
+      typeof message.constructor.getSendOptions === 'function'
+        ? message.constructor.getSendOptions(message)
+        : {},
+      options
     );
     if (receipt) {
       if (this.transient) {
-        console.warn('receipt option is ignored as the conversation is transient.');
+        console.warn(
+          'receipt option is ignored as the conversation is transient.'
+        );
       } else if (transient) {
-        console.warn('receipt option is ignored as the message is sent transiently.');
+        console.warn(
+          'receipt option is ignored as the message is sent transiently.'
+        );
       } else if (this.members.length > 2) {
-        console.warn('receipt option is recommended to be used in one-on-one conversation.'); // eslint-disable-line max-len
+        console.warn(
+          'receipt option is recommended to be used in one-on-one conversation.'
+        ); // eslint-disable-line max-len
       }
     }
     if (priority && !this.transient) {
-      console.warn('priority option is ignored as the conversation is not transient.');
+      console.warn(
+        'priority option is ignored as the conversation is not transient.'
+      );
     }
     Object.assign(message, {
       cid: this.id,
@@ -334,18 +348,12 @@ export default class ConversationBase extends EventEmitter {
     try {
       const resCommand = await this._send(command);
       if (!transient) {
-        const {
-          ackMessage: {
-            uid,
-            t,
+        const { ackMessage: { uid, t, code, reason, appCode } } = resCommand;
+        if (code !== null) {
+          throw createError({
             code,
             reason,
             appCode,
-          },
-        } = resCommand;
-        if (code !== null) {
-          throw createError({
-            code, reason, appCode,
           });
         }
         Object.assign(message, {
@@ -372,7 +380,10 @@ export default class ConversationBase extends EventEmitter {
       if (message.from !== this._client.id) {
         throw new Error('Updating message from others is not allowed');
       }
-      if (message.status !== MessageStatus.SENT && message.status !== MessageStatus.DELIVERED) {
+      if (
+        message.status !== MessageStatus.SENT &&
+        message.status !== MessageStatus.DELIVERED
+      ) {
         throw new Error('Message is not sent');
       }
     } else if (!(message.id && message.timestamp)) {
@@ -384,28 +395,34 @@ export default class ConversationBase extends EventEmitter {
       const content = serializeMessage(newMessage);
       ({ msg, binaryMsg } = content);
     }
-    await this._send(new GenericCommand({
-      cmd: CommandType.patch,
-      op: OpType.modify,
-      patchMessage: new PatchCommand({
-        patches: [new PatchItem({
-          cid: this.id,
-          mid: message.id,
-          timestamp: Number(message.timestamp),
-          recall,
-          data: msg,
-          binaryMsg,
-          mentionPids: newMessage.mentionList,
-          mentionAll: newMessage.mentionedAll,
-        })],
-        lastPatchTime: this._client._lastPatchTime,
-      }),
-    }));
-    const {
-      id, cid, timestamp, from, _status,
-    } = message;
+    await this._send(
+      new GenericCommand({
+        cmd: CommandType.patch,
+        op: OpType.modify,
+        patchMessage: new PatchCommand({
+          patches: [
+            new PatchItem({
+              cid: this.id,
+              mid: message.id,
+              timestamp: Number(message.timestamp),
+              recall,
+              data: msg,
+              binaryMsg,
+              mentionPids: newMessage.mentionList,
+              mentionAll: newMessage.mentionedAll,
+            }),
+          ],
+          lastPatchTime: this._client._lastPatchTime,
+        }),
+      })
+    );
+    const { id, cid, timestamp, from, _status } = message;
     Object.assign(newMessage, {
-      id, cid, timestamp, from, _status,
+      id,
+      cid,
+      timestamp,
+      from,
+      _status,
     });
     if (this.lastMessage.id === newMessage.id) {
       this.lastMessage = newMessage;
@@ -419,9 +436,11 @@ export default class ConversationBase extends EventEmitter {
    */
   async count() {
     this._debug('count');
-    const resCommand = await this._send(new GenericCommand({
-      op: 'count',
-    }));
+    const resCommand = await this._send(
+      new GenericCommand({
+        op: 'count',
+      })
+    );
     return resCommand.convMessage.count;
   }
 
@@ -492,7 +511,9 @@ export default class ConversationBase extends EventEmitter {
       endClosed,
     } = options;
     if (beforeMessageId || beforeTime || afterMessageId || afterTime) {
-      console.log('DEPRECATION: queryMessages options beforeTime, beforeMessageId, afterTime and afterMessageId are deprecated in favor of startTime, startMessageId, endTime and endMessageId.');
+      console.log(
+        'DEPRECATION: queryMessages options beforeTime, beforeMessageId, afterTime and afterMessageId are deprecated in favor of startTime, startMessageId, endTime and endMessageId.'
+      );
       return this.queryMessages({
         startTime: beforeTime,
         startMessageId: beforeMessageId,
@@ -502,10 +523,14 @@ export default class ConversationBase extends EventEmitter {
       });
     }
     if (startMessageId && !startTime) {
-      throw new Error('query option startMessageId must be used with option startTime');
+      throw new Error(
+        'query option startMessageId must be used with option startTime'
+      );
     }
     if (endMessageId && !endTime) {
-      throw new Error('query option endMessageId must be used with option endTime');
+      throw new Error(
+        'query option endMessageId must be used with option endTime'
+      );
     }
     const conditions = {
       t: startTime,
@@ -528,46 +553,54 @@ export default class ConversationBase extends EventEmitter {
     } else if (conditions.tt > conditions.t) {
       conditions.direction = MessageQueryDirection.OLD_TO_NEW;
     }
-    const resCommand = await this._send(new GenericCommand({
-      cmd: 'logs',
-      logsMessage: new LogsCommand(Object.assign(conditions, {
-        cid: this.id,
-      })),
-    }));
-    return Promise.all(resCommand.logsMessage.logs.map(async ({
-      msgId,
-      timestamp,
-      patchTimestamp,
-      from,
-      ackAt,
-      readAt,
-      data,
-      mentionAll,
-      mentionPids,
-      bin,
-    }) => {
-      const messageData = {
-        data,
-        bin,
-        id: msgId,
-        cid: this.id,
-        timestamp,
-        from,
-        deliveredAt: ackAt,
-        updatedAt: patchTimestamp,
-        mentionList: mentionPids,
-        mentionedAll: mentionAll,
-      };
-      const message = await this._client.parseMessage(messageData);
-      let status = MessageStatus.SENT;
-      if (this.members.length === 2) {
-        if (ackAt) status = MessageStatus.DELIVERED;
-        if (ackAt) this._setLastDeliveredAt(ackAt);
-        if (readAt) this._setLastReadAt(readAt);
-      }
-      message._setStatus(status);
-      return message;
-    }));
+    const resCommand = await this._send(
+      new GenericCommand({
+        cmd: 'logs',
+        logsMessage: new LogsCommand(
+          Object.assign(conditions, {
+            cid: this.id,
+          })
+        ),
+      })
+    );
+    return Promise.all(
+      resCommand.logsMessage.logs.map(
+        async ({
+          msgId,
+          timestamp,
+          patchTimestamp,
+          from,
+          ackAt,
+          readAt,
+          data,
+          mentionAll,
+          mentionPids,
+          bin,
+        }) => {
+          const messageData = {
+            data,
+            bin,
+            id: msgId,
+            cid: this.id,
+            timestamp,
+            from,
+            deliveredAt: ackAt,
+            updatedAt: patchTimestamp,
+            mentionList: mentionPids,
+            mentionedAll: mentionAll,
+          };
+          const message = await this._client.parseMessage(messageData);
+          let status = MessageStatus.SENT;
+          if (this.members.length === 2) {
+            if (ackAt) status = MessageStatus.DELIVERED;
+            if (ackAt) this._setLastDeliveredAt(ackAt);
+            if (readAt) this._setLastReadAt(readAt);
+          }
+          message._setStatus(status);
+          return message;
+        }
+      )
+    );
   }
 
   /**
@@ -608,7 +641,7 @@ export default class ConversationBase extends EventEmitter {
             startMessageId: beforeMessageId,
           });
         } else {
-          promise = promise.then((prevMessages) => {
+          promise = promise.then(prevMessages => {
             if (prevMessages.length === 0 || prevMessages.length < limit) {
               // no more messages
               return [];
@@ -667,13 +700,12 @@ export default class ConversationBase extends EventEmitter {
    */
   async fetchReceiptTimestamps() {
     const {
-      convMessage: {
-        maxReadTimestamp,
-        maxAckTimestamp,
-      },
-    } = await this._send(new GenericCommand({
-      op: 'max_read',
-    }));
+      convMessage: { maxReadTimestamp, maxAckTimestamp },
+    } = await this._send(
+      new GenericCommand({
+        op: 'max_read',
+      })
+    );
     this._setLastDeliveredAt(maxAckTimestamp);
     this._setLastReadAt(maxReadTimestamp);
     return this;
@@ -683,19 +715,22 @@ export default class ConversationBase extends EventEmitter {
     const convMessage = new ConvCommand({
       queryAllMembers: true,
     });
-    return this._send(new GenericCommand({
-      op: 'max_read',
-      convMessage,
-    })).then(({
-      convMessage: {
-        maxReadTuples,
-      },
-    }) => maxReadTuples
-      .filter(maxReadTuple => maxReadTuple.maxAckTimestamp || maxReadTuple.maxReadTimestamp)
-      .map(({ pid, maxAckTimestamp, maxReadTimestamp }) => ({
-        pid,
-        lastDeliveredAt: decodeDate(maxAckTimestamp),
-        lastReadAt: decodeDate(maxReadTimestamp),
-      })));
+    return this._send(
+      new GenericCommand({
+        op: 'max_read',
+        convMessage,
+      })
+    ).then(({ convMessage: { maxReadTuples } }) =>
+      maxReadTuples
+        .filter(
+          maxReadTuple =>
+            maxReadTuple.maxAckTimestamp || maxReadTuple.maxReadTimestamp
+        )
+        .map(({ pid, maxAckTimestamp, maxReadTimestamp }) => ({
+          pid,
+          lastDeliveredAt: decodeDate(maxAckTimestamp),
+          lastReadAt: decodeDate(maxReadTimestamp),
+        }))
+    );
   }
 }

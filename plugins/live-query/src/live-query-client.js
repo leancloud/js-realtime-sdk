@@ -1,10 +1,6 @@
 import { Protocals, _Promise, EventEmitter } from './realtime';
 
-const {
-  CommandType,
-  GenericCommand,
-  AckCommand,
-} = Protocals;
+const { CommandType, GenericCommand, AckCommand } = Protocals;
 
 const warn = error => console.warn(error.message);
 
@@ -18,21 +14,28 @@ export default class LiveQueryClient extends EventEmitter {
     this._querys = new Set();
   }
   _send(cmd, ...args) {
-    return this._connection.send(Object.assign(cmd, {
-      appId: this._appId,
-      installationId: this.id,
-      service: 1,
-    }), ...args);
+    return this._connection.send(
+      Object.assign(cmd, {
+        appId: this._appId,
+        installationId: this.id,
+        service: 1,
+      }),
+      ...args
+    );
   }
   _open() {
-    return this._send(new GenericCommand({
-      cmd: CommandType.login,
-    }));
+    return this._send(
+      new GenericCommand({
+        cmd: CommandType.login,
+      })
+    );
   }
   close() {
-    return this._send(new GenericCommand({
-      cmd: CommandType.logout,
-    })).then(() => this._eventemitter.emit('close'));
+    return this._send(
+      new GenericCommand({
+        cmd: CommandType.logout,
+      })
+    ).then(() => this._eventemitter.emit('close'));
   }
   register(liveQuery) {
     this._querys.add(liveQuery);
@@ -48,11 +51,7 @@ export default class LiveQueryClient extends EventEmitter {
     }
     return this._dispatchDataCommand(command);
   }
-  _dispatchDataCommand({
-    dataMessage: {
-      ids, msg,
-    },
-  }) {
+  _dispatchDataCommand({ dataMessage: { ids, msg } }) {
     this.emit('message', msg.map(({ data }) => JSON.parse(data)));
     // send ack
     const command = new GenericCommand({

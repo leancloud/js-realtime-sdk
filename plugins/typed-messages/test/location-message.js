@@ -56,8 +56,9 @@ describe('LocationMessage', () => {
   it('serialize and parse', async () => {
     const message = new LocationMessage(location);
     const json = message.toFullJSON();
-    const parsedMessage =
-      await client.parseMessage(JSON.parse(JSON.stringify(json)));
+    const parsedMessage = await client.parseMessage(
+      JSON.parse(JSON.stringify(json))
+    );
     parsedMessage.should.be.instanceof(LocationMessage);
     parsedMessage.toFullJSON().should.eql(json);
   });

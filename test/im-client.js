@@ -29,9 +29,9 @@ describe('IMClient', () => {
       appKey: APP_KEY,
       region: REGION,
     });
-    return realtime
-      .createIMClient(CLIENT_ID)
-      .then((c) => { client = c; });
+    return realtime.createIMClient(CLIENT_ID).then(c => {
+      client = c;
+    });
   });
 
   after(() => realtime._close());
@@ -45,16 +45,16 @@ describe('IMClient', () => {
       });
       const closeCallback = sinon.spy();
       return Promise.all([
-        rt.createIMClient(42)
-          .should.be.rejected(),
-        rt.createIMClient()
-          .then((client1) => {
+        rt.createIMClient(42).should.be.rejected(),
+        rt
+          .createIMClient()
+          .then(client1 => {
             client1.should.be.instanceof(IMClient);
             client1.id.should.be.a.String();
             rt._IMClients.should.have.properties(client1.id);
           })
           .then(() => rt.createIMClient(CLIENT_ID))
-          .then((client2) => {
+          .then(client2 => {
             client2.on('close', closeCallback);
             client2.id.should.be.equal(CLIENT_ID);
             rt._IMClients.should.have.properties(CLIENT_ID);
@@ -69,7 +69,9 @@ describe('IMClient', () => {
     });
 
     it('should be singleton', () =>
-      realtime.createIMClient(CLIENT_ID).then(client1 => client1.should.be.exactly(client)));
+      realtime
+        .createIMClient(CLIENT_ID)
+        .then(client1 => client1.should.be.exactly(client)));
 
     describe('with signatureFactory', () => {
       it('normal case', () => {
@@ -88,18 +90,21 @@ describe('IMClient', () => {
       });
     });
 
-    it('with tag', (done) => {
+    it('with tag', done => {
       const ID = 'conflict-test-client';
-      realtime.createIMClient(ID, undefined, 'TEST')
-        .then((client1) => {
+      realtime
+        .createIMClient(ID, undefined, 'TEST')
+        .then(client1 => {
           client1.on('conflict', () => done());
           return new Realtime({
             appId: APP_ID,
             appKey: APP_KEY,
             region: REGION,
-          }).createIMClient(ID, undefined, 'TEST')
+          })
+            .createIMClient(ID, undefined, 'TEST')
             .then(client2 => client2.close());
-        }).catch(done);
+        })
+        .catch(done);
     });
   });
 
@@ -108,19 +113,17 @@ describe('IMClient', () => {
       client.ping('1').should.be.rejected());
 
     it('should only return online clients', () =>
-      client.ping(['non-exists-client-id', CLIENT_ID])
-        .then((ids) => {
-          ids.should.eql([CLIENT_ID]);
-        }));
+      client.ping(['non-exists-client-id', CLIENT_ID]).then(ids => {
+        ids.should.eql([CLIENT_ID]);
+      }));
 
     it('should not request if get an empty ids list', () => {
       const send = sinon.spy(IMClient.prototype, '_send');
-      return client.ping([])
-        .then((ids) => {
-          ids.should.eql([]);
-          send.should.not.be.called();
-          send.restore();
-        });
+      return client.ping([]).then(ids => {
+        ids.should.eql([]);
+        send.should.not.be.called();
+        send.restore();
+      });
     });
   });
 
@@ -130,11 +133,11 @@ describe('IMClient', () => {
       await client.getConversation(1).should.be.rejected();
     });
     it('should return null if no match', () =>
-      client.getConversation(NON_EXISTING_ROOM_ID).then((conversation) => {
+      client.getConversation(NON_EXISTING_ROOM_ID).then(conversation => {
         should(conversation).be.null();
       }));
     it('should match one conversation', () =>
-      client.getConversation(EXISTING_ROOM_ID).then((conversation) => {
+      client.getConversation(EXISTING_ROOM_ID).then(conversation => {
         conversation.should.be.instanceof(Conversation);
         conversation.id.should.be.equal(EXISTING_ROOM_ID);
         conversation.createdAt.should.be.a.Date();
@@ -144,50 +147,65 @@ describe('IMClient', () => {
     it('should always return the same conversation instance', () => {
       let anonymousClientConversatoin;
       let originConversation;
-      return realtime.createIMClient().then(anonymousClient =>
-        // 使用匿名 client 创建一个对话
-        anonymousClient.createConversation({
-          members: [CLIENT_ID],
-          name: 'avoscloud',
-        })).then((conversation) => {
-        // 查询这个对话
-        anonymousClientConversatoin = conversation;
-        return client.getConversation(conversation.id);
-      }).then((conversation) => {
-        // 匿名 client 修改这个对话
-        originConversation = conversation;
-        return anonymousClientConversatoin
-          .set('name', 'leancloud')
-          .save();
-      }).then(() =>
-        // 再查询，应该返回原始对话
-        client.getConversation(anonymousClientConversatoin.id)).then((conversation) => {
-        conversation.should.be.exactly(originConversation);
-        originConversation.name.should.be.eql('avoscloud');
-        // 设置 noCache 查询，应该返回更新过的原始对话
-        return client.getConversation(anonymousClientConversatoin.id, true);
-      }).then((conversation) => {
-        conversation.should.be.exactly(originConversation);
-        originConversation.name.should.be.eql('leancloud');
-      });
+      return realtime
+        .createIMClient()
+        .then(anonymousClient =>
+          // 使用匿名 client 创建一个对话
+          anonymousClient.createConversation({
+            members: [CLIENT_ID],
+            name: 'avoscloud',
+          })
+        )
+        .then(conversation => {
+          // 查询这个对话
+          anonymousClientConversatoin = conversation;
+          return client.getConversation(conversation.id);
+        })
+        .then(conversation => {
+          // 匿名 client 修改这个对话
+          originConversation = conversation;
+          return anonymousClientConversatoin.set('name', 'leancloud').save();
+        })
+        .then(() =>
+          // 再查询，应该返回原始对话
+          client.getConversation(anonymousClientConversatoin.id)
+        )
+        .then(conversation => {
+          conversation.should.be.exactly(originConversation);
+          originConversation.name.should.be.eql('avoscloud');
+          // 设置 noCache 查询，应该返回更新过的原始对话
+          return client.getConversation(anonymousClientConversatoin.id, true);
+        })
+        .then(conversation => {
+          conversation.should.be.exactly(originConversation);
+          originConversation.name.should.be.eql('leancloud');
+        });
     });
     // https://github.com/leancloud/js-realtime-sdk/issues/229
     it('should update properties', () =>
-      client.getQuery()
+      client
+        .getQuery()
         .equalTo('objectId', EXISTING_ROOM_ID)
         .withLastMessagesRefreshed(true)
         .find()
-        .then((conversations) => {
+        .then(conversations => {
           conversations[0].lastMessage.should.be.instanceof(Message);
-          return client.getQuery()
+          return client
+            .getQuery()
             .equalTo('objectId', EXISTING_ROOM_ID)
             .withLastMessagesRefreshed(false)
             .find();
-        }).then((conversations) => {
+        })
+        .then(conversations => {
           conversations[0].lastMessage.should.be.instanceof(Message);
         }));
     it('getConversations', () =>
-      client.getConversations([NON_EXISTING_ROOM_ID, EXISTING_ROOM_ID, EXISTING_ROOM_ID])
+      client
+        .getConversations([
+          NON_EXISTING_ROOM_ID,
+          EXISTING_ROOM_ID,
+          EXISTING_ROOM_ID,
+        ])
         .then(([nonExistingConv, existingConv1, existingConv2]) => {
           should(nonExistingConv).be.null();
           existingConv1.id.should.eql(EXISTING_ROOM_ID);
@@ -197,49 +215,59 @@ describe('IMClient', () => {
 
   describe('createConversation', () => {
     it('should create a conversation', () =>
-      client.createConversation({
-        members: ['hjiang'],
-        name: '135',
-        attributes: {
-          foo: 'bar',
-        },
-        baz: 'qux',
-      }).then((conversation) => {
-        conversation.should.be.instanceof(Conversation);
-        conversation.members.should.have.length(2);
-        conversation.members.should.containDeep(['hjiang', CLIENT_ID]);
-        conversation.createdAt.should.be.a.Date();
-        conversation.updatedAt.should.be.a.Date();
-        should(conversation.lastMessageAt).be.null();
-        conversation.name.should.be.equal('135');
-        conversation.get('attributes').should.eql({ foo: 'bar' });
-        conversation.get('baz').should.eql('qux');
-      }));
+      client
+        .createConversation({
+          members: ['hjiang'],
+          name: '135',
+          attributes: {
+            foo: 'bar',
+          },
+          baz: 'qux',
+        })
+        .then(conversation => {
+          conversation.should.be.instanceof(Conversation);
+          conversation.members.should.have.length(2);
+          conversation.members.should.containDeep(['hjiang', CLIENT_ID]);
+          conversation.createdAt.should.be.a.Date();
+          conversation.updatedAt.should.be.a.Date();
+          should(conversation.lastMessageAt).be.null();
+          conversation.name.should.be.equal('135');
+          conversation.get('attributes').should.eql({ foo: 'bar' });
+          conversation.get('baz').should.eql('qux');
+        }));
     it('members required', () =>
       client.createConversation().should.be.rejected());
     it('unique', () =>
-      series([0, 0].map(() => () => client.createConversation({
-        name: 'unique room',
-        members: ['hjiang', 'jfeng'],
-        unique: true,
-      }))).then((conversations) => {
+      series(
+        [0, 0].map(() => () =>
+          client.createConversation({
+            name: 'unique room',
+            members: ['hjiang', 'jfeng'],
+            unique: true,
+          })
+        )
+      ).then(conversations => {
         conversations[0].should.be.exactly(conversations[1]);
       }));
     it('transient', () =>
-      client.createChatRoom({
-        name: 'transient room',
-      }).then((conversation) => {
-        conversation.should.be.instanceof(ChatRoom);
-        conversation.members.should.be.empty();
-      }));
+      client
+        .createChatRoom({
+          name: 'transient room',
+        })
+        .then(conversation => {
+          conversation.should.be.instanceof(ChatRoom);
+          conversation.members.should.be.empty();
+        }));
     it('createConversation with transient option ', () =>
-      client.createConversation({
-        name: 'transient room',
-        transient: true,
-      }).then((conversation) => {
-        conversation.should.be.instanceof(ChatRoom);
-        conversation.members.should.be.empty();
-      }));
+      client
+        .createConversation({
+          name: 'transient room',
+          transient: true,
+        })
+        .then(conversation => {
+          conversation.should.be.instanceof(ChatRoom);
+          conversation.members.should.be.empty();
+        }));
   });
 
   describe('session token', () => {
@@ -264,7 +292,9 @@ describe('IMClient', () => {
       const sm = new SessionManager();
       sm.setSessionToken(FAKE_TOKEN, 1000);
       try {
-        await sm.setSessionTokenAsync(Promise.reject(new Error('fetch session token error')));
+        await sm.setSessionTokenAsync(
+          Promise.reject(new Error('fetch session token error'))
+        );
       } catch (error) {
         // ignore
       }
@@ -290,7 +320,9 @@ describe('IMClient', () => {
       });
       it('normal case', async function test() {
         client._connection.disconnect();
-        await client._sessionManager.getSessionToken().should.be.rejectedWith('Connection unavailable');
+        await client._sessionManager
+          .getSessionToken()
+          .should.be.rejectedWith('Connection unavailable');
         return listen(client, Event.RECONNECT).then(() => {
           this.spy.should.be.called();
         });
