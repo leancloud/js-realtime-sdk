@@ -11,6 +11,7 @@ export const tryAll = promiseConstructors => {
   return promise.catch(() => tryAll(promiseConstructors.slice(1)));
 };
 
+// eslint-disable-next-line no-sequences
 export const tap = interceptor => value => (interceptor(value), value);
 
 export { default as Expirable } from './expirable';
@@ -159,8 +160,8 @@ export const setValue = (target, key, value) => {
   return target;
 };
 
-// eslint-disable-next-line no-undef
 export const isWeapp =
+  // eslint-disable-next-line no-undef
   typeof wx === 'object' && typeof wx.connectSocket === 'function';
 
 // throttle decorator
