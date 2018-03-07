@@ -16,10 +16,14 @@
       "npm run lint && npm run build && npm run docs && npm run test:node && npm run test:browser",
     "test:node":
       "NODE_ENV=test nyc mocha --timeout 30000 test/index.js plugins/**/test/index.js --exit",
-    "test:browser": "grunt test-browser --stack",
+    "test:browser": "npm run build:test && grunt test-browser --stack",
     "docs":
       "jsdoc src README.md package.json -d docs -c .jsdocrc.json && jsdoc plugins/typed-messages/src plugins/typed-messages/package.json src/messages/message.js src/messages/typed-message.js -d plugins/typed-messages/docs -c .jsdocrc.json && jsdoc plugins/webrtc/src plugins/webrtc/package.json -d plugins/webrtc/docs -c .jsdocrc.json && jsdoc plugins/groupchat-receipts/src plugins/groupchat-receipts/package.json -d plugins/groupchat-receipts/docs -c .jsdocrc.json",
-    "build": "grunt build --stack",
+    "build":
+      "npm run build:realtime && npm run build:plugins && grunt validate-es5 --stack",
+    "build:realtime": "rollup -c rollup/rollup.config.realtime.js",
+    "build:plugins": "rollup -c rollup/rollup.config.plugins.js",
+    "build:test": "rollup -c rollup/rollup.config.test.js",
     "changelog": "conventional-changelog -p angular -i CHANGELOG.md -s",
     "convert-pb":
       "pbjs proto/message.proto -t commonjs > proto/message-compiled.js && sed -i '' 's/protobufjs/protobufjs\\/dist\\/protobuf-light/g' ./proto/message-compiled.js"
@@ -56,9 +60,6 @@
     "espree": "^3.1.4",
     "grunt": "^1.0.1",
     "grunt-contrib-connect": "^1.0.0",
-    "grunt-contrib-uglify": "^3.1.0",
-    "grunt-envify": "0.1.0",
-    "grunt-rollup": "leeyeh/grunt-rollup",
     "grunt-saucelabs": "^9.0.0",
     "husky": "^0.14.3",
     "inherit": "^2.2.3",
@@ -70,9 +71,12 @@
     "nyc": "^11.2.1",
     "prettier": "^1.11.1",
     "pretty-quick": "^1.4.1",
+    "rollup": "^0.56.4",
     "rollup-plugin-babel": "^3.0.2",
     "rollup-plugin-commonjs": "^8.0.2",
     "rollup-plugin-json": "^2.0.0",
+    "rollup-plugin-replace": "^2.0.0",
+    "rollup-plugin-uglify": "^3.0.0",
     "should": "^12.0.0",
     "should-sinon": "0.0.5",
     "sinon": "^4.2.1",
