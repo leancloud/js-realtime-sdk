@@ -16,6 +16,7 @@ import Connection, {
 import { ErrorCode, createError } from './error';
 import { tap, Cache, trim, internal, ensureArray, isWeapp } from './utils';
 import { applyDecorators, applyDispatcher } from './plugin';
+import { version as VERSION } from '../package.json';
 
 const debug = d('LC:Realtime');
 const debugRequest = d('LC:request');
@@ -37,8 +38,8 @@ export default class Realtime extends EventEmitter {
    * @param  {String|String[]} [options.RTMServers] 指定私有部署的 RTM 服务器地址（since 4.0.0）
    * @param  {Plugin[]} [options.plugins] 加载插件（since 3.1.0）
    */
-  constructor(options) {
-    debug('initializing Realtime');
+  constructor({ plugins, ...options }) {
+    debug('initializing Realtime %s %O', VERSION, options);
     super();
     if (typeof options.appId !== 'string') {
       throw new TypeError(`appId [${options.appId}] is not a string`);
@@ -60,10 +61,12 @@ export default class Realtime extends EventEmitter {
     );
     this._cache = new Cache('endpoints');
     internal(this).clients = new Set();
-    this._plugins = [
+    const mergedPlugins = [
       ...ensureArray(Realtime.__preRegisteredPlugins),
-      ...ensureArray(options.plugins),
-    ].reduce((result, plugin) => {
+      ...ensureArray(plugins),
+    ];
+    debug('Using plugins %o', mergedPlugins.map(plugin => plugin.name));
+    this._plugins = mergedPlugins.reduce((result, plugin) => {
       // eslint-disable-next-line no-restricted-syntax
       for (const hook in plugin) {
         if ({}.hasOwnProperty.call(plugin, hook) && hook !== 'name') {
