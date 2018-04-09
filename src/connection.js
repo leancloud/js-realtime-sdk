@@ -53,7 +53,7 @@ export default class Connection extends WebSocketPlus {
     this._serialId = 0;
   }
 
-  send(command, waitingForRespond = true) {
+  async send(command, waitingForRespond = true) {
     let serialId;
     if (waitingForRespond) {
       this._serialId += 1;
@@ -74,9 +74,7 @@ export default class Connection extends WebSocketPlus {
 
     super.send(message);
 
-    if (!waitingForRespond) {
-      return Promise.resolve();
-    }
+    if (!waitingForRespond) return undefined;
     return new Promise((resolve, reject) => {
       this._commands[serialId] = {
         resolve,
