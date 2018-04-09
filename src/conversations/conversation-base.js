@@ -474,7 +474,7 @@ export default class ConversationBase extends EventEmitter {
    *
    * @param  {Object} [options]
    * @param  {Number} [options.limit] 限制查询结果的数量，目前服务端默认为 20
-   * @param  {type}   [options.type] 指定查询的富媒体消息类型，不指定则查询所有消息。
+   * @param  {Number}   [options.type] 指定查询的富媒体消息类型，不指定则查询所有消息。
    * @param  {MessageQueryDirection} [options.direction] 查询的方向。
    * 在不指定的情况下如果 startTime 大于 endTime，则为从新到旧查询，可以实现加载聊天记录等场景。
    * 如果 startTime 小于 endTime，则为从旧到新查询，可以实现弹幕等场景。
