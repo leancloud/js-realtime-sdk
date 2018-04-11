@@ -8,35 +8,47 @@ const onRealtimeCreate = realtime => {
     if (realtime._liveQueryClients[subscriptionId] !== undefined) {
       return _Promise.resolve(realtime._liveQueryClients[subscriptionId]);
     }
-    const promise = realtime._open().then(connection => {
-      const client = new LiveQueryClient(
-        realtime._options.appId,
-        subscriptionId,
-        connection
-      );
-      connection.on('reconnect', () =>
-        client
-          ._open()
-          .then(
-            () => client.emit('reconnect'),
-            error => client.emit('reconnecterror', error)
-          )
-      );
-      client._eventemitter.on(
-        'close',
-        () => {
-          delete realtime._liveQueryClients[client.id];
-          realtime._deregister(client);
-        },
-        realtime
-      );
-      return client._open().then(() => {
-        realtime._liveQueryClients[client.id] = client;
-        realtime._register(client);
-        return client;
+    const promise = realtime
+      ._open()
+      .then(connection => {
+        const client = new LiveQueryClient(
+          realtime._options.appId,
+          subscriptionId,
+          connection
+        );
+        connection.on('reconnect', () =>
+          client
+            ._open()
+            .then(
+              () => client.emit('reconnect'),
+              error => client.emit('reconnecterror', error)
+            )
+        );
+        client._eventemitter.on(
+          'beforeclose',
+          () => {
+            delete realtime._liveQueryClients[client.id];
+          },
+          realtime
+        );
+        client._eventemitter.on(
+          'close',
+          () => {
+            realtime._deregister(client);
+          },
+          realtime
+        );
+        return client._open().then(() => {
+          realtime._liveQueryClients[client.id] = client;
+          realtime._register(client);
+          return client;
+        });
+      })
+      .finally(() => {
+        if (realtime._deregisterPending) realtime._deregisterPending(promise);
       });
-    });
     realtime._liveQueryClients[subscriptionId] = promise;
+    if (realtime._registerPending) realtime._registerPending(promise);
     return promise;
   };
   /* eslint-enable no-param-reassign */

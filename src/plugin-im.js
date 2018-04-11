@@ -222,70 +222,85 @@ const onRealtimeCreate = realtime => {
       );
     }
     const _tag = tag || lagecyTag;
-    const promise = realtime._open().then(connection => {
-      const client = new IMClient(
-        id,
-        { ...buildinOptions, ...clientOptions },
-        {
-          _connection: connection,
-          _request: realtime._request.bind(realtime),
-          _messageParser: messageParser,
-          _plugins: realtime._plugins,
-          _identity: identity,
-        }
-      );
-      connection.on(RECONNECT, () =>
-        client
-          ._open(realtime._options.appId, _tag, deviceId, true)
-          /**
-           * 客户端连接恢复正常，该事件通常在 {@link Realtime#event:RECONNECT} 之后发生
-           * @event IMClient#RECONNECT
-           * @see Realtime#event:RECONNECT
-           * @since 3.2.0
-           */
-          /**
-           * 客户端重新登录发生错误（网络连接已恢复，但重新登录错误）
-           * @event IMClient#RECONNECT_ERROR
-           * @since 3.2.0
-           */
-          .then(
-            () => client.emit(RECONNECT),
-            error => client.emit(RECONNECT_ERROR, error)
-          )
-      );
-      internal(client)._eventemitter.on(
-        'close',
-        () => {
-          delete realtime._IMClients[client.id];
-          realtime._deregister(client);
-        },
-        realtime
-      );
-      return client
-        ._open(realtime._options.appId, _tag, deviceId, isReconnect)
-        .then(() => {
-          realtime._IMClients[client.id] = client;
-          realtime._IMClientsCreationCount += 1;
-          if (realtime._IMClientsCreationCount === 1) {
-            client._omitPeerId(true);
-            realtime._firstIMClient = client;
-          } else if (
-            realtime._IMClientsCreationCount > 1 &&
-            realtime._firstIMClient
-          ) {
-            realtime._firstIMClient._omitPeerId(false);
+    const promise = realtime
+      ._open()
+      .then(connection => {
+        const client = new IMClient(
+          id,
+          { ...buildinOptions, ...clientOptions },
+          {
+            _connection: connection,
+            _request: realtime._request.bind(realtime),
+            _messageParser: messageParser,
+            _plugins: realtime._plugins,
+            _identity: identity,
           }
-          realtime._register(client);
-          return client;
-        })
-        .catch(error => {
-          delete realtime._IMClients[client.id];
-          throw error;
-        });
-    });
+        );
+        connection.on(RECONNECT, () =>
+          client
+            ._open(realtime._options.appId, _tag, deviceId, true)
+            /**
+             * 客户端连接恢复正常，该事件通常在 {@link Realtime#event:RECONNECT} 之后发生
+             * @event IMClient#RECONNECT
+             * @see Realtime#event:RECONNECT
+             * @since 3.2.0
+             */
+            /**
+             * 客户端重新登录发生错误（网络连接已恢复，但重新登录错误）
+             * @event IMClient#RECONNECT_ERROR
+             * @since 3.2.0
+             */
+            .then(
+              () => client.emit(RECONNECT),
+              error => client.emit(RECONNECT_ERROR, error)
+            )
+        );
+        internal(client)._eventemitter.on(
+          'beforeclose',
+          () => {
+            delete realtime._IMClients[client.id];
+            if (realtime._firstIMClient === client) {
+              delete realtime._firstIMClient;
+            }
+          },
+          realtime
+        );
+        internal(client)._eventemitter.on(
+          'close',
+          () => {
+            realtime._deregister(client);
+          },
+          realtime
+        );
+        return client
+          ._open(realtime._options.appId, _tag, deviceId, isReconnect)
+          .then(() => {
+            realtime._IMClients[client.id] = client;
+            realtime._IMClientsCreationCount += 1;
+            if (realtime._IMClientsCreationCount === 1) {
+              client._omitPeerId(true);
+              realtime._firstIMClient = client;
+            } else if (
+              realtime._IMClientsCreationCount > 1 &&
+              realtime._firstIMClient
+            ) {
+              realtime._firstIMClient._omitPeerId(false);
+            }
+            realtime._register(client);
+            return client;
+          })
+          .catch(error => {
+            delete realtime._IMClients[client.id];
+            throw error;
+          });
+      })
+      .finally(() => {
+        realtime._deregisterPending(promise);
+      });
     if (identity) {
       realtime._IMClients[id] = promise;
     }
+    realtime._registerPending(promise);
     return promise;
   };
   Object.assign(realtime, {

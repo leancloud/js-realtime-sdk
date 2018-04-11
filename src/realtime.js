@@ -60,7 +60,9 @@ export default class Realtime extends EventEmitter {
       options
     );
     this._cache = new Cache('endpoints');
-    internal(this).clients = new Set();
+    const _this = internal(this);
+    _this.clients = new Set();
+    _this.pendingClients = new Set();
     const mergedPlugins = [
       ...ensureArray(Realtime.__preRegisteredPlugins),
       ...ensureArray(plugins),
@@ -391,13 +393,22 @@ export default class Realtime extends EventEmitter {
     if (connection.can('resume')) connection.resume();
   }
 
+  _registerPending(value) {
+    internal(this).pendingClients.add(value);
+  }
+
+  _deregisterPending(client) {
+    internal(this).pendingClients.delete(client);
+  }
+
   _register(client) {
     internal(this).clients.add(client);
   }
 
   _deregister(client) {
-    internal(this).clients.delete(client);
-    if (internal(this).clients.size === 0) {
+    const _this = internal(this);
+    _this.clients.delete(client);
+    if (_this.clients.size + _this.pendingClients.size === 0) {
       this._close();
     }
   }

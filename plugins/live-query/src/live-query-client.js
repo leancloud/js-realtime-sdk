@@ -31,18 +31,22 @@ export default class LiveQueryClient extends EventEmitter {
     );
   }
   close() {
+    const _ee = this._eventemitter;
+    _ee.emit('beforeclose');
     return this._send(
       new GenericCommand({
         cmd: CommandType.logout,
       })
-    ).then(() => this._eventemitter.emit('close'));
+    ).then(() => _ee.emit('close'));
   }
   register(liveQuery) {
     this._querys.add(liveQuery);
   }
   deregister(liveQuery) {
     this._querys.delete(liveQuery);
-    if (!this._querys.size) this.close().catch(warn);
+    setTimeout(() => {
+      if (!this._querys.size) this.close().catch(warn);
+    }, 0);
   }
   _dispatchCommand(command) {
     if (command.cmd !== CommandType.data) {

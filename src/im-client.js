@@ -1037,6 +1037,8 @@ export default class IMClient extends EventEmitter {
    */
   async close() {
     this._debug('close session');
+    const _ee = internal(this)._eventemitter;
+    _ee.emit('beforeclose');
     if (this._connection.is('connected')) {
       const command = new GenericCommand({
         cmd: 'session',
@@ -1044,7 +1046,7 @@ export default class IMClient extends EventEmitter {
       });
       await this._send(command);
     }
-    internal(this)._eventemitter.emit('close');
+    _ee.emit('close');
     this.emit(CLOSE, {
       code: 0,
     });
