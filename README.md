@@ -35,19 +35,20 @@ npm install leancloud-realtime@3 --save
 ## 支持的运行环境
 
 * 浏览器 / WebView
-  * IE 10+ / Edge
-  * Chrome 31+
+  * IE 10+
+  * Edge latest
+  * Chrome 45+
   * Firefox latest
-  * iOS 8.0+
+  * iOS 9.3+
   * Android 4.4+
 * Node.js 4.0+
-* 微信小程序 latest
+* 微信小程序/小游戏 latest
 * React Native 0.26+
 * Electron latest
 
 ## 文档
 
-* [安装文档](https://leancloud.cn/docs/realtime_guide-js.html#安装和初始化)
+* [安装文档](https://leancloud.cn/docs/sdk_setup-js.html)
 * [使用文档](https://leancloud.cn/docs/realtime_guide-js.html)
 * [API 文档](https://leancloud.github.io/js-realtime-sdk/docs/)
 
@@ -187,9 +188,9 @@ npm run build
 
 ## Release Process Workflow
 
-0.  遵循 semver 提升 `package.json` 与 `bower.json` 中的版本号
+0.  遵循 semver 提升 `package.json` 中的版本号
 1.  `npm run changelog` 生成新的 `changelog.md`，润色之
-1.  Commit `package.json`，`bower.json`，`changelog.md`
+1.  Commit `package.json`，`changelog.md`
 1.  Push to remote `master` branch
 1.  等待持续集成 pass
 1.  使用 GitHub 基于 dist 分支生成 pre-release 包（for bower）
