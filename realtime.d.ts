@@ -1,27 +1,47 @@
-declare module LeanCloudRealtime {
+declare namespace LeanCloudRealtime {
   interface AVUser {
     getSessionToken(): string;
   }
 
   interface SignatureResult {
-    signature: string,
-    timestamp: number,
-    nonce: string,
+    signature: string;
+    timestamp: number;
+    nonce: string;
   }
   type SignatureFactoryResult = Promise<SignatureResult> | SignatureResult;
 
   export class Realtime extends EventEmitter {
-    constructor(options: { appId: string, appKey: string, region?: string, pushOfflineMessages?: boolean, noBinary?: boolean, ssl?: boolean, server?: string|{RTMRouter: string, api: string}, RTMServers?: string|string[], plugins?: Array<Plugin> });
+    constructor(options: {
+      appId: string;
+      appKey: string;
+      region?: string;
+      pushOfflineMessages?: boolean;
+      noBinary?: boolean;
+      ssl?: boolean;
+      server?: string | { RTMRouter: string; api: string };
+      RTMServers?: string | string[];
+      plugins?: Array<Plugin>;
+    });
     createIMClient(
-      client: string|AVUser,
+      client: string | AVUser,
       options?: {
-        signatureFactory?: (clientId: string) => SignatureFactoryResult,
-        conversationSignatureFactory?: (clientId: string, conversationId: string, targetIds: string[], action: string) => SignatureFactoryResult,
-        blacklistSignatureFactory?: (clientId: string, conversationId: string, targetIds: string[], action: string) => SignatureFactoryResult,
-        tag?: string,
-        isReconnect?: boolean,
+        signatureFactory?: (clientId: string) => SignatureFactoryResult;
+        conversationSignatureFactory?: (
+          clientId: string,
+          conversationId: string,
+          targetIds: string[],
+          action: string
+        ) => SignatureFactoryResult;
+        blacklistSignatureFactory?: (
+          clientId: string,
+          conversationId: string,
+          targetIds: string[],
+          action: string
+        ) => SignatureFactoryResult;
+        tag?: string;
+        isReconnect?: boolean;
       },
-      tag?: string,
+      tag?: string
     ): Promise<IMClient>;
     static defineConversationProperty(prop: string, descriptor?: Object);
     register(messageClass: AVMessage[]);
@@ -31,14 +51,28 @@ declare module LeanCloudRealtime {
   class IMClient extends EventEmitter {
     id: string;
     close(): Promise<void>;
-    createConversation(options: { members?: string[], name?: string, transient?: boolean, unique?: boolean, [key: string]: any }): Promise<ConversationBase>;
-    createChatRoom(options: { name?: string, [key: string]: any }): Promise<ChatRoom>;
-    createTemporaryConversation(options: { members?: string[], ttl?: number }): Promise<TemporaryConversation>;
+    createConversation(options: {
+      members?: string[];
+      name?: string;
+      transient?: boolean;
+      unique?: boolean;
+      [key: string]: any;
+    }): Promise<ConversationBase>;
+    createChatRoom(options: {
+      name?: string;
+      [key: string]: any;
+    }): Promise<ChatRoom>;
+    createTemporaryConversation(options: {
+      members?: string[];
+      ttl?: number;
+    }): Promise<TemporaryConversation>;
     getConversation(id: string, noCache?: boolean): Promise<ConversationBase>;
     getQuery(): ConversationQuery<PresistentConversation>;
     getServiceConversationQuery(): ConversationQuery<ServiceConversation>;
     getChatRoomQuery(): ConversationQuery<ChatRoom>;
-    markAllAsRead(conversations: ConversationBase[]): Promise<Array<ConversationBase>>;
+    markAllAsRead(
+      conversations: ConversationBase[]
+    ): Promise<Array<ConversationBase>>;
     ping(clientIds: string[]): Promise<Array<string>>;
     parseMessage(json: Object): Promise<AVMessage>;
     parseConversation(json: Object): Promise<ConversationBase>;
@@ -74,8 +108,8 @@ declare module LeanCloudRealtime {
     withMembers(peerIds: string[], includeSelf: boolean): this;
   }
   /**
-  *  对话
-  */
+   *  对话
+   */
   class ConversationBase extends EventEmitter {
     id: string;
     lastMessage?: Message;
@@ -87,13 +121,46 @@ declare module LeanCloudRealtime {
     readonly unreadMessagesMentioned: Boolean;
     [key: string]: any;
     // constructor();
-    createMessagesIterator(option: { limit?: number, beforeTime?: Date, beforeMessageId?: string });
+    createMessagesIterator(option: {
+      limit?: number;
+      beforeTime?: Date;
+      beforeMessageId?: string;
+    });
     read(): Promise<this>;
     fetchReceiptTimestamps(): Promise<this>;
-    queryMessages(options: { beforeTime?: Date, beforeMessageId?: string, afterTime?: Date, afterMessageId?: string, limit?: number, type: number }): Promise<Array<Message>>;
-    queryMessages(options: { startTime?: Date, startMessageId?: string, startClosed?: boolean, endTime?: Date, endMessageId?: string, endClosed?: boolean, limit?: number, type: number, direction?: MessageQueryDirection }): Promise<Array<Message>>;
-    send<T extends Message>(message: T, options?: { pushData?: Object, priority?: MessagePriority, receipt?: boolean, transient?: boolean, will?: boolean }): Promise<T>;
-    update<T extends Message>(message: MessagePointer, newMessage: T): Promise<T>;
+    queryMessages(options: {
+      beforeTime?: Date;
+      beforeMessageId?: string;
+      afterTime?: Date;
+      afterMessageId?: string;
+      limit?: number;
+      type: number;
+    }): Promise<Array<Message>>;
+    queryMessages(options: {
+      startTime?: Date;
+      startMessageId?: string;
+      startClosed?: boolean;
+      endTime?: Date;
+      endMessageId?: string;
+      endClosed?: boolean;
+      limit?: number;
+      type: number;
+      direction?: MessageQueryDirection;
+    }): Promise<Array<Message>>;
+    send<T extends Message>(
+      message: T,
+      options?: {
+        pushData?: Object;
+        priority?: MessagePriority;
+        receipt?: boolean;
+        transient?: boolean;
+        will?: boolean;
+      }
+    ): Promise<T>;
+    update<T extends Message>(
+      message: MessagePointer,
+      newMessage: T
+    ): Promise<T>;
     recall(message: MessagePointer): Promise<RecalledMessage>;
     count(): Promise<number>;
     toJSON(): Object;
@@ -142,13 +209,20 @@ declare module LeanCloudRealtime {
     remove(clientIds: string[]): Promise<PartiallySuccess>;
     muteMembers(clientIds: string[]): Promise<PartiallySuccess>;
     unmuteMembers(clientIds: string[]): Promise<PartiallySuccess>;
-    queryMutedMembers(options?: PagedQueryParams): Promise<PagedResults<string>>;
+    queryMutedMembers(
+      options?: PagedQueryParams
+    ): Promise<PagedResults<string>>;
     blockMembers(clientIds: string[]): Promise<PartiallySuccess>;
     unblockMembers(clientIds: string[]): Promise<PartiallySuccess>;
-    queryBlockedMembers(options?: PagedQueryParams): Promise<PagedResults<string>>;
+    queryBlockedMembers(
+      options?: PagedQueryParams
+    ): Promise<PagedResults<string>>;
     getAllMemberInfo(): Promise<ConversationMemberInfo[]>;
     getMemberInfo(memberId: string): Promise<ConversationMemberInfo>;
-    updateMemberRole(memberId: string, role: ConversationMemberRole): Promise<this>;
+    updateMemberRole(
+      memberId: string,
+      role: ConversationMemberRole
+    ): Promise<this>;
   }
 
   export class Conversation extends PresistentConversation {}
@@ -176,7 +250,7 @@ declare module LeanCloudRealtime {
     toJSON(): Object;
   }
 
-  type MessagePointer = Message | {id: string, timestamp: Date|number};
+  type MessagePointer = Message | { id: string; timestamp: Date | number };
 
   type Payload = Object | String | ArrayBuffer;
 
@@ -214,7 +288,7 @@ declare module LeanCloudRealtime {
 
   // 富媒体消息
   export class TypedMessage extends Message {
-    static type: number;
+    static TYPE: number;
     attributes: Object;
     text: string;
     readonly summary: string;
@@ -239,10 +313,10 @@ declare module LeanCloudRealtime {
   }
 
   interface Middleware<T> {
-    (target: T): T
+    (target: T): T;
   }
   interface Decorator<T> {
-    (target: T): void
+    (target: T): void;
   }
 
   export interface Plugin {
@@ -300,7 +374,7 @@ declare module LeanCloudRealtime {
     INVALID_MESSAGING_TARGET,
     MESSAGE_REJECTED_BY_APP,
   }
-  
+
   export enum Event {
     DISCONNECT,
     RECONNECT,
@@ -310,7 +384,7 @@ declare module LeanCloudRealtime {
     ONLINE,
 
     RECONNECT_ERROR,
-  
+
     INVITED,
     KICKED,
     MEMBERS_JOINED,
@@ -338,8 +412,8 @@ declare module LeanCloudRealtime {
     INFO_UPDATED,
   }
 
-  export function messageType(type: number): Function
-  export function messageField(fields: string[]): Function
+  export function messageType(type: number): Function;
+  export function messageField(fields: string[]): Function;
 }
 
 export = LeanCloudRealtime;

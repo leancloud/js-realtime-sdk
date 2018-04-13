@@ -1,3 +1,39 @@
+<a name="4.0.0-beta.5"></a>
+
+# [4.0.0-beta.5](https://github.com/leancloud/js-realtime-sdk/compare/v4.0.0-beta.4...v4.0.0-beta.5) (2018-04-13)
+
+### Bug Fixes
+
+* 修复了多个导致切换用户时连接状态异常的问题。
+
+### Features
+
+* 支持按照富媒体消息类型查询历史消息。`Conversation#queryMessages` 方法增加了 `type` 参数用于指定查询的消息的类型
+
+    <details>
+  <summary>示例</summary>
+
+  ```js
+  // 限定查询图片消息
+  conversation
+    .queryMessage({
+      type: ImageMessage.TYPE,
+    })
+    .then(console.log)
+    .catch(console.error);
+  ```
+
+    </details>
+
+* 新增枚举 `Event`。SDK 派发的事件的名称是全小写风格的字符串。当事件的名称由多个单词组成时，全小写风格的命名会很难辩识（例如 `unreadmessagescountupdate`）。SDK 现在提供了事件常量枚举 `Event`，你可以使用 `Event.UNREAD_MESSAGES_COUNT_UPDATE` 来代替 `unreadmessagescountupdate` 了。
+* 引入了更加可靠的通知机制。在断线期间发生的 `INVITED` 与 `KICKED` 事件，现在会在断线重连成功后收到。
+
+### BREAKING CHANGES
+
+* 不再支持下列运行环境（SDK 应该仍能在这些环境下工作，但我们不再对其进行测试了）：
+  * Chrome < 45
+  * iOS < 9.3
+
 <a name="4.0.0-beta.4"></a>
 
 # 4.0.0-beta.4 (2018-02-06)
@@ -144,8 +180,8 @@
 
 * 初始化 `Realtime` 现在需要 `appKey` 参数。
 
-  <details>
-<summary>示例</summary>
+    <details>
+  <summary>示例</summary>
 
   ```diff
    const realtime = new Realtime({
@@ -154,12 +190,12 @@
    });
   ```
 
-  </details>
+    </details>
 
 * 现在所有异步 API 的异常都是以异步的方式抛出。我们还更新了 API 文档，标出了 API 的异步属性。
 
-  <details>
-<summary>示例</summary>
+    <details>
+  <summary>示例</summary>
 
   ```javascript
   // before
@@ -175,13 +211,13 @@
   });
   ```
 
-  </details>
+    </details>
 
 * 为了更好的隔离服务，我们为每个应用提供了独立的域名。对于小程序用户，请前往 [《小程序域名白名单配置》](https://leancloud.cn/docs/weapp-domains.html) 更新域名白名单。
 * 移除了 v3 中被标记为废弃的 API，包括：
 
-  <details>
-<summary>移除 API 列表</summary>
+    <details>
+  <summary>移除 API 列表</summary>
 
   * `IMClient`
     * `#markAllAsRead` 方法
@@ -194,10 +230,11 @@
   * `ConversationQuery`
     * `#withLastMessages` 方法
   * `Message`
+
     * `needReceipt` 与 `transient` 属性
     * `#setNeedReceipt` 与 `#setTransient` 方法
 
-  </details>
+    </details>
 
 ### Features
 
