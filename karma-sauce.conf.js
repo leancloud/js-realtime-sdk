@@ -1,4 +1,17 @@
 module.exports = config => {
+  const customLaunchers = {
+    sl_chrome: {
+      base: 'SauceLabs',
+      browserName: 'chrome',
+      version: '45',
+    },
+    sl_ios_safari: {
+      base: 'SauceLabs',
+      browserName: 'iPhone',
+      version: '9.3',
+    },
+  };
+
   config.set({
     // base path that will be used to resolve all patterns (eg. files, exclude)
     basePath: '',
@@ -6,6 +19,13 @@ module.exports = config => {
     // frameworks to use
     // available frameworks: https://npmjs.org/browse/keyword/karma-adapter
     frameworks: ['mocha'],
+
+    client: {
+      mocha: {
+        ui: 'bdd',
+        timeout: 30000,
+      },
+    },
 
     // list of files / patterns to load in the browser
     files: ['test/browser/index.js'],
@@ -20,7 +40,7 @@ module.exports = config => {
     // test results reporter to use
     // possible values: 'dots', 'progress'
     // available reporters: https://npmjs.org/browse/keyword/karma-reporter
-    reporters: ['dots'],
+    reporters: ['dots', 'saucelabs'],
 
     // web server port
     port: 9876,
@@ -35,9 +55,23 @@ module.exports = config => {
     // enable / disable watching file and executing tests whenever any file changes
     autoWatch: false,
 
+    sauceLabs: {
+      testName: `LeanCloud Realtime SDK Test #${(
+        process.env.TRAVIS_COMMIT || ''
+      ).slice(0, 7)}`,
+      recordVideo: true,
+      connectOptions: {
+        noSslBumpDomains: 'all',
+        logfile: 'sauce_connect.log',
+      },
+    },
+    customLaunchers,
+    captureTimeout: 480000,
+    browserNoActivityTimeout: 120000,
+
     // start these browsers
     // available browser launchers: https://npmjs.org/browse/keyword/karma-launcher
-    browsers: ['Chrome'],
+    browsers: Object.keys(customLaunchers),
 
     // Continuous Integration mode
     // if true, Karma captures browsers, runs the tests and exits
@@ -45,6 +79,6 @@ module.exports = config => {
 
     // Concurrency level
     // how many browser should be started simultaneous
-    concurrency: Infinity,
+    concurrency: 1,
   });
 };

@@ -16,11 +16,13 @@
       "npm run lint && npm run build && npm run docs && npm run test:node && npm run test:browser",
     "test:node":
       "NODE_ENV=test nyc mocha --timeout 30000 test/index.js plugins/**/test/index.js --exit",
-    "test:browser": "npm run build:test && karma start",
+    "test:browser":
+      "if [ ! -z \"$SAUCE_ACCESS_KEY\" ]; then npm run build:test && karma start karma-sauce.conf.js; else echo 'Saucelabs test skipped, set SAUCE_USERNAME and SAUCE_ACCESS_KEY to start it.\n\rTo run browser tests locally, run `npm run test:browser-local`'; fi",
+    "test:browser-local": "npm run build:test && karma start",
     "docs":
       "jsdoc src README.md package.json -d docs -c .jsdocrc.json && jsdoc plugins/typed-messages/src plugins/typed-messages/package.json src/messages/message.js src/messages/typed-message.js -d plugins/typed-messages/docs -c .jsdocrc.json && jsdoc plugins/webrtc/src plugins/webrtc/package.json -d plugins/webrtc/docs -c .jsdocrc.json && jsdoc plugins/groupchat-receipts/src plugins/groupchat-receipts/package.json -d plugins/groupchat-receipts/docs -c .jsdocrc.json",
     "build":
-      "npm run build:realtime && npm run build:plugins && grunt validate-es5 --stack",
+      "npm run build:realtime && npm run build:plugins && ./script/validate-es5.js",
     "build:realtime": "rollup -c rollup/rollup.config.realtime.js",
     "build:plugins": "rollup -c rollup/rollup.config.plugins.js",
     "build:test": "rollup -c rollup/rollup.config.test.js",
@@ -58,9 +60,6 @@
     "eslint-config-prettier": "^2.9.0",
     "eslint-plugin-import": "^2.0.0",
     "espree": "^3.1.4",
-    "grunt": "^1.0.1",
-    "grunt-contrib-connect": "^1.0.0",
-    "grunt-saucelabs": "^9.0.0",
     "husky": "^0.14.3",
     "inherit": "^2.2.3",
     "jsdoc": "leeyeh/jsdoc#v3.4.0",
@@ -70,7 +69,6 @@
     "karma-mocha": "^1.3.0",
     "karma-sauce-launcher": "^1.2.0",
     "leancloud-storage": "^3.0.0",
-    "load-grunt-tasks": "^3.4.1",
     "mocha": "^5.0.0",
     "nyc": "^11.2.1",
     "prettier": "^1.11.1",

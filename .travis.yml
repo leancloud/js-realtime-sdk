@@ -10,7 +10,7 @@ env:
     - EXSITING_ROOM_ID=5638313660b28815a724df31
     - SYS_CONV_ID=57bdb5965e1072004edd532c
 install:
-  - npm install grunt-cli codecov -g
+  - npm install codecov -g
   - npm install
 script:
   - npm test && codecov
