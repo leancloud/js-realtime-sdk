@@ -264,7 +264,7 @@ describe('Conversation', () => {
     it('afterTime', () =>
       conversation
         .queryMessages({
-          afterTime: new Date(),
+          afterTime: new Date(4070908800000),
         })
         .then(messages => {
           messages.should.be.an.empty();
@@ -272,7 +272,7 @@ describe('Conversation', () => {
     it('direction', () =>
       conversation
         .queryMessages({
-          startTime: new Date(),
+          startTime: new Date(4070908800000),
           direction: MessageQueryDirection.OLD_TO_NEW,
         })
         .then(messages => {
