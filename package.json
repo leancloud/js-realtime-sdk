@@ -42,7 +42,7 @@
   "homepage": "https://leancloud.cn/",
   "devDependencies": {
     "@commitlint/cli": "^6.0.2",
-    "@commitlint/config-angular": "^6.0.2",
+    "@commitlint/config-conventional": "^6.1.3",
     "@leeyeh/jsdoc-rtd": "^1.0.13",
     "@leeyeh/rollup-plugin-node-resolve": "^3.0.0",
     "babel-eslint": "^8.0.0",
@@ -120,7 +120,7 @@
     "trailingComma": "es5"
   },
   "commitlint": {
-    "extends": ["@commitlint/config-angular"]
+    "extends": ["@commitlint/config-conventional"]
   },
   "types": "./realtime.d.ts",
   "typings": "./realtime.d.ts"
