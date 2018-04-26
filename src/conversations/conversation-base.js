@@ -348,7 +348,9 @@ export default class ConversationBase extends EventEmitter {
     try {
       const resCommand = await this._send(command);
       if (!transient) {
-        const { ackMessage: { uid, t, code, reason, appCode } } = resCommand;
+        const {
+          ackMessage: { uid, t, code, reason, appCode },
+        } = resCommand;
         if (code !== null) {
           throw createError({
             code,
@@ -511,7 +513,7 @@ export default class ConversationBase extends EventEmitter {
       endClosed,
     } = options;
     if (beforeMessageId || beforeTime || afterMessageId || afterTime) {
-      console.log(
+      console.warn(
         'DEPRECATION: queryMessages options beforeTime, beforeMessageId, afterTime and afterMessageId are deprecated in favor of startTime, startMessageId, endTime and endMessageId.'
       );
       return this.queryMessages({
