@@ -41,14 +41,14 @@ class WebSocketPlus extends EventEmitter {
       );
     }
     super();
-    if (typeof getUrls !== 'function') {
-      this._getUrls = () => Promise.resolve(getUrls);
-    } else {
-      this._getUrls = getUrls;
-    }
-    this._protocol = protocol;
     this.init();
-    this._createWs(this._getUrls, this._protocol)
+    this._protocol = protocol;
+    Promise.resolve(typeof getUrls === 'function' ? getUrls() : getUrls)
+      .then(ensureArray)
+      .then(urls => {
+        this._urls = urls;
+        return this._open();
+      })
       .then(() => {
         this.__postponeTimeoutTimer = this._postponeTimeoutTimer.bind(this);
         if (global.addEventListener) {
@@ -62,32 +62,36 @@ class WebSocketPlus extends EventEmitter {
       .catch(this.throw.bind(this));
   }
 
-  _createWs(getUrls, protocol) {
-    return getUrls().then(urls =>
-      tryAll(
-        ensureArray(urls).map(url => (resolve, reject) => {
-          debug(`connect [${url}] ${protocol}`);
-          const ws = protocol
-            ? new WebSocket(url, protocol)
-            : new WebSocket(url);
-          ws.binaryType = this.binaryType || 'arraybuffer';
-          ws.onopen = () => resolve(ws);
-          ws.onclose = error => {
-            if (error instanceof Error) {
-              return reject(error);
-            }
-            // in browser, error event is useless
-            return reject(new Error(`Failed to connect [${url}]`));
-          };
-          ws.onerror = ws.onclose;
-        })
-      ).then(ws => {
-        this._ws = ws;
-        this._ws.onclose = this._handleClose.bind(this);
-        this._ws.onmessage = this._handleMessage.bind(this);
-        return ws;
+  _open() {
+    return this._createWs(this._urls, this._protocol).then(ws => {
+      const [first, ...reset] = this._urls;
+      this._urls = [...reset, first];
+      return ws;
+    });
+  }
+
+  _createWs(urls, protocol) {
+    return tryAll(
+      urls.map(url => (resolve, reject) => {
+        debug(`connect [${url}] ${protocol}`);
+        const ws = protocol ? new WebSocket(url, protocol) : new WebSocket(url);
+        ws.binaryType = this.binaryType || 'arraybuffer';
+        ws.onopen = () => resolve(ws);
+        ws.onclose = error => {
+          if (error instanceof Error) {
+            return reject(error);
+          }
+          // in browser, error event is useless
+          return reject(new Error(`Failed to connect [${url}]`));
+        };
+        ws.onerror = ws.onclose;
       })
-    );
+    ).then(ws => {
+      this._ws = ws;
+      this._ws.onclose = this._handleClose.bind(this);
+      this._ws.onmessage = this._handleMessage.bind(this);
+      return ws;
+    });
   }
   _destroyWs() {
     const ws = this._ws;
@@ -141,7 +145,7 @@ class WebSocketPlus extends EventEmitter {
   }
   onretry(event, from, to, attempt = 0) {
     this.emit(RETRY, attempt);
-    this._createWs(this._getUrls, this._protocol).then(
+    this._open().then(
       () => (this.can('reconnect') ? this.reconnect() : this._destroyWs()),
       () => this.can('fail') && this.fail(attempt + 1)
     );
