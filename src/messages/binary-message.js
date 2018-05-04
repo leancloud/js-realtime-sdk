@@ -1,6 +1,9 @@
 import { encode as encodeBase64 } from 'base64-arraybuffer';
 import Message from './message';
-
+import { IE10Compatible } from './helpers';
+// jsdoc-ignore-start
+@IE10Compatible
+// jsdoc-ignore-end
 export default class BinaryMessage extends Message {
   /**
    * 二进制消息

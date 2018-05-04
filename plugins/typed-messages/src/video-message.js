@@ -1,5 +1,5 @@
 import FileMessage from './file-message';
-import { messageType } from './realtime';
+import { messageType, IE10Compatible } from './realtime';
 
 /**
  * 构造方法参数同 {@link FileMessage}
@@ -17,5 +17,6 @@ VideoMessage._summaryType = '视频';
  * @const
  */
 messageType(-4)(VideoMessage);
+IE10Compatible(VideoMessage);
 
 export default VideoMessage;

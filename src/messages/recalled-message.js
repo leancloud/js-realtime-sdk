@@ -1,8 +1,9 @@
 import TypedMessage from './typed-message';
-import { messageType } from './helpers';
+import { messageType, IE10Compatible } from './helpers';
 
 // jsdoc-ignore-start
 @messageType(-127)
+@IE10Compatible
 // jsdoc-ignore-end
 /**
  * 已撤回类型消息，当消息被撤回时，SDK 会使用该类型的消息替代原始消息

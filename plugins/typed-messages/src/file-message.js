@@ -1,5 +1,10 @@
 import { File } from './storage';
-import { TypedMessage, messageType, messageField } from './realtime';
+import {
+  TypedMessage,
+  messageType,
+  messageField,
+  IE10Compatible,
+} from './realtime';
 
 export default class FileMessage extends TypedMessage {
   /**
@@ -88,3 +93,4 @@ FileMessage._summaryType = '文件';
  */
 messageType(-6)(FileMessage);
 messageField('_lcfile')(FileMessage);
+IE10Compatible(FileMessage);

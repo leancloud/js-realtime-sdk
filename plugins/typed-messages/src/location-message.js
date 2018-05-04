@@ -1,5 +1,10 @@
 import { GeoPoint } from './storage';
-import { TypedMessage, messageType, messageField } from './realtime';
+import {
+  TypedMessage,
+  messageType,
+  messageField,
+  IE10Compatible,
+} from './realtime';
 
 export default class LocationMessage extends TypedMessage {
   /**
@@ -56,3 +61,4 @@ export default class LocationMessage extends TypedMessage {
  */
 messageType(-5)(LocationMessage);
 messageField('_lcloc')(LocationMessage);
+IE10Compatible(LocationMessage);

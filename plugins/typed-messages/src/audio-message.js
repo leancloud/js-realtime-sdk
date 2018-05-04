@@ -1,5 +1,5 @@
 import FileMessage from './file-message';
-import { messageType } from './realtime';
+import { messageType, IE10Compatible } from './realtime';
 
 /**
  * 构造方法参数同 {@link FileMessage}
@@ -17,5 +17,6 @@ AudioMessage._summaryType = '语音';
  * @const
  */
 messageType(-3)(AudioMessage);
+IE10Compatible(AudioMessage);
 
 export default AudioMessage;
