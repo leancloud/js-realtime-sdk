@@ -251,7 +251,7 @@ Usernames = {
 // 显示接收到的信息
 function showMsg(message, isBefore) {
   var text = message.text;
-  Promise.resolve()
+  AV.Promise.resolve()
     .then(function() {
       if (message.from === clientId) {
         return '自己';
