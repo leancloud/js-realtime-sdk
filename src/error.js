@@ -9,6 +9,10 @@ export const error = Object.freeze({
     name: 'APP_NOT_AVAILABLE',
     message: 'App not exists or realtime message service is disabled.',
   },
+  4102: {
+    name: 'SIGNATURE_FAILED',
+    message: 'Login signature mismatch.',
+  },
   4103: {
     name: 'INVALID_LOGIN',
     message: 'Malformed clientId.',
@@ -36,15 +40,25 @@ export const error = Object.freeze({
   4112: {
     name: 'SESSION_TOKEN_EXPIRED',
   },
+  4113: {
+    name: 'APP_QUOTA_EXCEEDED',
+    message: 'The daily active users limit exceeded.',
+  },
+  4116: {
+    name: 'MESSAGE_SENT_QUOTA_EXCEEDED',
+    message: 'Command sent too fast.',
+  },
   4200: {
     name: 'INTERNAL_ERROR',
     message: 'Internal error, please contact LeanCloud for support.',
   },
-  4201: {
-    name: 'SEND_MESSAGE_TIMEOUT',
+  4301: {
+    name: 'CONVERSATION_API_FAILED',
+    message: 'Upstream Conversatoin API failed, see error.detail for details.',
   },
   4302: {
     name: 'CONVERSATION_SIGNATURE_FAILED',
+    message: 'Conversation action signature mismatch.',
   },
   4303: {
     name: 'CONVERSATION_NOT_FOUND',
@@ -54,6 +68,7 @@ export const error = Object.freeze({
   },
   4305: {
     name: 'CONVERSATION_REJECTED_BY_APP',
+    message: 'Conversation action rejected by hook.',
   },
   4306: {
     name: 'CONVERSATION_UPDATE_FAILED',
@@ -64,15 +79,69 @@ export const error = Object.freeze({
   4308: {
     name: 'CONVERSATION_NOT_ALLOWED',
   },
+  4309: {
+    name: 'CONVERSATION_UPDATE_REJECTED',
+    message: 'Conversation update rejected because the client is not a member.',
+  },
+  4310: {
+    name: 'CONVERSATION_QUERY_FAILED',
+    message: 'Conversation query failed because it is too expansive.',
+  },
+  4311: {
+    name: 'CONVERSATION_LOG_FAILED',
+  },
+  4312: {
+    name: 'CONVERSATION_LOG_REJECTED',
+    message:
+      'Message query rejected because the client is not a member of the conversation.',
+  },
+  4313: {
+    name: 'SYSTEM_CONVERSATION_REQUIRED',
+  },
+  4314: {
+    name: 'NORMAL_CONVERSATION_REQUIRED',
+  },
+  4315: {
+    name: 'CONVERSATION_BLACKLISTED',
+    message: 'Blacklisted in the conversation.',
+  },
+  4316: {
+    name: 'TRANSIENT_CONVERSATION_REQUIRED',
+  },
   4317: {
-    name: 'CONVERSATION_EXPIRED',
+    name: 'CONVERSATION_MEMBERSHIP_REQUIRED',
+  },
+  4318: {
+    name: 'CONVERSATION_API_QUOTA_EXCEEDED',
+    message: 'LeanCloud API quota exceeded. You may upgrade your plan.',
+  },
+  4323: {
+    name: 'TEMPORARY_CONVERSATION_EXPIRED',
     message: 'Temporary conversation expired or does not exist.',
   },
   4401: {
     name: 'INVALID_MESSAGING_TARGET',
+    message: 'Conversation does not exist or client is not a member.',
   },
   4402: {
     name: 'MESSAGE_REJECTED_BY_APP',
+    message: 'Message rejected by hook.',
+  },
+  4403: {
+    name: 'MESSAGE_OWNERSHIP_REQUIRED',
+  },
+  4404: {
+    name: 'MESSAGE_NOT_FOUND',
+  },
+  4405: {
+    name: 'MESSAGE_UPDATE_REJECTED_BY_APP',
+    message: 'Message update rejected by hook.',
+  },
+  4406: {
+    name: 'MESSAGE_EDIT_DISABLED',
+  },
+  4407: {
+    name: 'MESSAGE_RECALL_DISABLED',
   },
 });
 
@@ -94,8 +163,10 @@ export const createError = ({
   error: errorMessage,
 }) => {
   let message = reason || detail || errorMessage;
+  let name = reason;
   if (!message && error[code]) {
-    message = error[code].message || error[code].name;
+    ({ name } = error[code]);
+    message = error[code].message || name;
   }
   if (!message) {
     message = `Unknow Error: ${code}`;
@@ -105,5 +176,6 @@ export const createError = ({
     code,
     appCode,
     detail,
+    name,
   });
 };

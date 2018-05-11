@@ -754,14 +754,16 @@ describe('Conversation', () => {
       conv.expired.should.eql(true);
       await conv.send(new TextMessage('')).should.be.rejectedWith(Error, {
         message: 'Temporary conversation expired or does not exist.',
-        code: ErrorCode.CONVERSATION_EXPIRED,
+        code: ErrorCode.TEMPORARY_CONVERSATION_EXPIRED,
+        name: 'TEMPORARY_CONVERSATION_EXPIRED',
       });
       // server expiration check
       conv.expiredAt = Date.now() + 1000000;
       conv.expired.should.eql(false);
       return conv.send(new TextMessage('')).should.be.rejectedWith(Error, {
         message: 'Temporary conversation expired or does not exist.',
-        code: ErrorCode.CONVERSATION_EXPIRED,
+        code: ErrorCode.TEMPORARY_CONVERSATION_EXPIRED,
+        name: 'TEMPORARY_CONVERSATION_EXPIRED',
       });
     });
     it('serialize and parse', async () => {

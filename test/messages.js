@@ -323,6 +323,7 @@ describe('Messages', () => {
           .then(conversation => conversation.send(message))
           .should.be.rejectedWith(Error, {
             message: 'INVALID_MESSAGING_TARGET',
+            name: 'INVALID_MESSAGING_TARGET',
             code: ErrorCode.INVALID_MESSAGING_TARGET,
           })
           .then(() => {

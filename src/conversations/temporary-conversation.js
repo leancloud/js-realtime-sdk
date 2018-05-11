@@ -4,7 +4,7 @@ import { decodeDate, getTime } from '../utils';
 
 const transformNotFoundError = error =>
   error.code === ErrorCode.CONVERSATION_NOT_FOUND
-    ? createError({ code: ErrorCode.CONVERSATION_EXPIRED })
+    ? createError({ code: ErrorCode.TEMPORARY_CONVERSATION_EXPIRED })
     : error;
 
 /**
@@ -48,7 +48,7 @@ class TemporaryConversation extends ConversationBase {
 
   async _send(...args) {
     if (this.expired)
-      throw createError({ code: ErrorCode.CONVERSATION_EXPIRED });
+      throw createError({ code: ErrorCode.TEMPORARY_CONVERSATION_EXPIRED });
     try {
       return await super._send(...args);
     } catch (error) {

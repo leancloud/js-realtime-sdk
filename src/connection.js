@@ -82,7 +82,12 @@ export default class Connection extends WebSocketPlus {
         timeout: setTimeout(() => {
           if (this._commands[serialId]) {
             if (debug.enabled) debug('✗ %O timeout', trim(command));
-            reject(new Error('Command Timeout.'));
+            reject(
+              createError({
+                error: `Command Timeout [cmd:${command.cmd} op:${command.op}]`,
+                name: 'COMMAND_TIMEOUT',
+              })
+            );
             delete this._commands[serialId];
           }
         }, COMMAND_TIMEOUT),
