@@ -1,3 +1,24 @@
+<a name="4.0.0-rc.0"></a>
+
+# [4.0.0-rc.0](https://github.com/leancloud/js-realtime-sdk/compare/v4.0.0-beta.5...v4.0.0-rc.0) (2018-05-11)
+
+### Bug Fixes
+
+* 修复 IE10 兼容问题。
+* 更新了一些令人疑惑的异常信息（`error.message`)。
+
+### Performance Improvements
+
+* 断线重连时优先尝试未连接过的服务器从而改善某些情况下的重连速度。
+
+### BREAKING CHANGES
+
+* 部分异常的 `error.message` 被更新了。
+
+  这是一个不兼容的改动，考虑到开发者可能会对 `error.message` 进行字符串匹配。我们建议使用 `error.code` 或 `error.name` 进行异常匹配与处理。
+
+  **请注意：** 今后对 `error.message` 的改动将不被认为是不兼容的改动。
+
 <a name="4.0.0-beta.5"></a>
 
 # [4.0.0-beta.5](https://github.com/leancloud/js-realtime-sdk/compare/v4.0.0-beta.4...v4.0.0-beta.5) (2018-04-13)
