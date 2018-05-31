@@ -34,7 +34,7 @@ export default class Realtime extends EventEmitter {
    * @param  {Boolean} [options.noBinary=false] 设置 WebSocket 使用字符串格式收发消息（默认为二进制格式）。
    *                                            适用于 WebSocket 实现不支持二进制数据格式的情况
    * @param  {Boolean} [options.ssl=true] 使用 wss 进行连接
-   * @param  {String} [options.server] 指定私有部署的服务器域名（since 4.0.0）
+   * @param  {String|Object} [options.server] 指定私有部署的服务器域名（since 4.0.0）
    * @param  {String|String[]} [options.RTMServers] 指定私有部署的 RTM 服务器地址（since 4.0.0）
    * @param  {Plugin[]} [options.plugins] 加载插件（since 3.1.0）
    */
@@ -89,8 +89,12 @@ export default class Realtime extends EventEmitter {
   }
 
   async _request({ method, version = '1.1', path, query, headers, data = {} }) {
-    const { appId, region } = this._options;
-    const { api } = await this.constructor._getServerUrls({ appId, region });
+    const { appId, region, server } = this._options;
+    const { api } = await this.constructor._getServerUrls({
+      appId,
+      region,
+      server,
+    });
     const url = `https://${api}/${version}${path}`;
     const options = {
       method,
