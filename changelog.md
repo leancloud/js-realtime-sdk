@@ -1,3 +1,12 @@
+<a name="4.0.1"></a>
+
+## [4.0.1](https://github.com/leancloud/js-realtime-sdk/compare/v4.0.0...v4.0.1) (2018-05-31)
+
+### Bug Fixes
+
+* 修复了在 React Native 中 `Realtime#createIMClient` 返回 `undefined` 的问题。
+* 修复了私有部署应用会错误地请求公有集群的问题。
+
 <a name="4.0.0"></a>
 
 # 4.0.0 (2018-05-28)
