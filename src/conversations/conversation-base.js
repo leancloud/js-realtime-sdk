@@ -117,7 +117,7 @@ export default class ConversationBase extends EventEmitter {
     if (debug.enabled) {
       Object.values(Event).forEach(event =>
         this.on(event, (...payload) =>
-          this._debug(`${event} event emitted. %O`, payload)
+          this._debug(`${event} event emitted. %o`, payload)
         )
       );
     }

@@ -224,7 +224,7 @@ export default class Realtime extends EventEmitter {
       // event proxy
       [DISCONNECT, RECONNECT, RETRY, SCHEDULE, OFFLINE, ONLINE].forEach(event =>
         connection.on(event, (...payload) => {
-          debug(`${event} event emitted. %O`, payload);
+          debug(`${event} event emitted. %o`, payload);
           this.emit(event, ...payload);
           if (event !== RECONNECT) {
             internal(this).clients.forEach(client => {

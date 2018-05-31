@@ -118,7 +118,7 @@ export default class IMClient extends EventEmitter {
     if (debug.enabled) {
       Object.values(Event).forEach(event =>
         this.on(event, (...payload) =>
-          this._debug(`${event} event emitted. %O`, payload)
+          this._debug(`${event} event emitted. %o`, payload)
         )
       );
     }
@@ -160,7 +160,9 @@ export default class IMClient extends EventEmitter {
   }
 
   async _dispatchSessionMessage(message) {
-    const { sessionMessage: { code, reason } } = message;
+    const {
+      sessionMessage: { code, reason },
+    } = message;
     switch (message.op) {
       case OpType.closed: {
         internal(this)._eventemitter.emit('close');
@@ -261,7 +263,10 @@ export default class IMClient extends EventEmitter {
   }
 
   async _dispatchRcpMessage(message) {
-    const { rcpMessage, rcpMessage: { read } } = message;
+    const {
+      rcpMessage,
+      rcpMessage: { read },
+    } = message;
     const conversationId = rcpMessage.cid;
     const messageId = rcpMessage.id;
     const timestamp = decodeDate(rcpMessage.t);
@@ -355,7 +360,10 @@ export default class IMClient extends EventEmitter {
   }
 
   async _dispatchConvMessage(message) {
-    const { convMessage, convMessage: { initBy, m, info, attr } } = message;
+    const {
+      convMessage,
+      convMessage: { initBy, m, info, attr },
+    } = message;
     const conversation = await this.getConversation(convMessage.cid);
     switch (message.op) {
       case OpType.joined: {
@@ -1385,9 +1393,9 @@ export default class IMClient extends EventEmitter {
       );
     }
 
-    const { convMessage: { cid, cdate, tempConvTTL: ttl } } = await this._send(
-      command
-    );
+    const {
+      convMessage: { cid, cdate, tempConvTTL: ttl },
+    } = await this._send(command);
     const data = {
       name,
       transient,
