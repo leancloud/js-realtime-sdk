@@ -11,7 +11,7 @@ import TextMessage from './messages/text-message';
 import TypedMessage from './messages/typed-message';
 import RecalledMessage from './messages/recalled-message';
 import MessageParser from './message-parser';
-import { trim, internal, ensureArray } from './utils';
+import { trim, internal, ensureArray, finalize } from './utils';
 
 const debug = d('LC:IMPlugin');
 
@@ -294,9 +294,11 @@ const onRealtimeCreate = realtime => {
             throw error;
           });
       })
-      .finally(() => {
-        realtime._deregisterPending(promise);
-      });
+      .then(
+        ...finalize(() => {
+          realtime._deregisterPending(promise);
+        })
+      );
     if (identity) {
       realtime._IMClients[id] = promise;
     }

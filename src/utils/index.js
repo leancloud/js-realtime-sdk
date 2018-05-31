@@ -14,6 +14,15 @@ export const tryAll = promiseConstructors => {
 // eslint-disable-next-line no-sequences
 export const tap = interceptor => value => (interceptor(value), value);
 
+export const finalize = callback => [
+  // eslint-disable-next-line no-sequences
+  value => (callback(), value),
+  error => {
+    callback();
+    throw error;
+  },
+];
+
 export { default as Expirable } from './expirable';
 export { default as Cache } from './cache';
 

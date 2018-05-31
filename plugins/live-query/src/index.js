@@ -1,6 +1,15 @@
 import { _Promise } from './realtime';
 import LiveQueryClient from './live-query-client';
 
+const finalize = callback => [
+  // eslint-disable-next-line no-sequences
+  value => (callback(), value),
+  error => {
+    callback();
+    throw error;
+  },
+];
+
 const onRealtimeCreate = realtime => {
   /* eslint-disable no-param-reassign */
   realtime._liveQueryClients = {};
@@ -44,9 +53,11 @@ const onRealtimeCreate = realtime => {
           return client;
         });
       })
-      .finally(() => {
-        if (realtime._deregisterPending) realtime._deregisterPending(promise);
-      });
+      .then(
+        ...finalize(() => {
+          if (realtime._deregisterPending) realtime._deregisterPending(promise);
+        })
+      );
     realtime._liveQueryClients[subscriptionId] = promise;
     if (realtime._registerPending) realtime._registerPending(promise);
     return promise;
