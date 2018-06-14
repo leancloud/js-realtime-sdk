@@ -368,9 +368,10 @@ class PersistentConversation extends ConversationBase {
       }),
     });
     await this._appendConversationSignature(command, 'add', clientIds);
-    const { convMessage, convMessage: { allowedPids } } = await this._send(
-      command
-    );
+    const {
+      convMessage,
+      convMessage: { allowedPids },
+    } = await this._send(command);
     if (!this.transient && !this.system) {
       this.members = union(this.members, allowedPids);
     }
@@ -394,9 +395,10 @@ class PersistentConversation extends ConversationBase {
       }),
     });
     await this._appendConversationSignature(command, 'remove', clientIds);
-    const { convMessage, convMessage: { allowedPids } } = await this._send(
-      command
-    );
+    const {
+      convMessage,
+      convMessage: { allowedPids },
+    } = await this._send(command);
     if (!this.transient && !this.system) {
       this.members = difference(this.members, allowedPids);
     }
@@ -479,7 +481,9 @@ class PersistentConversation extends ConversationBase {
         next,
       }),
     });
-    const { convMessage: { m, next: newNext } } = await this._send(command);
+    const {
+      convMessage: { m, next: newNext },
+    } = await this._send(command);
     return {
       results: m,
       next: newNext,
@@ -602,6 +606,7 @@ class PersistentConversation extends ConversationBase {
   /**
    * 获取指定成员的对话属性
    * @since 4.0.0
+   * @param {String} memberId 成员 Id
    * @return {Promise.<ConversationMemberInfo>} 指定成员的对话属性
    */
   async getMemberInfo(memberId) {
