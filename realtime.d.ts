@@ -300,10 +300,10 @@ export class TextMessage extends TypedMessage {
 export class RecalledMessage extends TypedMessage {}
 
 declare class EventEmitter {
-  on(evt: string, listener: Function): this;
-  once(evt: string, listener: Function): this;
-  off(evt: string, listener: Function): this;
-  emit(evt: string, ...args: any[]): boolean;
+  on(evt: Event | string, listener: Function): this;
+  once(evt: Event | string, listener: Function): this;
+  off(evt: Event | string, listener: Function): this;
+  emit(evt: Event | string, ...args: any[]): boolean;
 }
 
 interface Middleware<T> {
