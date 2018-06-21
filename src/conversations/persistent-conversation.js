@@ -593,11 +593,13 @@ class PersistentConversation extends ConversationBase {
       memberInfoMap[memberInfo.memberId] = memberInfo;
     });
     this.members.forEach(memberId => {
-      memberInfoMap[memberId] = new ConversationMemberInfo({
-        conversation: this,
-        memberId,
-        role: ConversationMemberRole.MEMBER,
-      });
+      memberInfoMap[memberId] =
+        memberInfoMap[memberId] ||
+        new ConversationMemberInfo({
+          conversation: this,
+          memberId,
+          role: ConversationMemberRole.MEMBER,
+        });
     });
     internal(this).memberInfoMap = memberInfoMap;
     return this.members.map(memberId => memberInfoMap[memberId]);
