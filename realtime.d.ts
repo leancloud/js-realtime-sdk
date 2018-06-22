@@ -211,15 +211,18 @@ declare class PresistentConversation extends ConversationBase {
   queryBlockedMembers(
     options?: PagedQueryParams
   ): Promise<PagedResults<string>>;
-  getAllMemberInfo(): Promise<ConversationMemberInfo[]>;
+}
+
+export class Conversation extends PresistentConversation {
+  getAllMemberInfo(options: {
+    noCache?: boolean;
+  }): Promise<ConversationMemberInfo[]>;
   getMemberInfo(memberId: string): Promise<ConversationMemberInfo>;
   updateMemberRole(
     memberId: string,
     role: ConversationMemberRole
   ): Promise<this>;
 }
-
-export class Conversation extends PresistentConversation {}
 export class ChatRoom extends PresistentConversation {}
 export class ServiceConversation extends PresistentConversation {
   subscribe(): Promise<this>;

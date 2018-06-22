@@ -1,3 +1,4 @@
+/* eslint class-methods-use-this: ["error", { "exceptMethods": ["_addMembers", "_removeMembers"] }] */
 import EventEmitter from 'eventemitter3';
 import d from 'debug';
 import { decodeDate, getTime, internal } from '../utils';
@@ -445,6 +446,21 @@ export default class ConversationBase extends EventEmitter {
     );
     return resCommand.convMessage.count;
   }
+
+  /**
+   * 应用增加成员的操作，产生副作用
+   * @param {string[]} members
+   * @abstract
+   * @private
+   */
+  _addMembers() {}
+  /**
+   * 应用减少成员的操作，产生副作用
+   * @param {string[]} members
+   * @abstract
+   * @private
+   */
+  _removeMembers() {}
 
   /**
    * 修改已发送的消息

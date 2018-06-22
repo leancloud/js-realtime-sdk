@@ -27,8 +27,6 @@ import {
   Expirable,
   Cache,
   keyRemap,
-  union,
-  difference,
   trim,
   internal,
   throttle,
@@ -367,10 +365,7 @@ export default class IMClient extends EventEmitter {
     const conversation = await this.getConversation(convMessage.cid);
     switch (message.op) {
       case OpType.joined: {
-        if (!conversation.transient) {
-          // eslint-disable-next-line no-param-reassign
-          conversation.members = union(conversation.members, [this.id]);
-        }
+        conversation._addMembers([this.id]);
         const payload = {
           invitedBy: initBy,
         };
@@ -392,10 +387,7 @@ export default class IMClient extends EventEmitter {
         return;
       }
       case OpType.left: {
-        if (!conversation.transient) {
-          // eslint-disable-next-line no-param-reassign
-          conversation.members = difference(conversation.members, [this.id]);
-        }
+        conversation._removeMembers([this.id]);
         const payload = {
           kickedBy: initBy,
         };
@@ -417,10 +409,7 @@ export default class IMClient extends EventEmitter {
         return;
       }
       case OpType.members_joined: {
-        if (!conversation.transient) {
-          // eslint-disable-next-line no-param-reassign
-          conversation.members = union(conversation.members, convMessage.m);
-        }
+        conversation._addMembers(m);
         const payload = {
           invitedBy: initBy,
           members: m,
@@ -445,13 +434,7 @@ export default class IMClient extends EventEmitter {
         return;
       }
       case OpType.members_left: {
-        if (!conversation.transient) {
-          // eslint-disable-next-line no-param-reassign
-          conversation.members = difference(
-            conversation.members,
-            convMessage.m
-          );
-        }
+        conversation._removeMembers(m);
         const payload = {
           kickedBy: initBy,
           members: m,
