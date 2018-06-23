@@ -1,6 +1,6 @@
 {
   "name": "leancloud-realtime",
-  "version": "4.0.1",
+  "version": "4.1.0",
   "description": "LeanCloud Realtime Message JavaScript SDK",
   "main": "./dist/realtime.js",
   "jsnext:main": "./src/index.js",
@@ -10,31 +10,28 @@
   "scripts": {
     "precommit": "pretty-quick --staged",
     "commitmsg": "commitlint -e $GIT_PARAMS",
-    "lint":
-      "eslint --ignore-path .gitignore src test plugins && tsc realtime.d.ts",
-    "test":
-      "npm run lint && npm run build && npm run docs && npm run test:node && npm run test:browser",
-    "test:node":
-      "NODE_ENV=test nyc mocha --timeout 30000 test/index.js plugins/**/test/index.js --exit",
-    "test:browser":
-      "if [ ! -z \"$SAUCE_ACCESS_KEY\" ]; then npm run build:test && karma start karma-sauce.conf.js; else echo 'Saucelabs test skipped, set SAUCE_USERNAME and SAUCE_ACCESS_KEY to start it.\n\rTo run browser tests locally, run `npm run test:browser-local`'; fi",
+    "lint": "eslint --ignore-path .gitignore src test plugins && tsc realtime.d.ts",
+    "test": "npm run lint && npm run build && npm run docs && npm run test:node && npm run test:browser",
+    "test:node": "NODE_ENV=test nyc mocha --timeout 30000 test/index.js plugins/**/test/index.js --exit",
+    "test:browser": "if [ ! -z \"$SAUCE_ACCESS_KEY\" ]; then npm run build:test && karma start karma-sauce.conf.js; else echo 'Saucelabs test skipped, set SAUCE_USERNAME and SAUCE_ACCESS_KEY to start it.\n\rTo run browser tests locally, run `npm run test:browser-local`'; fi",
     "test:browser-local": "npm run build:test && karma start",
-    "docs":
-      "jsdoc src README.md package.json -d docs -c .jsdocrc.json && jsdoc plugins/typed-messages/src plugins/typed-messages/package.json src/messages/message.js src/messages/typed-message.js -d plugins/typed-messages/docs -c .jsdocrc.json && jsdoc plugins/webrtc/src plugins/webrtc/package.json -d plugins/webrtc/docs -c .jsdocrc.json && jsdoc plugins/groupchat-receipts/src plugins/groupchat-receipts/package.json -d plugins/groupchat-receipts/docs -c .jsdocrc.json",
-    "build":
-      "npm run build:realtime && npm run build:plugins && ./script/validate-es5.js",
+    "docs": "jsdoc src README.md package.json -d docs -c .jsdocrc.json && jsdoc plugins/typed-messages/src plugins/typed-messages/package.json src/messages/message.js src/messages/typed-message.js -d plugins/typed-messages/docs -c .jsdocrc.json && jsdoc plugins/webrtc/src plugins/webrtc/package.json -d plugins/webrtc/docs -c .jsdocrc.json && jsdoc plugins/groupchat-receipts/src plugins/groupchat-receipts/package.json -d plugins/groupchat-receipts/docs -c .jsdocrc.json",
+    "build": "npm run build:realtime && npm run build:plugins && ./script/validate-es5.js",
     "build:realtime": "rollup -c rollup/rollup.config.realtime.js",
     "build:plugins": "rollup -c rollup/rollup.config.plugins.js",
     "build:test": "rollup -c rollup/rollup.config.test.js",
     "changelog": "conventional-changelog -p angular -i CHANGELOG.md -s",
-    "convert-pb":
-      "pbjs proto/message.proto -t commonjs > proto/message-compiled.js && sed -i '' 's/protobufjs/protobufjs\\/dist\\/protobuf-light/g' ./proto/message-compiled.js"
+    "convert-pb": "pbjs proto/message.proto -t commonjs > proto/message-compiled.js && sed -i '' 's/protobufjs/protobufjs\\/dist\\/protobuf-light/g' ./proto/message-compiled.js"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/leancloud/js-realtime-sdk.git"
   },
-  "keywords": ["leancloud", "realtime", "message"],
+  "keywords": [
+    "leancloud",
+    "realtime",
+    "message"
+  ],
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/leancloud/js-realtime-sdk/issues"
@@ -109,9 +106,17 @@
     "./dist/realtime-core.js": "./dist/realtime-core.weapp.js"
   },
   "nyc": {
-    "require": ["babel-register"],
-    "include": ["src/**", "plugins/typed-messages/src/**"],
-    "reporter": ["lcov", "text"],
+    "require": [
+      "babel-register"
+    ],
+    "include": [
+      "src/**",
+      "plugins/typed-messages/src/**"
+    ],
+    "reporter": [
+      "lcov",
+      "text"
+    ],
     "sourceMap": false,
     "instrument": false
   },
@@ -120,7 +125,9 @@
     "trailingComma": "es5"
   },
   "commitlint": {
-    "extends": ["@commitlint/config-conventional"]
+    "extends": [
+      "@commitlint/config-conventional"
+    ]
   },
   "types": "./realtime.d.ts",
   "typings": "./realtime.d.ts"
