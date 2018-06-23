@@ -235,6 +235,7 @@ export class TemporaryConversation extends ConversationBase {
 }
 
 export enum ConversationMemberRole {
+  OWNER,
   MANAGER,
   MEMBER,
 }

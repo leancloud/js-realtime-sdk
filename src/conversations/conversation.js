@@ -9,6 +9,7 @@ import {
   ConvMemberInfo,
   OpType,
 } from '../../proto/message';
+import { createError, ErrorCode } from '../error';
 
 /**
  * 普通对话
@@ -115,6 +116,10 @@ class Conversation extends PersistentConversation {
    */
   async updateMemberRole(memberId, role) {
     this._debug('update member role');
+    if (role === ConversationMemberRole.OWNER)
+      throw createError({
+        code: ErrorCode.OWNER_PROMOTION_NOT_ALLOWED,
+      });
     await this._send(
       new GenericCommand({
         op: OpType.member_info_update,

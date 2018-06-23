@@ -7,6 +7,8 @@ import { internal } from './utils';
  * @memberof module:leancloud-realtime
  */
 const ConversationMemberRole = {
+  /** 所有者 */
+  OWNER: 'Owner',
   /** 管理员 */
   MANAGER: 'Manager',
   /** 成员 */
@@ -52,6 +54,7 @@ export default class ConversationMemberInfo {
    * @readonly
    */
   get role() {
+    if (this.isOwner) return ConversationMemberRole.OWNER;
     return internal(this).role;
   }
   /**

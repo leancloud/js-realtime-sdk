@@ -143,6 +143,10 @@ export const error = Object.freeze({
   4407: {
     name: 'MESSAGE_RECALL_DISABLED',
   },
+  5130: {
+    name: 'OWNER_PROMOTION_NOT_ALLOWED',
+    message: "Updating a member's role to owner is not allowed.",
+  },
 });
 
 export const ErrorCode = Object.freeze(

@@ -607,13 +607,19 @@ describe('Conversation', () => {
       memberConversation
         .updateMemberRole(member.id, ConversationMemberRole.MANAGER)
         .should.be.rejectedWith('CONVERSATION_OPERATION_UNAUTHORIZED'));
+    it('owner promotion is not allowed', async () =>
+      ownerConversation
+        .updateMemberRole(member.id, ConversationMemberRole.OWNER)
+        .should.be.rejectedWith({
+          code: ErrorCode.OWNER_PROMOTION_NOT_ALLOWED,
+        }));
     it('info query', async () => {
       const infoes = await ownerConversation.getAllMemberInfo();
       infoes.should.have.length(4);
       (await ownerConversation.getMemberInfo(owner.id)).toJSON().should.eql({
         conversationId: ownerConversation.id,
         memberId: owner.id,
-        role: ConversationMemberRole.MEMBER,
+        role: ConversationMemberRole.OWNER,
         isOwner: true,
       });
       (await ownerConversation.getMemberInfo(member.id)).toJSON().should.eql({
