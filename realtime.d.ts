@@ -426,6 +426,8 @@ export enum Event {
   MESSAGE_RECALL,
   MESSAGE_UPDATE,
   INFO_UPDATED,
+
+  OWNER_PROMOTION_NOT_ALLOWED,
 }
 
 export function messageType(type: number): Function;
