@@ -13,6 +13,7 @@ export default class LiveQueryClient extends EventEmitter {
     this._eventemitter = new EventEmitter();
     this._querys = new Set();
   }
+
   _send(cmd, ...args) {
     return this._connection.send(
       Object.assign(cmd, {
@@ -23,6 +24,7 @@ export default class LiveQueryClient extends EventEmitter {
       ...args
     );
   }
+
   _open() {
     return this._send(
       new GenericCommand({
@@ -30,6 +32,7 @@ export default class LiveQueryClient extends EventEmitter {
       })
     );
   }
+
   close() {
     const _ee = this._eventemitter;
     _ee.emit('beforeclose');
@@ -39,15 +42,18 @@ export default class LiveQueryClient extends EventEmitter {
       })
     ).then(() => _ee.emit('close'));
   }
+
   register(liveQuery) {
     this._querys.add(liveQuery);
   }
+
   deregister(liveQuery) {
     this._querys.delete(liveQuery);
     setTimeout(() => {
       if (!this._querys.size) this.close().catch(warn);
     }, 0);
   }
+
   _dispatchCommand(command) {
     if (command.cmd !== CommandType.data) {
       this.emit('unhandledmessage', command);
@@ -55,6 +61,7 @@ export default class LiveQueryClient extends EventEmitter {
     }
     return this._dispatchDataCommand(command);
   }
+
   _dispatchDataCommand({ dataMessage: { ids, msg } }) {
     this.emit('message', msg.map(({ data }) => JSON.parse(data)));
     // send ack

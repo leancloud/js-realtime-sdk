@@ -40,6 +40,7 @@ export default class IncomingCall extends Call {
       )
       .then(() => this._promises.resolveAccept());
   }
+
   /**
    * 拒绝该呼入通话
    * @return {Promise}

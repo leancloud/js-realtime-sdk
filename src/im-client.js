@@ -1042,6 +1042,7 @@ export default class IMClient extends EventEmitter {
       code: 0,
     });
   }
+
   /**
    * 获取 client 列表中在线的 client，每次查询最多 20 个 clientId，超出部分会被忽略
    * @param  {String[]} clientIds 要查询的 client ids
@@ -1452,6 +1453,7 @@ export default class IMClient extends EventEmitter {
       conversations.forEach(buffer.add.bind(buffer));
     });
   }
+
   _sendReadCommand(conversations) {
     return this._send(
       new GenericCommand({

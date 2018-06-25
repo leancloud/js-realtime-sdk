@@ -2,7 +2,7 @@ import 'should';
 import 'should-sinon';
 import isPlainObject from 'lodash/isPlainObject';
 import { GeoPoint } from 'leancloud-storage';
-import { LocationMessage, TypedMessagesPlugin } from '../src/';
+import { LocationMessage, TypedMessagesPlugin } from '../src';
 import { Realtime } from '../../../src';
 import IMClient from '../../../src/im-client';
 

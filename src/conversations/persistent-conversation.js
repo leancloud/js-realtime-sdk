@@ -131,12 +131,15 @@ class PersistentConversation extends ConversationBase {
   set createdAt(value) {
     this._createdAt = decodeDate(value);
   }
+
   get createdAt() {
     return this._createdAt;
   }
+
   set updatedAt(value) {
     this._updatedAt = decodeDate(value);
   }
+
   get updatedAt() {
     return this._updatedAt;
   }
@@ -148,6 +151,7 @@ class PersistentConversation extends ConversationBase {
   get name() {
     return this.get('name');
   }
+
   set name(value) {
     this.set('name', value);
   }

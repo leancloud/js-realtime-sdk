@@ -22,6 +22,7 @@ class TypedMessage extends Message {
   set text(text) {
     return this.setText(text);
   }
+
   get text() {
     return this.getText();
   }
@@ -30,6 +31,7 @@ class TypedMessage extends Message {
   set attributes(attributes) {
     return this.setAttributes(attributes);
   }
+
   get attributes() {
     return this.getAttributes();
   }
@@ -53,6 +55,7 @@ class TypedMessage extends Message {
     this._lctext = text;
     return this;
   }
+
   /**
    * @return {String}
    */
@@ -68,6 +71,7 @@ class TypedMessage extends Message {
     this._lcattrs = attributes;
     return this;
   }
+
   /**
    * @return {Object}
    */

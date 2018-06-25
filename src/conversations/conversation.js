@@ -34,6 +34,7 @@ class Conversation extends PersistentConversation {
         });
     });
   }
+
   _removeMembers(members) {
     super._removeMembers(members);
     this.members = difference(this.members, members);

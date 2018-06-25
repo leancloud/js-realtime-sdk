@@ -179,6 +179,7 @@ export default class Message {
   get timestamp() {
     return this._timestamp;
   }
+
   set timestamp(value) {
     this._timestamp = decodeDate(value);
   }
@@ -190,6 +191,7 @@ export default class Message {
   get deliveredAt() {
     return this._deliveredAt;
   }
+
   set deliveredAt(value) {
     this._deliveredAt = decodeDate(value);
   }
@@ -202,6 +204,7 @@ export default class Message {
   get updatedAt() {
     return this._updatedAt || this.timestamp;
   }
+
   set updatedAt(value) {
     this._updatedAt = decodeDate(value);
   }
@@ -215,11 +218,13 @@ export default class Message {
   get mentioned() {
     return this._mentioned;
   }
+
   _updateMentioned(client) {
     this._mentioned =
       this.from !== client &&
       (this.mentionedAll || this.mentionList.indexOf(client) > -1);
   }
+
   /**
    * 获取提及用户列表
    * @since 4.0.0
@@ -228,6 +233,7 @@ export default class Message {
   getMentionList() {
     return this.mentionList;
   }
+
   /**
    * 设置提及用户列表
    * @since 4.0.0
@@ -238,6 +244,7 @@ export default class Message {
     this.mentionList = ensureArray(clients);
     return this;
   }
+
   /**
    * 设置是否提及所有人
    * @since 4.0.0

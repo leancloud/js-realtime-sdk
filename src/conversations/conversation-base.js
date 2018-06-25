@@ -3,7 +3,6 @@ import EventEmitter from 'eventemitter3';
 import d from 'debug';
 import { decodeDate, getTime, internal } from '../utils';
 import { applyDecorators } from '../plugin';
-import IMClient from '../im-client';
 import {
   GenericCommand,
   ConvCommand,
@@ -110,11 +109,7 @@ export default class ConversationBase extends EventEmitter {
       unreadMessagesCount,
       mentioned,
     });
-    if (client instanceof IMClient) {
-      this._client = client;
-    } else {
-      throw new TypeError('Conversation must be initialized with a client');
-    }
+    this._client = client;
     if (debug.enabled) {
       Object.values(Event).forEach(event =>
         this.on(event, (...payload) =>
@@ -134,6 +129,7 @@ export default class ConversationBase extends EventEmitter {
   get unreadMessagesMentioned() {
     return internal(this).unreadMessagesMentioned;
   }
+
   _setUnreadMessagesMentioned(value) {
     internal(this).unreadMessagesMentioned = Boolean(value);
   }
@@ -144,6 +140,7 @@ export default class ConversationBase extends EventEmitter {
       this._client.emit(Event.UNREAD_MESSAGES_COUNT_UPDATE, [this]);
     }
   }
+
   /**
    * 当前用户在该对话的未读消息数
    * @type {Number}
@@ -157,9 +154,11 @@ export default class ConversationBase extends EventEmitter {
     if (time <= this._lastMessageAt) return;
     this._lastMessageAt = time;
   }
+
   get lastMessageAt() {
     return this._lastMessageAt;
   }
+
   /**
    * 最后消息送达时间，常用来实现消息的「已送达」标记，可通过 {@link Conversation#fetchReceiptTimestamps} 获取或更新该属性
    * @type {?Date}
@@ -169,6 +168,7 @@ export default class ConversationBase extends EventEmitter {
     if (this.members.length !== 2) return null;
     return internal(this).lastDeliveredAt;
   }
+
   _setLastDeliveredAt(value) {
     const date = decodeDate(value);
     if (!(date < internal(this).lastDeliveredAt)) {
@@ -181,6 +181,7 @@ export default class ConversationBase extends EventEmitter {
       this.emit(Event.LAST_DELIVERED_AT_UPDATE);
     }
   }
+
   /**
    * 最后消息被阅读时间，常用来实现发送消息的「已读」标记，可通过 {@link Conversation#fetchReceiptTimestamps} 获取或更新该属性
    * @type {?Date}
@@ -190,6 +191,7 @@ export default class ConversationBase extends EventEmitter {
     if (this.members.length !== 2) return null;
     return internal(this).lastReadAt;
   }
+
   _setLastReadAt(value) {
     const date = decodeDate(value);
     if (!(date < internal(this).lastReadAt)) {
@@ -454,6 +456,7 @@ export default class ConversationBase extends EventEmitter {
    * @private
    */
   _addMembers() {}
+
   /**
    * 应用减少成员的操作，产生副作用
    * @param {string[]} members

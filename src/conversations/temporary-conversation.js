@@ -34,6 +34,7 @@ class TemporaryConversation extends ConversationBase {
   set expiredAt(value) {
     this._expiredAt = decodeDate(value);
   }
+
   get expiredAt() {
     return this._expiredAt;
   }

@@ -8,7 +8,7 @@ import {
   AudioMessage,
   VideoMessage,
   TypedMessagesPlugin,
-} from '../src/';
+} from '../src';
 import { Realtime } from '../../../src';
 import IMClient from '../../../src/im-client';
 

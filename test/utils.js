@@ -136,10 +136,12 @@ describe('Utils', () => {
         this.value1 = 0;
         this.value2 = 0;
       }
+
       @throttle(100)
       inc1() {
         this.value1 = this.value1 + 1;
       }
+
       @throttle(200)
       inc2() {
         this.value2 = this.value2 + 1;

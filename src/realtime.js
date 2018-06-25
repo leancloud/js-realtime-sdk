@@ -368,6 +368,7 @@ export default class Realtime extends EventEmitter {
     }
     return connection.retry();
   }
+
   /**
    * 暂停，使 SDK 进入离线状态。
    * 你可以在网络断开、应用进入后台等时刻调用该方法让 SDK 进入离线状态，离线状态下不会尝试重连。
@@ -383,6 +384,7 @@ export default class Realtime extends EventEmitter {
     if (!connection) return;
     if (connection.can('pause')) connection.pause();
   }
+
   /**
    * 恢复在线状态。
    * 你可以在网络恢复、应用回到前台等时刻调用该方法让 SDK 恢复在线状态，恢复在线状态后 SDK 会开始尝试重连。

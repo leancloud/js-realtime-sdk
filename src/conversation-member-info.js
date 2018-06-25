@@ -40,6 +40,7 @@ export default class ConversationMemberInfo {
   get conversationId() {
     return internal(this).conversation.id;
   }
+
   /**
    * 成员 Id
    * @type {String}
@@ -48,6 +49,7 @@ export default class ConversationMemberInfo {
   get memberId() {
     return internal(this).memberId;
   }
+
   /**
    * 角色
    * @type {module:leancloud-realtime.ConversationMemberRole | String}
@@ -57,6 +59,7 @@ export default class ConversationMemberInfo {
     if (this.isOwner) return ConversationMemberRole.OWNER;
     return internal(this).role;
   }
+
   /**
    * 是否是管理员
    * @type {Boolean}

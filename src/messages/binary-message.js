@@ -24,6 +24,7 @@ export default class BinaryMessage extends Message {
   get buffer() {
     return this.content;
   }
+
   set buffer(buffer) {
     this.content = buffer;
   }

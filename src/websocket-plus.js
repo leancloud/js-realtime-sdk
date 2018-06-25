@@ -93,6 +93,7 @@ class WebSocketPlus extends EventEmitter {
       return ws;
     });
   }
+
   _destroyWs() {
     const ws = this._ws;
     if (!ws) return;
@@ -108,12 +109,15 @@ class WebSocketPlus extends EventEmitter {
   onbeforeevent(event, from, to, ...payload) {
     debug(`${event}: ${from} -> ${to}`, ...payload);
   }
+
   onopen() {
     this.emit(OPEN);
   }
+
   onconnected() {
     this._startConnectionKeeper();
   }
+
   onleaveconnected(event, from, to) {
     this._stopConnectionKeeper();
     this._destroyWs();
@@ -121,15 +125,19 @@ class WebSocketPlus extends EventEmitter {
       this.emit(DISCONNECT);
     }
   }
+
   onpause() {
     this.emit(OFFLINE);
   }
+
   onbeforeresume() {
     this.emit(ONLINE);
   }
+
   onreconnect() {
     this.emit(RECONNECT);
   }
+
   ondisconnected(event, from, to, attempt = 0) {
     const delay = DEFAULT_RETRY_STRATEGY.call(null, attempt);
     debug(`schedule attempt=${attempt} delay=${delay}`);
@@ -143,6 +151,7 @@ class WebSocketPlus extends EventEmitter {
       }
     }, delay);
   }
+
   onretry(event, from, to, attempt = 0) {
     this.emit(RETRY, attempt);
     this._open().then(
@@ -150,9 +159,11 @@ class WebSocketPlus extends EventEmitter {
       () => this.can('fail') && this.fail(attempt + 1)
     );
   }
+
   onerror(event, from, to, error) {
     this.emit(ERROR, error);
   }
+
   onclose() {
     if (global.removeEventListener) {
       if (this.__pause) global.removeEventListener('offline', this.__pause);
@@ -186,6 +197,7 @@ class WebSocketPlus extends EventEmitter {
       console.warn(`websocket ping error: ${error.message}`);
     }
   }
+
   ping() {
     if (this._ws.ping) {
       this._ws.ping();
@@ -203,11 +215,13 @@ class WebSocketPlus extends EventEmitter {
       this.disconnect();
     }, TIMEOUT_TIME);
   }
+
   _clearTimeoutTimers() {
     if (this._timeoutTimer) {
       clearTimeout(this._timeoutTimer);
     }
   }
+
   _startConnectionKeeper() {
     debug('start connection keeper');
     this._heartbeatTimer = setInterval(this._ping.bind(this), HEARTBEAT_TIME);
@@ -216,6 +230,7 @@ class WebSocketPlus extends EventEmitter {
     addListener.call(this._ws, 'pong', this.__postponeTimeoutTimer);
     this._postponeTimeoutTimer();
   }
+
   _stopConnectionKeeper() {
     debug('stop connection keeper');
     // websockets/ws#489
@@ -235,6 +250,7 @@ class WebSocketPlus extends EventEmitter {
     if (this.isFinished()) return;
     this.handleClose(event);
   }
+
   handleClose() {
     // reconnect
     this.disconnect();
@@ -252,6 +268,7 @@ class WebSocketPlus extends EventEmitter {
     debug('message', event.data);
     this.handleMessage(event.data);
   }
+
   handleMessage(message) {
     this.emit(MESSAGE, message);
   }

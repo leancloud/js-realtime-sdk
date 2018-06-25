@@ -192,6 +192,7 @@ export default class ConversationQuery {
   notContainsIn(key, values) {
     return this._addCondition(key, '$nin', values);
   }
+
   /**
    * 增加查询条件，当conversation的属性中对应的字段中的元素包含所有的值才可返回
    *
