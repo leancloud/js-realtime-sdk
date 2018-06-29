@@ -52,8 +52,12 @@ class WebSocketPlus extends EventEmitter {
       .then(() => {
         this.__postponeTimeoutTimer = this._postponeTimeoutTimer.bind(this);
         if (global.addEventListener) {
-          this.__pause = () => this.pause();
-          this.__resume = () => this.resume();
+          this.__pause = () => {
+            if (this.can('pause')) this.pause();
+          };
+          this.__resume = () => {
+            if (this.can('resume')) this.resume();
+          };
           global.addEventListener('offline', this.__pause);
           global.addEventListener('online', this.__resume);
         }
