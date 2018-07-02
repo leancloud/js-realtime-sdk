@@ -14,7 +14,6 @@ import { sinon, listen, series } from './test-utils';
 import {
   APP_ID,
   APP_KEY,
-  REGION,
   EXISTING_ROOM_ID,
   NON_EXISTING_ROOM_ID,
   CLIENT_ID,
@@ -27,7 +26,6 @@ describe('IMClient', () => {
     realtime = new Realtime({
       appId: APP_ID,
       appKey: APP_KEY,
-      region: REGION,
     });
     return realtime.createIMClient(CLIENT_ID).then(c => {
       client = c;
@@ -41,7 +39,6 @@ describe('IMClient', () => {
       const rt = new Realtime({
         appId: APP_ID,
         appKey: APP_KEY,
-        region: REGION,
       });
       const closeCallback = sinon.spy();
       return Promise.all([
@@ -99,7 +96,6 @@ describe('IMClient', () => {
           return new Realtime({
             appId: APP_ID,
             appKey: APP_KEY,
-            region: REGION,
           })
             .createIMClient(ID, undefined, 'TEST')
             .then(client2 => client2.close());
@@ -342,7 +338,6 @@ describe('IMClient', () => {
       this.realtime = new Realtime({
         appId: APP_ID,
         appKey: APP_KEY,
-        region: REGION,
       });
       this.client = await this.realtime.createIMClient();
     });

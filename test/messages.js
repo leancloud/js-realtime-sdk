@@ -21,7 +21,7 @@ import {
 
 import { listen, hold, sinon } from './test-utils';
 
-import { APP_ID, APP_KEY, REGION, EXISTING_ROOM_ID } from './configs';
+import { APP_ID, APP_KEY, EXISTING_ROOM_ID } from './configs';
 
 @messageType(1)
 @messageField('foo')
@@ -141,7 +141,6 @@ describe('Messages', () => {
       const realtime = new Realtime({
         appId: APP_ID,
         appKey: APP_KEY,
-        region: REGION,
       });
       return Promise.all([realtime.createIMClient(), realtime.createIMClient()])
         .then(clients => {

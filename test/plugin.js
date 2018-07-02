@@ -7,13 +7,7 @@ import { messageType } from '../src/messages/helpers';
 
 import { sinon, hold } from './test-utils';
 
-import {
-  APP_ID,
-  APP_KEY,
-  REGION,
-  EXISTING_ROOM_ID,
-  CLIENT_ID,
-} from './configs';
+import { APP_ID, APP_KEY, EXISTING_ROOM_ID, CLIENT_ID } from './configs';
 
 @messageType(1)
 class PluginDefinedMessage extends TypedMessage {}
@@ -30,7 +24,6 @@ describe('Plugin', () => {
       realtime = new Realtime({
         appId: APP_ID,
         appKey: APP_KEY,
-        region: REGION,
         plugins: [
           {
             messageClasses: [PluginDefinedMessage],
@@ -96,7 +89,6 @@ describe('Plugin', () => {
       realtime = new Realtime({
         appId: APP_ID,
         appKey: APP_KEY,
-        region: REGION,
         plugins: [
           {
             onRealtimeCreate: patchTestFunction(1),
@@ -145,7 +137,6 @@ describe('Plugin', () => {
         new Realtime({
           appId: APP_ID,
           appKey: APP_KEY,
-          region: REGION,
           plugins: [
             {
               name: 'ErrorPlugin',
@@ -160,7 +151,6 @@ describe('Plugin', () => {
       new Realtime({
         appId: APP_ID,
         appKey: APP_KEY,
-        region: REGION,
         plugins: [
           {
             name: 'ErrorPlugin',
@@ -176,7 +166,6 @@ describe('Plugin', () => {
       new Realtime({
         appId: APP_ID,
         appKey: APP_KEY,
-        region: REGION,
         plugins: [
           {
             name: 'ErrorPlugin',
@@ -192,7 +181,6 @@ describe('Plugin', () => {
       new Realtime({
         appId: APP_ID,
         appKey: APP_KEY,
-        region: REGION,
         plugins: [
           {
             name: 'ErrorPlugin',
@@ -217,7 +205,6 @@ describe('Plugin', () => {
         new Realtime({
           appId: APP_ID,
           appKey: APP_KEY,
-          region: REGION,
           plugins: [
             {
               name: 'ErrorPlugin',
@@ -228,7 +215,6 @@ describe('Plugin', () => {
         new Realtime({
           appId: APP_ID,
           appKey: APP_KEY,
-          region: REGION,
           plugins: [
             {
               name: 'ErrorPlugin',

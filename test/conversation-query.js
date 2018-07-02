@@ -2,7 +2,7 @@ import ConversationQuery from '../src/conversation-query';
 import Realtime from '../src/realtime';
 import Message, { MessageStatus } from '../src/messages/message';
 
-import { APP_ID, APP_KEY, REGION, EXISTING_ROOM_ID } from './configs';
+import { APP_ID, APP_KEY, EXISTING_ROOM_ID } from './configs';
 
 describe('ConversationQuery', () => {
   // divided to 2 parts since there is query quota for every single client
@@ -12,7 +12,6 @@ describe('ConversationQuery', () => {
       new Realtime({
         appId: APP_ID,
         appKey: APP_KEY,
-        region: REGION,
       })
         .createIMClient()
         .then(c => {
@@ -197,7 +196,6 @@ describe('ConversationQuery', () => {
       new Realtime({
         appId: APP_ID,
         appKey: APP_KEY,
-        region: REGION,
       })
         .createIMClient()
         .then(c => {

@@ -9,7 +9,7 @@ import { Event } from '../src';
 
 import { listen, sinon, wait } from './test-utils';
 
-import { APP_ID, APP_KEY, REGION, NON_EXISTING_ROOM_ID } from './configs';
+import { APP_ID, APP_KEY, NON_EXISTING_ROOM_ID } from './configs';
 
 const createRealtime = options =>
   new Realtime(
@@ -17,7 +17,6 @@ const createRealtime = options =>
       {
         appId: APP_ID,
         appKey: APP_KEY,
-        region: REGION,
       },
       options
     )

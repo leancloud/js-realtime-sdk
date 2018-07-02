@@ -29,7 +29,6 @@ export default class Realtime extends EventEmitter {
    * @param  {Object} options
    * @param  {String} options.appId
    * @param  {String} options.appKey （since 4.0.0）
-   * @param  {String} [options.region='cn'] 节点 id
    * @param  {Boolean} [options.pushOfflineMessages=false] 启用推送离线消息模式（默认为发送未读消息通知模式）
    * @param  {Boolean} [options.noBinary=false] 设置 WebSocket 使用字符串格式收发消息（默认为二进制格式）。
    *                                            适用于 WebSocket 实现不支持二进制数据格式的情况
@@ -47,11 +46,13 @@ export default class Realtime extends EventEmitter {
     if (typeof options.appKey !== 'string') {
       throw new TypeError(`appKey [${options.appKey}] is not a string`);
     }
+    if (options.region) {
+      console.warn('region option is not necessary anymore');
+    }
     this._options = Object.assign(
       {
         appId: undefined,
         appKey: undefined,
-        region: 'cn',
         pushOfflineMessages: false,
         noBinary: false,
         ssl: true,
@@ -89,10 +90,9 @@ export default class Realtime extends EventEmitter {
   }
 
   async _request({ method, version = '1.1', path, query, headers, data = {} }) {
-    const { appId, region, server } = this._options;
+    const { appId, server } = this._options;
     const { api } = await this.constructor._getServerUrls({
       appId,
-      region,
       server,
     });
     const url = `https://${api}/${version}${path}`;
@@ -268,7 +268,7 @@ export default class Realtime extends EventEmitter {
     return [info.server, info.secondary];
   }
 
-  static async _getServerUrls({ appId, region, server }) {
+  static async _getServerUrls({ appId, server }) {
     debug('fetch server urls');
     if (server) {
       if (typeof server !== 'string') return server;
@@ -277,53 +277,40 @@ export default class Realtime extends EventEmitter {
         api: server,
       };
     }
-    switch (region) {
-      case 'cn': {
-        const cachedRouter = routerCache.get(appId);
-        if (cachedRouter) return cachedRouter;
-        return axios
-          .get('https://app-router.leancloud.cn/2/route', {
-            params: {
-              appId,
-            },
-            timeout: 20000,
-          })
-          .then(res => res.data)
-          .then(tap(debug))
-          .then(
-            ({ rtm_router_server: RTMRouter, api_server: api, ttl = 3600 }) => {
-              if (!RTMRouter) {
-                throw new Error('rtm router not exists');
-              }
-              const serverUrls = {
-                RTMRouter,
-                api,
-              };
-              routerCache.set(appId, serverUrls, ttl * 1000);
-              return serverUrls;
-            }
-          )
-          .catch(() => {
-            const id = appId.slice(0, 8).toLowerCase();
-            return {
-              RTMRouter: `${id}.rtm.lncld.net`,
-              api: `${id}.api.lncld.net`,
-            };
-          });
-      }
-      case 'us':
-        return {
-          RTMRouter: 'router-a0-push.leancloud.cn',
-          api: 'us-api.leancloud.cn',
+    const cachedRouter = routerCache.get(appId);
+    if (cachedRouter) return cachedRouter;
+    return axios
+      .get('https://app-router.leancloud.cn/2/route', {
+        params: {
+          appId,
+        },
+        timeout: 20000,
+      })
+      .then(res => res.data)
+      .then(tap(debug))
+      .then(({ rtm_router_server: RTMRouter, api_server: api, ttl = 3600 }) => {
+        if (!RTMRouter) {
+          throw new Error('rtm router not exists');
+        }
+        const serverUrls = {
+          RTMRouter,
+          api,
         };
-      default:
-        throw new Error(`Region [${region}] is not supported.`);
-    }
+        routerCache.set(appId, serverUrls, ttl * 1000);
+        return serverUrls;
+      })
+      .catch(() => {
+        const id = appId.slice(0, 8).toLowerCase();
+        return {
+          RTMRouter: `${id}.rtm.lncld.net`,
+          api: `${id}.api.lncld.net`,
+        };
+      });
   }
 
-  static _fetchRTMServers({ appId, region, ssl, server, RTMServerName }) {
+  static _fetchRTMServers({ appId, ssl, server, RTMServerName }) {
     debug('fetch endpoint info');
-    return this._getServerUrls({ appId, region, server })
+    return this._getServerUrls({ appId, server })
       .then(tap(debug))
       .then(({ RTMRouter }) =>
         axios

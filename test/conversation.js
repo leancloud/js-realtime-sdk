@@ -22,7 +22,6 @@ import {
 import {
   APP_ID,
   APP_KEY,
-  REGION,
   EXISTING_ROOM_ID,
   SYS_CONV_ID,
   CLIENT_ID,
@@ -39,7 +38,6 @@ describe('Conversation', () => {
     realtime = new Realtime({
       appId: APP_ID,
       appKey: APP_KEY,
-      region: REGION,
     });
     return realtime
       .createIMClient(CLIENT_ID)
@@ -543,7 +541,6 @@ describe('Conversation', () => {
         bwangRealtime = new Realtime({
           appId: APP_ID,
           appKey: APP_KEY,
-          region: REGION,
         });
         return bwangRealtime.createIMClient(bwangId);
       })
