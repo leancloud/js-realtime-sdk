@@ -168,6 +168,8 @@ export default class IMClient extends EventEmitter {
           /**
            * 用户在其他客户端登录，当前客户端被服务端强行下线。详见文档「单点登录」章节。
            * @event IMClient#CONFLICT
+           * @param {Object} payload
+           * @param {string} payload.reason 原因
            */
           return this.emit(CONFLICT, {
             reason,
@@ -514,7 +516,7 @@ export default class IMClient extends EventEmitter {
          * 当前用户被加入某个对话的黑名单
          * @event IMClient#BLOCKED
          * @param {Object} payload
-         * @param {String} payloadblockedBy 该操作的发起者 id
+         * @param {String} payload.blockedBy 该操作的发起者 id
          * @param {ConversationBase} conversation
          */
         this.emit(BLOCKED, payload, conversation);
@@ -654,7 +656,7 @@ export default class IMClient extends EventEmitter {
          * 有成员的对话信息被更新
          * @event IMClient#MEMBER_INFO_UPDATED
          * @param {Object} payload
-         * @param {String[]} payload.member 被更新对话信息的成员 id
+         * @param {String} payload.member 被更新对话信息的成员 id
          * @param {ConversationMumberInfo} payload.memberInfo 被更新的成员对话信息
          * @param {String} payload.updatedBy 该操作的发起者 id
          * @param {ConversationBase} conversation
@@ -664,7 +666,7 @@ export default class IMClient extends EventEmitter {
          * 有成员的对话信息被更新
          * @event ConversationBase#MEMBER_INFO_UPDATED
          * @param {Object} payload
-         * @param {String[]} payload.member 被更新对话信息的成员 id
+         * @param {String} payload.member 被更新对话信息的成员 id
          * @param {ConversationMumberInfo} payload.memberInfo 被更新的成员对话信息
          * @param {String} payload.updatedBy 该操作的发起者 id
          */

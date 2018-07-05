@@ -9,7 +9,7 @@ interface SignatureResult {
 }
 type SignatureFactoryResult = Promise<SignatureResult> | SignatureResult;
 
-export class Realtime extends EventEmitter {
+export class Realtime extends EventEmitter<ConnectionEvent> {
   constructor(options: {
     appId: string;
     appKey: string;
@@ -47,7 +47,7 @@ export class Realtime extends EventEmitter {
   retry();
 }
 
-declare class IMClient extends EventEmitter {
+declare class IMClient extends EventEmitter<ClientEvent | SharedEvent> {
   id: string;
   close(): Promise<void>;
   createConversation(options: {
@@ -75,6 +75,25 @@ declare class IMClient extends EventEmitter {
   ping(clientIds: string[]): Promise<Array<string>>;
   parseMessage(json: Object): Promise<AVMessage>;
   parseConversation(json: Object): Promise<ConversationBase>;
+
+  on<K extends keyof ClientEvent>(
+    event: K,
+    listener: (payload?: ClientEvent[K]) => any
+  ): this;
+  on<K extends keyof SharedEvent>(
+    event: K,
+    listener: (payload?: SharedEvent[K], conversaion?: ConversationBase) => any
+  ): this;
+  once<K extends keyof ClientEvent>(
+    event: K,
+    listener: (payload?: ClientEvent[K]) => any
+  ): this;
+  once<K extends keyof SharedEvent>(
+    event: K,
+    listener: (payload?: SharedEvent[K], conversaion?: ConversationBase) => any
+  ): this;
+  on(evt: string, listener: Function): this;
+  once(evt: string, listener: Function): this;
 }
 
 declare class ConversationQuery<T extends ConversationBase> {
@@ -109,7 +128,7 @@ declare class ConversationQuery<T extends ConversationBase> {
 /**
  *  对话
  */
-declare class ConversationBase extends EventEmitter {
+declare class ConversationBase extends EventEmitter<ConversationEvent> {
   id: string;
   lastMessage?: Message;
   lastMessageAt?: Date;
@@ -303,11 +322,13 @@ export class TextMessage extends TypedMessage {
 
 export class RecalledMessage extends TypedMessage {}
 
-declare class EventEmitter {
-  on(evt: Event | string, listener: Function): this;
-  once(evt: Event | string, listener: Function): this;
-  off(evt: Event | string, listener: Function): this;
-  emit(evt: Event | string, ...args: any[]): boolean;
+declare class EventEmitter<T> {
+  on<K extends keyof T>(event: K, listener: (payload?: T[K]) => any): this;
+  on(evt: string, listener: Function): this;
+  once<K extends keyof T>(event: K, listener: (payload?: T[K]) => any): this;
+  once(evt: string, listener: Function): this;
+  off<K extends keyof T>(evt: T | string, listener?: Function): this;
+  emit<K extends keyof T>(evt: T | string, ...args: any[]): boolean;
 }
 
 interface Middleware<T> {
@@ -389,45 +410,99 @@ export enum ErrorCode {
   MESSAGE_UPDATE_REJECTED_BY_APP,
   MESSAGE_EDIT_DISABLED,
   MESSAGE_RECALL_DISABLED,
+
+  OWNER_PROMOTION_NOT_ALLOWED,
 }
 
 export enum Event {
-  DISCONNECT,
-  RECONNECT,
-  RETRY,
-  SCHEDULE,
-  OFFLINE,
-  ONLINE,
+  DISCONNECT = 'disconnect',
+  RECONNECT = 'reconnect',
+  RETRY = 'retry',
+  SCHEDULE = 'schedule',
+  OFFLINE = 'offline',
+  ONLINE = 'online',
 
-  RECONNECT_ERROR,
+  RECONNECT_ERROR = 'reconnecterror',
+  UNREAD_MESSAGES_COUNT_UPDATE = 'unreadmessagescountupdate',
+  CLOSE = 'close',
+  CONFLICT = 'conflict',
+  CONVERSATION_INFO_UPDATED = 'conversationinfoupdated',
+  UNHANDLED_MESSAGE = 'unhandledmessage',
 
-  INVITED,
-  KICKED,
-  MEMBERS_JOINED,
-  MEMBERS_LEFT,
-  MEMBER_INFO_UPDATED,
-  BLOCKED,
-  UNBLOCKED,
-  MEMBERS_BLOCKED,
-  MEMBERS_UNBLOCKED,
-  MUTED,
-  UNMUTED,
-  MEMBERS_MUTED,
-  MEMBERS_UNMUTED,
-  MESSAGE,
-  UNREAD_MESSAGES_COUNT_UPDATE,
-  CLOSE,
-  CONFLICT,
-  UNHANDLED_MESSAGE,
-  CONVERSATION_INFO_UPDATED,
+  INVITED = 'invited',
+  KICKED = 'kicked',
+  MEMBERS_JOINED = 'membersjoined',
+  MEMBERS_LEFT = 'membersleft',
+  MEMBER_INFO_UPDATED = 'memberinfoupdated',
+  BLOCKED = 'blocked',
+  UNBLOCKED = 'unblocked',
+  MEMBERS_BLOCKED = 'membersblocked',
+  MEMBERS_UNBLOCKED = 'membersunblocked',
+  MUTED = 'muted',
+  UNMUTED = 'unmuted',
+  MEMBERS_MUTED = 'membersmuted',
+  MEMBERS_UNMUTED = 'membersunmuted',
+  MESSAGE = 'message',
 
-  LAST_DELIVERED_AT_UPDATE,
-  LAST_READ_AT_UPDATE,
-  MESSAGE_RECALL,
-  MESSAGE_UPDATE,
-  INFO_UPDATED,
+  LAST_DELIVERED_AT_UPDATE = 'lastdeliveredatupdate',
+  LAST_READ_AT_UPDATE = 'lastreadatupdate',
+  MESSAGE_RECALL = 'messagerecall',
+  MESSAGE_UPDATE = 'messageupdate',
+  INFO_UPDATED = 'infoupdated',
+}
 
-  OWNER_PROMOTION_NOT_ALLOWED,
+declare interface ConnectionEvent {
+  [Event.DISCONNECT]: void;
+  [Event.RECONNECT]: void;
+  // Tuples in rest parameters is not supported until TS 3.0
+  // [Event.SCHEDULE]: [number, number];
+  [Event.RETRY]: number;
+  [Event.OFFLINE]: void;
+  [Event.ONLINE]: void;
+}
+
+declare interface SharedEvent {
+  [Event.INVITED]: { invitedBy: string };
+  [Event.KICKED]: { kickedBy: string };
+  [Event.MEMBERS_JOINED]: { members: string[]; invitedBy: string };
+  [Event.MEMBERS_LEFT]: { members: string[]; kickedBy: string };
+  [Event.MEMBER_INFO_UPDATED]: {
+    member: string;
+    memberInfo: ConversationMemberInfo;
+    updatedBy: string;
+  };
+  [Event.BLOCKED]: { blockedBy: string };
+  [Event.UNBLOCKED]: { unblockedBy: string };
+  [Event.MEMBERS_BLOCKED]: { blockedBy: string; members: string[] };
+  [Event.MEMBERS_UNBLOCKED]: { unblockedBy: string; members: string[] };
+  [Event.MUTED]: { mutedBy: string };
+  [Event.UNMUTED]: { unmutedBy: string };
+  [Event.MEMBERS_MUTED]: { mutedBy: string; members: string[] };
+  [Event.MEMBERS_UNMUTED]: { unmutedBy: string; members: string[] };
+  [Event.MESSAGE]: Message;
+  [Event.MESSAGE_RECALL]: Message;
+  [Event.MESSAGE_UPDATE]: Message;
+}
+
+declare interface ClientEvent extends ConnectionEvent {
+  [Event.RECONNECT_ERROR]: Error;
+  [Event.UNREAD_MESSAGES_COUNT_UPDATE]: ConversationBase[];
+  [Event.CLOSE]: { code: number; reason: string };
+  [Event.CONFLICT]: { reason: string };
+  [Event.CONVERSATION_INFO_UPDATED]: {
+    attributes: { [key: string]: any };
+    updatedBy: string;
+  };
+  [Event.UNHANDLED_MESSAGE]: any;
+}
+
+declare interface ConversationEvent extends SharedEvent {
+  [Event.LAST_DELIVERED_AT_UPDATE]: void;
+  [Event.LAST_READ_AT_UPDATE]: void;
+  [Event.INFO_UPDATED]: {
+    attributes: { [key: string]: any };
+    updatedBy: string;
+  };
 }
 
 export function messageType(type: number): Function;
