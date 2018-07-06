@@ -1,3 +1,13 @@
+<a name="4.2.0"></a>
+
+# [4.2.0](https://github.com/leancloud/js-realtime-sdk/compare/v4.1.0...v4.2.0) (2018-07-06)
+
+### Features
+
+- 改进了 TypeScript 定义，现在事件回调的参数也会得到类型推导与提示：
+  ![Type inference](https://user-images.githubusercontent.com/175227/42360160-933389f8-8119-11e8-9b76-a114a184e4ff.png)
+- `Realtime` 初始化时不再需要 `region` 参数了。
+
 <a name="4.1.0"></a>
 
 # [4.1.0](https://github.com/leancloud/js-realtime-sdk/compare/v4.0.1...v4.1.0) (2018-06-24)
