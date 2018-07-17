@@ -62,6 +62,9 @@ export const decode = value => {
   if (value.__type === 'Date' && value.iso) {
     return new Date(value.iso);
   }
+  if (Array.isArray(value)) {
+    return value.map(decode);
+  }
   if (isPlainObject(value)) {
     return Object.keys(value).reduce(
       (result, key) => ({
@@ -80,6 +83,9 @@ export const decode = value => {
  */
 export const encode = value => {
   if (value instanceof Date) return { __type: 'Date', iso: value.toJSON() };
+  if (Array.isArray(value)) {
+    return value.map(encode);
+  }
   if (isPlainObject(value)) {
     return Object.keys(value).reduce(
       (result, key) => ({

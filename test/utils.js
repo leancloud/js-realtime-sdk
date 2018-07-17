@@ -97,15 +97,17 @@ describe('Utils', () => {
       should(decode()).eql(undefined);
     });
     it('Date', () => {
-      const json = { a: { b: new Date(0) } };
+      const json = { a: [{ b: new Date(0) }] };
       const encoded = encode(json);
       encoded.should.eql({
-        a: {
-          b: {
-            __type: 'Date',
-            iso: '1970-01-01T00:00:00.000Z',
+        a: [
+          {
+            b: {
+              __type: 'Date',
+              iso: '1970-01-01T00:00:00.000Z',
+            },
           },
-        },
+        ],
       });
       decode(encoded).should.eql(json);
     });
