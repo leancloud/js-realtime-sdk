@@ -46,9 +46,6 @@ export default class Realtime extends EventEmitter {
     if (typeof options.appKey !== 'string') {
       throw new TypeError(`appKey [${options.appKey}] is not a string`);
     }
-    if (options.region) {
-      console.warn('region option is not necessary anymore');
-    }
     this._options = Object.assign(
       {
         appId: undefined,

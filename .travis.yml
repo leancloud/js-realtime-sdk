@@ -4,7 +4,6 @@ node_js:
 sudo: false
 env:
   global:
-    - REGION=us
     - APP_ID=Ol0Cw6zL1xP9IIqJpiSv9uYC
     - APP_KEY=WWVkTzf8xlUTPS2dIKwuCkIz
     - EXSITING_ROOM_ID=5638313660b28815a724df31
