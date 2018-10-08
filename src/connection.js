@@ -101,7 +101,8 @@ export default class Connection extends WebSocketPlus {
       message = GenericCommand.decode(msg);
       if (debug.enabled) debug('↓ %O received', trim(message));
     } catch (e) {
-      console.warn('Decode message failed', msg);
+      console.warn('Decode message failed:', e.message, msg);
+      return;
     }
     const serialId = message.i;
     if (serialId) {
