@@ -1,3 +1,12 @@
+<a name="4.2.1"></a>
+
+## [4.2.1](https://github.com/leancloud/js-realtime-sdk/compare/v4.2.0...v4.2.1) (2018-10-09)
+
+### Bug Fixes
+
+- 现在能正确处理对话属性中的数组类型了。
+- 移除了关于 `region` 参数不再使用的警告。
+
 <a name="4.2.0"></a>
 
 # [4.2.0](https://github.com/leancloud/js-realtime-sdk/compare/v4.1.0...v4.2.0) (2018-07-06)
