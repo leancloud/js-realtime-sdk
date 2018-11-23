@@ -1,3 +1,11 @@
+interface IteratorResult<T> {
+  done: boolean;
+  value: T;
+}
+interface AsyncIterator<T> {
+  next(): Promise<IteratorResult<T>>;
+}
+
 interface AVUser {
   getSessionToken(): string;
 }
@@ -42,9 +50,12 @@ export class Realtime extends EventEmitter<ConnectionEvent> {
     },
     tag?: string
   ): Promise<IMClient>;
-  static defineConversationProperty(prop: string, descriptor?: Object);
-  register(messageClass: AVMessage[]);
-  retry();
+  static defineConversationProperty(
+    prop: string,
+    descriptor?: Object
+  ): typeof Conversation;
+  register(messageClass: AVMessage[]): void;
+  retry(): number;
 }
 
 declare class IMClient extends EventEmitter<ClientEvent | SharedEvent> {
@@ -143,7 +154,7 @@ declare class ConversationBase extends EventEmitter<ConversationEvent> {
     limit?: number;
     beforeTime?: Date;
     beforeMessageId?: string;
-  });
+  }): AsyncIterator<Array<Message>>;
   read(): Promise<this>;
   fetchReceiptTimestamps(): Promise<this>;
   queryMessages(options: {
