@@ -350,21 +350,21 @@ export default class ConversationBase extends EventEmitter {
     });
     try {
       const resCommand = await this._send(command);
-      if (!transient) {
-        const {
-          ackMessage: { uid, t, code, reason, appCode },
-        } = resCommand;
-        if (code !== null) {
-          throw createError({
-            code,
-            reason,
-            appCode,
-          });
-        }
-        Object.assign(message, {
-          id: uid,
-          timestamp: t,
+      const {
+        ackMessage: { uid, t, code, reason, appCode },
+      } = resCommand;
+      if (code !== null) {
+        throw createError({
+          code,
+          reason,
+          appCode,
         });
+      }
+      Object.assign(message, {
+        id: uid,
+        timestamp: t,
+      });
+      if (!transient) {
         this.lastMessage = message;
         this.lastMessageAt = message.timestamp;
       }
