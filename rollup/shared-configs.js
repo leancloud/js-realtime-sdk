@@ -23,18 +23,17 @@ var require = require || function(id) {throw new Error('Unexpected required ' + 
 
 export const babelConfigs = {
   plugins: [
-    'external-helpers',
-    'transform-runtime',
-    'transform-object-rest-spread',
-    'transform-decorators-legacy',
+    '@babel/plugin-external-helpers',
+    '@babel/plugin-transform-runtime',
+    ['@babel/plugin-proposal-decorators', { legacy: true }],
     [
-      'transform-es2015-classes',
+      '@babel/plugin-transform-classes',
       {
         loose: true,
       },
     ],
   ],
-  presets: [['env', { modules: false, debug: true }]],
+  presets: [['@babel/preset-env', { modules: false, debug: true }]],
   babelrc: false,
   runtimeHelpers: true,
 };

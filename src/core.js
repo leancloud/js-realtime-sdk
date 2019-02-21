@@ -5,7 +5,8 @@ export { Protocals };
 
 export { default as EventEmitter } from 'eventemitter3';
 
-export { Promise };
+const polyfilledPromise = Promise;
+export { polyfilledPromise as Promise };
 
 export {
   /**

@@ -1,5 +1,6 @@
 import isEmpty from 'lodash/isEmpty';
 import cloneDeep from 'lodash/cloneDeep';
+import find from 'lodash/find';
 import ConversationBase from './conversation-base';
 import {
   decodeDate,
@@ -198,8 +199,7 @@ class PersistentConversation extends ConversationBase {
     } else {
       // set 'a.c': nothing to do
       // set 'a.b.c.d': assign c: { d: {} } to 'a.b'
-      // CAUTION: non-standard API, provided by core-js
-      const parentKey = Array.find(pendingKeys, k => key.indexOf(k) === 0); // 'a.b'
+      const parentKey = find(pendingKeys, k => key.indexOf(k) === 0); // 'a.b'
       if (parentKey) {
         setValue(
           pendingAttributes[parentKey],
