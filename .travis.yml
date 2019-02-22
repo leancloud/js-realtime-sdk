@@ -1,6 +1,6 @@
 language: node_js
 node_js:
-  - "8"
+  - '10'
 sudo: false
 env:
   global:
@@ -16,12 +16,12 @@ script:
   - npm run docs
 after_success:
   - if [[ "$TRAVIS_BRANCH" == "master" ]] && [[ "${TRAVIS_PULL_REQUEST}" = "false" ]]; then
-      ./script/deploy.sh;
-      ./script/release.sh;
+    ./script/deploy.sh;
+    ./script/release.sh;
     fi
   - if [[ "$TRAVIS_BRANCH" == "next" ]] && [[ "${TRAVIS_PULL_REQUEST}" = "false" ]]; then
-      ./script/release.sh next-dist;
+    ./script/release.sh next-dist;
     fi
   - if [[ "$TRAVIS_BRANCH" == "v4" ]] && [[ "${TRAVIS_PULL_REQUEST}" = "false" ]]; then
-      ./script/release.sh v4-dist;
+    ./script/release.sh v4-dist;
     fi
