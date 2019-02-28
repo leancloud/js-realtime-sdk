@@ -28,6 +28,7 @@ enum CommandType {
   patch = 18;
   pubsub = 19;
   blacklist = 20;
+  goaway = 21;
 }
 
 enum OpType {
@@ -108,6 +109,8 @@ enum OpType {
   unblocked = 173;
   members_blocked = 174;
   members_unblocked = 175;
+  check_block = 176;
+  check_result = 177;
 
   add_shutup = 180;
   remove_shutup = 181;
@@ -119,6 +122,7 @@ enum OpType {
   unshutuped = 187;
   members_shutuped = 188;
   members_unshutuped = 189;
+  check_shutup = 190;  // check_result define in 177
 }
 
 enum StatusType {
@@ -197,6 +201,7 @@ message ErrorCommand {
   optional int32 appCode = 3;
   optional string detail = 4;
   repeated string pids = 5;
+  optional string appMsg = 6;
 }
 
 message DirectCommand {
@@ -234,6 +239,7 @@ message AckCommand {
   optional string type = 9;
   repeated string ids = 10;
   optional int32 appCode = 11;
+  optional string appMsg = 12;
 }
 
 message UnreadCommand {
@@ -285,6 +291,7 @@ message ConvCommand {
   optional JsonObjectMessage results = 100;
   optional JsonObjectMessage where = 101;
   optional JsonObjectMessage attr = 103;
+  optional JsonObjectMessage attrModified = 104;
 }
 
 message RoomCommand {
@@ -368,6 +375,8 @@ message PatchItem {
   optional bytes binaryMsg = 8;
   optional bool mentionAll = 9;
   repeated string mentionPids = 10;
+  optional int64 patchCode = 11;
+  optional string patchReason = 12;
 }
 
 message PatchCommand {
