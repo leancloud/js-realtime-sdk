@@ -905,6 +905,7 @@ export default class IMClient extends EventEmitter {
       peerId,
       sessionMessage,
       sessionMessage: { st: token, stTtl: tokenTTL, code },
+      serverTs,
     } = resCommand;
     if (code) {
       throw createError(sessionMessage);
@@ -916,6 +917,9 @@ export default class IMClient extends EventEmitter {
         this._sessionManager =
           this._sessionManager || this._createSessionManager();
         this._sessionManager.setSessionToken(token, tokenTTL);
+      }
+      if (serverTs) {
+        internal(this).lastPatchTime = getTime(decodeDate(serverTs));
       }
       if (internal(this).lastNotificationTime) {
         // Do not await for it as this is failable
