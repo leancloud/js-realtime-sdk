@@ -1429,6 +1429,7 @@ export default class IMClient extends EventEmitter {
       transient: true,
       members: null,
       unique: false,
+      _tempConv: false,
     });
   }
 

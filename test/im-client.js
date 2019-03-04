@@ -249,10 +249,12 @@ describe('IMClient', () => {
       client
         .createChatRoom({
           name: 'transient room',
+          _tempConv: true, // should be ignored
         })
         .then(conversation => {
           conversation.should.be.instanceof(ChatRoom);
           conversation.members.should.be.empty();
+          conversation.id.should.not.startWith('_tmp:');
         }));
     it('createConversation with transient option ', () =>
       client
