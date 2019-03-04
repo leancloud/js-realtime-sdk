@@ -89,19 +89,28 @@ declare class IMClient extends EventEmitter<ClientEvent | SharedEvent> {
 
   on<K extends keyof ClientEvent>(
     event: K,
-    listener: (payload?: ClientEvent[K]) => any
+    listener: (payload?: ClientEvent[K]) => any,
+    ...context: EventContext<K>
   ): this;
   on<K extends keyof SharedEvent>(
     event: K,
-    listener: (payload?: SharedEvent[K], conversaion?: ConversationBase) => any
+    listener: (
+      payload?: SharedEvent[K],
+      conversaion?: ConversationBase,
+      ...context: EventContext<K>
+    ) => any
   ): this;
   once<K extends keyof ClientEvent>(
     event: K,
-    listener: (payload?: ClientEvent[K]) => any
+    listener: (payload?: ClientEvent[K], ...context: EventContext<K>) => any
   ): this;
   once<K extends keyof SharedEvent>(
     event: K,
-    listener: (payload?: SharedEvent[K], conversaion?: ConversationBase) => any
+    listener: (
+      payload?: SharedEvent[K],
+      conversaion?: ConversationBase,
+      ...context: EventContext<K>
+    ) => any
   ): this;
   on(evt: string, listener: Function): this;
   once(evt: string, listener: Function): this;
@@ -334,9 +343,17 @@ export class TextMessage extends TypedMessage {
 export class RecalledMessage extends TypedMessage {}
 
 declare class EventEmitter<T> {
-  on<K extends keyof T>(event: K, listener: (payload?: T[K]) => any): this;
+  on<K extends keyof T>(
+    event: K,
+    listener: (payload?: T[K]) => any,
+    ...context: EventContext<K>
+  ): this;
   on(evt: string, listener: Function): this;
-  once<K extends keyof T>(event: K, listener: (payload?: T[K]) => any): this;
+  once<K extends keyof T>(
+    event: K,
+    listener: (payload?: T[K]) => any,
+    ...context: EventContext<K>
+  ): this;
   once(evt: string, listener: Function): this;
   off<K extends keyof T>(evt: T | string, listener?: Function): this;
   emit<K extends keyof T>(evt: T | string, ...args: any[]): boolean;
@@ -514,6 +531,20 @@ declare interface ConversationEvent extends SharedEvent {
     attributes: { [key: string]: any };
     updatedBy: string;
   };
+}
+
+declare interface OptionalContext {
+  [Event.MESSAGE_RECALL]: [PatchReason];
+  [Event.MESSAGE_UPDATE]: [PatchReason];
+}
+
+declare type EventContext<K> = K extends keyof OptionalContext
+  ? OptionalContext[K]
+  : [];
+
+declare interface PatchReason {
+  code: number;
+  detail?: string;
 }
 
 export function messageType(type: number): Function;

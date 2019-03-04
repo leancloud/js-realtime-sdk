@@ -293,6 +293,8 @@ export default class IMClient extends EventEmitter {
             binaryMsg,
             mentionAll,
             mentionPids,
+            patchCode,
+            patchReason,
           }) => {
             const conversation = this._conversationCache.get(cid);
             // deleted conversation
@@ -323,34 +325,45 @@ export default class IMClient extends EventEmitter {
                 ) {
                   conversation.lastMessage = message; // eslint-disable-line no-param-reassign
                 }
+                let reason;
+                if (patchCode) {
+                  reason = {
+                    code: patchCode.toNumber(),
+                    detail: patchReason,
+                  };
+                }
                 if (recall) {
                   /**
                    * 消息被撤回
                    * @event IMClient#MESSAGE_RECALL
                    * @param {AVMessage} message 被撤回的消息
                    * @param {ConversationBase} conversation 消息所在的会话
+                   * @param {PatchReason} [reason] 撤回的原因，不存在代表是发送者主动撤回
                    */
-                  this.emit(MESSAGE_RECALL, message, conversation);
+                  this.emit(MESSAGE_RECALL, message, conversation, reason);
                   /**
                    * 消息被撤回
                    * @event ConversationBase#MESSAGE_RECALL
                    * @param {AVMessage} message 被撤回的消息
+                   * @param {PatchReason} [reason] 撤回的原因，不存在代表是发送者主动撤回
                    */
-                  conversation.emit(MESSAGE_RECALL, message);
+                  conversation.emit(MESSAGE_RECALL, message, reason);
                 } else {
                   /**
                    * 消息被修改
                    * @event IMClient#MESSAGE_UPDATE
                    * @param {AVMessage} message 被修改的消息
                    * @param {ConversationBase} conversation 消息所在的会话
+                   * @param {PatchReason} [reason] 修改的原因，不存在代表是发送者主动修改
                    */
-                  this.emit(MESSAGE_UPDATE, message, conversation);
+                  this.emit(MESSAGE_UPDATE, message, conversation, reason);
                   /**
                    * 消息被修改
                    * @event ConversationBase#MESSAGE_UPDATE
                    * @param {AVMessage} message 被修改的消息
+                   * @param {PatchReason} [reason] 修改的原因，不存在代表是发送者主动修改
                    */
-                  conversation.emit(MESSAGE_UPDATE, message);
+                  conversation.emit(MESSAGE_UPDATE, message, reason);
                 }
               });
           }
@@ -1483,3 +1496,11 @@ export default class IMClient extends EventEmitter {
     );
   }
 }
+
+/**
+ * 修改、撤回消息的原因
+ * @typedef PatchReason
+ * @type {Object}
+ * @property {number} code 负数为内置 code，正数为开发者在 hook 中自定义的 code。比如因为敏感词过滤被修改的 code 为 -4408。
+ * @property {string} [detail] 具体的原因说明。
+ */
