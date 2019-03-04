@@ -1,3 +1,21 @@
+<a name="4.3.0"></a>
+
+# [4.3.0](https://github.com/leancloud/js-realtime-sdk/compare/v4.2.1...v4.3.0) (2019-03-04)
+
+### Bug Fixes
+
+- 修复了暂态消息发送成功后消息 id 没有更新的问题。
+- TypeScript 定义现在满足 `strict` 模式。
+
+### Features
+
+- `MESSAGE_UPDATE` 与 `MESSAGE_RECALL` 事件现在会额外返回一个 `reason` 参数来指示修改、撤回的原因（如果有的话）。
+  - 由于这个功能带来的定义描述的升级，SDK 要求的 TypeScript 最低版本现在为 3.0。
+
+### Performance Improvements
+
+- 支持在服务端运维操作时更快的切换到可用服务器上。
+
 <a name="4.2.1"></a>
 
 ## [4.2.1](https://github.com/leancloud/js-realtime-sdk/compare/v4.2.0...v4.2.1) (2018-10-09)
