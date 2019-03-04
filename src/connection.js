@@ -18,6 +18,8 @@ const debug = d('LC:Connection');
 
 const COMMAND_TIMEOUT = 20000;
 
+const EXPIRE = Symbol('expire');
+
 export {
   OPEN,
   DISCONNECT,
@@ -28,6 +30,7 @@ export {
   ONLINE,
   ERROR,
   MESSAGE,
+  EXPIRE,
 };
 
 export default class Connection extends WebSocketPlus {
@@ -118,10 +121,20 @@ export default class Connection extends WebSocketPlus {
         console.warn(`Unexpected command received with serialId [${serialId}],
          which have timed out or never been requested.`);
       }
-    } else if (message.cmd === CommandType.error) {
-      this.emit(ERROR, createError(message.errorMessage));
     } else {
-      this.emit(MESSAGE, message);
+      switch (message.cmd) {
+        case CommandType.error: {
+          this.emit(ERROR, createError(message.errorMessage));
+          return;
+        }
+        case CommandType.goaway: {
+          this.emit(EXPIRE);
+          return;
+        }
+        default: {
+          this.emit(MESSAGE, message);
+        }
+      }
     }
   }
 

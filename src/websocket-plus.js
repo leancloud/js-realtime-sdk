@@ -34,6 +34,14 @@ const requireConnected = (target, name, descriptor) =>
   });
 
 class WebSocketPlus extends EventEmitter {
+  get urls() {
+    return this._urls;
+  }
+
+  set urls(urls) {
+    this._urls = ensureArray(urls);
+  }
+
   constructor(getUrls, protocol) {
     if (typeof WebSocket === 'undefined') {
       throw new Error(

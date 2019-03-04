@@ -12,6 +12,7 @@ import Connection, {
   ONLINE,
   ERROR,
   MESSAGE,
+  EXPIRE,
 } from './connection';
 import { ErrorCode, createError } from './error';
 import { tap, Cache, trim, internal, ensureArray, isWeapp } from './utils';
@@ -147,9 +148,16 @@ export default class Realtime extends EventEmitter {
         () => this._getRTMServers(this._options),
         protocol
       );
-      connection.on(OPEN, () => resolve(connection));
-      connection.on(ERROR, reject);
-      connection.on(MESSAGE, this._dispatchCommand.bind(this));
+      connection
+        .on(OPEN, () => resolve(connection))
+        .on(ERROR, reject)
+        .on(EXPIRE, async () => {
+          debug('Connection expired. Refresh endpoints.');
+          this._cache.set('endpoints', null, 0);
+          connection.urls = await this._getRTMServers(this._options);
+          connection.disconnect();
+        })
+        .on(MESSAGE, this._dispatchCommand.bind(this));
       /**
        * 连接断开。
        * 连接断开可能是因为 SDK 进入了离线状态（see {@link Realtime#event:OFFLINE}），或长时间没有收到服务器心跳。
