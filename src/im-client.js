@@ -1340,7 +1340,7 @@ export default class IMClient extends EventEmitter {
     members: m,
     name,
     transient,
-    unique: u,
+    unique = true,
     _tempConv: tempConv,
     _tempConvTTL: tempConvTTL,
     ...properties
@@ -1357,10 +1357,6 @@ export default class IMClient extends EventEmitter {
         throw new TypeError(`conversation name ${name} is not a string`);
       }
       attr.name = name;
-    }
-    let unique = u;
-    if (unique === undefined) {
-      unique = true;
     }
     attr = new JsonObjectMessage({
       data: JSON.stringify(encode(attr)),
