@@ -1333,14 +1333,14 @@ export default class IMClient extends EventEmitter {
    * @param {Object} options 除了下列字段外的其他字段将被视为对话的自定义属性
    * @param {String[]} options.members 对话的初始成员列表，默认包含当前 client
    * @param {String} [options.name] 对话的名字
-   * @param {Boolean} [options.unique=false] 唯一对话，当其为 true 时，如果当前已经有相同成员的对话存在则返回该对话，否则会创建新的对话
+   * @param {Boolean} [options.unique=true] 唯一对话，当其为 true 时，如果当前已经有相同成员的对话存在则返回该对话，否则会创建新的对话
    * @return {Promise.<Conversation>}
    */
   async createConversation({
     members: m,
     name,
     transient,
-    unique,
+    unique = true,
     _tempConv: tempConv,
     _tempConvTTL: tempConvTTL,
     ...properties

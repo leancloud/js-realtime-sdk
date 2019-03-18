@@ -245,6 +245,42 @@ describe('IMClient', () => {
       ).then(conversations => {
         conversations[0].should.be.exactly(conversations[1]);
       }));
+    it('unique by default', () =>
+      series(
+        [0, 0].map(() => () =>
+          client.createConversation({
+            name: 'default unique',
+            members: ['hjiang', 'jfeng'],
+          })
+        )
+      ).then(conversations => {
+        conversations[0].should.be.exactly(conversations[1]);
+      }));
+    it('explicitly not unique', () =>
+      series(
+        [0, 0].map(() => () =>
+          client.createConversation({
+            name: 'default unique',
+            members: ['hjiang', 'jfeng'],
+            unique: false,
+          })
+        )
+      ).then(conversations => {
+        should.notEqual(conversations[0].id, conversations[1].id);
+      }));
+    it('different names', () =>
+      series(
+        ['foo', 'bar'].map(n => () =>
+          client.createConversation({
+            name: n,
+            members: ['hjiang', 'jfeng'],
+            unique: true,
+          })
+        )
+      ).then(conversations => {
+        conversations[0].should.be.exactly(conversations[1]);
+        conversations[0].name.should.be.exactly('bar');
+      }));
     it('transient', () =>
       client
         .createChatRoom({
