@@ -2,7 +2,7 @@
 
 [![npm](https://img.shields.io/npm/v/leancloud-realtime.svg?style=flat-square)](https://www.npmjs.com/package/leancloud-realtime)
 [![npm](https://img.shields.io/npm/v/leancloud-realtime/next.svg?style=flat-square)](https://www.npmjs.com/package/leancloud-realtime)
-![gzip size](http://img.badgesize.io/leancloud/js-realtime-sdk/dist/dist/realtime.browser.min.js.svg?compression=gzip&style=flat-square)
+![gzip size](http://img.badgesize.io/leancloud/js-realtime-sdk/dist/dist/realtime-browser.min.js.svg?compression=gzip&style=flat-square)
 [![Build Status](https://img.shields.io/travis/leancloud/js-realtime-sdk.svg?style=flat-square)](https://travis-ci.org/leancloud/js-realtime-sdk)
 [![Codecov](https://img.shields.io/codecov/c/github/leancloud/js-realtime-sdk.svg?style=flat-square)](https://codecov.io/github/leancloud/js-realtime-sdk)
 [![Known Vulnerabilities](https://snyk.io/test/github/leancloud/js-realtime-sdk/badge.svg?style=flat-square)](https://snyk.io/test/github/leancloud/js-realtime-sdk)
@@ -34,29 +34,29 @@ npm install leancloud-realtime@3 --save
 
 ## 支持的运行环境
 
-* 浏览器 / WebView
-  * IE 10+
-  * Edge latest
-  * Chrome 45+
-  * Firefox latest
-  * iOS 9.3+
-  * Android 4.4+
-* Node.js 4.0+
-* 微信小程序/小游戏 latest
-* React Native 0.26+
-* Electron latest
+- 浏览器 / WebView
+  - IE 10+
+  - Edge latest
+  - Chrome 45+
+  - Firefox latest
+  - iOS 9.3+
+  - Android 4.4+
+- Node.js 4.0+
+- 微信小程序/小游戏 latest
+- React Native 0.26+
+- Electron latest
 
 ## 文档
 
-* [安装文档](https://leancloud.cn/docs/sdk_setup-js.html)
-* [使用文档](https://leancloud.cn/docs/realtime_guide-js.html)
-* [API 文档](https://leancloud.github.io/js-realtime-sdk/docs/)
+- [安装文档](https://leancloud.cn/docs/sdk_setup-js.html)
+- [使用文档](https://leancloud.cn/docs/realtime_guide-js.html)
+- [API 文档](https://leancloud.github.io/js-realtime-sdk/docs/)
 
 ## Demo
 
-* [Simple Chatroom](https://leancloud.github.io/js-realtime-sdk/demo/simple-chatroom/) ([src](https://github.com/leancloud/js-realtime-sdk/tree/master/demo/simple-chatroom))
-* [LeanMessage](https://leancloud.github.io/leanmessage-demo) ([src](https://github.com/leancloud/leanmessage-demo))
-* [WebRTC 视频通话](https://leancloud.github.io/js-realtime-sdk/demo/webrtc/) ([src](https://github.com/leancloud/js-realtime-sdk/tree/master/demo/webrtc))
+- [Simple Chatroom](https://leancloud.github.io/js-realtime-sdk/demo/simple-chatroom/) ([src](https://github.com/leancloud/js-realtime-sdk/tree/master/demo/simple-chatroom))
+- [LeanMessage](https://leancloud.github.io/leanmessage-demo) ([src](https://github.com/leancloud/leanmessage-demo))
+- [WebRTC 视频通话](https://leancloud.github.io/js-realtime-sdk/demo/webrtc/) ([src](https://github.com/leancloud/js-realtime-sdk/tree/master/demo/webrtc))
 
 ## 插件
 
@@ -68,9 +68,9 @@ npm install leancloud-realtime@3 --save
 
 ## 支持
 
-* 在使用过程中遇到了问题时
-  * 如果你是商用版用户，请新建一个工单。
-  * 也可以在 [论坛](https://forum.leancloud.cn/) 提问、讨论。
+- 在使用过程中遇到了问题时
+  - 如果你是商用版用户，请新建一个工单。
+  - 也可以在 [论坛](https://forum.leancloud.cn/) 提问、讨论。
 
 ## 贡献
 
@@ -91,9 +91,9 @@ npm install leancloud-realtime@3 --save
 ├── deploy.sh                 // 部署 gh-pages 分支
 ├── release.sh                // 部署 dist 分支
 ├── dist                      // 打包产出 (dist 分支)
-│   ├── realtime.browser.js     // 浏览器用
-│   ├── realtime.browser.min.js // 浏览器用(uglified)
-│   ├── realtime.weapp.js       // 微信小程序用
+│   ├── realtime-browser.js     // 浏览器用
+│   ├── realtime-browser.min.js // 浏览器用(uglified)
+│   ├── realtime-weapp.js       // 微信小程序用
 │   └── realtime.js             // node 用
 ├── proto
 │   ├── message-compiled.js     // 使用 pbjs 生成的 message 类
@@ -115,30 +115,30 @@ SDK 分为连接层与应用层两部分，只存在应用层对连接层公开 
 
 #### 连接层
 
-* `WebSocketPlus`：封装了 WebSocket。相比 w3 WebSocket，增加了以下特性：
-  * 是一个有限状态机
-  * 实现了 [Node.js EventEmitter 接口](https://nodejs.org/api/events.html)
-  * 超时与自动重连机制
-  * url 参数支持 Promise 及备用地址
-* `Connection`：继承自 `WebSocketPlus`，增加了与业务相关的功能：
-  * 根据 subprotocol 自动处理发送与接收的消息，应用层发送接收的均是 ProtoBuf Message 类
-  * `send` 接口返回 Promise，在 server 回复后才算 send 成功
-  * 实现了应用层 ping/pong
+- `WebSocketPlus`：封装了 WebSocket。相比 w3 WebSocket，增加了以下特性：
+  - 是一个有限状态机
+  - 实现了 [Node.js EventEmitter 接口](https://nodejs.org/api/events.html)
+  - 超时与自动重连机制
+  - url 参数支持 Promise 及备用地址
+- `Connection`：继承自 `WebSocketPlus`，增加了与业务相关的功能：
+  - 根据 subprotocol 自动处理发送与接收的消息，应用层发送接收的均是 ProtoBuf Message 类
+  - `send` 接口返回 Promise，在 server 回复后才算 send 成功
+  - 实现了应用层 ping/pong
 
 #### 应用层
 
-* `Realtime`：开发者使用 SDK 的入口，负责访问 router、创建 connection、创建与管理 clients、创建 messageParser（管理消息类型）、监听 connection 的消息并 dispatch 给对应的 client
-* `Client`：所有的 clients 共享一个 connection
-  * `IMClient`：对应即时通讯中的「用户」，持有 connection 与 conversations，负责创建管理将收到的消息处理后在对应 conversation 上派发，所有的 IMClients 共享一个 messageParser
-* `MessageParser` 消息解析器，负责将一个 JSON 格式的消息 parse 为对应的 Message 类
-* `Conversation`：实现对话相关的操作
-  * `ConversationQuery`：对话查询器
-* `Messages`
-  * `AVMessage`：接口描述，生成文档用
-  * `Message`：消息基类
-  * `TypedMessage`：类型消息基类，继承自 `Message`
-  * `TextMessage`：文本消息，继承自 `TypedMessage`
-  * 其他富媒体消息类（`FileMessage` 及其子类、`LocationMessage`）由于依赖 leancloud-storage，作为另一个独立 package 发布
+- `Realtime`：开发者使用 SDK 的入口，负责访问 router、创建 connection、创建与管理 clients、创建 messageParser（管理消息类型）、监听 connection 的消息并 dispatch 给对应的 client
+- `Client`：所有的 clients 共享一个 connection
+  - `IMClient`：对应即时通讯中的「用户」，持有 connection 与 conversations，负责创建管理将收到的消息处理后在对应 conversation 上派发，所有的 IMClients 共享一个 messageParser
+- `MessageParser` 消息解析器，负责将一个 JSON 格式的消息 parse 为对应的 Message 类
+- `Conversation`：实现对话相关的操作
+  - `ConversationQuery`：对话查询器
+- `Messages`
+  - `AVMessage`：接口描述，生成文档用
+  - `Message`：消息基类
+  - `TypedMessage`：类型消息基类，继承自 `Message`
+  - `TextMessage`：文本消息，继承自 `TypedMessage`
+  - 其他富媒体消息类（`FileMessage` 及其子类、`LocationMessage`）由于依赖 leancloud-storage，作为另一个独立 package 发布
 
 ### 开启调试模式
 

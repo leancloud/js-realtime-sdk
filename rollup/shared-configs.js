@@ -92,7 +92,7 @@ export const node = {
 export const browser = {
   input: INPUT_FILE,
   output: {
-    file: 'dist/realtime.browser.js',
+    file: 'dist/realtime-browser.js',
     format: 'umd',
     name: 'AV',
     extend: true,
@@ -109,7 +109,7 @@ export const browser = {
 export const weapp = {
   input: INPUT_FILE,
   output: {
-    file: 'dist/realtime.weapp.js',
+    file: 'dist/realtime-weapp.js',
     format: 'umd',
     name: 'AV',
     extend: true,

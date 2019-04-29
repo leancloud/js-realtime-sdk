@@ -8,8 +8,8 @@ const espree = require('espree');
   './plugins/webrtc/dist/webrtc.js',
   './plugins/groupchat-receipts/dist/groupchat-receipts.js',
   './plugins/live-query/dist/live-query.js',
-  './dist/realtime.browser.js',
-  './dist/realtime.weapp.js',
+  './dist/realtime-browser.js',
+  './dist/realtime-weapp.js',
 ].forEach(file => {
   process.stdout.write(`validate ${file}`);
   const code = fs.readFileSync(file);
