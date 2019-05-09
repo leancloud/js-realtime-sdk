@@ -21,7 +21,9 @@
     "build:plugins": "rollup -c rollup/rollup.config.plugins.js",
     "build:test": "rollup -c rollup/rollup.config.test.js",
     "changelog": "conventional-changelog -p angular -i CHANGELOG.md -s",
-    "convert-pb": "pbjs proto/message.proto -t commonjs > proto/message-compiled.js && sed -i '' 's/protobufjs/protobufjs\\/dist\\/protobuf-light/g' ./proto/message-compiled.js"
+    "convert-pb": "pbjs proto/message.proto -t commonjs > proto/message-compiled.js && sed -i '' 's/protobufjs/protobufjs\\/dist\\/protobuf-light/g' ./proto/message-compiled.js",
+    "snyk-protect": "snyk protect",
+    "prepare": "npm run snyk-protect"
   },
   "repository": {
     "type": "git",
@@ -92,7 +94,8 @@
     "lodash": "^4.17.10",
     "protobufjs": "^5.0.1",
     "uuid": "^3.0.0",
-    "ws": "^5.2.1"
+    "ws": "^5.2.1",
+    "snyk": "^1.163.0"
   },
   "browser": {
     "ws": "./src/polyfills/ws-browser.js",
@@ -130,5 +133,6 @@
     ]
   },
   "types": "./realtime.d.ts",
-  "typings": "./realtime.d.ts"
+  "typings": "./realtime.d.ts",
+  "snyk": true
 }
