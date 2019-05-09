@@ -58,7 +58,7 @@ const createRollupPluginsOptions = resolveOptions => [
         'src/**',
         'test/**',
         'proto/**',
-        'node_modules/axios/**',
+        'node_modules/superagent/**',
         'node_modules/weapp-polyfill/**',
         'node_modules/sinon/**',
       ],

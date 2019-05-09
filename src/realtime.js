@@ -1,6 +1,6 @@
 import d from 'debug';
 import EventEmitter from 'eventemitter3';
-import axios from 'axios';
+import superagent from 'superagent';
 import shuffle from 'lodash/shuffle';
 import Connection, {
   OPEN,
@@ -94,35 +94,37 @@ export default class Realtime extends EventEmitter {
       server,
     });
     const url = `https://${api}/${version}${path}`;
-    const options = {
-      method,
-      params: query,
-      headers: {
+    debugRequest('Req: %O %O %O', method, url, { query, headers, data });
+    return superagent(method, url)
+      .set({
         'X-LC-Id': this._options.appId,
         'X-LC-Key': this._options.appKey,
         ...headers,
-      },
-      data,
-    };
-    debugRequest('Req: %O %O', url, options);
-    return axios(url, options).then(
-      response => {
-        debugRequest('Res: %O %O %O', url, response.status, response.data);
-        return response.data;
-      },
-      error => {
-        debugRequest(
-          'Error: %O %O %O',
-          url,
-          error.response.status,
-          error.response.data
-        );
-        if (error.response && error.response.data && error.response.data.code) {
-          throw createError(error.response.data);
+      })
+      .query(query)
+      .send(data)
+      .then(
+        response => {
+          debugRequest('Res: %O %O %O', url, response.status, response.body);
+          return response.body;
+        },
+        error => {
+          debugRequest(
+            'Error: %O %O %O',
+            url,
+            error.response.status,
+            error.response.body
+          );
+          if (
+            error.response &&
+            error.response.body &&
+            error.response.body.code
+          ) {
+            throw createError(error.response.body);
+          }
+          throw error;
         }
-        throw error;
-      }
-    );
+      );
   }
 
   _open() {
@@ -284,14 +286,13 @@ export default class Realtime extends EventEmitter {
     }
     const cachedRouter = routerCache.get(appId);
     if (cachedRouter) return cachedRouter;
-    return axios
-      .get('https://app-router.leancloud.cn/2/route', {
-        params: {
-          appId,
-        },
-        timeout: 20000,
+    return superagent
+      .get('https://app-router.leancloud.cn/2/route')
+      .query({
+        appId,
       })
-      .then(res => res.data)
+      .timeout(20000)
+      .then(res => res.body)
       .then(tap(debug))
       .then(({ rtm_router_server: RTMRouter, api_server: api, ttl = 3600 }) => {
         if (!RTMRouter) {
@@ -318,18 +319,17 @@ export default class Realtime extends EventEmitter {
     return this._getServerUrls({ appId, server })
       .then(tap(debug))
       .then(({ RTMRouter }) =>
-        axios
-          .get(`https://${RTMRouter}/v1/route`, {
-            params: {
-              appId,
-              secure: ssl,
-              features: isWeapp ? 'wechat' : undefined,
-              server: RTMServerName,
-              _t: Date.now(),
-            },
-            timeout: 20000,
+        superagent
+          .get(`https://${RTMRouter}/v1/route`)
+          .query({
+            appId,
+            secure: ssl,
+            features: isWeapp ? 'wechat' : undefined,
+            server: RTMServerName,
+            _t: Date.now(),
           })
-          .then(res => res.data)
+          .timeout(20000)
+          .then(res => res.body)
           .then(tap(debug))
       );
   }
