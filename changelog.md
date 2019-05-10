@@ -1,3 +1,17 @@
+<a name="5.0.0-alpha.0"></a>
+
+# [5.0.0-alpha.0](https://github.com/leancloud/js-realtime-sdk/compare/v4.3.0...v5.0.0-alpha.0) (2019-05-10)
+
+### BREAKING CHANGES
+
+- 创建对话时 `unique` 参数的默认值修改为 true（之前是 false）。
+- 编译产出的文件现在使用了符合社区习惯的命名规则：`realtime-platform[.min].js`。如果你通过 CDN 或者其他直接引用文件的方式加载的 SDK，请调整对应的文件名。
+- 内部使用的 HTTP client 从 axios 换成了 superagent。这个改动解决了在包括 CocosCreator 真机在内的多个平台上抛异常的问题。部分包含 HTTP 请求逻辑的 API 与网络相关的异常信息可能发生变化。
+
+### Performance Improvements
+
+- 升级到了 babel@7，略微减小了产出文件体积。
+
 <a name="4.3.0"></a>
 
 # [4.3.0](https://github.com/leancloud/js-realtime-sdk/compare/v4.2.1...v4.3.0) (2019-03-04)

@@ -22,6 +22,6 @@ after_success:
   - if [[ "$TRAVIS_BRANCH" == "next" ]] && [[ "${TRAVIS_PULL_REQUEST}" = "false" ]]; then
     ./script/release.sh next-dist;
     fi
-  - if [[ "$TRAVIS_BRANCH" == "v4" ]] && [[ "${TRAVIS_PULL_REQUEST}" = "false" ]]; then
-    ./script/release.sh v4-dist;
+  - if [[ "$TRAVIS_BRANCH" == "v5" ]] && [[ "${TRAVIS_PULL_REQUEST}" = "false" ]]; then
+    ./script/release.sh v5-dist;
     fi
