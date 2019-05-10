@@ -24,7 +24,7 @@ describe('WebSocketPlus', () => {
       });
     });
     it('error event should be emitted when got 404 error', done => {
-      const ws = new WebSocketPlus('ws://404.github.com');
+      const ws = new WebSocketPlus('wss://404.github.com');
       ws.on(ERROR, error => {
         error.should.be.instanceof(Error);
         done();
@@ -32,7 +32,7 @@ describe('WebSocketPlus', () => {
     });
     it('backup endpoint should be used when the primary one fails', () => {
       const ws = new WebSocketPlus([
-        'ws://404.github.com',
+        'wss://404.github.com',
         'ws://demos.kaazing.com/echo',
       ]);
       return listen(ws, OPEN, ERROR).then(() => ws.close());
