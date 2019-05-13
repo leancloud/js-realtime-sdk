@@ -1,3 +1,23 @@
+<a name="5.0.0-alpha.1"></a>
+
+# [5.0.0-alpha.1](https://github.com/leancloud/js-realtime-sdk/compare/v5.0.0-alpha.0...v5.0.0-alpha.1) (2019-05-13)
+
+### Features
+
+- 增加了手动启用、停用调试模式的开关：
+
+  ```js
+  const { debug } = require('leancloud-realtime');
+  debug.enable();
+  debug.disable();
+  ```
+
+  原有在浏览器中使用 localStorage，在 Node.js 中使用环境变量启用调试模式的方式仍然可用。
+
+### Bug Fixes
+
+- 修复了 CocosCreator 真机上 WebSocket 连接抛异常的问题。
+
 <a name="5.0.0-alpha.0"></a>
 
 # [5.0.0-alpha.0](https://github.com/leancloud/js-realtime-sdk/compare/v4.3.0...v5.0.0-alpha.0) (2019-05-10)
