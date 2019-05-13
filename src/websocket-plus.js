@@ -119,7 +119,7 @@ class WebSocketPlus extends EventEmitter {
 
   // eslint-disable-next-line class-methods-use-this
   onbeforeevent(event, from, to, ...payload) {
-    debug(`${event}: ${from} -> ${to}`, ...payload);
+    debug(`${event}: ${from} -> ${to} %o`, payload);
   }
 
   onopen() {

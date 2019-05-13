@@ -23,7 +23,7 @@ export default class Cache {
   }
 
   set(key, value, ttl) {
-    debug('[%s] set: %s %o %d', this.name, key, value, ttl);
+    debug('[%s] set: %s %d', this.name, key, ttl);
     this._map[key] = new Expirable(value, ttl);
   }
 }

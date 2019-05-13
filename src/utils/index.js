@@ -1,7 +1,13 @@
 import isPlainObject from 'lodash/isPlainObject';
+import d from 'debug';
 import global from './global';
 
 export { global };
+
+export const debug = {
+  enable: (namespaces = 'LC*') => d.enable(namespaces),
+  disable: d.disable,
+};
 
 export const tryAll = promiseConstructors => {
   const promise = new Promise(promiseConstructors[0]);

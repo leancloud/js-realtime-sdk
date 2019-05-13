@@ -16,3 +16,5 @@ export {
    */
   default as Realtime,
 } from './realtime';
+
+export { debug } from './utils';

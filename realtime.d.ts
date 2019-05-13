@@ -550,4 +550,11 @@ declare interface PatchReason {
 export function messageType(type: number): Function;
 export function messageField(fields: string[]): Function;
 
+interface Debug {
+  enable(): void;
+  enable(namespaces: string): void;
+  disable(): string;
+}
+export var debug: Debug;
+
 export as namespace AV;
