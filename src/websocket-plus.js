@@ -238,6 +238,10 @@ class WebSocketPlus extends EventEmitter {
     debug('start connection keeper');
     this._heartbeatTimer = setInterval(this._ping.bind(this), HEARTBEAT_TIME);
     const addListener = this._ws.addListener || this._ws.addEventListener;
+    if (!addListener) {
+      debug('connection keeper disabled due to the lack of #addEventListener.');
+      return;
+    }
     addListener.call(this._ws, 'message', this.__postponeTimeoutTimer);
     addListener.call(this._ws, 'pong', this.__postponeTimeoutTimer);
     this._postponeTimeoutTimer();
@@ -248,9 +252,11 @@ class WebSocketPlus extends EventEmitter {
     // websockets/ws#489
     const removeListener =
       this._ws.removeListener || this._ws.removeEventListener;
-    removeListener.call(this._ws, 'message', this.__postponeTimeoutTimer);
-    removeListener.call(this._ws, 'pong', this.__postponeTimeoutTimer);
-    this._clearTimeoutTimers();
+    if (removeListener) {
+      removeListener.call(this._ws, 'message', this.__postponeTimeoutTimer);
+      removeListener.call(this._ws, 'pong', this.__postponeTimeoutTimer);
+      this._clearTimeoutTimers();
+    }
     if (this._heartbeatTimer) {
       clearInterval(this._heartbeatTimer);
     }
