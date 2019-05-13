@@ -1,5 +1,6 @@
 /* eslint class-methods-use-this: ["error", { "exceptMethods": ["_addMembers", "_removeMembers"] }] */
 import EventEmitter from 'eventemitter3';
+import values from 'lodash/values';
 import d from 'debug';
 import { decodeDate, getTime, internal } from '../utils';
 import { applyDecorators } from '../plugin';
@@ -111,7 +112,7 @@ export default class ConversationBase extends EventEmitter {
     });
     this._client = client;
     if (debug.enabled) {
-      Object.values(Event).forEach(event =>
+      values(Event).forEach(event =>
         this.on(event, (...payload) =>
           this._debug(`${event} event emitted. %o`, payload)
         )
