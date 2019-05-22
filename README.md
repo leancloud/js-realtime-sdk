@@ -2,7 +2,7 @@
 
 [![npm](https://img.shields.io/npm/v/leancloud-realtime.svg?style=flat-square)](https://www.npmjs.com/package/leancloud-realtime)
 [![npm](https://img.shields.io/npm/v/leancloud-realtime/next.svg?style=flat-square)](https://www.npmjs.com/package/leancloud-realtime)
-![gzip size](http://img.badgesize.io/leancloud/js-realtime-sdk/dist/dist/realtime-browser.min.js.svg?compression=gzip&style=flat-square)
+![gzip size](https://img.badgesize.io/leancloud/js-realtime-sdk/next-dist/dist/realtime-browser.min.js.svg?compression=gzip&style=flat-square)
 [![Build Status](https://img.shields.io/travis/leancloud/js-realtime-sdk.svg?style=flat-square)](https://travis-ci.org/leancloud/js-realtime-sdk)
 [![Codecov](https://img.shields.io/codecov/c/github/leancloud/js-realtime-sdk.svg?style=flat-square)](https://codecov.io/github/leancloud/js-realtime-sdk)
 [![Known Vulnerabilities](https://snyk.io/test/github/leancloud/js-realtime-sdk/badge.svg?style=flat-square)](https://snyk.io/test/github/leancloud/js-realtime-sdk)
@@ -76,7 +76,7 @@ npm install leancloud-realtime@3 --save
 
 如果你希望为这个项目贡献代码，请按以下步骤进行：
 
-0.  Fork 这个项目，clone 到本地
+1.  Fork 这个项目，clone 到本地
 1.  在目录中执行 `npm install` 安装所需 Node.js 依赖包
 1.  编码，更新测试用例
 1.  运行 `npm test` 确保测试全部 pass
@@ -176,7 +176,7 @@ npm run test:node -- --grep KEYWORDS
 npm run test:browser-local
 ```
 
-生成 dist/realtime.\*
+编译
 
 ```
 npm run build
