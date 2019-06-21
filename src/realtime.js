@@ -306,9 +306,22 @@ export default class Realtime extends EventEmitter {
       })
       .catch(() => {
         const id = appId.slice(0, 8).toLowerCase();
+        let domain;
+        switch (appId.slice(-9)) {
+          case '-9Nh9j0Va':
+            // TAB
+            domain = 'lncldapi.com';
+            break;
+          case '-MdYXbMMI':
+            // US
+            domain = 'lncldglobal.com';
+            break;
+          default:
+            domain = 'lncld.net';
+        }
         return {
-          RTMRouter: `${id}.rtm.lncld.net`,
-          api: `${id}.api.lncld.net`,
+          RTMRouter: `${id}.rtm.${domain}`,
+          api: `${id}.api.${domain}`,
         };
       });
   }
