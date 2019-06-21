@@ -1,3 +1,11 @@
+<a name="4.3.1"></a>
+
+## [4.3.1](https://github.com/leancloud/js-realtime-sdk/compare/v4.3.0...v4.3.1) (2019-06-21)
+
+### Bug Fixes
+
+- 修正了华东节点与美国节点的默认 server。
+
 <a name="4.3.0"></a>
 
 # [4.3.0](https://github.com/leancloud/js-realtime-sdk/compare/v4.2.1...v4.3.0) (2019-03-04)
