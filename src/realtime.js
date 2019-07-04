@@ -93,7 +93,7 @@ export default class Realtime extends EventEmitter {
       appId,
       server,
     });
-    const url = `https://${api}/${version}${path}`;
+    const url = `${api}/${version}${path}`;
     debugRequest('Req: %O %O %O', method, url, { query, headers, data });
     return superagent(method, url)
       .set({
@@ -286,6 +286,7 @@ export default class Realtime extends EventEmitter {
     }
     const cachedRouter = routerCache.get(appId);
     if (cachedRouter) return cachedRouter;
+    const defaultProtocol = 'https://';
     return superagent
       .get('https://app-router.leancloud.cn/2/route')
       .query({
@@ -294,17 +295,23 @@ export default class Realtime extends EventEmitter {
       .timeout(20000)
       .then(res => res.body)
       .then(tap(debug))
-      .then(({ rtm_router_server: RTMRouter, api_server: api, ttl = 3600 }) => {
-        if (!RTMRouter) {
-          throw new Error('rtm router not exists');
+      .then(
+        ({
+          rtm_router_server: RTMRouterServer,
+          api_server: APIServer,
+          ttl = 3600,
+        }) => {
+          if (!RTMRouterServer) {
+            throw new Error('rtm router not exists');
+          }
+          const serverUrls = {
+            RTMRouter: `${defaultProtocol}${RTMRouterServer}`,
+            api: `${defaultProtocol}${APIServer}`,
+          };
+          routerCache.set(appId, serverUrls, ttl * 1000);
+          return serverUrls;
         }
-        const serverUrls = {
-          RTMRouter,
-          api,
-        };
-        routerCache.set(appId, serverUrls, ttl * 1000);
-        return serverUrls;
-      })
+      )
       .catch(() => {
         const id = appId.slice(0, 8).toLowerCase();
         let domain;
@@ -321,8 +328,8 @@ export default class Realtime extends EventEmitter {
             domain = 'lncld.net';
         }
         return {
-          RTMRouter: `${id}.rtm.${domain}`,
-          api: `${id}.api.${domain}`,
+          RTMRouter: `${defaultProtocol}${id}.rtm.${domain}`,
+          api: `${defaultProtocol}${id}.api.${domain}`,
         };
       });
   }
@@ -333,7 +340,7 @@ export default class Realtime extends EventEmitter {
       .then(tap(debug))
       .then(({ RTMRouter }) =>
         superagent
-          .get(`https://${RTMRouter}/v1/route`)
+          .get(`${RTMRouter}/v1/route`)
           .query({
             appId,
             secure: ssl,
