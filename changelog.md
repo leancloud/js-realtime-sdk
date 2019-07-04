@@ -1,3 +1,16 @@
+<a name="5.0.0-alpha.2"></a>
+
+# [5.0.0-alpha.2](https://github.com/leancloud/js-realtime-sdk/compare/v5.0.0-alpha.1...v5.0.0-alpha.2) (2019-07-04)
+
+### Bug Fixes
+
+- 修正了华东节点与美国节点的默认 server。
+- 修复了开启调试模式的情况下在某些不支持 `Object.values` 的运行环境会抛异常的问题。
+
+### Features
+
+- 初始化 `Realtime` 的 `server` 参数现在允许指定协议了。
+
 <a name="5.0.0-alpha.1"></a>
 
 # [5.0.0-alpha.1](https://github.com/leancloud/js-realtime-sdk/compare/v5.0.0-alpha.0...v5.0.0-alpha.1) (2019-05-13)
