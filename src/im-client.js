@@ -850,7 +850,11 @@ export default class IMClient extends EventEmitter {
 
   async _open(appId, tag, deviceId, isReconnect = false) {
     this._debug('open session');
-    const { lastUnreadNotifTime, lastPatchTime } = internal(this);
+    const {
+      lastUnreadNotifTime,
+      lastPatchTime,
+      lastNotificationTime,
+    } = internal(this);
     const command = new GenericCommand({
       cmd: 'session',
       op: 'open',
@@ -932,17 +936,18 @@ export default class IMClient extends EventEmitter {
           this._sessionManager || this._createSessionManager();
         this._sessionManager.setSessionToken(token, tokenTTL);
       }
+      const serverTime = getTime(decodeDate(serverTs));
       if (serverTs) {
-        internal(this).lastPatchTime = getTime(decodeDate(serverTs));
+        internal(this).lastPatchTime = serverTime;
       }
-      if (internal(this).lastNotificationTime) {
+      if (lastNotificationTime) {
         // Do not await for it as this is failable
-        this._syncNotifications(internal(this).lastNotificationTime).catch(
-          error => console.warn('Syncing notifications failed:', error)
+        this._syncNotifications(lastNotificationTime).catch(error =>
+          console.warn('Syncing notifications failed:', error)
         );
       } else {
         // Set timestamp to now for next reconnection
-        internal(this).lastNotificationTime = Date.now();
+        internal(this).lastNotificationTime = serverTime;
       }
     } else {
       console.warn('Unexpected session opened without peerId.');
