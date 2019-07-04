@@ -1412,6 +1412,18 @@ module.exports = require('protobufjs/dist/protobuf-light')
           },
           {
             rule: 'optional',
+            type: 'int64',
+            name: 'clientTs',
+            id: 10,
+          },
+          {
+            rule: 'optional',
+            type: 'int32',
+            name: 'notificationType',
+            id: 11,
+          },
+          {
+            rule: 'optional',
             type: 'DataCommand',
             name: 'dataMessage',
             id: 101,

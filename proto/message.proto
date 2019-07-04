@@ -424,6 +424,8 @@ message GenericCommand {
   optional int32 priority = 7;
   optional int32 service = 8;
   optional int64 serverTs = 9;
+  optional int64 clientTs = 10;
+  optional int32 notificationType = 11;
 
   optional DataCommand dataMessage = 101;
   optional SessionCommand sessionMessage = 102;
