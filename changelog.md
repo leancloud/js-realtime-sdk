@@ -1,3 +1,11 @@
+<a name="5.0.0-alpha.3"></a>
+
+# [5.0.0-alpha.3](https://github.com/leancloud/js-realtime-sdk/compare/v5.0.0-alpha.2...v5.0.0-alpha.3) (2019-07-04)
+
+### Bug Fixes
+
+- 修复可靠的通知机制依然有可能会跳过部分通知的问题。
+
 <a name="5.0.0-alpha.2"></a>
 
 # [5.0.0-alpha.2](https://github.com/leancloud/js-realtime-sdk/compare/v5.0.0-alpha.1...v5.0.0-alpha.2) (2019-07-04)
