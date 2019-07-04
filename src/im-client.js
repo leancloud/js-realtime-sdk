@@ -135,7 +135,7 @@ export default class IMClient extends EventEmitter {
    */
   async _dispatchCommand(command) {
     this._debug(trim(command), 'received');
-    if (command.serverTs) {
+    if (command.serverTs && command.notificationType === 1) {
       internal(this).lastNotificationTime = getTime(
         decodeDate(command.serverTs)
       );
@@ -960,11 +960,12 @@ export default class IMClient extends EventEmitter {
       timestamp
     );
     notifications.forEach(notification => {
-      const { cmd, op, serverTs, ...payload } = notification;
+      const { cmd, op, serverTs, notificationType, ...payload } = notification;
       this._dispatchCommand({
         cmd: CommandType[cmd],
         op: OpType[op],
         serverTs,
+        notificationType,
         [`${cmd}Message`]: payload,
       });
     });
