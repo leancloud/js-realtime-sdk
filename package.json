@@ -97,13 +97,13 @@
   "browser": {
     "ws": "./src/polyfills/ws-browser.js",
     "./dist/realtime.js": "./dist/realtime-browser.js",
-    "./dist/realtime-core-js": "./dist/realtime-core-browser.js"
+    "./dist/realtime-core.js": "./dist/realtime-core-browser.js"
   },
   "weapp": {
     "ws": "weapp-polyfill/websocket.js",
     "./src/polyfills/polyfills.js": "./src/polyfills/polyfills-weapp.js",
     "./dist/realtime.js": "./dist/realtime-weapp.js",
-    "./dist/realtime-core-js": "./dist/realtime-core-weapp.js"
+    "./dist/realtime-core.js": "./dist/realtime-core-weapp.js"
   },
   "nyc": {
     "require": [
