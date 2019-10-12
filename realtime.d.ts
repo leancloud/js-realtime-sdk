@@ -172,7 +172,7 @@ declare class ConversationBase extends EventEmitter<ConversationEvent> {
     afterTime?: Date;
     afterMessageId?: string;
     limit?: number;
-    type: number;
+    type?: number;
   }): Promise<Array<Message>>;
   queryMessages(options: {
     startTime?: Date;
@@ -182,7 +182,7 @@ declare class ConversationBase extends EventEmitter<ConversationEvent> {
     endMessageId?: string;
     endClosed?: boolean;
     limit?: number;
-    type: number;
+    type?: number;
     direction?: MessageQueryDirection;
   }): Promise<Array<Message>>;
   send<T extends Message>(
