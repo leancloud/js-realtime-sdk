@@ -303,7 +303,7 @@ export default class Realtime extends EventEmitter {
     if (cachedRouter) return cachedRouter;
     const defaultProtocol = 'https://';
     return superagent
-      .get('https://app-router.leancloud.cn/2/route')
+      .get('https://app-router.com/2/route')
       .query({
         appId,
       })
