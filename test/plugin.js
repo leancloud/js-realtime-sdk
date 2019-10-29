@@ -1,13 +1,12 @@
 import 'should';
 import 'should-sinon';
-import Realtime from '../src/realtime';
 import TypedMessage from '../src/messages/typed-message';
 import TextMessage from '../src/messages/text-message';
 import { messageType } from '../src/messages/helpers';
 
 import { sinon, hold } from './test-utils';
 
-import { APP_ID, APP_KEY, EXISTING_ROOM_ID, CLIENT_ID } from './configs';
+import { EXISTING_ROOM_ID, CLIENT_ID, createRealtime } from './configs';
 
 @messageType(1)
 class PluginDefinedMessage extends TypedMessage {}
@@ -21,9 +20,7 @@ describe('Plugin', () => {
     let client;
     let realtime;
     before(() => {
-      realtime = new Realtime({
-        appId: APP_ID,
-        appKey: APP_KEY,
+      realtime = createRealtime({
         plugins: [
           {
             messageClasses: [PluginDefinedMessage],
@@ -86,9 +83,7 @@ describe('Plugin', () => {
     let client;
     let realtime;
     before(() => {
-      realtime = new Realtime({
-        appId: APP_ID,
-        appKey: APP_KEY,
+      realtime = createRealtime({
         plugins: [
           {
             onRealtimeCreate: patchTestFunction(1),
@@ -134,9 +129,7 @@ describe('Plugin', () => {
   describe('error handling', () => {
     it('create Realtime should throw', () => {
       (() =>
-        new Realtime({
-          appId: APP_ID,
-          appKey: APP_KEY,
+        createRealtime({
           plugins: [
             {
               name: 'ErrorPlugin',
@@ -148,9 +141,7 @@ describe('Plugin', () => {
         })).should.throw('test[ErrorPlugin]');
     });
     it('create IMClient should be rejected', () =>
-      new Realtime({
-        appId: APP_ID,
-        appKey: APP_KEY,
+      createRealtime({
         plugins: [
           {
             name: 'ErrorPlugin',
@@ -163,9 +154,7 @@ describe('Plugin', () => {
         .createIMClient()
         .should.be.rejectedWith('test[ErrorPlugin]'));
     it('middleware error should be reported', () =>
-      new Realtime({
-        appId: APP_ID,
-        appKey: APP_KEY,
+      createRealtime({
         plugins: [
           {
             name: 'ErrorPlugin',
@@ -174,13 +163,11 @@ describe('Plugin', () => {
             },
           },
         ],
-      })._messageParser
-        .parse(new TextMessage('1').getPayload())
+      })
+        ._messageParser.parse(new TextMessage('1').getPayload())
         .should.be.rejectedWith('test[ErrorPlugin]'));
     it('beforeMessageDispatch error should be reported', () =>
-      new Realtime({
-        appId: APP_ID,
-        appKey: APP_KEY,
+      createRealtime({
         plugins: [
           {
             name: 'ErrorPlugin',
@@ -202,9 +189,7 @@ describe('Plugin', () => {
     it('middleware return type mismatch should trigger a warning', () => {
       const spy = sinon.spy(console, 'warn');
       return Promise.all([
-        new Realtime({
-          appId: APP_ID,
-          appKey: APP_KEY,
+        createRealtime({
           plugins: [
             {
               name: 'ErrorPlugin',
@@ -212,9 +197,7 @@ describe('Plugin', () => {
             },
           ],
         })._messageParser.parse(new TextMessage('1').getPayload()),
-        new Realtime({
-          appId: APP_ID,
-          appKey: APP_KEY,
+        createRealtime({
           plugins: [
             {
               name: 'ErrorPlugin',

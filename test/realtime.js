@@ -9,29 +9,31 @@ import { Event } from '../src';
 
 import { listen, sinon, wait } from './test-utils';
 
-import { APP_ID, APP_KEY, NON_EXISTING_ROOM_ID } from './configs';
-
-const createRealtime = options =>
-  new Realtime(
-    Object.assign(
-      {
-        appId: APP_ID,
-        appKey: APP_KEY,
-      },
-      options
-    )
-  );
+import {
+  createRealtime,
+  APP_ID,
+  APP_KEY,
+  SERVER,
+  NON_EXISTING_ROOM_ID,
+} from './configs';
 
 class Client {}
 
 describe('Realtime', () => {
   describe('constructor', () => {
     it('appId required', () => (() => new Realtime()).should.throw());
+    it('server required for CN app', () =>
+      (() =>
+        new Realtime({
+          appId: 'test-cn-app-id',
+          appKey: 'test-cn-app-key',
+        })).should.throw());
     it('normal', () =>
       (() =>
         new Realtime({
           appId: APP_ID,
           appKey: APP_KEY,
+          server: SERVER,
         })).should.not.throw);
   });
   describe('_open/_close', () => {

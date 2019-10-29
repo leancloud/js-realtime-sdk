@@ -15,7 +15,15 @@ import Connection, {
   EXPIRE,
 } from './connection';
 import { ErrorCode, createError } from './error';
-import { tap, Cache, trim, internal, ensureArray, isWeapp } from './utils';
+import {
+  tap,
+  Cache,
+  trim,
+  internal,
+  ensureArray,
+  isWeapp,
+  isCNApp,
+} from './utils';
 import { applyDecorators, applyDispatcher } from './plugin';
 import { version as VERSION } from '../package.json';
 
@@ -30,11 +38,11 @@ export default class Realtime extends EventEmitter {
    * @param  {Object} options
    * @param  {String} options.appId
    * @param  {String} options.appKey （since 4.0.0）
+   * @param  {String|Object} [options.server] 指定服务器域名，中国节点应用此参数必填（since 4.0.0）
    * @param  {Boolean} [options.pushOfflineMessages=false] 启用推送离线消息模式（默认为发送未读消息通知模式）
    * @param  {Boolean} [options.noBinary=false] 设置 WebSocket 使用字符串格式收发消息（默认为二进制格式）。
    *                                            适用于 WebSocket 实现不支持二进制数据格式的情况
    * @param  {Boolean} [options.ssl=true] 使用 wss 进行连接
-   * @param  {String|Object} [options.server] 指定私有部署的服务器域名（since 4.0.0）
    * @param  {String|String[]} [options.RTMServers] 指定私有部署的 RTM 服务器地址（since 4.0.0）
    * @param  {Plugin[]} [options.plugins] 加载插件（since 3.1.0）
    */
@@ -46,6 +54,13 @@ export default class Realtime extends EventEmitter {
     }
     if (typeof options.appKey !== 'string') {
       throw new TypeError(`appKey [${options.appKey}] is not a string`);
+    }
+    if (isCNApp(options.appId)) {
+      if (!options.server) {
+        throw new TypeError(
+          `server option is required for apps from CN region`
+        );
+      }
     }
     this._options = Object.assign(
       {
@@ -314,19 +329,7 @@ export default class Realtime extends EventEmitter {
       )
       .catch(() => {
         const id = appId.slice(0, 8).toLowerCase();
-        let domain;
-        switch (appId.slice(-9)) {
-          case '-9Nh9j0Va':
-            // TAB
-            domain = 'lncldapi.com';
-            break;
-          case '-MdYXbMMI':
-            // US
-            domain = 'lncldglobal.com';
-            break;
-          default:
-            domain = 'lncld.net';
-        }
+        const domain = 'lncldglobal.com';
         return {
           RTMRouter: `${defaultProtocol}${id}.rtm.${domain}`,
           api: `${defaultProtocol}${id}.api.${domain}`,

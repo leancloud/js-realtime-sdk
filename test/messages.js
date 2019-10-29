@@ -1,6 +1,5 @@
 import 'should';
 import 'should-sinon';
-import Realtime from '../src/realtime';
 import { Conversation } from '../src/conversations';
 import {
   Event,
@@ -21,7 +20,7 @@ import {
 
 import { listen, hold, sinon } from './test-utils';
 
-import { APP_ID, APP_KEY, EXISTING_ROOM_ID } from './configs';
+import { EXISTING_ROOM_ID, createRealtime } from './configs';
 
 @messageType(1)
 @messageField('foo')
@@ -138,10 +137,7 @@ describe('Messages', () => {
     let conversationWchen;
     let conversationZwang;
     before(() => {
-      const realtime = new Realtime({
-        appId: APP_ID,
-        appKey: APP_KEY,
-      });
+      const realtime = createRealtime();
       return Promise.all([realtime.createIMClient(), realtime.createIMClient()])
         .then(clients => {
           [wchen, zwang] = clients;

@@ -32,6 +32,8 @@ const onRealtimeCreate = realtime => {
  * @example
  * var realtime = new Realtime({
  *   appId: appId,
+ *   appKey: appKey,
+ *   server: server,
  *   plugins: WebRTCPlugin,
  * });
  * realtime.createWebRTCClient(id);

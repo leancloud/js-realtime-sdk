@@ -1,5 +1,4 @@
 import uuid from 'uuid/v4';
-import Realtime from '../src/realtime';
 import { tap } from '../src/utils';
 import {
   GenericCommand,
@@ -20,11 +19,10 @@ import {
 } from '../src';
 
 import {
-  APP_ID,
-  APP_KEY,
   EXISTING_ROOM_ID,
   SYS_CONV_ID,
   CLIENT_ID,
+  createRealtime,
 } from './configs';
 
 import { listen, sinon, wait } from './test-utils';
@@ -35,10 +33,7 @@ describe('Conversation', () => {
   let client;
   let conversation;
   before(() => {
-    realtime = new Realtime({
-      appId: APP_ID,
-      appKey: APP_KEY,
-    });
+    realtime = createRealtime();
     return realtime
       .createIMClient(CLIENT_ID)
       .then(c => {
@@ -538,10 +533,7 @@ describe('Conversation', () => {
           .then(tap(() => jwu.close()))
       )
       .then(() => {
-        bwangRealtime = new Realtime({
-          appId: APP_ID,
-          appKey: APP_KEY,
-        });
+        bwangRealtime = createRealtime();
         return bwangRealtime.createIMClient(bwangId);
       })
       .then(c => {

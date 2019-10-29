@@ -1,18 +1,14 @@
 import ConversationQuery from '../src/conversation-query';
-import Realtime from '../src/realtime';
 import Message, { MessageStatus } from '../src/messages/message';
 
-import { APP_ID, APP_KEY, EXISTING_ROOM_ID } from './configs';
+import { EXISTING_ROOM_ID, createRealtime } from './configs';
 
 describe('ConversationQuery', () => {
   // divided to 2 parts since there is query quota for every single client
   describe('part1', () => {
     let client;
     before(() =>
-      new Realtime({
-        appId: APP_ID,
-        appKey: APP_KEY,
-      })
+      createRealtime()
         .createIMClient()
         .then(c => {
           client = c;
@@ -193,10 +189,7 @@ describe('ConversationQuery', () => {
   describe('part2', () => {
     let client;
     before(() =>
-      new Realtime({
-        appId: APP_ID,
-        appKey: APP_KEY,
-      })
+      createRealtime()
         .createIMClient()
         .then(c => {
           client = c;

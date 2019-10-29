@@ -1,7 +1,6 @@
 import 'should';
 import 'should-sinon';
 import should from 'should/as-function';
-import Realtime from '../src/realtime';
 import IMClient from '../src/im-client';
 import { Conversation, ChatRoom } from '../src/conversations';
 import Message from '../src/messages/message';
@@ -12,21 +11,17 @@ import { Expirable } from '../src/utils';
 import { sinon, listen, series } from './test-utils';
 
 import {
-  APP_ID,
-  APP_KEY,
   EXISTING_ROOM_ID,
   NON_EXISTING_ROOM_ID,
   CLIENT_ID,
+  createRealtime,
 } from './configs';
 
 describe('IMClient', () => {
   let client;
   let realtime;
   before(() => {
-    realtime = new Realtime({
-      appId: APP_ID,
-      appKey: APP_KEY,
-    });
+    realtime = createRealtime();
     return realtime.createIMClient(CLIENT_ID).then(c => {
       client = c;
     });
@@ -36,10 +31,7 @@ describe('IMClient', () => {
 
   describe('create and close', () => {
     it('normal create and close', () => {
-      const rt = new Realtime({
-        appId: APP_ID,
-        appKey: APP_KEY,
-      });
+      const rt = createRealtime();
       const closeCallback = sinon.spy();
       return Promise.all([
         rt.createIMClient(42).should.be.rejected(),
@@ -93,10 +85,7 @@ describe('IMClient', () => {
         .createIMClient(ID, undefined, 'TEST')
         .then(client1 => {
           client1.on('conflict', () => done());
-          return new Realtime({
-            appId: APP_ID,
-            appKey: APP_KEY,
-          })
+          createRealtime()
             .createIMClient(ID, undefined, 'TEST')
             .then(client2 => client2.close());
         })
@@ -373,10 +362,7 @@ describe('IMClient', () => {
 
   describe('Reliable notifications', () => {
     before(async function setup() {
-      this.realtime = new Realtime({
-        appId: APP_ID,
-        appKey: APP_KEY,
-      });
+      this.realtime = createRealtime();
       this.client = await this.realtime.createIMClient();
     });
     after(async function teardown() {

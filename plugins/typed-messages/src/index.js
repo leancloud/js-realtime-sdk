@@ -12,6 +12,8 @@ import { name } from '../package.json';
  * @example
  * var realtime = new Realtime({
  *   appId: appId,
+ *   appKey: appKey,
+ *   server: server,
  *   plugins: TypedMessagesPlugin,
  * });
  */

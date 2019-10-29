@@ -13,8 +13,9 @@ import { Realtime } from '../../../src';
 import IMClient from '../../../src/im-client';
 
 const realtime = new Realtime({
-  appId: '',
-  appKey: '',
+  appId: 'for-test',
+  appKey: 'for-test',
+  server: 'for-test',
   plugins: TypedMessagesPlugin,
 });
 const client = new IMClient('test', undefined, {
