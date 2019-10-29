@@ -5,7 +5,9 @@ export const APP_ID =
   process.env.APP_ID || 'anruhhk6visejjip57psvv5uuv8sggrzdfl9pg2bghgsiy35';
 export const APP_KEY =
   process.env.APP_KEY || 'xhiibo2eiyokjdu2y3kqcb7334rtw4x33zam98buxzkjuq5g';
-const defaultServer = isCNApp ? 'https://js-rtm-test.jishuq.com' : undefined;
+const defaultServer = isCNApp(APP_ID)
+  ? 'https://js-rtm-test.jishuq.com'
+  : undefined;
 export const SERVER = process.env.SERVER ? process.env.SERVER : defaultServer;
 export const EXISTING_ROOM_ID =
   process.env.EXSITING_ROOM_ID || '559d08a1e4b0a35bc5062ba1';

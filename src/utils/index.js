@@ -222,4 +222,4 @@ export const throttle = wait => (target, property, descriptor) => {
   };
 };
 
-export const isCNApp = appId => appId.slice(-9).toLowerCase() !== '-MdYXbMMI';
+export const isCNApp = appId => appId.slice(-9) !== '-MdYXbMMI';
