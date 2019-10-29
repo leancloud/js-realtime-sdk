@@ -106,6 +106,12 @@ export const browser = {
   }),
 };
 
+const weappRuntimeReset = () => ({
+  intro() {
+    return 'var XMLHttpRequest;';
+  },
+});
+
 export const weapp = {
   input: INPUT_FILE,
   output: {
@@ -118,12 +124,15 @@ export const weapp = {
     },
     sourcemap: true,
   },
-  plugins: createRollupPluginsOptions({
-    browser: true,
-    customResolveOptions: {
-      aliasFields: ['weapp', 'browser'],
-    },
-  }),
+  plugins: [
+    ...createRollupPluginsOptions({
+      browser: true,
+      customResolveOptions: {
+        aliasFields: ['weapp', 'browser'],
+      },
+    }),
+    weappRuntimeReset(),
+  ],
 };
 
 export const minify = config =>
