@@ -1,8 +1,13 @@
 // 请将 AppId 改为你自己的 AppId，否则无法本地测试
 var appId = 'JVcHWdgny33gWo3kEOvcUgOW-gzGzoHsz';
 var appKey = '4lTe5hwnx58HYPrFXyAea6QV';
+var server = 'https://jvchwdgn.lc-cn-n1-shared.com';
 
-AV.initialize(appId, appKey);
+AV.initialize({
+  appId: appId,
+  appKey: appKey,
+  serverUrls: server,
+});
 
 // 请换成你自己的一个房间的 conversation id（这是服务器端生成的）
 var roomId = '5989569dda2f6000616cfb67';
@@ -14,6 +19,7 @@ var clientId = 'LeanCloud';
 var realtime = new AV.Realtime({
   appId: appId,
   appKey: appKey,
+  server: server,
   plugins: AV.TypedMessagesPlugin,
 });
 var client;
