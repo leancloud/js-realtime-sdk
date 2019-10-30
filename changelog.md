@@ -1,3 +1,17 @@
+<a name="5.0.0-beta.0"></a>
+
+# [5.0.0-beta.0](https://github.com/leancloud/js-realtime-sdk/compare/v5.0.0-alpha.3...v5.0.0-beta.0) (2019-10-30)
+
+### BREAKING CHANGES
+
+- 对于中国节点应用，初始化 `Realtime` 时必须通过 `server` 参数指定服务器地址。中国节点的应用必须要绑定自有域名后才能使用，这个改动是为让没有指定服务器地址时的异常更加明确。国际版应用不受影响。
+- SDK 使用的域名更新。国际版应用新增 `app-router.com`，中国节点应用不受影响。`app-router.leancloud.cn` 均不再使用。如果国际版应用在微信小程序等需要域名白名单的平台上运行，需要更新白名单配置，开发者可以访问应用的 LeanCloud 控制台获取最新的域名列表。
+
+### Bug Fixes
+
+- 修复了 CocosCreator 编译到微信小游戏后无法连接的问题。
+- 修正了 TypeScript 定义文件中 `Conversation#queryMessages` 的一个错误的参数类型。
+
 <a name="5.0.0-alpha.3"></a>
 
 # [5.0.0-alpha.3](https://github.com/leancloud/js-realtime-sdk/compare/v5.0.0-alpha.2...v5.0.0-alpha.3) (2019-07-04)
