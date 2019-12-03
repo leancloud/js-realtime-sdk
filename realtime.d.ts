@@ -54,7 +54,7 @@ export class Realtime extends EventEmitter<ConnectionEvent> {
     prop: string,
     descriptor?: Object
   ): typeof Conversation;
-  register(messageClass: AVMessage[]): void;
+  register(messageClass: MessageConstructor | MessageConstructor[]): void;
   retry(): number;
 }
 
@@ -84,7 +84,7 @@ declare class IMClient extends EventEmitter<ClientEvent | SharedEvent> {
     conversations: ConversationBase[]
   ): Promise<Array<ConversationBase>>;
   ping(clientIds: string[]): Promise<Array<string>>;
-  parseMessage(json: Object): Promise<AVMessage>;
+  parseMessage<T extends AVMessage = Message>(json: Object): Promise<T>;
   parseConversation(json: Object): Promise<ConversationBase>;
 
   on<K extends keyof ClientEvent>(
@@ -294,6 +294,9 @@ type Payload = Object | String | ArrayBuffer;
 export interface AVMessage {
   getPayload(): Payload;
 }
+export interface MessageConstructor {
+  new (...args: any[]): AVMessage;
+}
 
 export class Message implements AVMessage {
   constructor(content: any);
@@ -371,7 +374,7 @@ export interface Plugin {
   beforeMessageParse?: Middleware<AVMessage>;
   afterMessageParse?: Middleware<AVMessage>;
   beforeMessageDispatch?: (message: AVMessage) => boolean;
-  messageClasses?: AVMessage[];
+  messageClasses?: MessageConstructor[];
   onConversationCreate?: Decorator<ConversationBase>;
   onIMClientCreate?: Decorator<IMClient>;
   onRealtimeCreate?: Decorator<Realtime>;
