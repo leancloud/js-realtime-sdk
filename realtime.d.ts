@@ -345,6 +345,14 @@ export class TextMessage extends TypedMessage {
 
 export class RecalledMessage extends TypedMessage {}
 
+export class MessageParser {
+  constructor(plugin?: Plugin);
+  register(messageClass: MessageConstructor | MessageConstructor[]): void;
+  parse<T extends AVMessage = Message>(
+    source: Object | string | any
+  ): Promise<T>;
+}
+
 declare class EventEmitter<T> {
   on<K extends keyof T>(
     event: K,

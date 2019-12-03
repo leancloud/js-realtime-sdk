@@ -1,6 +1,7 @@
 import d from 'debug';
 import isPlainObject from 'lodash/isPlainObject';
 import { applyMiddlewares } from './plugin';
+import { ensureArray } from './utils';
 
 const debug = d('LC:MessageParser');
 
@@ -34,12 +35,27 @@ const applyPlugins = (target, key, descriptor) => {
 };
 
 export default class MessageParser {
+  /**
+   * 消息解析器
+   * @param {Object} plugins 插件，在解析时会应用 beforeMessageParse 与 afterMessageParse Middleware。
+   */
   constructor(plugins = {}) {
     this._plugins = plugins;
     this._messageClasses = [];
   }
 
-  register(messageClass) {
+  /**
+   * 注册消息类
+   *
+   * @param  {Function | Function[]} messageClass 消息类，需要实现 {@link AVMessage} 接口，
+   * 建议继承自 {@link TypedMessage}，也可以传入一个消息类数组。
+   * @throws {TypeError} 如果 messageClass 没有实现 {@link AVMessage} 接口则抛出异常
+   */
+  register(messageClasses) {
+    ensureArray(messageClasses).map(klass => this._register(klass));
+  }
+
+  _register(messageClass) {
     if (
       messageClass &&
       messageClass.parse &&
@@ -56,6 +72,12 @@ export default class MessageParser {
   @tryParseJson
   @applyPlugins
   // jsdoc-ignore-end
+  /**
+   * 解析消息内容
+   * @param {Object | string | any} target 消息内容，如果是字符串会尝试 parse 为 JSON。
+   * @return {AVMessage} 解析后的消息
+   * @throws {Error} 如果不匹配任何注册的消息则抛出异常
+   */
   parse(content) {
     debug('parsing message: %O', content);
     // eslint-disable-next-line no-restricted-syntax

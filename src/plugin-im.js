@@ -175,8 +175,7 @@ const onRealtimeCreate = realtime => {
    * 建议继承自 {@link TypedMessage}
    * @throws {TypeError} 如果 messageClass 没有实现 {@link AVMessage} 接口则抛出异常
    */
-  const register = messageClass =>
-    ensureArray(messageClass).map(messageParser.register.bind(messageParser));
+  const register = messageParser.register.bind(messageParser);
   register(ensureArray(realtime._plugins.messageClasses));
   /**
    * 创建一个即时通讯客户端，多次创建相同 id 的客户端会返回同一个实例
