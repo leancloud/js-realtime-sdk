@@ -27,10 +27,10 @@ describe('Plugin', () => {
             onRealtimeCreate: patchTestFunction(),
             onIMClientCreate: patchTestFunction(),
             onConversationCreate: patchTestFunction(),
-            beforeMessageParse: json =>
-              Object.assign({}, json, {
-                _lctext: `[plugin-test]${json._lctext}`,
-              }),
+            beforeMessageParse: json => ({
+              ...json,
+              _lctext: `[plugin-test]${json._lctext}`,
+            }),
             afterMessageParse: message => {
               message.foo = 'bar';
               return message;
@@ -87,17 +87,17 @@ describe('Plugin', () => {
         plugins: [
           {
             onRealtimeCreate: patchTestFunction(1),
-            beforeMessageParse: json =>
-              Object.assign({}, json, {
-                _lctext: `[plugin-test]${json._lctext}`,
-              }),
+            beforeMessageParse: json => ({
+              ...json,
+              _lctext: `[plugin-test]${json._lctext}`,
+            }),
           },
           {
             onRealtimeCreate: patchTestFunction(2),
-            beforeMessageParse: json =>
-              Object.assign({}, json, {
-                _lctext: `${json._lctext}[plugin-test]`,
-              }),
+            beforeMessageParse: json => ({
+              ...json,
+              _lctext: `${json._lctext}[plugin-test]`,
+            }),
           },
           {
             onRealtimeCreate: patchTestFunction(1, 'test2'),

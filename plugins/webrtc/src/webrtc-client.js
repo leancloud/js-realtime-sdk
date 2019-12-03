@@ -37,12 +37,10 @@ export default class WebRTCClient extends EventEmitter {
     super();
     /** @type {string} */
     this.id = id;
-    this.options = Object.assign(
-      {
-        RTCConfiguration: DEFAULT_RTCCONF,
-      },
-      options
-    );
+    this.options = {
+      RTCConfiguration: DEFAULT_RTCCONF,
+      ...options,
+    };
   }
 
   _open(realtime, clientOptions) {

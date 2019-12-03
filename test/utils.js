@@ -141,12 +141,12 @@ describe('Utils', () => {
 
       @throttle(100)
       inc1() {
-        this.value1 = this.value1 + 1;
+        this.value1 += 1;
       }
 
       @throttle(200)
       inc2() {
-        this.value2 = this.value2 + 1;
+        this.value2 += 1;
       }
     }
     it('excution should be delayed', () => {

@@ -80,11 +80,9 @@ export default class MessageParser {
    */
   parse(content) {
     debug('parsing message: %O', content);
-    // eslint-disable-next-line no-restricted-syntax
+    // eslint-disable-next-line
     for (const Klass of this._messageClasses) {
-      const contentCopy = isPlainObject(content)
-        ? Object.assign({}, content)
-        : content;
+      const contentCopy = isPlainObject(content) ? { ...content } : content;
       let valid;
       let result;
       try {

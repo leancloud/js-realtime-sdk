@@ -139,18 +139,15 @@ export const internal = object => {
 
 export const compact = (obj, filter) => {
   if (!isPlainObject(obj)) return obj;
-  const object = Object.assign({}, obj);
-  // eslint-disable-next-line no-restricted-syntax
-  for (const prop in object) {
-    if ({}.hasOwnProperty.call(object, prop)) {
-      const value = object[prop];
-      if (value === filter) {
-        delete object[prop];
-      } else {
-        object[prop] = compact(value, filter);
-      }
+  const object = { ...obj };
+  Object.keys(object).forEach(prop => {
+    const value = object[prop];
+    if (value === filter) {
+      delete object[prop];
+    } else {
+      object[prop] = compact(value, filter);
     }
-  }
+  });
   return object;
 };
 

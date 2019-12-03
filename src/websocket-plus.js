@@ -25,13 +25,13 @@ const TIMEOUT_TIME = 380000;
 
 const DEFAULT_RETRY_STRATEGY = attempt => Math.min(1000 * 2 ** attempt, 300000);
 
-const requireConnected = (target, name, descriptor) =>
-  Object.assign({}, descriptor, {
-    value: function requireConnectedWrapper(...args) {
-      this.checkConnectionAvailability(name);
-      return descriptor.value.call(this, ...args);
-    },
-  });
+const requireConnected = (target, name, descriptor) => ({
+  ...descriptor,
+  value: function requireConnectedWrapper(...args) {
+    this.checkConnectionAvailability(name);
+    return descriptor.value.call(this, ...args);
+  },
+});
 
 class WebSocketPlus extends EventEmitter {
   get urls() {

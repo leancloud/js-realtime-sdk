@@ -97,16 +97,12 @@ class TypedMessage extends Message {
   /* eslint-enable class-methods-use-this */
 
   getPayload() {
-    return compact(
-      Object.assign(
-        {
-          _lctext: this.getText(),
-          _lcattrs: this.getAttributes(),
-        },
-        this._getCustomFields(),
-        this._getType()
-      )
-    );
+    return compact({
+      _lctext: this.getText(),
+      _lcattrs: this.getAttributes(),
+      ...this._getCustomFields(),
+      ...this._getType(),
+    });
   }
 
   toJSON() {

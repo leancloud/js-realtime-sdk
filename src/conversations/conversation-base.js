@@ -297,16 +297,15 @@ export default class ConversationBase extends EventEmitter {
     if (!(message instanceof Message)) {
       throw new TypeError(`${message} is not a Message`);
     }
-    const { transient, receipt, priority, pushData, will } = Object.assign(
-      {},
+    const { transient, receipt, priority, pushData, will } = {
       // support Message static property: sendOptions
-      message.constructor.sendOptions,
+      ...message.constructor.sendOptions,
       // support Message static property: getSendOptions
-      typeof message.constructor.getSendOptions === 'function'
+      ...(typeof message.constructor.getSendOptions === 'function'
         ? message.constructor.getSendOptions(message)
-        : {},
-      options
-    );
+        : {}),
+      ...options,
+    };
     if (receipt) {
       if (this.transient) {
         console.warn(

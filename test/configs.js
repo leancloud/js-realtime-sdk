@@ -17,13 +17,9 @@ export const NON_EXISTING_ROOM_ID = '555555555555555555555555';
 export const CLIENT_ID = process.env.CLIENT_ID || 'leeyeh';
 
 export const createRealtime = options =>
-  new Realtime(
-    Object.assign(
-      {
-        appId: APP_ID,
-        appKey: APP_KEY,
-        server: SERVER,
-      },
-      options
-    )
-  );
+  new Realtime({
+    appId: APP_ID,
+    appKey: APP_KEY,
+    server: SERVER,
+    ...options,
+  });

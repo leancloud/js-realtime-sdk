@@ -62,17 +62,16 @@ export default class Realtime extends EventEmitter {
         );
       }
     }
-    this._options = Object.assign(
-      {
-        appId: undefined,
-        appKey: undefined,
-        pushOfflineMessages: false,
-        noBinary: false,
-        ssl: true,
-        RTMServerName: process.env.RTM_SERVER_NAME, // undocumented on purpose, internal use only
-      },
-      options
-    );
+    this._options = {
+      appId: undefined,
+      appKey: undefined,
+      pushOfflineMessages: false,
+      noBinary: false,
+      ssl: true,
+      RTMServerName: process.env.RTM_SERVER_NAME, // undocumented on purpose, internal use only
+
+      ...options,
+    };
     this._cache = new Cache('endpoints');
     const _this = internal(this);
     _this.clients = new Set();
@@ -81,10 +80,12 @@ export default class Realtime extends EventEmitter {
       ...ensureArray(Realtime.__preRegisteredPlugins),
       ...ensureArray(plugins),
     ];
-    debug('Using plugins %o', mergedPlugins.map(plugin => plugin.name));
+    debug(
+      'Using plugins %o',
+      mergedPlugins.map(plugin => plugin.name)
+    );
     this._plugins = mergedPlugins.reduce((result, plugin) => {
-      // eslint-disable-next-line no-restricted-syntax
-      for (const hook in plugin) {
+      Object.keys(plugin).forEach(hook => {
         if ({}.hasOwnProperty.call(plugin, hook) && hook !== 'name') {
           if (plugin.name) {
             ensureArray(plugin[hook]).forEach(value => {
@@ -95,7 +96,7 @@ export default class Realtime extends EventEmitter {
           // eslint-disable-next-line no-param-reassign
           result[hook] = ensureArray(result[hook]).concat(plugin[hook]);
         }
-      }
+      });
       return result;
     }, {});
     // onRealtimeCreate hook
@@ -376,9 +377,7 @@ export default class Realtime extends EventEmitter {
     }
     if (connection.cannot('retry')) {
       throw new Error(
-        `retrying not allowed when not disconnected. the connection is now ${
-          connection.current
-        }`
+        `retrying not allowed when not disconnected. the connection is now ${connection.current}`
       );
     }
     return connection.retry();
