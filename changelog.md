@@ -1,3 +1,15 @@
+<a name="5.0.0-beta.1"></a>
+
+# [5.0.0-beta.1](https://github.com/leancloud/js-realtime-sdk/compare/v5.0.0-beta.0...v5.0.0-beta.1) (2019-12-10)
+
+### Features
+
+- 导出 MessageParser 用于消息内容的解析。
+
+### Bug Fixes
+
+- 订正了 TypeScript 定义文件中错误定义的 MessageConstructor interface。
+
 <a name="5.0.0-beta.0"></a>
 
 # [5.0.0-beta.0](https://github.com/leancloud/js-realtime-sdk/compare/v5.0.0-alpha.3...v5.0.0-beta.0) (2019-10-30)
