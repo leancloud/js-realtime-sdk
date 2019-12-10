@@ -37,11 +37,12 @@ const applyPlugins = (target, key, descriptor) => {
 export default class MessageParser {
   /**
    * 消息解析器
-   * @param {Object} plugins 插件，在解析时会应用 beforeMessageParse 与 afterMessageParse Middleware。
+   * @param {Object} plugins 插件，插件的 messageClasses 会自动被注册，在解析时 beforeMessageParse 与 afterMessageParse Middleware 会被应用。
    */
   constructor(plugins = {}) {
     this._plugins = plugins;
     this._messageClasses = [];
+    this.register(plugins.messageClasses);
   }
 
   /**
