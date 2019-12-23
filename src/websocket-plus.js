@@ -151,7 +151,8 @@ class WebSocketPlus extends EventEmitter {
   }
 
   ondisconnected(event, from, to, attempt = 0) {
-    const delay = DEFAULT_RETRY_STRATEGY.call(null, attempt);
+    const delay =
+      from === OFFLINE ? 0 : DEFAULT_RETRY_STRATEGY.call(null, attempt);
     debug(`schedule attempt=${attempt} delay=${delay}`);
     this.emit(SCHEDULE, attempt, delay);
     if (this.__scheduledRetry) {
