@@ -108,7 +108,7 @@ export const browser = {
 
 const weappRuntimeReset = () => ({
   intro() {
-    return 'var XMLHttpRequest;';
+    return 'var XMLHttpRequest;function Function(){return function(){}};';
   },
 });
 
