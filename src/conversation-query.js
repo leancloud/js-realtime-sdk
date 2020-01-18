@@ -387,4 +387,12 @@ export default class ConversationQuery {
   async find() {
     return this._client._executeQuery(this);
   }
+
+  /**
+   * 返回符合条件的第一个结果
+   * @return {Promise.<ConversationBase>}
+   */
+  async first() {
+    return (await this.limit(1).find())[0];
+  }
 }

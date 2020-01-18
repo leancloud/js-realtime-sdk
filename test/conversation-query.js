@@ -295,6 +295,14 @@ describe('ConversationQuery', () => {
         .then(conversations => {
           conversations.length.should.be.equal(0);
         }));
+    it('first', () =>
+      client
+        .getQuery()
+        .equalTo('objectId', EXISTING_ROOM_ID)
+        .first()
+        .then(conversation => {
+          conversation.id.should.be.equal(EXISTING_ROOM_ID);
+        }));
     it('limit', () =>
       client
         .getQuery()
