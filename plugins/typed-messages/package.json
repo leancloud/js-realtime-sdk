@@ -23,7 +23,7 @@
   },
   "homepage": "https://github.com/leancloud/js-realtime-sdk#readme",
   "peerDependencies": {
-    "leancloud-storage": "^2.0.0 || ^3.0.0",
+    "leancloud-storage": "^2.0.0 || ^3.0.0 || ^4.0.0",
     "leancloud-realtime": "^4.0.0-alpha.3 || ^5.0.0-alpha.2"
   }
 }
