@@ -294,8 +294,8 @@ type Payload = Object | String | ArrayBuffer;
 export interface AVMessage {
   getPayload(): Payload;
 }
-export interface MessageConstructor {
-  new (...args: any[]): AVMessage;
+export interface MessageConstructor<T extends AVMessage = AVMessage> {
+  new (...args: any[]): T;
 }
 
 export class Message implements AVMessage {
@@ -558,8 +558,19 @@ declare interface PatchReason {
   detail?: string;
 }
 
-export function messageType(type: number): Function;
-export function messageField(fields: string[]): Function;
+export type MessageDecorator<T extends AVMessage> = (
+  target: MessageConstructor<T>
+) => MessageConstructor<T>;
+
+export function messageType<T extends AVMessage>(
+  type: number
+): MessageDecorator<T>;
+export function messageField<T extends AVMessage>(
+  fields: string[]
+): MessageDecorator<T>;
+export function IE10Compatible<T extends AVMessage>(
+  target: MessageConstructor<T>
+): MessageConstructor<T>;
 
 interface Debug {
   enable(): void;
