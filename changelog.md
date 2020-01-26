@@ -1,3 +1,17 @@
+<a name="5.0.0-beta.2"></a>
+
+# [5.0.0-beta.2](https://github.com/leancloud/js-realtime-sdk/compare/v5.0.0-beta.1...v5.0.0-beta.2) (2020-01-26)
+
+### Features
+
+- 增加了 `ConversationQuery#first` 方法。
+
+### Bug Fixes
+
+- 修复了在微信小程序上引入 SDK 后抛 `Function` 未定义的问题。
+- 当 SDK 从 `offline` 状态恢复到 `online` 状态时会立即开始尝试重连（之前会等待一秒）。
+- 更新了 TypeScript 定义。
+
 <a name="5.0.0-beta.1"></a>
 
 # [5.0.0-beta.1](https://github.com/leancloud/js-realtime-sdk/compare/v5.0.0-beta.0...v5.0.0-beta.1) (2019-12-10)
