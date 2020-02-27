@@ -1,7 +1,11 @@
 import './polyfills/polyfills';
-import * as Protocals from '../proto/message';
+import * as Protocols from '../proto/message';
 
-export { Protocals };
+export {
+  Protocols,
+  // misspelling
+  Protocols as Protocals,
+};
 
 export { default as EventEmitter } from 'eventemitter3';
 

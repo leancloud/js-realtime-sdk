@@ -1,6 +1,6 @@
-import { Protocals, _Promise, EventEmitter } from './realtime';
+import { Protocols, _Promise, EventEmitter } from './realtime';
 
-const { CommandType, GenericCommand, AckCommand } = Protocals;
+const { CommandType, GenericCommand, AckCommand } = Protocols;
 
 const warn = error => console.warn(error.message);
 
@@ -63,7 +63,10 @@ export default class LiveQueryClient extends EventEmitter {
   }
 
   _dispatchDataCommand({ dataMessage: { ids, msg } }) {
-    this.emit('message', msg.map(({ data }) => JSON.parse(data)));
+    this.emit(
+      'message',
+      msg.map(({ data }) => JSON.parse(data))
+    );
     // send ack
     const command = new GenericCommand({
       cmd: CommandType.ack,

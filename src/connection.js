@@ -51,7 +51,7 @@ export default class Connection extends WebSocketPlus {
         )
       );
     }
-    this._protocalFormat = format;
+    this._protocolFormat = format;
     this._commands = {};
     this._serialId = 0;
   }
@@ -66,7 +66,7 @@ export default class Connection extends WebSocketPlus {
     if (debug.enabled) debug('↑ %O sent', trim(command));
 
     let message;
-    if (this._protocalFormat === 'proto2base64') {
+    if (this._protocolFormat === 'proto2base64') {
       message = command.toBase64();
     } else if (command.toArrayBuffer) {
       message = command.toArrayBuffer();

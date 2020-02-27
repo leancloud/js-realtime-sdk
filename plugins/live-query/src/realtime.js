@@ -1,9 +1,14 @@
 /* eslint-disable import/no-unresolved */
-import { Protocals, Promise as _Promise } from 'leancloud-realtime/core';
+import {
+  Protocols as _Protocols,
+  Protocals,
+  Promise as _Promise,
+} from 'leancloud-realtime/core';
 
-if (!Protocals) {
+const Protocols = _Protocols || Protocals;
+if (!Protocols) {
   throw new Error('LeanCloud Realtime SDK not installed');
 }
-export { _Promise };
+export { _Promise, Protocols };
 
-export { Protocals, EventEmitter } from 'leancloud-realtime/core';
+export { EventEmitter } from 'leancloud-realtime/core';
