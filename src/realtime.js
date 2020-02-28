@@ -1,6 +1,5 @@
 import d from 'debug';
 import EventEmitter from 'eventemitter3';
-import superagent from 'superagent';
 import shuffle from 'lodash/shuffle';
 import Connection, {
   OPEN,
@@ -24,12 +23,11 @@ import {
   isWeapp,
   isCNApp,
 } from './utils';
+import request from './utils/request';
 import { applyDecorators, applyDispatcher } from './plugin';
 import { version as VERSION } from '../package.json';
 
 const debug = d('LC:Realtime');
-const debugRequest = d('LC:request');
-
 const routerCache = new Cache('push-router');
 
 export default class Realtime extends EventEmitter {
@@ -103,44 +101,35 @@ export default class Realtime extends EventEmitter {
     applyDecorators(this._plugins.onRealtimeCreate, this);
   }
 
-  async _request({ method, version = '1.1', path, query, headers, data = {} }) {
-    const { appId, server } = this._options;
-    const { api } = await this.constructor._getServerUrls({
-      appId,
-      server,
-    });
-    const url = `${api}/${version}${path}`;
-    debugRequest('Req: %O %O %O', method, url, { query, headers, data });
-    return superagent(method, url)
-      .set({
+  async _request({
+    method,
+    url: _url,
+    version = '1.1',
+    path,
+    query,
+    headers,
+    data,
+  }) {
+    let url = _url;
+    if (!url) {
+      const { appId, server } = this._options;
+      const { api } = await this.constructor._getServerUrls({
+        appId,
+        server,
+      });
+      url = `${api}/${version}${path}`;
+    }
+    return request({
+      url,
+      method,
+      query,
+      headers: {
         'X-LC-Id': this._options.appId,
         'X-LC-Key': this._options.appKey,
         ...headers,
-      })
-      .query(query)
-      .send(data)
-      .then(
-        response => {
-          debugRequest('Res: %O %O %O', url, response.status, response.body);
-          return response.body;
-        },
-        error => {
-          debugRequest(
-            'Error: %O %O %O',
-            url,
-            error.response.status,
-            error.response.body
-          );
-          if (
-            error.response &&
-            error.response.body &&
-            error.response.body.code
-          ) {
-            throw createError(error.response.body);
-          }
-          throw error;
-        }
-      );
+      },
+      data,
+    });
   }
 
   _open() {
@@ -303,13 +292,13 @@ export default class Realtime extends EventEmitter {
     const cachedRouter = routerCache.get(appId);
     if (cachedRouter) return cachedRouter;
     const defaultProtocol = 'https://';
-    return superagent
-      .get('https://app-router.com/2/route')
-      .query({
+    return request({
+      url: 'https://app-router.com/2/route',
+      query: {
         appId,
-      })
-      .timeout(20000)
-      .then(res => res.body)
+      },
+      timeout: 20000,
+    })
       .then(tap(debug))
       .then(
         ({
@@ -343,18 +332,17 @@ export default class Realtime extends EventEmitter {
     return this._getServerUrls({ appId, server })
       .then(tap(debug))
       .then(({ RTMRouter }) =>
-        superagent
-          .get(`${RTMRouter}/v1/route`)
-          .query({
+        request({
+          url: `${RTMRouter}/v1/route`,
+          query: {
             appId,
             secure: ssl,
             features: isWeapp ? 'wechat' : undefined,
             server: RTMServerName,
             _t: Date.now(),
-          })
-          .timeout(20000)
-          .then(res => res.body)
-          .then(tap(debug))
+          },
+          timeout: 20000,
+        }).then(tap(debug))
       );
   }
 

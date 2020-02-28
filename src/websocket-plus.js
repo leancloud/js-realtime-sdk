@@ -3,9 +3,7 @@
 import d from 'debug';
 import EventEmitter from 'eventemitter3';
 import StateMachine from 'javascript-state-machine';
-
-import WebSocket from 'ws';
-
+import { getAdaptor } from './adaptor';
 import { ensureArray, tryAll, global } from './utils';
 
 const debug = d('LC:WebSocketPlus');
@@ -43,11 +41,6 @@ class WebSocketPlus extends EventEmitter {
   }
 
   constructor(getUrls, protocol) {
-    if (typeof WebSocket === 'undefined') {
-      throw new Error(
-        'WebSocket is undefined. Polyfill is required in this runtime.'
-      );
-    }
     super();
     this.init();
     this._protocol = protocol;
@@ -86,6 +79,7 @@ class WebSocketPlus extends EventEmitter {
     return tryAll(
       urls.map(url => (resolve, reject) => {
         debug(`connect [${url}] ${protocol}`);
+        const WebSocket = getAdaptor('WebSocket');
         const ws = protocol ? new WebSocket(url, protocol) : new WebSocket(url);
         ws.binaryType = this.binaryType || 'arraybuffer';
         ws.onopen = () => resolve(ws);
