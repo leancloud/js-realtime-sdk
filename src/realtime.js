@@ -271,9 +271,19 @@ export default class Realtime extends EventEmitter {
     let info;
     const cachedEndPoints = this._cache.get('endpoints');
     if (cachedEndPoints) {
-      info = await cachedEndPoints;
+      info = cachedEndPoints;
     } else {
       info = await this.constructor._fetchRTMServers(options);
+      const { server, secondary, ttl } = info;
+      if (
+        typeof server !== 'string' &&
+        typeof secondary !== 'string' &&
+        typeof ttl !== 'number'
+      ) {
+        throw new Error(
+          `malformed RTM route response: ${JSON.stringify(info)}`
+        );
+      }
       this._cache.set('endpoints', info, info.ttl * 1000);
     }
     debug('endpoint info: %O', info);
