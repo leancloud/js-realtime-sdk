@@ -576,7 +576,6 @@ interface RequestOptions {
   method?: string;
   data?: object | string;
   headers?: object;
-  timeout?: number;
 }
 
 interface Response {
