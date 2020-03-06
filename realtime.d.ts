@@ -588,13 +588,13 @@ interface Response {
 interface WebSocket {
   addEventListener(
     event: string,
-    handler: (...args: any) => any,
-    ...args: any
+    handler: (...args: any[]) => any,
+    ...args: any[]
   ): any;
   removeEventListener(
     event: string,
-    handler: (...args: any) => any,
-    ...args: any
+    handler: (...args: any[]) => any,
+    ...args: any[]
   ): any;
   send(data: string | ArrayBuffer): any;
   close(): any;
