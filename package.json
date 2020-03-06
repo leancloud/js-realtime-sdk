@@ -89,10 +89,11 @@
     "eventemitter3": "^3.0.0",
     "javascript-state-machine": "^2.3.5",
     "lodash": "^4.17.10",
+    "promise-timeout": "^1.3.0",
     "protobufjs": "^5.0.1",
     "superagent": "^5.1.0",
     "uuid": "^3.0.0",
-    "ws": "^5.2.1"
+    "ws": "^7.2.1"
   },
   "browser": {
     "ws": "./src/polyfills/ws-browser.js",
@@ -102,8 +103,7 @@
   "weapp": {
     "ws": "weapp-polyfill/websocket.js",
     "./src/polyfills/polyfills.js": "./src/polyfills/polyfills-weapp.js",
-    "./dist/realtime.js": "./dist/realtime-weapp.js",
-    "./dist/realtime-core.js": "./dist/realtime-core-weapp.js"
+    "./dist/realtime.js": "./dist/realtime-weapp.js"
   },
   "nyc": {
     "require": [

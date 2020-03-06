@@ -1,15 +1,13 @@
 /** @module leancloud-realtime */
+import './polyfills/polyfills';
 import { Realtime, setAdaptors } from './core';
-import { request, WebSocket } from './builtin-adaptors';
+import * as adaptors from './builtin-adaptors';
 import { IMPlugin, defineConversationProperty } from './plugin-im';
 import MessageParser from './message-parser';
 import * as CoreEvent from './events/core';
 import * as IMEvent from './events/im';
 
-setAdaptors({
-  request,
-  WebSocket,
-});
+setAdaptors(adaptors);
 
 Realtime.defineConversationProperty = defineConversationProperty;
 Realtime.__preRegisteredPlugins = [IMPlugin];

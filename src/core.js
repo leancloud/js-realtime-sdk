@@ -1,4 +1,3 @@
-import './polyfills/polyfills';
 import * as Protocols from '../proto/message';
 
 export {

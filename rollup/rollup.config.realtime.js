@@ -18,5 +18,4 @@ export default [
   core(browser),
   weapp,
   minify(weapp),
-  core(weapp),
 ];

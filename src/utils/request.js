@@ -1,5 +1,6 @@
 import d from 'debug';
 import isPlainObject from 'lodash/isPlainObject';
+import { timeout } from 'promise-timeout';
 import { getAdaptor } from '../adaptor';
 import { createError } from '../error';
 
@@ -11,7 +12,7 @@ export default ({
   query,
   headers,
   data,
-  timeout,
+  timeout: time,
 }) => {
   let url = _url;
   if (query) {
@@ -26,8 +27,9 @@ export default ({
       .join('&');
     url = `${url}?${queryString}`;
   }
-  debug('Req: %O %O %O', method, url, { query, headers, data });
-  return getAdaptor('request')(url, { method, query, headers, data, timeout })
+  debug('Req: %O %O %O', method, url, { headers, data });
+  const request = getAdaptor('request');
+  const promise = request(url, { method, headers, data })
     .then(response => {
       if (response.ok === false) {
         const error = createError(response.data);
@@ -48,4 +50,5 @@ export default ({
       }
       throw error;
     });
+  return time ? timeout(promise, time) : promise;
 };

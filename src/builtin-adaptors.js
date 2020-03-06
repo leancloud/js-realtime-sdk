@@ -1,8 +1,8 @@
 import superagent from 'superagent';
 import WebSocket from 'ws';
 
-export function request(url, { method, data, headers, timeout }) {
-  const req = superagent(method, url).timeout(timeout);
+export function request(url, { method, data, headers }) {
+  const req = superagent(method, url);
   if (headers) {
     req.set(headers);
   }
