@@ -1,3 +1,11 @@
+<a name="5.0.0-beta.3"></a>
+
+# [5.0.0-beta.3](https://github.com/leancloud/js-realtime-sdk/compare/v5.0.0-beta.2...v5.0.0-beta.3) (2020-03-06)
+
+### Features
+
+- 增加了 `setAdaptors` 接口，支持配置自定义运行时。
+
 <a name="5.0.0-beta.2"></a>
 
 # [5.0.0-beta.2](https://github.com/leancloud/js-realtime-sdk/compare/v5.0.0-beta.1...v5.0.0-beta.2) (2020-01-26)
