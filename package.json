@@ -86,7 +86,7 @@
     "@babel/runtime": "^7.7.4",
     "@leancloud/runtime-adapters-browser": "^1.0.0",
     "@leancloud/runtime-adapters-node": "^1.0.0",
-    "@leancloud/runtime-adapters-weapp": "^1.0.0",
+    "@leancloud/runtime-adapters-weapp": "^1.0.1",
     "base64-arraybuffer": "^0.1.5",
     "debug": "^3.1.0",
     "eventemitter3": "^3.0.0",

@@ -12,7 +12,7 @@ import WebSocketPlus, {
 } from './websocket-plus';
 import { createError } from './error';
 import { GenericCommand, CommandType } from '../proto/message';
-import { trim, isWeapp } from './utils';
+import { trim } from './utils';
 
 const debug = d('LC:Connection');
 
@@ -37,20 +37,7 @@ export default class Connection extends WebSocketPlus {
   constructor(getUrl, { format, version }) {
     debug('initializing Connection');
     const protocolString = `lc.${format}.${version}`;
-    if (!isWeapp) {
-      super(getUrl, protocolString);
-    } else {
-      super(
-        getUrl().then(urls =>
-          urls.map(
-            url =>
-              `${url}${
-                url.indexOf('?') === -1 ? '?' : '&'
-              }subprotocol=${encodeURIComponent(protocolString)}`
-          )
-        )
-      );
-    }
+    super(getUrl, protocolString);
     this._protocolFormat = format;
     this._commands = {};
     this._serialId = 0;
