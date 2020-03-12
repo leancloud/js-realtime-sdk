@@ -3,7 +3,7 @@
 import d from 'debug';
 import EventEmitter from 'eventemitter3';
 import StateMachine from 'javascript-state-machine';
-import { getAdaptor } from './adaptor';
+import { getAdapter } from './adapter';
 import { ensureArray, tryAll, global } from './utils';
 
 const debug = d('LC:WebSocketPlus');
@@ -79,7 +79,7 @@ class WebSocketPlus extends EventEmitter {
     return tryAll(
       urls.map(url => (resolve, reject) => {
         debug(`connect [${url}] ${protocol}`);
-        const WebSocket = getAdaptor('WebSocket');
+        const WebSocket = getAdapter('WebSocket');
         const ws = protocol ? new WebSocket(url, protocol) : new WebSocket(url);
         ws.binaryType = this.binaryType || 'arraybuffer';
         ws.onopen = () => resolve(ws);

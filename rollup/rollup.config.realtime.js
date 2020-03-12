@@ -15,7 +15,6 @@ export default [
   core(node),
   browser,
   minify(browser),
-  core(browser),
   weapp,
   minify(weapp),
 ];

@@ -1,7 +1,7 @@
 import d from 'debug';
 import isPlainObject from 'lodash/isPlainObject';
 import { timeout } from 'promise-timeout';
-import { getAdaptor } from '../adaptor';
+import { getAdapter } from '../adapter';
 import { createError } from '../error';
 
 const debug = d('LC:request');
@@ -28,7 +28,7 @@ export default ({
     url = `${url}?${queryString}`;
   }
   debug('Req: %O %O %O', method, url, { headers, data });
-  const request = getAdaptor('request');
+  const request = getAdapter('request');
   const promise = request(url, { method, headers, data })
     .then(response => {
       if (response.ok === false) {

@@ -20,6 +20,6 @@ export {
   default as Realtime,
 } from './realtime';
 
-export * from './adaptor';
+export * from './adapter';
 
 export { debug } from './utils';

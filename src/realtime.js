@@ -66,8 +66,10 @@ export default class Realtime extends EventEmitter {
       pushOfflineMessages: false,
       noBinary: false,
       ssl: true,
-      RTMServerName: process.env.RTM_SERVER_NAME, // undocumented on purpose, internal use only
-
+      RTMServerName:
+        typeof process !== 'undefined'
+          ? process.env.RTM_SERVER_NAME
+          : undefined, // undocumented on purpose, internal use only
       ...options,
     };
     this._cache = new Cache('endpoints');

@@ -43,10 +43,11 @@
     "@babel/plugin-proposal-decorators": "^7.7.4",
     "@babel/plugin-transform-classes": "^7.7.4",
     "@babel/plugin-transform-runtime": "^7.7.4",
-    "@babel/preset-env": "^7.7.4",
+    "@babel/preset-env": "^7.8.7",
     "@babel/register": "^7.7.4",
     "@commitlint/cli": "^7.0.0",
     "@commitlint/config-conventional": "^7.0.1",
+    "@leancloud/adapter-types": "^1.0.0",
     "@leeyeh/jsdoc-rtd": "^1.0.13",
     "@leeyeh/rollup-plugin-node-resolve": "^3.0.1",
     "babel-eslint": "^9.0.0",
@@ -79,11 +80,13 @@
     "should": "^12.0.0",
     "should-sinon": "^0.0.6",
     "sinon": "^6.0.1",
-    "typescript": "^3.3.3333",
-    "weapp-polyfill": "^3.2.0"
+    "typescript": "^3.3.3333"
   },
   "dependencies": {
     "@babel/runtime": "^7.7.4",
+    "@leancloud/runtime-adapters-browser": "^1.0.0",
+    "@leancloud/runtime-adapters-node": "^1.0.0",
+    "@leancloud/runtime-adapters-weapp": "^1.0.0",
     "base64-arraybuffer": "^0.1.5",
     "debug": "^3.1.0",
     "eventemitter3": "^3.0.0",
@@ -91,18 +94,14 @@
     "lodash": "^4.17.10",
     "promise-timeout": "^1.3.0",
     "protobufjs": "^5.0.1",
-    "superagent": "^5.1.0",
-    "uuid": "^3.0.0",
-    "ws": "^7.2.1"
+    "uuid": "^3.0.0"
   },
   "browser": {
-    "ws": "./src/polyfills/ws-browser.js",
-    "./dist/realtime.js": "./dist/realtime-browser.js",
-    "./dist/realtime-core.js": "./dist/realtime-core-browser.js"
+    "@leancloud/runtime-adapters-node": "@leancloud/runtime-adapters-browser",
+    "./dist/realtime.js": "./dist/realtime-browser.js"
   },
   "weapp": {
-    "ws": "weapp-polyfill/websocket.js",
-    "./src/polyfills/polyfills.js": "./src/polyfills/polyfills-weapp.js",
+    "@leancloud/runtime-adapters-node": "@leancloud/runtime-adapters-weapp",
     "./dist/realtime.js": "./dist/realtime-weapp.js"
   },
   "nyc": {

@@ -1,3 +1,5 @@
+import { Adapters } from '@leancloud/adapter-types';
+
 interface IteratorResult<T> {
   done: boolean;
   value: T;
@@ -572,45 +574,7 @@ export function IE10Compatible<T extends AVMessage>(
   target: MessageConstructor<T>
 ): MessageConstructor<T>;
 
-interface RequestOptions {
-  method?: string;
-  data?: object | string;
-  headers?: object;
-}
-
-interface Response {
-  status?: number;
-  ok?: boolean;
-  headers?: object;
-  data?: object;
-}
-
-interface WebSocket {
-  addEventListener(
-    event: string,
-    handler: (...args: any[]) => any,
-    ...args: any[]
-  ): any;
-  removeEventListener(
-    event: string,
-    handler: (...args: any[]) => any,
-    ...args: any[]
-  ): any;
-  send(data: string | ArrayBuffer): any;
-  close(): any;
-}
-
-declare interface Adaptors {
-  WebSocket: {
-    new (url: string, protocols?: string | string[]): WebSocket;
-  };
-  request: (url: string, options?: RequestOptions) => Response;
-}
-export function setAdaptors(adaptors: Adaptors): void;
-export function setAdaptor<K extends keyof Adaptors>(
-  name: K,
-  adaptor: Adaptors[K]
-): void;
+export function setAdapters(adapters: Partial<Adapters>): void;
 
 interface Debug {
   enable(): void;
