@@ -1,10 +1,22 @@
+<a name="5.0.0-rc.0"></a>
+
+# [5.0.0-rc.0](https://github.com/leancloud/js-realtime-sdk/compare/v5.0.0-beta.3...v5.0.0-rc.0) (2020-03-12)
+
+这个版本继续了对「更多运行环境支持」的探索，将 SDK 内置的多平台支持使用新的 `Adapter` 模式进行了重构。SDK 支持的运行平台、使用方法都没有变化。
+
+### Bug Fixes
+
+- `setAdaptors` 接口被重命名为 `setAdapters`。
+
 <a name="5.0.0-beta.3"></a>
 
 # [5.0.0-beta.3](https://github.com/leancloud/js-realtime-sdk/compare/v5.0.0-beta.2...v5.0.0-beta.3) (2020-03-06)
 
+作为正在进行的对「更多运行环境支持」探索的第一步，这个版本的 SDK 所以对平台提供的 API 的依赖被抽象为可替换的 `Adapter`。开发者可以配置全部或一部分 `Adapter` 以支持包括小程序在内的各类平台。
+
 ### Features
 
-- 增加了 `setAdaptors` 接口，支持配置自定义运行时。
+- 增加了 `setAdaptors` 接口（已在 v5.0.0-rc.0 中重命名为 `setAdapters`），支持配置自定义运行时。
 
 <a name="5.0.0-beta.2"></a>
 
