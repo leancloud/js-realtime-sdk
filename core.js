@@ -1,1 +1,1 @@
-module.exports = require('./dist/realtime-core');
+module.exports = require('./dist/core');

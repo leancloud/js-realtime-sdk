@@ -67,12 +67,12 @@ const createRollupPluginsOptions = resolveOptions => [
   env(),
 ];
 
-const INPUT_FILE = 'src/index.js';
+const INPUT_FILE = 'src/im-runtime.js';
 
 export const node = {
   input: INPUT_FILE,
   output: {
-    file: 'dist/realtime.js',
+    file: 'dist/im-node.js',
     format: 'cjs',
     sourcemap: true,
   },
@@ -92,7 +92,7 @@ export const node = {
 export const browser = {
   input: INPUT_FILE,
   output: {
-    file: 'dist/realtime-browser.js',
+    file: 'dist/im-browser.js',
     format: 'umd',
     name: 'AV',
     extend: true,
@@ -115,7 +115,7 @@ const weappRuntimeReset = () => ({
 export const weapp = {
   input: INPUT_FILE,
   output: {
-    file: 'dist/realtime-weapp.js',
+    file: 'dist/im-weapp.js',
     format: 'umd',
     name: 'AV',
     extend: true,

@@ -1,20 +1,21 @@
 import { node, browser, weapp, minify } from './shared-configs';
 
-const CORE_INPUT_FILE = 'src/core.js';
+const core = {
+  ...node,
+  input: 'src/core.js',
+  output: {
+    ...node.output,
+    file: 'dist/core.js',
+  },
+};
 
-const core = config =>
-  Object.assign({}, config, {
-    input: CORE_INPUT_FILE,
-    output: Object.assign({}, config.output, {
-      file: config.output.file.replace(/\/realtime/, '/realtime-core'),
-    }),
-  });
+const im = {
+  ...node,
+  input: 'src/im.js',
+  output: {
+    ...node.output,
+    file: 'dist/im.js',
+  },
+};
 
-export default [
-  node,
-  core(node),
-  browser,
-  minify(browser),
-  weapp,
-  minify(weapp),
-];
+export default [core, im, node, browser, minify(browser), weapp, minify(weapp)];

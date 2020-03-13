@@ -2,7 +2,7 @@
   "name": "leancloud-realtime",
   "version": "5.0.0-rc.0",
   "description": "LeanCloud Realtime Message JavaScript SDK",
-  "main": "./dist/realtime.js",
+  "main": "./dist/im-node.js",
   "jsnext:main": "./src/index.js",
   "directories": {
     "test": "test"
@@ -98,11 +98,11 @@
   },
   "browser": {
     "@leancloud/runtime-adapters-node": "@leancloud/runtime-adapters-browser",
-    "./dist/realtime.js": "./dist/realtime-browser.js"
+    "./dist/im-node.js": "./dist/im-browser.js"
   },
   "weapp": {
     "@leancloud/runtime-adapters-node": "@leancloud/runtime-adapters-weapp",
-    "./dist/realtime.js": "./dist/realtime-weapp.js"
+    "./dist/im-node.js": "./dist/im-weapp.js"
   },
   "nyc": {
     "require": [

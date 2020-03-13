@@ -117,9 +117,12 @@ describe('Realtime', () => {
       const realtime = createRealtime();
       return realtime._open().then(connection => {
         const callbackPromise = Promise.all(
-          [Event.RETRY, Event.SCHEDULE, Event.DISCONNECT, Event.RECONNECT].map(
-            event => listen(realtime, event)
-          )
+          [
+            Event.RETRY,
+            Event.SCHEDULE,
+            Event.DISCONNECT,
+            Event.RECONNECT,
+          ].map(event => listen(realtime, event))
         );
         connection.emit(Event.DISCONNECT);
         connection.emit(Event.RETRY, 1, 2);

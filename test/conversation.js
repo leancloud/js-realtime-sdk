@@ -720,9 +720,16 @@ describe('Conversation', () => {
       she.close();
     });
     it('should be immutable', () => {
-      ['set', 'save', 'get', 'fetch', 'join', 'quit', 'add', 'remove'].forEach(
-        key => fzhangConversation.should.not.have.property(key)
-      );
+      [
+        'set',
+        'save',
+        'get',
+        'fetch',
+        'join',
+        'quit',
+        'add',
+        'remove',
+      ].forEach(key => fzhangConversation.should.not.have.property(key));
     });
     it('create, send and recieve', async () => {
       const waitForMessage = listen(she, Event.MESSAGE);

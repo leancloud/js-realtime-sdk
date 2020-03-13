@@ -91,10 +91,11 @@ npm install leancloud-realtime@3 --save
 ├── deploy.sh                 // 部署 gh-pages 分支
 ├── release.sh                // 部署 dist 分支
 ├── dist                      // 打包产出 (dist 分支)
-│   ├── realtime-browser.js     // 浏览器用
-│   ├── realtime-browser.min.js // 浏览器用(uglified)
-│   ├── realtime-weapp.js       // 微信小程序用
-│   └── realtime.js             // node 用
+│   ├── core.js               // 核心逻辑（不包含运行时）
+│   ├── im.js                 // IM（不包含运行时）
+│   ├── im-browser.js         // 浏览器用
+│   ├── im-weapp.js           // 微信小程序用
+│   └── im-node.js            // node 用
 ├── proto
 │   ├── message-compiled.js     // 使用 pbjs 生成的 message 类
 │   ├── message.js              // ES6 wrapper
