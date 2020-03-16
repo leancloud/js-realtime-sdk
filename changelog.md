@@ -1,3 +1,30 @@
+<a name="5.0.0-rc.1"></a>
+
+# [5.0.0-rc.1](https://github.com/leancloud/js-realtime-sdk/compare/v5.0.0-rc.0...v5.0.0-rc.1) (2020-03-16)
+
+这个版本中 SDK 新增了一个运行环境无关的版本，开发者可以在此基础上应用目标运行环境的 Adapters 来适配相应的运行平台。
+
+### Features
+
+- 增加 `/im` 入口，这是一个运行环境无关的版本，需要配置 Adapters 后才能运行。可以通过以下方式引入该版本：
+
+  ```js
+  const { Realtime, setAdapters } = require('leancloud-realtime/im');
+  ```
+
+### BREAKING CHANGES
+
+- 更新了内置支持平台的预编译版本文件名以更好的反应不同版本之间的差异：
+
+  | 原文件名                                        | 新文件名                            |
+  | ----------------------------------------------- | ----------------------------------- |
+  | -                                               | im.js（新）                         |
+  | realtime.js                                     | im-node.js                          |
+  | realtime-browser.js<br/>realtime-browser.min.js | im-browser.js<br/>im-browser.min.js |
+  | realtime-weapp.js<br/>realtime-weapp.min.js     | im-weapp.js<br/>im-weapp.min.js     |
+
+  如果你使用了 CDN 或其他直接引用预编译版本的方式加载的 SDK，需要按照上面的对应关系更新文件名。
+
 <a name="5.0.0-rc.0"></a>
 
 # [5.0.0-rc.0](https://github.com/leancloud/js-realtime-sdk/compare/v5.0.0-beta.3...v5.0.0-rc.0) (2020-03-12)
