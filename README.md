@@ -2,7 +2,7 @@
 
 [![npm](https://img.shields.io/npm/v/leancloud-realtime.svg?style=flat-square)](https://www.npmjs.com/package/leancloud-realtime)
 [![npm](https://img.shields.io/npm/v/leancloud-realtime/next.svg?style=flat-square)](https://www.npmjs.com/package/leancloud-realtime)
-![gzip size](https://img.badgesize.io/leancloud/js-realtime-sdk/next-dist/dist/realtime-browser.min.js.svg?compression=gzip&style=flat-square)
+![gzip size](https://img.badgesize.io/leancloud/js-realtime-sdk/next-dist/dist/im-browser.min.js.svg?compression=gzip&style=flat-square)
 [![Build Status](https://img.shields.io/travis/leancloud/js-realtime-sdk.svg?style=flat-square)](https://travis-ci.org/leancloud/js-realtime-sdk)
 [![Codecov](https://img.shields.io/codecov/c/github/leancloud/js-realtime-sdk.svg?style=flat-square)](https://codecov.io/github/leancloud/js-realtime-sdk)
 [![Known Vulnerabilities](https://snyk.io/test/github/leancloud/js-realtime-sdk/badge.svg?style=flat-square)](https://snyk.io/test/github/leancloud/js-realtime-sdk)
