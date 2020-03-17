@@ -13,7 +13,7 @@ export const messageType = type => {
   };
 };
 
-// documented in ../index.js
+// documented in ../plugin-im.js
 export const messageField = fields => {
   if (typeof fields !== 'string') {
     if (!Array.isArray(fields)) {

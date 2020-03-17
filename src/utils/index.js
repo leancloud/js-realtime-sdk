@@ -4,10 +4,19 @@ import global from './global';
 
 export { global };
 
-export const debug = {
+/**
+ * 调试日志控制器
+ * @const
+ * @memberof module:leancloud-realtime
+ * @example
+ * debug.enable();  // 启用调试日志
+ * debug.disable(); // 关闭调试日志
+ */
+const debug = {
   enable: (namespaces = 'LC*') => d.enable(namespaces),
   disable: d.disable,
 };
+export { debug };
 
 export const tryAll = promiseConstructors => {
   const promise = new Promise(promiseConstructors[0]);
