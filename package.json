@@ -84,9 +84,9 @@
   },
   "dependencies": {
     "@babel/runtime": "^7.7.4",
-    "@leancloud/runtime-adapters-browser": "^1.0.1",
-    "@leancloud/runtime-adapters-node": "^1.0.1",
-    "@leancloud/runtime-adapters-weapp": "^1.0.2",
+    "@leancloud/platform-adapters-browser": "^1.0.1",
+    "@leancloud/platform-adapters-node": "^1.0.1",
+    "@leancloud/platform-adapters-weapp": "^1.0.2",
     "base64-arraybuffer": "^0.1.5",
     "debug": "^3.1.0",
     "eventemitter3": "^3.0.0",
@@ -97,11 +97,11 @@
     "uuid": "^3.0.0"
   },
   "browser": {
-    "@leancloud/runtime-adapters-node": "@leancloud/runtime-adapters-browser",
+    "@leancloud/platform-adapters-node": "@leancloud/platform-adapters-browser",
     "./dist/im-node.js": "./dist/im-browser.js"
   },
   "weapp": {
-    "@leancloud/runtime-adapters-node": "@leancloud/runtime-adapters-weapp",
+    "@leancloud/platform-adapters-node": "@leancloud/platform-adapters-weapp",
     "./dist/im-node.js": "./dist/im-weapp.js"
   },
   "nyc": {

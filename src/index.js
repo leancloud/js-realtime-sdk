@@ -1,1 +1,1 @@
-export * from './im-runtime';
+export * from './im-adapted';

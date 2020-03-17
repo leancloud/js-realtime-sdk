@@ -67,7 +67,7 @@ const createRollupPluginsOptions = resolveOptions => [
   env(),
 ];
 
-const INPUT_FILE = 'src/im-runtime.js';
+const INPUT_FILE = 'src/im-adapted.js';
 
 export const node = {
   input: INPUT_FILE,
