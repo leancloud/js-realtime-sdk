@@ -58,6 +58,7 @@ export const createRollupPluginsOptions = resolveOptions => [
         'proto/**',
         '**/superagent/**',
         '**/event-target-shim/**',
+        '**/promise-timeout/**',
         'node_modules/sinon/**',
       ],
     })
