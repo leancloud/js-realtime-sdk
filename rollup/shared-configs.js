@@ -24,7 +24,7 @@ var require = require || function(id) {throw new Error('Unexpected required ' + 
 export const babelConfigs = {
   plugins: [
     '@babel/plugin-external-helpers',
-    '@babel/plugin-transform-runtime',
+    ['@babel/plugin-transform-runtime', { corejs: 2 }],
     ['@babel/plugin-proposal-decorators', { legacy: true }],
     [
       '@babel/plugin-transform-classes',
