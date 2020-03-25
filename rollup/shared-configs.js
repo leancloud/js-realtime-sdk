@@ -21,9 +21,11 @@ var require = require || function(id) {throw new Error('Unexpected required ' + 
   },
 });
 
-export const babelConfigs = {
+export const getBabelConfigs = ({ transformRuntime = true } = {}) => ({
   plugins: [
-    ['@babel/plugin-transform-runtime', { corejs: 2 }],
+    ...(transformRuntime
+      ? [['@babel/plugin-transform-runtime', { corejs: 2 }]]
+      : []),
     ['@babel/plugin-proposal-decorators', { legacy: true }],
     [
       '@babel/plugin-transform-classes',
@@ -34,25 +36,22 @@ export const babelConfigs = {
   ],
   presets: [['@babel/preset-env', { modules: false, debug: true }]],
   babelrc: false,
+  configFile: false,
   runtimeHelpers: true,
-};
+});
 
 export const createRollupPluginsOptions = resolveOptions => [
   json(),
-  nodeResolve(
-    Object.assign(
-      {
-        main: true,
-      },
-      resolveOptions
-    )
-  ),
+  nodeResolve({
+    main: true,
+    ...resolveOptions,
+  }),
   commonjsGlobal(),
   commonjs({
     include: ['node_modules/**', 'proto/**'],
   }),
   babel(
-    Object.assign({}, babelConfigs, {
+    Object.assign(getBabelConfigs(), {
       include: [
         'src/**',
         'test/**',
@@ -68,7 +67,7 @@ export const createRollupPluginsOptions = resolveOptions => [
 
 const INPUT_FILE = 'src/im-adapted.js';
 
-export const node = {
+export const getNodeConfig = (transformRuntime = true) => ({
   input: INPUT_FILE,
   output: {
     file: 'dist/im-node.js',
@@ -78,15 +77,20 @@ export const node = {
   plugins: [
     json(),
     babel(
-      Object.assign({}, babelConfigs, {
-        exclude: 'node_modules/**',
-      })
+      Object.assign(
+        getBabelConfigs({
+          transformRuntime,
+        }),
+        {
+          exclude: 'node_modules/**',
+        }
+      )
     ),
     commonjs({
       include: ['proto/**'],
     }),
   ],
-};
+});
 
 export const browser = {
   input: INPUT_FILE,

@@ -1,7 +1,8 @@
-import { node, browser, weapp, withMinified } from './shared-configs';
+import { getNodeConfig, browser, weapp, withMinified } from './shared-configs';
 
+const node = getNodeConfig();
 const core = {
-  ...node,
+  ...getNodeConfig(false),
   input: 'src/core.js',
   output: {
     ...node.output,
