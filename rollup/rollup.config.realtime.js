@@ -1,4 +1,4 @@
-import { node, browser, weapp, minify } from './shared-configs';
+import { node, browser, weapp, withMinified } from './shared-configs';
 
 const core = {
   ...node,
@@ -10,12 +10,18 @@ const core = {
 };
 
 const im = {
-  ...node,
+  ...browser,
   input: 'src/im.js',
   output: {
-    ...node.output,
+    ...browser.output,
     file: 'dist/im.js',
   },
 };
 
-export default [core, im, node, browser, minify(browser), weapp, minify(weapp)];
+export default [
+  core,
+  withMinified(im),
+  node,
+  withMinified(browser),
+  withMinified(weapp),
+];

@@ -37,7 +37,7 @@ export const babelConfigs = {
   runtimeHelpers: true,
 };
 
-const createRollupPluginsOptions = resolveOptions => [
+export const createRollupPluginsOptions = resolveOptions => [
   json(),
   nodeResolve(
     Object.assign(
@@ -134,10 +134,14 @@ export const weapp = {
   ],
 };
 
-export const minify = config =>
-  Object.assign({}, config, {
-    output: Object.assign({}, config.output, {
+export const withMinified = config => ({
+  ...config,
+  output: [
+    config.output,
+    {
+      ...config.output,
       file: config.output.file.replace(/\.js$/, '.min.js'),
-    }),
-    plugins: config.plugins.concat(uglify()),
-  });
+      plugins: [uglify()],
+    },
+  ],
+});

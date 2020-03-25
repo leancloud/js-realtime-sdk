@@ -3,7 +3,7 @@ import json from 'rollup-plugin-json';
 import babel from 'rollup-plugin-babel';
 import commonjs from 'rollup-plugin-commonjs';
 
-import { minify, babelConfigs } from './shared-configs';
+import { withMinified, babelConfigs } from './shared-configs';
 
 const createConfig = ({ input, output, id }) => ({
   input,
@@ -65,12 +65,8 @@ const liveQuery = createConfig({
 });
 
 export default [
-  typedMessages,
-  minify(typedMessages),
-  webrtc,
-  minify(webrtc),
-  GroupChatReceipts,
-  minify(GroupChatReceipts),
-  liveQuery,
-  minify(liveQuery),
+  withMinified(typedMessages),
+  withMinified(webrtc),
+  withMinified(GroupChatReceipts),
+  withMinified(liveQuery),
 ];
