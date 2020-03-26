@@ -3,6 +3,12 @@
   "version": "5.0.0-rc.2",
   "description": "LeanCloud Realtime Message JavaScript SDK",
   "main": "./dist/im-node.js",
+  "files": [
+    "dist",
+    "*.js",
+    "*.d.ts",
+    "es-latest"
+  ],
   "directories": {
     "test": "test"
   },
