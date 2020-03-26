@@ -1,3 +1,23 @@
+<a name="5.0.0-rc.2"></a>
+
+# [5.0.0-rc.2](https://github.com/leancloud/js-realtime-sdk/compare/v5.0.0-rc.1...v5.0.0-rc.2) (2020-03-26)
+
+为了保证兼容性，SDK 一直以来分发的都是 ECMAScript 5 版本的代码，并打包了所有需要的 Polyfills（比如 Promise）。
+
+从这个版本起，SDK 将同时提供以最新版本 ECMAScript 为编译目标的版本。相比于以 ECMAScript 5 版本，最新 ECMAScript 版本的 SDK 拥有更小的体积与更好的运行时优化，适用于只需要兼容最新版本浏览器的使用场景。如果应用使用了 `@babel/preset-env` 或类似方案，也可以在转译时 include 最新 ECMAScript 版本的 SDK，由应用来决定要兼容的目标运行环境。
+
+需要注意最新版本 ECMAScript 每年都会变，而该版本的目标即是提供与最新标准对齐的代码，因此由于引入了新版本 ECMASCript 特性导致不再支持某些非最新版本的运行环境将不被视为 Breaking change。当前 ECMAScript 的版本为 2020。
+
+### Features
+
+- （实验性功能）提供了最新 ECMAScript 版本的 SDK。
+  - CommonJS 运行环境可以通过 `require('leancloud-realtime/es-latest')` 来引入该版本的 SDK；
+  - 对于 CDN 或者其他直接引用文件的场景，可以在 `dist/es-latest` 目录下找到预编译的文件。
+
+### Bug Fixes
+
+- 修复了不兼容 IE 11 等不支持 Promise 的运行环境的问题。
+
 <a name="5.0.0-rc.1"></a>
 
 # [5.0.0-rc.1](https://github.com/leancloud/js-realtime-sdk/compare/v5.0.0-rc.0...v5.0.0-rc.1) (2020-03-16)
