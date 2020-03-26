@@ -2,7 +2,7 @@ import nodeResolve from '@leeyeh/rollup-plugin-node-resolve';
 import json from 'rollup-plugin-json';
 import babel from 'rollup-plugin-babel';
 import commonjs from 'rollup-plugin-commonjs';
-import { uglify } from 'rollup-plugin-uglify';
+import { terser } from 'rollup-plugin-terser';
 
 const env = () => ({
   intro() {
@@ -21,24 +21,28 @@ var require = require || function(id) {throw new Error('Unexpected required ' + 
   },
 });
 
-export const getBabelConfigs = ({ transformRuntime = true } = {}) => ({
-  plugins: [
-    ...(transformRuntime
-      ? [['@babel/plugin-transform-runtime', { corejs: 2 }]]
-      : []),
-    ['@babel/plugin-proposal-decorators', { legacy: true }],
-    [
-      '@babel/plugin-transform-classes',
-      {
-        loose: true,
-      },
-    ],
-  ],
-  presets: [['@babel/preset-env', { modules: false, debug: true }]],
+const plugins = [['@babel/plugin-proposal-decorators', { legacy: true }]];
+export const babelConfig = {
+  plugins,
   babelrc: false,
   configFile: false,
   runtimeHelpers: true,
-});
+  env: {
+    es5: {
+      plugins: [
+        ...plugins,
+        ['@babel/plugin-transform-runtime', { corejs: 2 }],
+        [
+          '@babel/plugin-transform-classes',
+          {
+            loose: true,
+          },
+        ],
+      ],
+      presets: [['@babel/preset-env', { modules: false, debug: true }]],
+    },
+  },
+};
 
 export const createRollupPluginsOptions = resolveOptions => [
   json(),
@@ -50,94 +54,20 @@ export const createRollupPluginsOptions = resolveOptions => [
   commonjs({
     include: ['node_modules/**', 'proto/**'],
   }),
-  babel(
-    Object.assign(getBabelConfigs(), {
-      include: [
-        'src/**',
-        'test/**',
-        'proto/**',
-        '**/superagent/**',
-        '**/event-target-shim/**',
-        '**/promise-timeout/**',
-        'node_modules/sinon/**',
-      ],
-    })
-  ),
+  babel({
+    ...babelConfig,
+    include: [
+      'src/**',
+      'test/**',
+      'proto/**',
+      '**/superagent/**',
+      '**/event-target-shim/**',
+      '**/promise-timeout/**',
+      'node_modules/sinon/**',
+    ],
+  }),
   env(),
 ];
-
-const INPUT_FILE = 'src/im-adapted.js';
-
-export const getNodeConfig = (transformRuntime = true) => ({
-  input: INPUT_FILE,
-  output: {
-    file: 'dist/im-node.js',
-    format: 'cjs',
-    sourcemap: true,
-  },
-  plugins: [
-    json(),
-    babel(
-      Object.assign(
-        getBabelConfigs({
-          transformRuntime,
-        }),
-        {
-          exclude: 'node_modules/**',
-        }
-      )
-    ),
-    commonjs({
-      include: ['proto/**'],
-    }),
-  ],
-});
-
-export const browser = {
-  input: INPUT_FILE,
-  output: {
-    file: 'dist/im-browser.js',
-    format: 'umd',
-    name: 'AV',
-    extend: true,
-    amd: {
-      id: 'leancloud-realtime',
-    },
-    sourcemap: true,
-  },
-  plugins: createRollupPluginsOptions({
-    browser: true,
-  }),
-};
-
-const weappRuntimeReset = () => ({
-  intro() {
-    return 'global.Object=Object;function Function(){return function(){}};';
-  },
-});
-
-export const weapp = {
-  input: INPUT_FILE,
-  output: {
-    file: 'dist/im-weapp.js',
-    format: 'umd',
-    name: 'AV',
-    extend: true,
-    amd: {
-      id: 'leancloud-realtime',
-    },
-    sourcemap: true,
-  },
-  plugins: [
-    ...createRollupPluginsOptions({
-      browser: true,
-      customResolveOptions: {
-        aliasFields: ['weapp', 'browser'],
-      },
-    }),
-    weappRuntimeReset(),
-  ],
-};
 
 export const withMinified = config => ({
   ...config,
@@ -146,7 +76,7 @@ export const withMinified = config => ({
     {
       ...config.output,
       file: config.output.file.replace(/\.js$/, '.min.js'),
-      plugins: [uglify()],
+      plugins: [terser()],
     },
   ],
 });

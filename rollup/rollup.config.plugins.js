@@ -3,7 +3,7 @@ import json from 'rollup-plugin-json';
 import babel from 'rollup-plugin-babel';
 import commonjs from 'rollup-plugin-commonjs';
 
-import { withMinified, getBabelConfigs } from './shared-configs';
+import { withMinified, babelConfig } from './shared-configs';
 
 const createConfig = ({ input, output, id }) => ({
   input,
@@ -29,11 +29,10 @@ const createConfig = ({ input, output, id }) => ({
   },
   plugins: [
     json(),
-    babel(
-      Object.assign(getBabelConfigs(), {
-        exclude: 'node_modules/**',
-      })
-    ),
+    babel({
+      ...babelConfig,
+      exclude: 'node_modules/**',
+    }),
     nodeResolve({
       main: true,
     }),

@@ -8,6 +8,9 @@ const espree = require('espree');
   './plugins/webrtc/dist/webrtc.js',
   './plugins/groupchat-receipts/dist/groupchat-receipts.js',
   './plugins/live-query/dist/live-query.js',
+  './dist/core.js',
+  './dist/im.js',
+  './dist/im-node.js',
   './dist/im-browser.js',
   './dist/im-weapp.js',
 ].forEach(file => {

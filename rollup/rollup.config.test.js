@@ -1,6 +1,6 @@
 import _ from 'lodash';
 import replace from 'rollup-plugin-replace';
-import { browser } from './shared-configs';
+import { browser } from './rollup.config.realtime';
 
 const envify = () =>
   replace(
