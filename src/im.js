@@ -26,7 +26,7 @@ export {
 
 export {
   /**
-   * 错误码，详见 {@link https://leancloud.cn/docs/realtime_v2.html#云端错误码说明}
+   * 错误码，详见 [即时通讯云端错误码说明]{@link https://leancloud.cn/docs/realtime-faq.html#hash-291949329}
    * @name ErrorCode
    * @enum {Number}
    * @since 3.3.0
