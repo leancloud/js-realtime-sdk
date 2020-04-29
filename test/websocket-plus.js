@@ -1,5 +1,7 @@
 import 'should';
 import 'should-sinon';
+import WebSocket from 'ws';
+import http from 'http';
 import WebSocketPlus, {
   ERROR,
   OPEN,
@@ -12,10 +14,40 @@ import WebSocketPlus, {
 } from '../src/websocket-plus';
 import { listen, wait, sinon } from './test-utils';
 
+function launchLocalTestServer() {
+  return new Promise(resolve => {
+    const httpServer = new http.Server();
+    httpServer.listen(null, () => {
+      const wsServer = new WebSocket.Server({ server: httpServer });
+      wsServer.on('connection', ws => ws.on('message', ws.send));
+      wsServer.on('headers', (headers, req) => {
+        if (req.url === '/404') {
+          headers.splice(0, headers.length);
+          headers.push('HTTP/1.1 404 Not Found');
+        }
+      });
+      resolve(wsServer);
+    });
+  });
+}
+
 describe('WebSocketPlus', () => {
+  let wsServer;
+  let localEchoServerAddress;
+  let localNotFoundServerAddress;
+  before(() => {
+    return launchLocalTestServer().then(wss => {
+      const { port } = wss.address();
+      localEchoServerAddress = `ws://localhost:${port}`;
+      localNotFoundServerAddress = `${localEchoServerAddress}/404`;
+      wsServer = wss;
+    });
+  });
+  after(() => wsServer.close());
+
   describe('open/close', () => {
     it('basic open and close', () => {
-      const ws = new WebSocketPlus('ws://demos.kaazing.com/echo');
+      const ws = new WebSocketPlus(localEchoServerAddress);
       return listen(ws, OPEN, ERROR).then(() => {
         ws.is('connected').should.be.true();
         ws.close();
@@ -24,7 +56,7 @@ describe('WebSocketPlus', () => {
       });
     });
     it('error event should be emitted when got 404 error', done => {
-      const ws = new WebSocketPlus('wss://404.github.com');
+      const ws = new WebSocketPlus(localNotFoundServerAddress);
       ws.on(ERROR, error => {
         error.should.be.instanceof(Error);
         done();
@@ -32,22 +64,20 @@ describe('WebSocketPlus', () => {
     });
     it('backup endpoint should be used when the primary one fails', () => {
       const ws = new WebSocketPlus([
-        'wss://404.github.com',
-        'ws://demos.kaazing.com/echo',
+        localNotFoundServerAddress,
+        localEchoServerAddress,
       ]);
       return listen(ws, OPEN, ERROR).then(() => ws.close());
     });
     it('should support promised endpoints', () => {
-      const ws = new WebSocketPlus(
-        Promise.resolve(['ws://demos.kaazing.com/echo'])
-      );
+      const ws = new WebSocketPlus(Promise.resolve([localEchoServerAddress]));
       return listen(ws, OPEN, ERROR).then(() => ws.close());
     });
   });
 
   describe('send', () => {
     it('should throw if not connected', () => {
-      const ws = new WebSocketPlus('ws://demos.kaazing.com/echo');
+      const ws = new WebSocketPlus(localEchoServerAddress);
       (() => ws.send()).should.throw(/Connection unavailable/);
       (() => ws._ping()).should.throw(/Connection unavailable/);
       ws.on(OPEN, () => ws.close());
@@ -57,7 +87,7 @@ describe('WebSocketPlus', () => {
   describe('Auto reconnecting', () => {
     let ws;
     before(() => {
-      ws = new WebSocketPlus('ws://demos.kaazing.com/echo');
+      ws = new WebSocketPlus(localEchoServerAddress);
       return listen(ws, OPEN, ERROR);
     });
     after(() => {
@@ -94,7 +124,7 @@ describe('WebSocketPlus', () => {
   describe('online/offline', () => {
     let ws;
     before(() => {
-      ws = new WebSocketPlus('ws://demos.kaazing.com/echo');
+      ws = new WebSocketPlus(localEchoServerAddress);
       return listen(ws, OPEN, ERROR);
     });
     after(() => {
