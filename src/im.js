@@ -45,3 +45,10 @@ export {
    */
   MessageParser,
 };
+
+export {
+  /**
+   * @see ConversationQuery
+   */
+  default as ConversationQuery,
+} from './conversation-query';

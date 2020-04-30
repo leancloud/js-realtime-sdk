@@ -119,6 +119,12 @@ declare class IMClient extends EventEmitter<ClientEvent | SharedEvent> {
 }
 
 declare class ConversationQuery<T extends ConversationBase> {
+  static and<U extends ConversationBase>(
+    ...queries: ConversationQuery<U>[]
+  ): ConversationQuery<U>;
+  static or<U extends ConversationBase>(
+    ...queries: ConversationQuery<U>[]
+  ): ConversationQuery<U>;
   addAscending(key: string): this;
   addDescending(key: string): this;
   ascending(key: string): this;
