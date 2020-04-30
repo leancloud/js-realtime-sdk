@@ -1,7 +1,11 @@
 import ConversationQuery from '../src/conversation-query';
 import Message, { MessageStatus } from '../src/messages/message';
 
-import { EXISTING_ROOM_ID, createRealtime } from './configs';
+import {
+  createRealtime,
+  EXISTING_ROOM_ID,
+  NON_EXISTING_ROOM_ID,
+} from './configs';
 
 describe('ConversationQuery', () => {
   // divided to 2 parts since there is query quota for every single client
@@ -386,5 +390,32 @@ describe('ConversationQuery', () => {
       ]).then(conversations => {
         conversations[0].should.be.exactly(conversations[1]);
       }));
+    describe('and & or', () => {
+      it('should fail when provide less than 2 parameters', () =>
+        (() => ConversationQuery.and()).should.throw());
+      it('should fail when parameters is not a ConversationQuery instance', () =>
+        (() => ConversationQuery.and(0, 0)).should.throw());
+      it('should return 0 conversations', () => {
+        const goodQuery = new ConversationQuery(client);
+        goodQuery.equalTo('objectId', EXISTING_ROOM_ID);
+        const badQuery = new ConversationQuery(client);
+        badQuery.equalTo('objectId', NON_EXISTING_ROOM_ID);
+        return ConversationQuery.and(goodQuery, badQuery)
+          .find()
+          .then(conversations => conversations.length.should.be.equal(0));
+      });
+      it(`should return a conversation which id is ${EXISTING_ROOM_ID}`, () => {
+        const goodQuery = new ConversationQuery(client);
+        goodQuery.equalTo('objectId', EXISTING_ROOM_ID);
+        const badQuery = new ConversationQuery(client);
+        badQuery.equalTo('objectId', NON_EXISTING_ROOM_ID);
+        ConversationQuery.or(goodQuery, badQuery)
+          .find()
+          .then(conversations => {
+            conversations.length.should.be.equal(1);
+            conversations[0].id.should.be.equal(EXISTING_ROOM_ID);
+          });
+      });
+    });
   });
 });

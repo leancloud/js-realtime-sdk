@@ -26,6 +26,37 @@ export default class ConversationQuery {
   }
 
   /**
+   * 构造一个用 AND 连接所有查询的 ConversationQuery
+   * @param {...ConversationQuery} queries
+   * @return {ConversationQuery}
+   */
+  static and(...queries) {
+    if (queries.length < 2) {
+      throw new Error('The queries must contain at least two elements');
+    }
+    if (!queries.every(q => q instanceof ConversationQuery)) {
+      throw new Error(
+        'The element of queries must be an instance of ConversationQuery'
+      );
+    }
+    const combined = new ConversationQuery(queries[0]._client);
+    combined._where.$and = queries.map(q => q._where);
+    return combined;
+  }
+
+  /**
+   * 构造一个用 OR 连接所有查询的 ConversationQuery
+   * @param  {...ConversationQuery} queries
+   * @return {ConversationQuery}
+   */
+  static or(...queries) {
+    const combined = ConversationQuery.and(...queries);
+    combined._where.$or = combined._where.$and;
+    delete combined._where.$and;
+    return combined;
+  }
+
+  /**
    * Create a ConversationQuery
    * @param  {IMClient} client
    */
