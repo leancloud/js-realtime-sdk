@@ -10,8 +10,12 @@ const envify = () =>
       .value()
   );
 
+let input = 'test/index.js';
+if (process.env.LC_TEST_TARGET === 'browser') {
+  input = 'test/index-browser.js';
+}
 export default Object.assign({}, browser, {
-  input: 'test/index.js',
+  input,
   output: Object.assign({}, browser.output, {
     file: 'test/browser/index.js',
   }),

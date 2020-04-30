@@ -13,7 +13,7 @@
     "test": "npm run lint && npm run build && npm run docs && npm run test:node && npm run test:browser",
     "test:node": "NODE_ENV=test nyc mocha --timeout 30000 test/index.js plugins/**/test/index.js --exit",
     "test:browser": "if [ ! -z \"$SAUCE_ACCESS_KEY\" ]; then npm run build:test && karma start karma-sauce.conf.js; else echo 'Saucelabs test skipped, set SAUCE_USERNAME and SAUCE_ACCESS_KEY to start it.\n\rTo run browser tests locally, run `npm run test:browser-local`'; fi",
-    "test:browser-local": "npm run build:test && karma start",
+    "test:browser-local": "LC_TEST_TARGET=browser npm run build:test && karma start",
     "docs": "jsdoc src README.md package.json -d docs -c .jsdocrc.json && jsdoc plugins/typed-messages/src plugins/typed-messages/package.json src/messages/message.js src/messages/typed-message.js -d plugins/typed-messages/docs -c .jsdocrc.json && jsdoc plugins/webrtc/src plugins/webrtc/package.json -d plugins/webrtc/docs -c .jsdocrc.json && jsdoc plugins/groupchat-receipts/src plugins/groupchat-receipts/package.json -d plugins/groupchat-receipts/docs -c .jsdocrc.json",
     "build": "npm run build:realtime && BABEL_ENV=es5 npm run build:realtime && BABEL_ENV=es5 npm run build:plugins && ./script/validate-es5.js",
     "build:realtime": "rollup -c rollup/rollup.config.realtime.js",
