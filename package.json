@@ -105,7 +105,8 @@
   "browser": {
     "@leancloud/platform-adapters-node": "@leancloud/platform-adapters-browser",
     "./dist/im-node.js": "./dist/im-browser.js",
-    "./dist/es-latest/im-node.js": "./dist/es-latest/im-browser.js"
+    "./dist/es-latest/im-node.js": "./dist/es-latest/im-browser.js",
+    "./test/websocket-plus.js": false
   },
   "weapp": {
     "@leancloud/platform-adapters-node": "@leancloud/platform-adapters-weapp",
