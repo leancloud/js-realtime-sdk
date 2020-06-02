@@ -1,3 +1,19 @@
+<a name="5.0.0-rc.3"></a>
+
+# [5.0.0-rc.3](https://github.com/leancloud/js-realtime-sdk/compare/v5.0.0-rc.2...v5.0.0-rc.3) (2020-06-05)
+
+### Features
+
+- 增加了 `ConversationQuery.or` 与 `ConversationQuery.and` 支持对话组合查询。
+
+### Bug Fixes
+
+- 修复了小程序中引入 SDK 抛 `Cannot read property 'document' of undefined` 异常的问题。
+
+### BREAKING CHANGES
+
+- 不再允许使用相同的 appId 初始化多个 Realtime 实例。该用法一般是对 SDK 的误用，容易导致连接数异常增长。对于大多数用户，该变动不会对应用带来任何影响。
+
 <a name="5.0.0-rc.2"></a>
 
 # [5.0.0-rc.2](https://github.com/leancloud/js-realtime-sdk/compare/v5.0.0-rc.1...v5.0.0-rc.2) (2020-03-26)
