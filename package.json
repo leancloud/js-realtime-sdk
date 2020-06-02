@@ -43,12 +43,12 @@
   },
   "homepage": "https://leancloud.cn/",
   "devDependencies": {
-    "@babel/core": "^7.7.4",
-    "@babel/plugin-proposal-decorators": "^7.7.4",
-    "@babel/plugin-transform-classes": "^7.7.4",
-    "@babel/plugin-transform-runtime": "^7.7.4",
-    "@babel/preset-env": "^7.8.7",
-    "@babel/register": "^7.7.4",
+    "@babel/core": "^7.10.2",
+    "@babel/plugin-proposal-decorators": "^7.10.1",
+    "@babel/plugin-transform-classes": "^7.10.1",
+    "@babel/plugin-transform-runtime": "^7.10.1",
+    "@babel/preset-env": "^7.10.2",
+    "@babel/register": "^7.10.1",
     "@commitlint/cli": "^7.0.0",
     "@commitlint/config-conventional": "^7.0.1",
     "@leeyeh/jsdoc-rtd": "^1.0.13",
@@ -87,7 +87,7 @@
     "ws": "^7.2.5"
   },
   "dependencies": {
-    "@babel/runtime": "^7.7.4",
+    "@babel/runtime": "^7.10.2",
     "@leancloud/adapter-types": "^1.0.1",
     "@leancloud/platform-adapters-browser": "^1.0.1",
     "@leancloud/platform-adapters-node": "^1.0.1",
