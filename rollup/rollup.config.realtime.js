@@ -1,11 +1,13 @@
 import json from 'rollup-plugin-json';
-import babel from 'rollup-plugin-babel';
-import commonjs from 'rollup-plugin-commonjs';
+import babel from '@rollup/plugin-babel';
+import commonjs from '@rollup/plugin-commonjs';
 import {
   createRollupPluginsOptions,
   babelConfig,
   withMinified,
 } from './shared-configs';
+
+const pkg = require('../package.json');
 
 const INPUT_FILE = 'src/im-adapted.js';
 const OUTPUT_DIR = process.env.BABEL_ENV === 'es5' ? 'dist' : 'dist/es-latest';
@@ -50,9 +52,14 @@ export const browser = {
     },
     sourcemap: true,
   },
-  plugins: createRollupPluginsOptions({
-    browser: true,
-  }),
+  plugins: createRollupPluginsOptions(
+    {
+      entries: pkg.browser,
+    },
+    {
+      browser: true,
+    }
+  ),
 };
 
 const im = {
@@ -66,7 +73,7 @@ const im = {
 
 const weappRuntimeReset = () => ({
   intro() {
-    return 'global.Object=Object;function Function(){return function(){}};';
+    return 'global.Object=Object;function Function(){return function(){return {}}};';
   },
 });
 
@@ -83,12 +90,14 @@ export const weapp = {
     sourcemap: true,
   },
   plugins: [
-    ...createRollupPluginsOptions({
-      browser: true,
-      customResolveOptions: {
-        aliasFields: ['weapp', 'browser'],
+    ...createRollupPluginsOptions(
+      {
+        entries: pkg.weapp,
       },
-    }),
+      {
+        browser: true,
+      }
+    ),
     weappRuntimeReset(),
   ],
 };

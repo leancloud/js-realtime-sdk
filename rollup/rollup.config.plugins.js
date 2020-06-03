@@ -1,7 +1,7 @@
-import nodeResolve from '@leeyeh/rollup-plugin-node-resolve';
+import resolve from '@rollup/plugin-node-resolve';
 import json from 'rollup-plugin-json';
-import babel from 'rollup-plugin-babel';
-import commonjs from 'rollup-plugin-commonjs';
+import babel from '@rollup/plugin-babel';
+import commonjs from '@rollup/plugin-commonjs';
 
 import { withMinified, babelConfig } from './shared-configs';
 
@@ -33,7 +33,7 @@ const createConfig = ({ input, output, id }) => ({
       ...babelConfig,
       exclude: 'node_modules/**',
     }),
-    nodeResolve({
+    resolve({
       main: true,
     }),
     commonjs({

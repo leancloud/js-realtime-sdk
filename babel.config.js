@@ -15,7 +15,7 @@ module.exports = {
     ],
   ],
   plugins: [
-    '@babel/plugin-transform-runtime',
+    ['@babel/plugin-transform-runtime', { corejs: 2 }],
     ['@babel/plugin-proposal-decorators', { legacy: true }],
   ],
   env: {

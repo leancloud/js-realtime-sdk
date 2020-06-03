@@ -1,7 +1,8 @@
-import nodeResolve from '@leeyeh/rollup-plugin-node-resolve';
+import alias from '@rollup/plugin-alias';
+import resolve from '@rollup/plugin-node-resolve';
 import json from 'rollup-plugin-json';
-import babel from 'rollup-plugin-babel';
-import commonjs from 'rollup-plugin-commonjs';
+import babel from '@rollup/plugin-babel';
+import commonjs from '@rollup/plugin-commonjs';
 import { terser } from 'rollup-plugin-terser';
 
 const env = () => ({
@@ -26,12 +27,12 @@ export const babelConfig = {
   plugins,
   babelrc: false,
   configFile: false,
-  runtimeHelpers: true,
+  babelHelpers: process.env.BABEL_ENV === 'es5' ? 'runtime' : 'bundled',
   env: {
     es5: {
       plugins: [
         ...plugins,
-        ['@babel/plugin-transform-runtime'],
+        ['@babel/plugin-transform-runtime', { corejs: 2 }],
         [
           '@babel/plugin-transform-classes',
           {
@@ -44,12 +45,10 @@ export const babelConfig = {
   },
 };
 
-export const createRollupPluginsOptions = resolveOptions => [
+export const createRollupPluginsOptions = (aliasOptions, resolveOptions) => [
+  alias(aliasOptions),
   json(),
-  nodeResolve({
-    main: true,
-    ...resolveOptions,
-  }),
+  resolve(resolveOptions),
   commonjsGlobal(),
   commonjs({
     include: ['node_modules/**', 'proto/**'],
@@ -62,6 +61,7 @@ export const createRollupPluginsOptions = resolveOptions => [
       'proto/**',
       '**/superagent/**',
       '**/event-target-shim/**',
+      '**/@leancloud/platform-adapters-*/**',
       '**/promise-timeout/**',
       'node_modules/sinon/**',
     ],
