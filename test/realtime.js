@@ -1,7 +1,7 @@
 import 'should';
 import 'should-sinon';
 import should from 'should/as-function';
-import Realtime from '../src/realtime';
+import Realtime, { MultitonRealtime } from '../src/realtime';
 import Connection from '../src/connection';
 import { GenericCommand, CommandType, ConvCommand } from '../proto/message';
 import TextMessage from '../src/messages/text-message';
@@ -21,20 +21,38 @@ class Client {}
 
 describe('Realtime', () => {
   describe('constructor', () => {
-    it('appId required', () => (() => new Realtime()).should.throw());
+    it('appId required', () => (() => new MultitonRealtime()).should.throw());
     it('server required for CN app', () =>
       (() =>
-        new Realtime({
+        new MultitonRealtime({
           appId: 'test-cn-app-id',
           appKey: 'test-cn-app-key',
         })).should.throw());
     it('normal', () =>
       (() =>
-        new Realtime({
+        new MultitonRealtime({
           appId: APP_ID,
           appKey: APP_KEY,
           server: SERVER,
         })).should.not.throw);
+  });
+  describe('SingletonRealtime', () => {
+    it('should throw on reinit', () => {
+      (() => {
+        // eslint-disable-next-line no-new
+        new Realtime({
+          appId: APP_ID,
+          appKey: APP_KEY,
+          server: SERVER,
+        });
+        // eslint-disable-next-line no-new
+        new Realtime({
+          appId: APP_ID,
+          appKey: APP_KEY,
+          server: SERVER,
+        });
+      }).should.throw();
+    });
   });
   describe('_open/_close', () => {
     it('connection should be reused', () => {

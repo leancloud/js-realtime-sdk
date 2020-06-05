@@ -3,10 +3,10 @@ import 'should-sinon';
 import isPlainObject from 'lodash/isPlainObject';
 import { GeoPoint } from 'leancloud-storage';
 import { LocationMessage, TypedMessagesPlugin } from '../src';
-import { Realtime } from '../../../src';
+import { MultitonRealtime } from '../../../src/realtime';
 import IMClient from '../../../src/im-client';
 
-const realtime = new Realtime({
+const realtime = new MultitonRealtime({
   appId: 'for-test',
   appKey: 'for-test',
   server: 'for-test',

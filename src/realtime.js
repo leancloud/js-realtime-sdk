@@ -1,3 +1,4 @@
+// eslint-disable-next-line max-classes-per-file
 import d from 'debug';
 import EventEmitter from 'eventemitter3';
 import shuffle from 'lodash/shuffle';
@@ -30,6 +31,8 @@ import { version as VERSION } from '../package.json';
 const debug = d('LC:Realtime');
 const routerCache = new Cache('push-router');
 
+const initializedApp = {};
+
 export default class Realtime extends EventEmitter {
   /**
    * @extends EventEmitter
@@ -47,13 +50,18 @@ export default class Realtime extends EventEmitter {
   constructor({ plugins, ...options }) {
     debug('initializing Realtime %s %O', VERSION, options);
     super();
-    if (typeof options.appId !== 'string') {
-      throw new TypeError(`appId [${options.appId}] is not a string`);
+    const { appId } = options;
+    if (typeof appId !== 'string') {
+      throw new TypeError(`appId [${appId}] is not a string`);
     }
+    if (initializedApp[appId]) {
+      throw new Error(`App [${appId}] is aleady initialized.`);
+    }
+    initializedApp[appId] = true;
     if (typeof options.appKey !== 'string') {
       throw new TypeError(`appKey [${options.appKey}] is not a string`);
     }
-    if (isCNApp(options.appId)) {
+    if (isCNApp(appId)) {
       if (!options.server) {
         throw new TypeError(
           `server option is required for apps from CN region`
@@ -442,6 +450,18 @@ export default class Realtime extends EventEmitter {
       if (shouldDispatch)
         return debug('[WARN] Unexpected message received: %O', trim(command));
       return false;
+    });
+  }
+}
+
+// For test purpose only
+// SHOULD NOT be public
+export class MultitonRealtime extends Realtime {
+  constructor({ appId, ...rest }) {
+    delete initializedApp[appId];
+    super({
+      appId,
+      ...rest,
     });
   }
 }
