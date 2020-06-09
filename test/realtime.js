@@ -3,6 +3,7 @@ import 'should-sinon';
 import should from 'should/as-function';
 import Realtime, { MultitonRealtime } from '../src/realtime';
 import Connection from '../src/connection';
+import WebSocketPlus from '../src/websocket-plus';
 import { GenericCommand, CommandType, ConvCommand } from '../proto/message';
 import TextMessage from '../src/messages/text-message';
 import { Event } from '../src';
@@ -280,5 +281,19 @@ describe('Connection', () => {
     clientMessageEventCallback.should.be.calledOnce();
     clientMessageEventCallback.should.be.calledWith(omitPeerIdMessage);
     clientMessageEventCallback.restore();
+  });
+  describe('throttle', () => {
+    it('same cmds should be throttled', async () => {
+      const send = sinon.spy(WebSocketPlus.prototype, 'send');
+      await Promise.all([client.ping(['0']), client.ping(['0'])]);
+      send.should.be.calledOnce();
+      send.restore();
+    });
+    it('different cmds should not be throttled', async () => {
+      const send = sinon.spy(WebSocketPlus.prototype, 'send');
+      await Promise.all([client.ping(['1']), client.ping(['2'])]);
+      send.should.be.calledTwice();
+      send.restore();
+    });
   });
 });

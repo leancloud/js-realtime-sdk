@@ -229,3 +229,11 @@ export const throttle = wait => (target, property, descriptor) => {
 };
 
 export const isCNApp = appId => appId.slice(-9) !== '-MdYXbMMI';
+
+export const equalBuffer = (buffer1, buffer2) => {
+  if (!buffer1 || !buffer2) return false;
+  if (buffer1.byteLength !== buffer2.byteLength) return false;
+  const a = new Uint8Array(buffer1);
+  const b = new Uint8Array(buffer2);
+  return !a.some((value, index) => value !== b[index]);
+};

@@ -13,6 +13,7 @@ import {
   throttle,
   encode,
   decode,
+  equalBuffer,
 } from '../src/utils';
 import { wait, sinon } from './test-utils';
 
@@ -193,5 +194,17 @@ describe('Utils', () => {
           counter2.value2.should.eql(1);
         });
     });
+  });
+  it('equalBuffer', () => {
+    const buffer = new ArrayBuffer(8);
+    const buffer1 = new ArrayBuffer(4);
+    const buffer2 = new ArrayBuffer(4);
+    new Uint8Array(buffer2)[2] = 1;
+    equalBuffer(buffer, buffer).should.eql(true);
+    equalBuffer(buffer, buffer1).should.eql(false);
+    equalBuffer(buffer1, buffer2).should.eql(false);
+    equalBuffer(buffer, undefined).should.eql(false);
+    equalBuffer(undefined, buffer).should.eql(false);
+    equalBuffer(undefined, undefined).should.eql(false);
   });
 });
