@@ -11,14 +11,24 @@ import WebSocketPlus, {
   MESSAGE,
 } from './websocket-plus';
 import { createError } from './error';
-import { GenericCommand, CommandType } from '../proto/message';
-import { trim } from './utils';
+import { GenericCommand, CommandType, OpType } from '../proto/message';
+import { trim, equalBuffer } from './utils';
 
 const debug = d('LC:Connection');
 
 const COMMAND_TIMEOUT = 20000;
 
 const EXPIRE = Symbol('expire');
+
+const isIdempotentCommand = command =>
+  !(
+    command.cmd === CommandType.direct ||
+    (command.cmd === CommandType.session && command.op === OpType.open) ||
+    (command.cmd === CommandType.conv &&
+      (command.op === OpType.start ||
+        command.op === OpType.update ||
+        command.op === OpType.members))
+  );
 
 export {
   OPEN,
@@ -44,8 +54,25 @@ export default class Connection extends WebSocketPlus {
   }
 
   async send(command, waitingForRespond = true) {
+    let buffer;
     let serialId;
     if (waitingForRespond) {
+      if (isIdempotentCommand(command)) {
+        buffer = command.toArrayBuffer();
+        const duplicatedCommand = Object.values(this._commands).find(
+          ({ buffer: targetBuffer, command: targetCommand }) =>
+            targetCommand.cmd === command.cmd &&
+            targetCommand.op === command.op &&
+            equalBuffer(targetBuffer, buffer)
+        );
+        if (duplicatedCommand) {
+          console.warn(
+            `Duplicated command [cmd:${command.cmd} op:${command.op}] is throttled.`
+          );
+          return duplicatedCommand.promise;
+        }
+      }
+
       this._serialId += 1;
       serialId = this._serialId;
       command.i = serialId; // eslint-disable-line no-param-reassign
@@ -65,8 +92,10 @@ export default class Connection extends WebSocketPlus {
     super.send(message);
 
     if (!waitingForRespond) return undefined;
-    return new Promise((resolve, reject) => {
+    const promise = new Promise((resolve, reject) => {
       this._commands[serialId] = {
+        command,
+        buffer,
         resolve,
         reject,
         timeout: setTimeout(() => {
@@ -83,6 +112,8 @@ export default class Connection extends WebSocketPlus {
         }, COMMAND_TIMEOUT),
       };
     });
+    this._commands[serialId].promise = promise;
+    return promise;
   }
 
   handleMessage(msg) {
