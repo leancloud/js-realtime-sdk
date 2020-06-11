@@ -283,17 +283,19 @@ describe('Connection', () => {
     clientMessageEventCallback.restore();
   });
   describe('throttle', () => {
-    it('same cmds should be throttled', async () => {
-      const send = sinon.spy(WebSocketPlus.prototype, 'send');
-      await Promise.all([client.ping(['0']), client.ping(['0'])]);
-      send.should.be.calledOnce();
-      send.restore();
+    beforeEach(function() {
+      this.send = sinon.spy(WebSocketPlus.prototype, 'send');
     });
-    it('different cmds should not be throttled', async () => {
-      const send = sinon.spy(WebSocketPlus.prototype, 'send');
+    afterEach(function() {
+      this.send.restore();
+    });
+    it('same cmds should be throttled', async function() {
+      await Promise.all([client.ping(['0']), client.ping(['0'])]);
+      this.send.should.be.calledOnce();
+    });
+    it('different cmds should not be throttled', async function() {
       await Promise.all([client.ping(['1']), client.ping(['2'])]);
-      send.should.be.calledTwice();
-      send.restore();
+      this.send.should.be.calledTwice();
     });
   });
 });

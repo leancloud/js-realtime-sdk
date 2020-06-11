@@ -23,6 +23,7 @@ const EXPIRE = Symbol('expire');
 const isIdempotentCommand = command =>
   !(
     command.cmd === CommandType.direct ||
+    (command.cmd === CommandType.session && command.op === OpType.open) ||
     (command.cmd === CommandType.conv &&
       (command.op === OpType.start ||
         command.op === OpType.update ||
