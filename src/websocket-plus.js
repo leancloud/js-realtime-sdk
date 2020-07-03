@@ -162,7 +162,7 @@ class WebSocketPlus extends EventEmitter {
   onretry(event, from, to, attempt = 0) {
     this.emit(RETRY, attempt);
     this._open().then(
-      () => (this.can('reconnect') ? this.reconnect() : this._destroyWs()),
+      () => this.can('reconnect') && this.reconnect(),
       () => this.can('fail') && this.fail(attempt + 1)
     );
   }
