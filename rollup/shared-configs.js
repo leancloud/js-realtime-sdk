@@ -32,7 +32,7 @@ export const babelConfig = {
     es5: {
       plugins: [
         ...plugins,
-        ['@babel/plugin-transform-runtime', { corejs: 2 }],
+        ['@babel/plugin-transform-runtime'],
         [
           '@babel/plugin-transform-classes',
           {
