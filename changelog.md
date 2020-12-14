@@ -4,7 +4,7 @@
 
 ### Features
 
-- `PersistentConversation#get` 方法支持使用点号语法获取自定义属性：
+- 支持使用点号语法获取 Conversation 的自定义属性：
   ```js
   conversation.get('attr.type');
   ```
