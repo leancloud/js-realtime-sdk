@@ -12,6 +12,7 @@
 ### BugFixes
 
 - 修复了装饰器 `messageType` 和 `messageField` 类型定义的错误。
+- 修复了重连后可能意外关闭长连接的问题。
 
 <a name="5.0.0-rc.3"></a>
 
