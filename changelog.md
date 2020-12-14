@@ -1,3 +1,18 @@
+<a name="5.0.0-rc.4"></a>
+
+# [5.0.0-rc.4](https://github.com/leancloud/js-realtime-sdk/compare/v5.0.0-rc.3...v5.0.0-rc.4) (2020-12-14)
+
+### Features
+
+- `PersistentConversation#get` 方法支持使用点号语法获取自定义属性：
+  ```js
+  conversation.get('attr.type');
+  ```
+
+### BugFixes
+
+- 修复了装饰器 `messageType` 和 `messageField` 类型定义的错误。
+
 <a name="5.0.0-rc.3"></a>
 
 # [5.0.0-rc.3](https://github.com/leancloud/js-realtime-sdk/compare/v5.0.0-rc.2...v5.0.0-rc.3) (2020-06-05)
