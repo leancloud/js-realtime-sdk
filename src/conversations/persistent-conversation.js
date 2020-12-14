@@ -1,6 +1,7 @@
 import isEmpty from 'lodash/isEmpty';
 import cloneDeep from 'lodash/cloneDeep';
 import find from 'lodash/find';
+import get from 'lodash/get';
 import ConversationBase from './conversation-base';
 import {
   decodeDate,
@@ -164,7 +165,7 @@ class PersistentConversation extends ConversationBase {
    * @return {Any} 属性的值
    */
   get(key) {
-    return internal(this).currentAttributes[key];
+    return get(internal(this).currentAttributes, key);
   }
 
   /**
