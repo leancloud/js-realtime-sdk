@@ -1,4 +1,5 @@
 import d from 'debug';
+import values from 'lodash/values';
 import WebSocketPlus, {
   OPEN,
   DISCONNECT,
@@ -59,7 +60,7 @@ export default class Connection extends WebSocketPlus {
     if (waitingForRespond) {
       if (isIdempotentCommand(command)) {
         buffer = command.toArrayBuffer();
-        const duplicatedCommand = Object.values(this._commands).find(
+        const duplicatedCommand = values(this._commands).find(
           ({ buffer: targetBuffer, command: targetCommand }) =>
             targetCommand.cmd === command.cmd &&
             targetCommand.op === command.op &&
