@@ -1,7 +1,6 @@
 import EventEmitter from 'eventemitter3';
 import { decode as decodeBase64 } from 'base64-arraybuffer';
 import remove from 'lodash/remove';
-import values from 'lodash/values';
 import d from 'debug';
 import {
   Conversation,
@@ -115,7 +114,7 @@ export default class IMClient extends EventEmitter {
     internal(this).lastNotificationTime = undefined;
     internal(this)._eventemitter = new EventEmitter();
     if (debug.enabled) {
-      values(Event).forEach(event =>
+      Object.values(Event).forEach(event =>
         this.on(event, (...payload) =>
           this._debug(`${event} event emitted. %o`, payload)
         )

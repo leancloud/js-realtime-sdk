@@ -32,7 +32,12 @@ export const babelConfig = {
     es5: {
       plugins: [
         ...plugins,
-        ['@babel/plugin-transform-runtime'],
+        [
+          '@babel/plugin-transform-runtime',
+          {
+            corejs: 3,
+          },
+        ],
         [
           '@babel/plugin-transform-classes',
           {
@@ -40,7 +45,17 @@ export const babelConfig = {
           },
         ],
       ],
-      presets: [['@babel/preset-env', { modules: false, debug: true }]],
+      presets: [
+        [
+          '@babel/preset-env',
+          {
+            modules: false,
+            debug: true,
+            useBuiltIns: 'usage',
+            targets: 'defaults',
+          },
+        ],
+      ],
     },
   },
 };

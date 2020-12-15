@@ -88,7 +88,7 @@
     "ws": "^7.2.5"
   },
   "dependencies": {
-    "@babel/runtime": "^7.10.2",
+    "@babel/runtime-corejs3": "^7.12.5",
     "@leancloud/adapter-types": "^3.0.0",
     "@leancloud/platform-adapters-browser": "^1.1.0",
     "@leancloud/platform-adapters-node": "^1.1.0",
