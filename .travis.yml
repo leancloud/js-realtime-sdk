@@ -7,6 +7,7 @@ env:
     - APP_KEY=Gc2YoMOt0kKEYrAL8ECTujbH
     - EXSITING_ROOM_ID=5d0ca75a1da56900089ce410
     - SYS_CONV_ID=5f687464eae7a622625b39ee
+    - DEBUG=superagent*
 install:
   - npm install codecov -g
   - npm install
