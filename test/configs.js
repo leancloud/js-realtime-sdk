@@ -16,10 +16,13 @@ export const SYS_CONV_ID =
 export const NON_EXISTING_ROOM_ID = '555555555555555555555555';
 export const CLIENT_ID = process.env.CLIENT_ID || 'leeyeh';
 
-export const createRealtime = options =>
-  new MultitonRealtime({
+export const createRealtime = options => {
+  const mergedOptions = {
     appId: APP_ID,
     appKey: APP_KEY,
     server: SERVER,
     ...options,
-  });
+  };
+  console.log('全体目光向我看齐', 'create realtime with', mergedOptions);
+  return new MultitonRealtime(mergedOptions);
+};
