@@ -23,6 +23,7 @@ export const createRealtime = options => {
     server: SERVER,
     ...options,
   };
+  /* eslint-disable-next-line */
   console.log('全体目光向我看齐', 'create realtime with', mergedOptions);
   return new MultitonRealtime(mergedOptions);
 };
