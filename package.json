@@ -16,7 +16,7 @@
     "precommit": "pretty-quick --staged",
     "commitmsg": "commitlint -e $GIT_PARAMS",
     "lint": "eslint --ignore-path .gitignore src test plugins && tsc realtime.d.ts --strict",
-    "test": "npm run lint && npm run build && npm run docs && npm run test:node && npm run test:browser",
+    "test": "DEBUG=superagent* npm run lint && npm run build && npm run docs && npm run test:node && npm run test:browser",
     "test:node": "NODE_ENV=test nyc mocha --timeout 30000 test/index.js plugins/**/test/index.js --exit",
     "test:browser": "if [ ! -z \"$SAUCE_ACCESS_KEY\" ]; then npm run build:test && karma start karma-sauce.conf.js; else echo 'Saucelabs test skipped, set SAUCE_USERNAME and SAUCE_ACCESS_KEY to start it.\n\rTo run browser tests locally, run `npm run test:browser-local`'; fi",
     "test:browser-local": "npm run build:test && karma start",
