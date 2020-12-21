@@ -1,3 +1,13 @@
+<a name="5.0.0-rc.5"></a>
+
+# [5.0.0-rc.5](https://github.com/leancloud/js-realtime-sdk/compare/v5.0.0-rc.4...v5.0.0-rc.5) (2020-12-21)
+
+### Bug Fixes
+
+- 修复了装饰器 `messageType` 和 `messageField` 类型定义的错误。
+- 修复了 `Realtime#createIMClient` 参数类型定义的错误。
+- 对话签名中邀请、移除成员时的 action 从 `add` / `remove` 更改为 `invite` / `kick`，如果你使用了签名控制对话邀请、移除成员权限，需要更新对 action 的判断逻辑。
+
 <a name="5.0.0-rc.4"></a>
 
 # [5.0.0-rc.4](https://github.com/leancloud/js-realtime-sdk/compare/v5.0.0-rc.3...v5.0.0-rc.4) (2020-12-16)
@@ -9,7 +19,7 @@
   conversation.get('attr.type');
   ```
 
-### BugFixes
+### Bug Fixes
 
 - 修复了装饰器 `messageType` 和 `messageField` 类型定义的错误。
 - 修复了重连后可能意外关闭长连接的问题。
