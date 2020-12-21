@@ -205,7 +205,7 @@ describe('Conversation', () => {
             this.conversation.id,
             'ycui',
             ['jwu', 'wduan'],
-            'add',
+            'invite',
           ]);
       });
     });
@@ -217,7 +217,7 @@ describe('Conversation', () => {
             this.conversation.id,
             'ycui',
             ['wduan'],
-            'remove',
+            'kick',
           ]);
       });
     });

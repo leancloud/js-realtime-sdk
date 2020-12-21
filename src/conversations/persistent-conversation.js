@@ -335,7 +335,7 @@ class PersistentConversation extends ConversationBase {
 
   async _appendBlacklistSignature(command, action, clientIds) {
     if (this._client.options.blacklistSignatureFactory) {
-      const params = [this._client.id, this.id, clientIds.sort(), action];
+      const params = [this.id, this._client.id, clientIds.sort(), action];
       const signatureResult = await runSignatureFactory(
         this._client.options.blacklistSignatureFactory,
         params
@@ -370,7 +370,7 @@ class PersistentConversation extends ConversationBase {
         m: clientIds,
       }),
     });
-    await this._appendConversationSignature(command, 'add', clientIds);
+    await this._appendConversationSignature(command, 'invite', clientIds);
     const {
       convMessage,
       convMessage: { allowedPids },
@@ -395,7 +395,7 @@ class PersistentConversation extends ConversationBase {
         m: clientIds,
       }),
     });
-    await this._appendConversationSignature(command, 'remove', clientIds);
+    await this._appendConversationSignature(command, 'kick', clientIds);
     const {
       convMessage,
       convMessage: { allowedPids },
