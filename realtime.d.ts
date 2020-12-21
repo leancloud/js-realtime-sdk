@@ -36,14 +36,14 @@ export class Realtime extends EventEmitter<ConnectionEvent> {
     options?: {
       signatureFactory?: (clientId: string) => SignatureFactoryResult;
       conversationSignatureFactory?: (
-        clientId: string,
         conversationId: string,
+        clientId: string,
         targetIds: string[],
         action: string
       ) => SignatureFactoryResult;
       blacklistSignatureFactory?: (
-        clientId: string,
         conversationId: string,
+        clientId: string,
         targetIds: string[],
         action: string
       ) => SignatureFactoryResult;
