@@ -566,9 +566,9 @@ declare interface PatchReason {
   detail?: string;
 }
 
-export type TypedMessageDecorator = (
-  target: typeof TypedMessage
-) => typeof TypedMessage;
+export type TypedMessageDecorator = <T extends typeof TypedMessage>(
+  target: T
+) => T;
 
 export function messageType(type: number): TypedMessageDecorator;
 export function messageField(fields: string[]): TypedMessageDecorator;
