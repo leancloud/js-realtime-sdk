@@ -720,6 +720,8 @@ export default class ConversationBase extends EventEmitter {
    * @return {Promise.<this>} this
    */
   async fetchReceiptTimestamps() {
+    // 暂态/系统会话不支持回执
+    if (this.transient || this.system) return this;
     const {
       convMessage: { maxReadTimestamp, maxAckTimestamp },
     } = await this._send(
@@ -733,6 +735,8 @@ export default class ConversationBase extends EventEmitter {
   }
 
   _fetchAllReceiptTimestamps() {
+    // 暂态/系统会话不支持回执
+    if (this.transient || this.system) return this;
     const convMessage = new ConvCommand({
       queryAllMembers: true,
     });
