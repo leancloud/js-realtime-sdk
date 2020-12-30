@@ -24,7 +24,6 @@ export class Realtime extends EventEmitter<ConnectionEvent> {
     appId: string;
     appKey: string;
     region?: string;
-    pushOfflineMessages?: boolean;
     noBinary?: boolean;
     ssl?: boolean;
     server?: string | { RTMRouter: string; api: string };
