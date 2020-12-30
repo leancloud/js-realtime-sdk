@@ -40,7 +40,6 @@ export default class Realtime extends EventEmitter {
    * @param  {String} options.appId
    * @param  {String} options.appKey （since 4.0.0）
    * @param  {String|Object} [options.server] 指定服务器域名，中国节点应用此参数必填（since 4.0.0）
-   * @param  {Boolean} [options.pushOfflineMessages=false] 启用推送离线消息模式（默认为发送未读消息通知模式）
    * @param  {Boolean} [options.noBinary=false] 设置 WebSocket 使用字符串格式收发消息（默认为二进制格式）。
    *                                            适用于 WebSocket 实现不支持二进制数据格式的情况
    * @param  {Boolean} [options.ssl=true] 使用 wss 进行连接
@@ -71,7 +70,6 @@ export default class Realtime extends EventEmitter {
     this._options = {
       appId: undefined,
       appKey: undefined,
-      pushOfflineMessages: false,
       noBinary: false,
       ssl: true,
       RTMServerName:
@@ -150,11 +148,7 @@ export default class Realtime extends EventEmitter {
       // 不发送 binary data，fallback to base64 string
       format = 'proto2base64';
     }
-    let version = 3;
-    if (this._options.pushOfflineMessages) {
-      // 不推送离线消息，而是发送对话的未读通知
-      version = 1;
-    }
+    const version = 3;
     const protocol = {
       format,
       version,
