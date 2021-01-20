@@ -78,9 +78,11 @@ const isTemporaryConversatrionId = id => /^_tmp:/.test(id);
  * 1 transient-msg-ack
  * 1 keep-notification
  * 1 partial-failed-msg
+ * 0 group-chat-rcp
+ * 1 omit-peer-id
  * @ignore
  */
-const configBitmap = 0b111011;
+const configBitmap = 0b10111011;
 
 export default class IMClient extends EventEmitter {
   /**
@@ -820,7 +822,6 @@ export default class IMClient extends EventEmitter {
         const timestamps = convAckMessages.map(message => message.timestamp);
         const command = new GenericCommand({
           cmd: 'ack',
-          peerId: this.id,
           ackMessage: new AckCommand({
             cid,
             fromts: Math.min.apply(null, timestamps),
