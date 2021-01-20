@@ -77,7 +77,10 @@ declare class IMClient extends EventEmitter<ClientEvent | SharedEvent> {
     members?: string[];
     ttl?: number;
   }): Promise<TemporaryConversation>;
-  getConversation(id: string, noCache?: boolean): Promise<ConversationBase>;
+  getConversation(
+    id: string,
+    noCache?: boolean
+  ): Promise<PresistentConversation>;
   getQuery(): ConversationQuery<PresistentConversation>;
   getServiceConversationQuery(): ConversationQuery<ServiceConversation>;
   getChatRoomQuery(): ConversationQuery<ChatRoom>;
