@@ -1452,8 +1452,6 @@ export default class IMClient extends EventEmitter {
   async createTemporaryConversation({ ttl: _tempConvTTL, ...param }) {
     return this.createConversation({
       ...param,
-      transient: false,
-      unique: false,
       _tempConv: true,
       _tempConvTTL,
     });
