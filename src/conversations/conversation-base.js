@@ -429,7 +429,7 @@ export default class ConversationBase extends EventEmitter {
       from,
       _status,
     });
-    if (this.lastMessage.id === newMessage.id) {
+    if (this.lastMessage && this.lastMessage.id === newMessage.id) {
       this.lastMessage = newMessage;
     }
     return newMessage;
