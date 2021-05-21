@@ -1,3 +1,17 @@
+<a name="5.0.0-rc.6"></a>
+
+# [5.0.0-rc.6](https://github.com/leancloud/js-realtime-sdk/compare/v5.0.0-rc.5...v5.0.0-rc.6) (2021-05-21)
+
+### **BREAKING CHANGES**
+
+- 不再支持以 `pushOfflineMessages` 模式创建 Realtime ，需要开发者主动拉取未读消息。
+
+### Bug Fixes
+
+- 修复了使用相同的成员创建临时对话时没有得到唯一的对话的问题。
+- 修复了 `IMClient#getConversation` 返回值类型定义的错误。
+- 修复了修改、撤回消息成功后可能抛出异常的问题。
+
 <a name="5.0.0-rc.5"></a>
 
 # [5.0.0-rc.5](https://github.com/leancloud/js-realtime-sdk/compare/v5.0.0-rc.4...v5.0.0-rc.5) (2020-12-21)

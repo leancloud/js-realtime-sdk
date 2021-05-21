@@ -1,6 +1,6 @@
 {
   "name": "leancloud-realtime",
-  "version": "5.0.0-rc.5",
+  "version": "5.0.0-rc.6",
   "description": "LeanCloud Realtime Message JavaScript SDK",
   "main": "./dist/im-node.js",
   "files": [
