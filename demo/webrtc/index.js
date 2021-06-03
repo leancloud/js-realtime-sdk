@@ -5,12 +5,13 @@ var APP_KEY = 'eRTm5hmmJ1Ki1dH9CA4qf3zL';
 var realtime = new AV.Realtime({
   appId: APP_ID,
   appKey: APP_KEY,
-  plugins: AV.WebRTCPlugin
+  server: 'https://nomzedu7.api.lncld.net',
+  plugins: AV.WebRTCPlugin,
 });
 
 var mediaConstraints = {
   audio: true,
-  video: true
+  video: true,
 };
 
 var callParam = document.URL.match(/[\?&]call=([^&]*)/);
@@ -37,12 +38,12 @@ var vm = new Vue({
     currentCall: null,
     localVideoEnabled: true,
     localAudioEnabled: true,
-    remoteAudioEnabled: true
+    remoteAudioEnabled: true,
   },
   computed: {
     callLink: function callLink() {
       return document.URL.replace(/\?[\s\S]*/, '') + '?call=' + this.client.id;
-    }
+    },
   },
   created: function created() {
     if (autoId) {
@@ -53,23 +54,26 @@ var vm = new Vue({
     login: function login() {
       var _this = this;
       _this.state = 'loggingin';
-      return realtime.createWebRTCClient(this.id).then(function (client) {
-        _this.client = client;
-        client.on('call', function (call) {
-          _this.incomingCall = call;
-          call.on('cancel', function () {
-            _this.incomingCall = null;
+      return realtime
+        .createWebRTCClient(this.id)
+        .then(function(client) {
+          _this.client = client;
+          client.on('call', function(call) {
+            _this.incomingCall = call;
+            call.on('cancel', function() {
+              _this.incomingCall = null;
+            });
           });
-        });
-        client.on('conflict', function () {
-          alert(client.id + ' logged in another device');
-        });
-        _this.state = 'ready';
-        if (autoCall) {
-          _this.call();
-          autoCall = false;
-        }
-      }).catch(console.error.bind(console));
+          client.on('conflict', function() {
+            alert(client.id + ' logged in another device');
+          });
+          _this.state = 'ready';
+          if (autoCall) {
+            _this.call();
+            autoCall = false;
+          }
+        })
+        .catch(console.error.bind(console));
     },
     logout: function logout() {
       var _this = this;
@@ -83,8 +87,10 @@ var vm = new Vue({
       var _this = this;
 
       if (!this.localStream) {
-        this.localStream = navigator.mediaDevices.getUserMedia(mediaConstraints);
-        this.localStream.then(function (localStream) {
+        this.localStream = navigator.mediaDevices.getUserMedia(
+          mediaConstraints
+        );
+        this.localStream.then(function(localStream) {
           document.getElementById('local_video').srcObject = localStream;
           _this.localAudio = localStream.getAudioTracks()[0];
           _this.localVideo = localStream.getVideoTracks()[0];
@@ -97,58 +103,67 @@ var vm = new Vue({
       this.state = 'calling';
       return new Promise(function(resolve) {
         setTimeout(resolve, 16);
-      }).then(function() {
-        return _this.getLocalStream();
-      }).then(function (localStream) {
-        if (_this.targetId === '') {
-          throw new Error('target id required');
-        }
-        if (!_this.client) {
-          throw new Error('not logged in');
-        }
-        document.getElementById('local_video').srcObject = localStream;
-        return _this.client.call(_this.targetId, localStream);
-      }).then(function (outgoingCall) {
-        _this.currentCall = outgoingCall;
-        outgoingCall.on('connect', function (stream) {
-          document.getElementById('remote_video').srcObject = stream;
-          _this.remoteAudio = stream.getAudioTracks()[0];
-          _this.state = 'connected';
-        });
-        outgoingCall.on('refuse', function () {
-          alert(_this.targetId + ' refused the call');
+      })
+        .then(function() {
+          return _this.getLocalStream();
+        })
+        .then(function(localStream) {
+          if (_this.targetId === '') {
+            throw new Error('target id required');
+          }
+          if (!_this.client) {
+            throw new Error('not logged in');
+          }
+          document.getElementById('local_video').srcObject = localStream;
+          return _this.client.call(_this.targetId, localStream);
+        })
+        .then(function(outgoingCall) {
+          _this.currentCall = outgoingCall;
+          outgoingCall.on('connect', function(stream) {
+            document.getElementById('remote_video').srcObject = stream;
+            _this.remoteAudio = stream.getAudioTracks()[0];
+            _this.state = 'connected';
+          });
+          outgoingCall.on('refuse', function() {
+            alert(_this.targetId + ' refused the call');
+            _this.reset();
+          });
+          outgoingCall.on('close', _this.reset.bind(_this));
+          _this.state = 'waiting';
+        })
+        .catch(function(error) {
           _this.reset();
+          return alert(error.message);
         });
-        outgoingCall.on('close', _this.reset.bind(_this));
-        _this.state = 'waiting';
-      }).catch(function (error) {
-        _this.reset();
-        return alert(error.message);
-      });
     },
     accept: function accept() {
       var _this = this;
 
-      return this.getLocalStream().then(function (localStream) {
-        var incomingCall = _this.incomingCall;
-        _this.incomingCall = null;
-        _this.currentCall = incomingCall;
-        _this.targetId = incomingCall.from;
-        _this.state = 'connected';
-        incomingCall.on('connect', function (stream) {
-          document.getElementById('remote_video').srcObject = stream;
-          _this.remoteAudio = stream.getAudioTracks()[0];
-        });
-        incomingCall.on('close', _this.reset.bind(_this));
-        return incomingCall.accept(localStream);
-      }).catch(console.error.bind(console));
+      return this.getLocalStream()
+        .then(function(localStream) {
+          var incomingCall = _this.incomingCall;
+          _this.incomingCall = null;
+          _this.currentCall = incomingCall;
+          _this.targetId = incomingCall.from;
+          _this.state = 'connected';
+          incomingCall.on('connect', function(stream) {
+            document.getElementById('remote_video').srcObject = stream;
+            _this.remoteAudio = stream.getAudioTracks()[0];
+          });
+          incomingCall.on('close', _this.reset.bind(_this));
+          return incomingCall.accept(localStream);
+        })
+        .catch(console.error.bind(console));
     },
     decline: function decline() {
       var _this = this;
 
-      return this.incomingCall.refuse().then(function () {
-        return _this.incomingCall = null;
-      }).catch(console.error.bind(console));
+      return this.incomingCall
+        .refuse()
+        .then(function() {
+          return (_this.incomingCall = null);
+        })
+        .catch(console.error.bind(console));
     },
     hangup: function hungup() {
       if (this.currentCall) {
@@ -160,7 +175,7 @@ var vm = new Vue({
       this.state = 'ready';
       var localVideo = document.getElementById('local_video');
       if (localVideo.srcObject) {
-        localVideo.srcObject.getTracks().forEach(function (track) {
+        localVideo.srcObject.getTracks().forEach(function(track) {
           return track.stop();
         });
       }
@@ -180,6 +195,6 @@ var vm = new Vue({
     toggleMuted: function toggleMuted() {
       this.remoteAudioEnabled = !this.remoteAudioEnabled;
       this.remoteAudio.enabled = this.remoteAudioEnabled;
-    }
-  }
+    },
+  },
 });
