@@ -54,7 +54,7 @@ export default class Realtime extends EventEmitter {
       throw new TypeError(`appId [${appId}] is not a string`);
     }
     if (initializedApp[appId]) {
-      throw new Error(`App [${appId}] is aleady initialized.`);
+      throw new Error(`App [${appId}] is already initialized.`);
     }
     initializedApp[appId] = true;
     if (typeof options.appKey !== 'string') {
