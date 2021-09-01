@@ -1,3 +1,11 @@
+<a name="5.0.0-rc.7"></a>
+
+# [5.0.0-rc.7](https://github.com/leancloud/js-realtime-sdk/compare/v5.0.0-rc.6...v5.0.0-rc.7) (2021-09-01)
+
+### Bug Fixes
+
+- 修复了默些情况下无法断线重连的问题。
+
 <a name="5.0.0-rc.6"></a>
 
 # [5.0.0-rc.6](https://github.com/leancloud/js-realtime-sdk/compare/v5.0.0-rc.5...v5.0.0-rc.6) (2021-05-21)
