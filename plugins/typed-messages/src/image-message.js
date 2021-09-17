@@ -1,22 +1,21 @@
-import FileMessage from './file-message';
-import { messageType, IE10Compatible } from './realtime';
+export function createImageMessageClass({ FileMessage, realtime }) {
+  /**
+   * 构造方法参数同 {@link FileMessage}
+   *
+   * @extends FileMessage
+   */
+  class ImageMessage extends FileMessage {}
+  ImageMessage._summaryType = '图片';
 
-/**
- * 构造方法参数同 {@link FileMessage}
- *
- * @extends FileMessage
- */
-class ImageMessage extends FileMessage {}
-ImageMessage._summaryType = '图片';
+  /**
+   * @name TYPE
+   * @memberof ImageMessage
+   * @type Number
+   * @static
+   * @const
+   */
+  realtime.messageType(-2)(ImageMessage);
+  realtime.IE10Compatible(ImageMessage);
 
-/**
- * @name TYPE
- * @memberof ImageMessage
- * @type Number
- * @static
- * @const
- */
-messageType(-2)(ImageMessage);
-IE10Compatible(ImageMessage);
-
-export default ImageMessage;
+  return ImageMessage;
+}

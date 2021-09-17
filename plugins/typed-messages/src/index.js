@@ -1,52 +1,62 @@
 /** @module leancloud-realtime-plugin-typed-messages */
 
-import FileMessage from './file-message';
-import ImageMessage from './image-message';
-import AudioMessage from './audio-message';
-import VideoMessage from './video-message';
-import LocationMessage from './location-message';
+import { createFileMessageClass } from './file-message';
+import { createImageMessageClass } from './image-message';
+import { createAudioMessageClass } from './audio-message';
+import { createVideoMessageClass } from './video-message';
+import { createLocationMessage } from './location-message';
 import { name } from '../package.json';
 
 /**
- * TypedMessages 插件，使用后可支持接收 LeanCloud 提供的富媒体类型的消息
+ * 初始化 TypedMessages 插件，使用后可支持接收 LeanCloud 提供的富媒体类型的消息
  * @example
- * var realtime = new Realtime({
+ * const { TypedMessagesPlugin } = initPlugin({ AV, realtime });
+ * const realtime = new Realtime({
  *   appId: appId,
  *   appKey: appKey,
  *   server: server,
  *   plugins: TypedMessagesPlugin,
  * });
  */
-export const TypedMessagesPlugin = {
-  name,
-  messageClasses: [
+export default function initPlugin({ AV, realtime }) {
+  /**
+   * @see FileMessage
+   */
+  const FileMessage = createFileMessageClass({ AV, realtime });
+  /**
+   * @see ImageMessage
+   */
+  const ImageMessage = createImageMessageClass({ FileMessage, realtime });
+  /**
+   * @see AudioMessage
+   */
+  const AudioMessage = createAudioMessageClass({ FileMessage, realtime });
+  /**
+   * @see VideoMessage
+   */
+  const VideoMessage = createVideoMessageClass({ FileMessage, realtime });
+  /**
+   * @see LocationMessage
+   */
+  const LocationMessage = createLocationMessage({ AV, realtime });
+
+  const TypedMessagesPlugin = {
+    name,
+    messageClasses: [
+      FileMessage,
+      ImageMessage,
+      AudioMessage,
+      VideoMessage,
+      LocationMessage,
+    ],
+  };
+
+  return {
+    TypedMessagesPlugin,
     FileMessage,
     ImageMessage,
     AudioMessage,
     VideoMessage,
     LocationMessage,
-  ],
-};
-
-export {
-  /**
-   * @see FileMessage
-   */
-  FileMessage,
-  /**
-   * @see ImageMessage
-   */
-  ImageMessage,
-  /**
-   * @see AudioMessage
-   */
-  AudioMessage,
-  /**
-   * @see VideoMessage
-   */
-  VideoMessage,
-  /**
-   * @see LocationMessage
-   */
-  LocationMessage,
-};
+  };
+}
