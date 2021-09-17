@@ -1,4 +1,4 @@
-export function createImageMessageClass({ FileMessage, realtime }) {
+export default function createImageMessageClass({ FileMessage, realtime }) {
   /**
    * 构造方法参数同 {@link FileMessage}
    *

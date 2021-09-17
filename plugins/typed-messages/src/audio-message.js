@@ -1,4 +1,4 @@
-export function createAudioMessageClass({ FileMessage, realtime }) {
+export default function createAudioMessageClass({ FileMessage, realtime }) {
   /**
    * 构造方法参数同 {@link FileMessage}
    *

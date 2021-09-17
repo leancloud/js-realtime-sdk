@@ -1,4 +1,4 @@
-export function createLocationMessage({ AV, realtime }) {
+export default function createLocationMessage({ AV, realtime }) {
   class LocationMessage extends realtime.TypedMessage {
     /**
      * @extends TypedMessage

@@ -1,4 +1,4 @@
-export function createFileMessageClass({ AV, realtime }) {
+export default function createFileMessageClass({ AV, realtime }) {
   class FileMessage extends realtime.TypedMessage {
     /**
      * @extends TypedMessage

@@ -1,10 +1,10 @@
 /** @module leancloud-realtime-plugin-typed-messages */
 
-import { createFileMessageClass } from './file-message';
-import { createImageMessageClass } from './image-message';
-import { createAudioMessageClass } from './audio-message';
-import { createVideoMessageClass } from './video-message';
-import { createLocationMessage } from './location-message';
+import createFileMessageClass from './file-message';
+import createImageMessageClass from './image-message';
+import createAudioMessageClass from './audio-message';
+import createVideoMessageClass from './video-message';
+import createLocationMessage from './location-message';
 import { name } from '../package.json';
 
 /**
