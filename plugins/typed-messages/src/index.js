@@ -4,7 +4,7 @@ import createFileMessageClass from './file-message';
 import createImageMessageClass from './image-message';
 import createAudioMessageClass from './audio-message';
 import createVideoMessageClass from './video-message';
-import createLocationMessage from './location-message';
+import createLocationMessageClass from './location-message';
 import { name } from '../package.json';
 
 /**
@@ -38,7 +38,7 @@ export default function initPlugin({ AV, realtime }) {
   /**
    * @see LocationMessage
    */
-  const LocationMessage = createLocationMessage({ AV, realtime });
+  const LocationMessage = createLocationMessageClass({ AV, realtime });
 
   const TypedMessagesPlugin = {
     name,
