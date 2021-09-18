@@ -5,7 +5,7 @@ import commonjs from '@rollup/plugin-commonjs';
 
 import { withMinified, babelConfig } from './shared-configs';
 
-const createConfig = ({ input, output, id }) => ({
+const createConfig = ({ input, output, id, name = 'AV' }) => ({
   input,
   external: [
     'leancloud-realtime',
@@ -15,7 +15,7 @@ const createConfig = ({ input, output, id }) => ({
   output: {
     file: output,
     format: 'umd',
-    name: 'AV',
+    name,
     extend: true,
     amd: {
       id,
@@ -46,6 +46,7 @@ const typedMessages = createConfig({
   input: 'plugins/typed-messages/src/index.js',
   output: 'plugins/typed-messages/dist/typed-messages.js',
   id: 'typed-messages',
+  name: 'AV.initTypedMessages',
 });
 const webrtc = createConfig({
   input: 'plugins/webrtc/src/index.js',

@@ -60,3 +60,8 @@ export default function initPlugin(AV, IM) {
     LocationMessage,
   };
 }
+
+// 浏览器环境下自动初始化
+if (typeof self !== 'undefined' && self.AV) {
+  Object.assign(self.AV, initPlugin(self.AV, self.AV));
+}
