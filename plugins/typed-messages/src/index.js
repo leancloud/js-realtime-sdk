@@ -1,3 +1,5 @@
+/* global window */
+
 /** @module leancloud-realtime-plugin-typed-messages */
 
 import createFileMessageClass from './file-message';
@@ -62,6 +64,6 @@ export default function initPlugin(AV, IM) {
 }
 
 // 浏览器环境下自动初始化
-if (typeof self !== 'undefined' && self.AV) {
-  Object.assign(self.AV, initPlugin(self.AV, self.AV));
+if (typeof window !== 'undefined' && window.AV) {
+  Object.assign(window.AV, initPlugin(window.AV, window.AV));
 }
