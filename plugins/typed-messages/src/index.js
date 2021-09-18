@@ -1,3 +1,5 @@
+/* global window */
+
 /** @module leancloud-realtime-plugin-typed-messages */
 
 import createFileMessageClass from './file-message';
@@ -59,4 +61,9 @@ export default function initPlugin(AV, IM) {
     VideoMessage,
     LocationMessage,
   };
+}
+
+// 浏览器环境下自动初始化
+if (typeof window !== 'undefined' && window.AV) {
+  Object.assign(window.AV, initPlugin(window.AV, window.AV));
 }
