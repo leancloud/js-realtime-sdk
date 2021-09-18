@@ -1,5 +1,5 @@
-export default function createLocationMessageClass({ AV, realtime }) {
-  class LocationMessage extends realtime.TypedMessage {
+export default function createLocationMessageClass({ AV, IM }) {
+  class LocationMessage extends IM.TypedMessage {
     /**
      * @extends TypedMessage
      * @param  {AV.GeoPoint} geoPoint LeanCloud 存储 SDK 中的 AV.GeoPoint 实例
@@ -41,7 +41,7 @@ export default function createLocationMessageClass({ AV, realtime }) {
     static parse(json, message) {
       const { latitude, longitude } = json._lcloc;
       const geoPoint = new AV.GeoPoint({ latitude, longitude });
-      return realtime.TypedMessage.parse(json, message || new this(geoPoint));
+      return IM.TypedMessage.parse(json, message || new this(geoPoint));
     }
   }
 
@@ -52,9 +52,9 @@ export default function createLocationMessageClass({ AV, realtime }) {
    * @static
    * @const
    */
-  realtime.messageType(-5)(LocationMessage);
-  realtime.messageField('_lcloc')(LocationMessage);
-  realtime.IE10Compatible(LocationMessage);
+  IM.messageType(-5)(LocationMessage);
+  IM.messageField('_lcloc')(LocationMessage);
+  IM.IE10Compatible(LocationMessage);
 
   return LocationMessage;
 }

@@ -1,4 +1,4 @@
-export default function createVideoMessageClass({ FileMessage, realtime }) {
+export default function createVideoMessageClass({ FileMessage, IM }) {
   /**
    * 构造方法参数同 {@link FileMessage}
    *
@@ -14,8 +14,8 @@ export default function createVideoMessageClass({ FileMessage, realtime }) {
    * @static
    * @const
    */
-  realtime.messageType(-4)(VideoMessage);
-  realtime.IE10Compatible(VideoMessage);
+  IM.messageType(-4)(VideoMessage);
+  IM.IE10Compatible(VideoMessage);
 
   return VideoMessage;
 }

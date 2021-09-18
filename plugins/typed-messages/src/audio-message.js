@@ -1,4 +1,4 @@
-export default function createAudioMessageClass({ FileMessage, realtime }) {
+export default function createAudioMessageClass({ FileMessage, IM }) {
   /**
    * 构造方法参数同 {@link FileMessage}
    *
@@ -14,8 +14,8 @@ export default function createAudioMessageClass({ FileMessage, realtime }) {
    * @static
    * @const
    */
-  realtime.messageType(-3)(AudioMessage);
-  realtime.IE10Compatible(AudioMessage);
+  IM.messageType(-3)(AudioMessage);
+  IM.IE10Compatible(AudioMessage);
 
   return AudioMessage;
 }

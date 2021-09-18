@@ -1,5 +1,5 @@
-export default function createFileMessageClass({ AV, realtime }) {
-  class FileMessage extends realtime.TypedMessage {
+export default function createFileMessageClass({ AV, IM }) {
+  class FileMessage extends IM.TypedMessage {
     /**
      * @extends TypedMessage
      * @param  {AV.File} file LeanCloud 存储 SDK 中的 AV.File 实例，且必须是已经保存到服务端上的 File 实例
@@ -71,7 +71,7 @@ export default function createFileMessageClass({ AV, realtime }) {
 
     static parse(json, message) {
       const file = this._parseFileFromRawData(json);
-      return realtime.TypedMessage.parse(json, message || new this(file));
+      return IM.TypedMessage.parse(json, message || new this(file));
     }
   }
 
@@ -84,9 +84,9 @@ export default function createFileMessageClass({ AV, realtime }) {
    * @static
    * @const
    */
-  realtime.messageType(-6)(FileMessage);
-  realtime.messageField('_lcfile')(FileMessage);
-  realtime.IE10Compatible(FileMessage);
+  IM.messageType(-6)(FileMessage);
+  IM.messageField('_lcfile')(FileMessage);
+  IM.IE10Compatible(FileMessage);
 
   return FileMessage;
 }

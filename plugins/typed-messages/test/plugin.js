@@ -1,5 +1,5 @@
 import AV from 'leancloud-storage';
-import * as realtime from 'leancloud-realtime';
+import * as IM from 'leancloud-realtime';
 
 import initPlugin from '../src';
 
@@ -10,7 +10,7 @@ const {
   AudioMessage,
   VideoMessage,
   LocationMessage,
-} = initPlugin({ AV, realtime });
+} = initPlugin(AV, IM);
 
 export {
   TypedMessagesPlugin,

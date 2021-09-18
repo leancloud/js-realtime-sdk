@@ -10,7 +10,7 @@ import { name } from '../package.json';
 /**
  * 初始化 TypedMessages 插件，使用后可支持接收 LeanCloud 提供的富媒体类型的消息
  * @example
- * const { TypedMessagesPlugin } = initPlugin({ AV, realtime });
+ * const { TypedMessagesPlugin } = initPlugin(AV, Rtm);
  * const realtime = new Realtime({
  *   appId: appId,
  *   appKey: appKey,
@@ -18,27 +18,27 @@ import { name } from '../package.json';
  *   plugins: TypedMessagesPlugin,
  * });
  */
-export default function initPlugin({ AV, realtime }) {
+export default function initPlugin(AV, IM) {
   /**
    * @see FileMessage
    */
-  const FileMessage = createFileMessageClass({ AV, realtime });
+  const FileMessage = createFileMessageClass({ AV, IM });
   /**
    * @see ImageMessage
    */
-  const ImageMessage = createImageMessageClass({ FileMessage, realtime });
+  const ImageMessage = createImageMessageClass({ FileMessage, IM });
   /**
    * @see AudioMessage
    */
-  const AudioMessage = createAudioMessageClass({ FileMessage, realtime });
+  const AudioMessage = createAudioMessageClass({ FileMessage, IM });
   /**
    * @see VideoMessage
    */
-  const VideoMessage = createVideoMessageClass({ FileMessage, realtime });
+  const VideoMessage = createVideoMessageClass({ FileMessage, IM });
   /**
    * @see LocationMessage
    */
-  const LocationMessage = createLocationMessageClass({ AV, realtime });
+  const LocationMessage = createLocationMessageClass({ AV, IM });
 
   const TypedMessagesPlugin = {
     name,

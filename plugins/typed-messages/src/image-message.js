@@ -1,4 +1,4 @@
-export default function createImageMessageClass({ FileMessage, realtime }) {
+export default function createImageMessageClass({ FileMessage, IM }) {
   /**
    * 构造方法参数同 {@link FileMessage}
    *
@@ -14,8 +14,8 @@ export default function createImageMessageClass({ FileMessage, realtime }) {
    * @static
    * @const
    */
-  realtime.messageType(-2)(ImageMessage);
-  realtime.IE10Compatible(ImageMessage);
+  IM.messageType(-2)(ImageMessage);
+  IM.IE10Compatible(ImageMessage);
 
   return ImageMessage;
 }
