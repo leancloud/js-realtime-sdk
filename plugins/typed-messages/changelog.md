@@ -1,3 +1,19 @@
+<a name="4.0.0"></a>
+
+# 4.0.0 (2021-09-18)
+
+### BREAKING CHANGES
+
+- 使用前需要先进行初始化：
+
+  ```js
+  const AV = require('leancloud-storage');
+  const IM = require('leancloud-realtime');
+  const initPlugin = require('leancloud-realtime-plugin-typed-messages');
+
+  const { TypedMessagesPlugin, FileMessage } = initPlugin(AV, IM);
+  ```
+
 <a name="3.1.0"></a>
 
 # 3.1.0 (2020-01-25)
