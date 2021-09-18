@@ -20,4 +20,6 @@ declare interface Plugin {
   LocationMessage: typeof LocationMessage;
 }
 
-export default function initPlugin(avNs: typeof AV, imNs: typeof IM): Plugin;
+declare function initPlugin(avNs: typeof AV, imNs: typeof IM): Plugin;
+
+export = initPlugin;
