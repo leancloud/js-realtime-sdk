@@ -68,7 +68,7 @@
     "inherit": "^2.2.3",
     "jsdoc": "leeyeh/jsdoc#v3.4.0",
     "jsdoc-ignore-future": "^1.1.0",
-    "karma": "^2.0.0",
+    "karma": "^6.3.16",
     "karma-chrome-launcher": "^2.2.0",
     "karma-mocha": "^1.3.0",
     "karma-sauce-launcher": "^1.2.0",
