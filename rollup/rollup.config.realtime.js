@@ -71,12 +71,6 @@ const im = {
   },
 };
 
-const weappRuntimeReset = () => ({
-  intro() {
-    return 'global.Object=Object;function Function(){return function(){return {}}};';
-  },
-});
-
 export const weapp = {
   input: INPUT_FILE,
   output: {
@@ -98,7 +92,6 @@ export const weapp = {
         browser: true,
       }
     ),
-    weappRuntimeReset(),
   ],
 };
 
