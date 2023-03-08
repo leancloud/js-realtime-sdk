@@ -1,3 +1,11 @@
+<a name="5.0.0-rc.8"></a>
+
+# [5.0.0-rc.8](https://github.com/leancloud/js-realtime-sdk/compare/v5.0.0-rc.7...v5.0.0-rc.8) (2023-03-08)
+
+### Bug Fixes
+
+- 修复了在微信开发者工具中使用时会产生 `TypeError: Function(...) is not a function` 错误的问题。
+
 <a name="5.0.0-rc.7"></a>
 
 # [5.0.0-rc.7](https://github.com/leancloud/js-realtime-sdk/compare/v5.0.0-rc.6...v5.0.0-rc.7) (2021-09-01)
