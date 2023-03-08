@@ -6,7 +6,7 @@ export const APP_ID =
 export const APP_KEY =
   process.env.APP_KEY || 'xhiibo2eiyokjdu2y3kqcb7334rtw4x33zam98buxzkjuq5g';
 const defaultServer = isCNApp(APP_ID)
-  ? 'https://xhiibo2e.lc-cn-n1-shared.com'
+  ? 'https://anruhhk6.lc-cn-n1-shared.com'
   : undefined;
 export const SERVER = process.env.SERVER ? process.env.SERVER : defaultServer;
 export const EXISTING_ROOM_ID =
